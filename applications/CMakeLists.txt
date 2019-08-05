@@ -1,0 +1,2 @@
+add_subdirectory(ExecutionManager)
+add_subdirectory(MachineStateManager)

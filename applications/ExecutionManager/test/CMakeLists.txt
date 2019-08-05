@@ -14,5 +14,5 @@ target_link_libraries(em_test
 add_custom_target(em_test_run
   COMMAND em_test `printenv TESTFLAGS`
   WORKING_DIRECTORY ${CMAKE_CURRENT_SOURCE_DIR}
-  COMMENT "run tests"
+  COMMENT "Run execution manager tests"
 )

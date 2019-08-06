@@ -80,6 +80,8 @@ struct ApplicationManifest
 
 } // namespace manifests
 
+#include "jsonConerters.hpp"
+
 void manifests::MachineManifest::init()
 {
   loadHwConf();

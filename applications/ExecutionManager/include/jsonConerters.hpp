@@ -1,7 +1,7 @@
 #ifndef JSONCONVERTERS_HPP
 #define JSONCONVERTERS_HPP
 
-#include "json/json.hpp"
+#include "../json/json.hpp"
 #include "manifests.hpp"
 
 using nlohmann::json;

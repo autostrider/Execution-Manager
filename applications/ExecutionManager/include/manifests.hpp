@@ -143,8 +143,12 @@ void manifests::MachineManifest::loadHwConf()
   size_t prevIdleTime = 0;
   size_t prevTotalTime = 0;
 
-  ifstream procStat("/proc/stat");  // skip cpu prefix
-  procStat.ignore(5, ' ');
+#if UNIT_TEST
+  ifstream procStat("../test/cpu-mockfile");
+#else
+  ifstream procStat("/proc/stat");
+#endif
+  procStat.ignore(5, ' ');  // skip cpu prefix
   vector<size_t> times;
   for (size_t time; procStat >> time; times.push_back(time))
     ;

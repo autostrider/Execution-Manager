@@ -9,8 +9,10 @@ target_include_directories(em_test PRIVATE ${EM_INCLUDE})
 target_link_libraries(em_test
   gtest
   gtest_main
+  nlohmann_json::nlohmann_json
 )
 
+target_compile_definitions(em_test PUBLIC -DUNIT_TEST)
 add_custom_target(em_test_run
   COMMAND em_test `printenv TESTFLAGS`
   WORKING_DIRECTORY ${CMAKE_CURRENT_SOURCE_DIR}

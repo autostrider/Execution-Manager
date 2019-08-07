@@ -20,6 +20,9 @@ using std::ifstream;
 using std::string;
 using std::vector;
 
+/**
+ * @brief Enum with available machine states.
+ */
 enum class MachineStates 
 { 
     kInit, 
@@ -28,6 +31,12 @@ enum class MachineStates
     kRestart = -1 
 };
 
+/**
+ * @brief Struct, that holds network interface configuration.
+ * 
+ * @field ifa_name: name of interface
+ * @field family: family of interface
+ */
 struct InterfaceConf 
 {
   string ifa_name;
@@ -35,12 +44,26 @@ struct InterfaceConf
   char host[NI_MAXHOST];
 };
 
+/**
+ * @brief Struct that holds current hardware configuration.
+ * 
+ * @field ram: current available ram for running Adaptive Platform
+ * @field cpu: available cpu power for running Adaptive Platform
+ */
 struct HwConf 
 {
   uint64_t ram;
   uint8_t cpu;
 };
 
+/**
+ * @brief Struct that holds machine manifest configuration.
+ * 
+ * @field network: vectors that holds all network interfaces
+ * @field hwConf: hardware configuration for running Adaptive Platform
+ * @field states: available machine states
+ * @field adaptiveModules: all the available Adaptive Modules
+ */
 struct MachineManifest 
 {
  public:
@@ -50,13 +73,26 @@ struct MachineManifest
   vector<std::string> adaptiveModules;
 
  public:
+ /**
+  * @brief Method that generates machine manifest.
+  */
   void init();
 
  private:
+  /**
+   * @brief Method that loads available network interfaces and its' configs.
+   */
   void loadNetworkConf();
+
+  /**
+   * @brief Method that loads current hardware configuration
+   */
   void loadHwConf();
 };
 
+/**
+ * @brief Available application states.
+ */
 enum class AppStates 
 {
     kInitializing, 
@@ -64,12 +100,26 @@ enum class AppStates
     kShuttingdown
 };
 
+/**
+ * @brief Application Dependencies of an Adaptive Application.
+ * 
+ * @field name: name of dependency app.
+ * @field reqState: minimal required state for dependecy to run the app.
+ */
 struct StartupDeps 
 {
   std::string name;
   AppStates reqState;
 };
 
+/**
+ * @brief Application manifest structure.
+ * 
+ * @field name: name of Adaptive Application.
+ * @field version: version of Adaptive Application.
+ * @field machineStates: available machine states to run the Adaptive Application.
+ * @field deps: application dependencies of the Adaptive Application.
+ */
 struct ApplicationManifest 
 {
   std::string name;

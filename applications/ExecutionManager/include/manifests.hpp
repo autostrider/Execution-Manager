@@ -1,6 +1,8 @@
 #ifndef MANIFESTS_HPP
 #define MANIFESTS_HPP
 
+#include "application_state_client.h"
+
 #include <ifaddrs.h>
 #include <netdb.h>
 #include <sys/socket.h>
@@ -13,7 +15,7 @@
 #include <string>
 #include <vector>
 
-namespace manifests 
+namespace ExecutionManager
 {
 
 using std::ifstream;
@@ -59,7 +61,7 @@ struct HwConf
 /**
  * @brief Struct that holds machine manifest configuration.
  * 
- * @field network: vectors that holds all network interfaces
+ * network: vectors that holds all network interfaces
  * @field hwConf: hardware configuration for running Adaptive Platform
  * @field states: available machine states
  * @field adaptiveModules: all the available Adaptive Modules
@@ -70,7 +72,7 @@ struct MachineManifest
   vector<InterfaceConf> network;
   HwConf hwConf;
   vector<MachineStates> states;
-  vector<std::string> adaptiveModules;
+  vector<string> adaptiveModules;
 
  public:
  /**
@@ -90,49 +92,38 @@ struct MachineManifest
   void loadHwConf();
 };
 
-/**
- * @brief Available application states.
- */
-enum class AppStates 
-{
-    kInitializing, 
-    kRunning, 
-    kShuttingdown
-};
+
 
 /**
- * @brief Application Dependencies of an Adaptive Application.
- * 
- * @field name: name of dependency app.
- * @field reqState: minimal required state for dependecy to run the app.
+ * @brief The Process struct
  */
-struct StartupDeps 
+struct Process
 {
-  std::string name;
-  AppStates reqState;
+  /// Name of executable.
+  string name;
+
+  /// Available machine states to run the executable.
+  vector<MachineStates> startMachineStates;
+
 };
 
 /**
  * @brief Application manifest structure.
- * 
- * @field name: name of Adaptive Application.
- * @field version: version of Adaptive Application.
- * @field machineStates: available machine states to run the Adaptive Application.
- * @field deps: application dependencies of the Adaptive Application.
  */
 struct ApplicationManifest 
 {
-  std::string name;
-  std::string version;
-  std::vector<MachineStates> machineStates;
-  std::vector<StartupDeps> deps;
+  /// Name of Adaptive Application.
+  string name;
+
+  /// Vector of executables of application
+  vector<Process> processes;
 };
 
-} // namespace manifests
+} // namespace ExecutionManager
 
-#include "jsonConerters.hpp"
+#include "json_converters.hpp"
 
-void manifests::MachineManifest::init()
+void ExecutionManager::MachineManifest::init()
 {
   loadHwConf();
   loadNetworkConf();
@@ -140,7 +131,7 @@ void manifests::MachineManifest::init()
   adaptiveModules = {};
 }
 
-void manifests::MachineManifest::loadNetworkConf()
+void ExecutionManager::MachineManifest::loadNetworkConf()
 {
   ifaddrs *ifa;
   getifaddrs(&ifa);
@@ -178,7 +169,7 @@ void manifests::MachineManifest::loadNetworkConf()
   freeifaddrs(ifa);
 }
 
-void manifests::MachineManifest::loadHwConf()
+void ExecutionManager::MachineManifest::loadHwConf()
 {
   // load ram available
   struct sysinfo info;

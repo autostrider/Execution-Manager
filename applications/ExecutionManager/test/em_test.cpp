@@ -12,11 +12,8 @@ TEST(SomeTest, DoesThis)
 
 TEST(manifest_structures, json_serialization)
 {
-  // test only non-trivial algorithms
-  // it is only available cpu power
-  manifests::MachineManifest manif;
+  ExecutionManager::MachineManifest manif;
   manif.init();
 
   ASSERT_EQ(manif.hwConf.cpu, 96);
-  
 }

@@ -1,4 +1,4 @@
-set(API_NAMESPACE_NAME API)
+set(API_NAMESPACE_NAME api)
 
-add_subdirectory(MachineStateClient)
-add_subdirectory(ApplicationStateClient)
+add_subdirectory(machine_state_client)
+add_subdirectory(application_state_client)

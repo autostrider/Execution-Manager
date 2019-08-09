@@ -10,6 +10,8 @@ target_link_libraries(em_test
   gtest
   gtest_main
   nlohmann_json::nlohmann_json
+  api::application_state_client
+  api::machine_state_client
 )
 
 target_compile_definitions(em_test PUBLIC -DUNIT_TEST)

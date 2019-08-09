@@ -1,8 +1,7 @@
 #ifndef APPLICATION_STATE_CLIENT_H
 #define APPLICATION_STATE_CLIENT_H
 
-
-namespace ExecutionManager {
+namespace api {
 
 /**
  * @brief Available application states.

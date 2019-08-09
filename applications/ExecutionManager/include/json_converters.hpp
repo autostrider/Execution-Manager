@@ -1,9 +1,9 @@
 #ifndef JSON_CONVERTERS_HPP
 #define JSON_CONVERTERS_HPP
 
-#include "../json/json.hpp"
+#include <json.hpp>
+#include <application_state_client.h>
 #include "manifests.hpp"
-#include "application_state_client.h"
 
 using nlohmann::json;
 
@@ -28,7 +28,7 @@ NLOHMANN_JSON_SERIALIZE_ENUM(ApplicationState, {
 
 
 /// InterfaceConf serialization
-void to_json(json& j, const InterfaceConf& interfaceConf) 
+void to_json(json& j, const InterfaceConf& interfaceConf)
 {
     j = json{
             {"ifa_name", interfaceConf.ifa_name},
@@ -38,7 +38,7 @@ void to_json(json& j, const InterfaceConf& interfaceConf)
 }
 
 /// InterfaceConf  deserialization
-void from_json(const json& j, InterfaceConf& interfaceConf) 
+void from_json(const json& j, InterfaceConf& interfaceConf)
 {
     j.at("ifa_name").get_to(interfaceConf.ifa_name);
     j.at("family").get_to(interfaceConf.family);
@@ -46,7 +46,7 @@ void from_json(const json& j, InterfaceConf& interfaceConf)
 }
 
 /// HwConf serialization
-void to_json(json& j, const HwConf& hwConf) 
+void to_json(json& j, const HwConf& hwConf)
 {
     j = json{
             {"ram", hwConf.ram},
@@ -55,14 +55,14 @@ void to_json(json& j, const HwConf& hwConf)
 }
 
 /// HwConf  deserialization
-void from_json(const json& j, HwConf& hwConf) 
+void from_json(const json& j, HwConf& hwConf)
 {
     j.at("ram").get_to(hwConf.ram);
     j.at("cpu").get_to(hwConf.cpu);
 }
 
 /// MachineState serialization
-void to_json(json& j, const MachineManifest& machineManifest) 
+void to_json(json& j, const MachineManifest& machineManifest)
 {
     j = json{
             {"network", machineManifest.network},
@@ -73,7 +73,7 @@ void to_json(json& j, const MachineManifest& machineManifest)
 }
 
 /// MachineManifest deserialization
-void from_json(const json& j, MachineManifest& machineManifest) 
+void from_json(const json& j, MachineManifest& machineManifest)
 {
     j.at("network").get_to(machineManifest.network);
     j.at("hwConf").get_to(machineManifest.hwConf);
@@ -99,7 +99,7 @@ void from_json(const json& j, Process& process)
 
 
 /// ApplicationManifest serialization
-void to_json(json& j, const ApplicationManifest& applicationManifest) 
+void to_json(json& j, const ApplicationManifest& applicationManifest)
 {
     j = json{
             {"name", applicationManifest.name},
@@ -108,7 +108,7 @@ void to_json(json& j, const ApplicationManifest& applicationManifest)
 }
 
 /// ApplicationManifest deserialization
-void from_json(const json& j, ApplicationManifest& applicationManifest) 
+void from_json(const json& j, ApplicationManifest& applicationManifest)
 {
     j.at("name").get_to(applicationManifest.name);
     j.at("processes").get_to(applicationManifest.processes);

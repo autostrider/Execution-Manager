@@ -1,8 +1,6 @@
 #ifndef MANIFESTS_HPP
 #define MANIFESTS_HPP
 
-#include "application_state_client.h"
-
 #include <ifaddrs.h>
 #include <netdb.h>
 #include <sys/socket.h>
@@ -15,6 +13,9 @@
 #include <string>
 #include <vector>
 
+#include <application_state_client.h>
+#include <machine_state_client.h>
+
 namespace ExecutionManager
 {
 
@@ -22,24 +23,16 @@ using std::ifstream;
 using std::string;
 using std::vector;
 
-/**
- * @brief Enum with available machine states.
- */
-enum class MachineStates 
-{ 
-    kInit, 
-    kRunning, 
-    kShutdown, 
-    kRestart = -1 
-};
+using api::MachineStates;
+using api::ApplicationState;
 
 /**
  * @brief Struct, that holds network interface configuration.
- * 
+ *
  * @field ifa_name: name of interface
  * @field family: family of interface
  */
-struct InterfaceConf 
+struct InterfaceConf
 {
   string ifa_name;
   string family;
@@ -48,11 +41,11 @@ struct InterfaceConf
 
 /**
  * @brief Struct that holds current hardware configuration.
- * 
+ *
  * @field ram: current available ram for running Adaptive Platform
  * @field cpu: available cpu power for running Adaptive Platform
  */
-struct HwConf 
+struct HwConf
 {
   uint64_t ram;
   uint8_t cpu;
@@ -60,13 +53,13 @@ struct HwConf
 
 /**
  * @brief Struct that holds machine manifest configuration.
- * 
+ *
  * network: vectors that holds all network interfaces
  * @field hwConf: hardware configuration for running Adaptive Platform
  * @field states: available machine states
  * @field adaptiveModules: all the available Adaptive Modules
  */
-struct MachineManifest 
+struct MachineManifest
 {
  public:
   vector<InterfaceConf> network;
@@ -92,8 +85,6 @@ struct MachineManifest
   void loadHwConf();
 };
 
-
-
 /**
  * @brief The Process struct
  */
@@ -110,7 +101,7 @@ struct Process
 /**
  * @brief Application manifest structure.
  */
-struct ApplicationManifest 
+struct ApplicationManifest
 {
   /// Name of Adaptive Application.
   string name;

@@ -8,12 +8,18 @@ list(REMOVE_ITEM EM_SRC ${CMAKE_CURRENT_SOURCE_DIR}/src/em_main.cpp)
 
 set(EM_INCLUDE ${CMAKE_CURRENT_SOURCE_DIR}/include)
 
-add_subdirectory(ManifestParser)
 add_subdirectory(test)
 
 add_executable(em src/em_main.cpp ${EM_SRC})
 
-target_link_libraries(em  manifest_parser)
+target_link_libraries(em
+    PRIVATE
+        nlohmann_json::nlohmann_json
+    PUBLIC
+        api::application_state_client
+        api::machine_state_client
+)
+
 target_include_directories(em
     PUBLIC
         ${EM_INCLUDE}

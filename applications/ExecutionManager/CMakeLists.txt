@@ -8,16 +8,11 @@ list(REMOVE_ITEM EM_SRC ${CMAKE_CURRENT_SOURCE_DIR}/src/em_main.cpp)
 
 set(EM_INCLUDE ${CMAKE_CURRENT_SOURCE_DIR}/include)
 
-
 add_subdirectory(test)
 
 add_executable(em src/em_main.cpp ${EM_SRC})
 
-target_link_libraries(em INTERFACE nlohmann_json::nlohmann_json)
-target_include_directories(em
-    INTERFACE
-        ${MP_INCLUDE}
-)
+target_link_libraries(em PRIVATE nlohmann_json::nlohmann_json)
 
 target_include_directories(em
     PUBLIC

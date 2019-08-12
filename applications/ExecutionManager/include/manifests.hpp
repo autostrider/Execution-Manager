@@ -12,9 +12,12 @@
 #include <numeric>
 #include <string>
 #include <vector>
+#include <json.hpp>
 
 #include <application_state_client.h>
 #include <machine_state_client.h>
+
+using nlohmann::json;
 
 namespace ExecutionManager
 {
@@ -110,8 +113,54 @@ struct ApplicationManifest
   vector<Process> processes;
 };
 
+/// MachineStates serialization & deserialization
+NLOHMANN_JSON_SERIALIZE_ENUM(api::MachineStates, {
+    {api::MachineStates::kInit, "init"},
+    {api::MachineStates::kRestart, "restart"},
+    {api::MachineStates::kRunning, "running"},
+    {api::MachineStates::kShutdown, "shutdown"}
+})
+
+
+/// AppStates serialization & deserialization
+NLOHMANN_JSON_SERIALIZE_ENUM(api::ApplicationState, {
+    {api::ApplicationState::kInitializing, "init"},
+    {api::ApplicationState::kRunning, "running"},
+    {api::ApplicationState::kShuttingdown, "shutdown"}
+})
+
+/// InterfaceConf serialization
+void to_json(json& j, const InterfaceConf& interfaceConf);
+
+/// InterfaceConf  deserialization
+void from_json(const json& j, InterfaceConf& interfaceConf);
+
+/// HwConf serialization
+void to_json(json& j, const HwConf& hwConf);
+
+/// HwConf  deserialization
+void from_json(const json& j, HwConf& hwConf);
+
+/// MachineState serialization
+void to_json(json& j, const MachineManifest& machineManifest);
+
+/// MachineManifest deserialization
+void from_json(const json& j, MachineManifest& machineManifest);
+
+/// Process serialization
+void to_json(json& j, const Process& process);
+
+/// Process deserialization
+void from_json(const json& j, Process& process);
+
+/// ApplicationManifest serialization
+void to_json(json& j, const ApplicationManifest& applicationManifest);
+
+/// ApplicationManifest deserialization
+void from_json(const json& j, ApplicationManifest& applicationManifest);
+
 } // namespace ExecutionManager
 
-#endif // MANIFESTS_HPP
+//#include "../json_transformation.cpp"
 
-#include "json_converters.hpp"
+#endif // MANIFESTS_HPP

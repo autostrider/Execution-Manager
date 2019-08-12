@@ -14,6 +14,8 @@ using std::vector;
 using std::string;
 using applicationId = std::string;
 
+struct ApplicationManifest;
+
 class ExecutionManager
 {
 public:

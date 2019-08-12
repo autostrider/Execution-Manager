@@ -2,7 +2,6 @@
 
 #include <json.hpp>
 #include <application_state_client.h>
-#include "manifests.hpp"
 
 using nlohmann::json;
 
@@ -93,22 +92,6 @@ void MachineManifest::loadHwConf()
   float utilization = 100.0 * (1.0 - deltaIdle / deltaTotal);
   hwConf.cpu = 100 - utilization;
 }
-
-/// MachineStates serialization & deserialization
-NLOHMANN_JSON_SERIALIZE_ENUM(MachineStates, {
-    {MachineStates::kInit, "init"},
-    {MachineStates::kRestart, "restart"},
-    {MachineStates::kRunning, "running"},
-    {MachineStates::kShutdown, "shutdown"}
-})
-
-
-/// AppStates serialization & deserialization
-NLOHMANN_JSON_SERIALIZE_ENUM(ApplicationState, {
-    {ApplicationState::kInitializing, "init"},
-    {ApplicationState::kRunning, "running"},
-    {ApplicationState::kShuttingdown, "shutdown"}
-})
 
 
 /// InterfaceConf serialization

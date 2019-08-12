@@ -36,4 +36,4 @@
 *.app   binary
 
 # Ignore extern
-tools/json/json.hpp linguist-vendored
+tools/ linguist-vendored

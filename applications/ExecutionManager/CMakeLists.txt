@@ -18,6 +18,7 @@ target_link_libraries(em
     PUBLIC
         api::application_state_client
         api::machine_state_client
+        execution_management_api
 )
 
 target_include_directories(em

@@ -1,12 +1,11 @@
 cmake_minimum_required(VERSION 3.9)
-project(aa1 VERSION 1.0
-	    LANGUAGES CXX
-	    DESCRIPTION "Test adaptive application 1")
+project(aa VERSION 1.0
+	   LANGUAGES CXX
+	   DESCRIPTION "Test adaptive application 2")
 
-file(GLOB_RECURSE AA1_SRC src/*.cpp)
-list(REMOVE_ITEM AA1_SRC ${CMAKE_CURRENT_SOURCE_DIR}/src/aa_main.cpp)
 
-add_executable(aa1 src/aa_main.cpp ${AA1_SRC})
+add_executable(proc2 src/proc2.cpp)
+add_executable(proc3 src/proc3.cpp)
 
-target_compile_options(aa1 PRIVATE -Werror -Wall -fdiagnostics-color=always)
-target_compile_features(aa1 PRIVATE cxx_std_14)
+target_compile_options(aa PRIVATE -Werror -Wall -fdiagnostics-color=always)
+target_compile_features(aa PRIVATE cxx_std_14)

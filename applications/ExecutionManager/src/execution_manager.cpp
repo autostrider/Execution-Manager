@@ -4,11 +4,14 @@
 #include <unistd.h>
 #include <fstream>
 #include <dirent.h>
+#include <exception>
 
 #include <iostream>
 
 
 namespace ExecutionManager {
+
+const string ExecutionManager::corePath = string{"../applications/AdaptiveApplications/"};
 
 void ExecutionManager::start()
 {
@@ -16,17 +19,18 @@ void ExecutionManager::start()
 
     for (const auto& manf: manifests)
     {
+        std::cout << manf.name << std::endl;
         startApplication(manf);
     }
 }
 
-int ExecutionManager::loadFileNamesInDir(const string path, vector<string> &fileNames)
+int ExecutionManager::loadListOfApplications(vector<string> &fileNames)
 {
     DIR* dp;
 
-    if ((dp = opendir(path.c_str())) == nullptr)
+    if ((dp = opendir(corePath.c_str())) == nullptr)
     {
-        std::cerr << "Error opening directory: " << path << std::endl;
+        std::cerr << "Error opening directory: " << corePath << std::endl;
         std::cerr << strerror(errno) << std::endl;
 
         return errno;
@@ -38,6 +42,8 @@ int ExecutionManager::loadFileNamesInDir(const string path, vector<string> &file
         if (!strcmp(drnt->d_name, ".") || !strcmp(drnt->d_name, "..")) continue;
 
         fileNames.push_back(string{drnt->d_name});
+
+        std::cout << drnt->d_name << std::endl;
     }
 
     return 0;
@@ -46,10 +52,9 @@ int ExecutionManager::loadFileNamesInDir(const string path, vector<string> &file
 
 vector<ApplicationManifest> ExecutionManager::processManifests()
 {
-    const static string path = "../apps/manifests/";
-    vector<string> fileNames;
+    vector<string> applicationNames;
 
-    if (loadFileNamesInDir(path, fileNames))
+    if (loadListOfApplications(applicationNames))
     {
         std::cerr << "Error in processing manifests" << std::endl;
     }
@@ -57,9 +62,10 @@ vector<ApplicationManifest> ExecutionManager::processManifests()
     vector<ApplicationManifest> res;
     json content;
     ifstream data;
-    for (auto file: fileNames)
+    for (auto file: applicationNames)
     {
-        file = path + file;
+        file = corePath + file + "/manifest.json";
+        std::cout << file << std::endl;
         data.open(file);
 
         data >> content;
@@ -74,20 +80,21 @@ vector<ApplicationManifest> ExecutionManager::processManifests()
 
 applicationId ExecutionManager::startApplication(const ApplicationManifest &manifest)
 {
-    const static string path = "../apps/processes/";
-
     for (auto name: manifest.processes)
     {
         pid_t processId = fork();
 
         if (!processId)
         {
+            auto processPath = corePath + manifest.name + "/processes/" + name.name;
+            std::cout << "process path: " << processPath << std::endl;
             // child process
-            int res = execl((path + name.name).c_str(), name.name.c_str(), nullptr);
+            int res = execl(processPath.c_str(), name.name.c_str(), nullptr);
 
             if (res)
             {
                 std::cerr << "Error occured creating process\n";
+                std::cerr << strerror(errno) << std::endl << res << std::endl;
                 return "";
             }
         }

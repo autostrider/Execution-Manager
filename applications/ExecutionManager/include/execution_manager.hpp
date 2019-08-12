@@ -21,9 +21,9 @@ class ExecutionManager
 public:
     void start();
 private:
-    int loadFileNamesInDir(string path, vector<string>& fileNames);
+    int loadFileNamesInDir(const string path, vector<string>& fileNames);
     vector<ApplicationManifest> processManifests();
-    applicationId startApplication(ApplicationManifest &manifest);
+    applicationId startApplication(const ApplicationManifest &manifest);
 };
 
 } // namespace ExecutionManager

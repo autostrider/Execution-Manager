@@ -12,15 +12,15 @@ namespace ExecutionManager {
 
 void ExecutionManager::start()
 {
-    auto fileNames = processManifests();
+    auto manifests = processManifests();
 
-    for (const auto& file: fileNames)
+    for (const auto& manf: manifests)
     {
-        std::cout << file.name << std::endl;
+        startApplication(manf);
     }
 }
 
-int ExecutionManager::loadFileNamesInDir(string path, vector<string> &fileNames)
+int ExecutionManager::loadFileNamesInDir(const string path, vector<string> &fileNames)
 {
     DIR* dp;
 
@@ -72,9 +72,30 @@ vector<ApplicationManifest> ExecutionManager::processManifests()
     return res;
 }
 
-applicationId ExecutionManager::startApplication(ApplicationManifest &manifest)
+applicationId ExecutionManager::startApplication(const ApplicationManifest &manifest)
 {
-    return "";
+    const static string path = "../apps/processes/";
+
+    for (auto name: manifest.processes)
+    {
+        pid_t processId = fork();
+
+        if (!processId)
+        {
+            // child process
+            int res = execl((path + name.name).c_str(), name.name.c_str(), nullptr);
+
+            if (res)
+            {
+                std::cerr << "Error occured creating process\n";
+                return "";
+            }
+        }
+    }
+
+    return manifest.name;
+
+
 }
 
 } // namespace ExecutionManager

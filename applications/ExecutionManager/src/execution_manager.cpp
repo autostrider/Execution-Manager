@@ -11,6 +11,8 @@
 
 namespace ExecutionManager {
 
+using std::runtime_error;
+
 const string ExecutionManager::corePath = string{"../applications/AdaptiveApplications/"};
 
 void ExecutionManager::start()
@@ -20,7 +22,15 @@ void ExecutionManager::start()
     for (const auto& manf: manifests)
     {
         std::cout << manf.name << std::endl;
-        startApplication(manf);
+        try
+        {
+            startApplication(manf);
+        }
+        catch (runtime_error err)
+        {
+            std::cout << err.what() << std::endl;
+            continue;
+        }
     }
 }
 
@@ -30,10 +40,7 @@ int ExecutionManager::loadListOfApplications(vector<string> &fileNames)
 
     if ((dp = opendir(corePath.c_str())) == nullptr)
     {
-        std::cerr << "Error opening directory: " << corePath << std::endl;
-        std::cerr << strerror(errno) << std::endl;
-
-        return errno;
+        throw runtime_error(string{"Error opening directory: "} + strerror(errno));
     }
 
     for (struct dirent *drnt = readdir(dp); drnt != nullptr; drnt = readdir(dp))
@@ -54,10 +61,7 @@ vector<ApplicationManifest> ExecutionManager::processManifests()
 {
     vector<string> applicationNames;
 
-    if (loadListOfApplications(applicationNames))
-    {
-        std::cerr << "Error in processing manifests" << std::endl;
-    }
+    loadListOfApplications(applicationNames);
 
     vector<ApplicationManifest> res;
     json content;
@@ -93,9 +97,7 @@ applicationId ExecutionManager::startApplication(const ApplicationManifest &mani
 
             if (res)
             {
-                std::cerr << "Error occured creating process\n";
-                std::cerr << strerror(errno) << std::endl << res << std::endl;
-                return "";
+                throw runtime_error(string{"Error occured creating process: "} + strerror(errno));
             }
         }
     }

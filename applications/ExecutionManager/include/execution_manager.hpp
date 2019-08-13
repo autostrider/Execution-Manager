@@ -47,6 +47,8 @@ private:
      */
     void startApplication(const ApplicationManifest &manifest);
 
+    void startMachineStateManager();
+    void confirmMachineState(MachineStates state);
 private:
     /// \brief Hardcoded path to folder with adaptive applications.
     const static string corePath;

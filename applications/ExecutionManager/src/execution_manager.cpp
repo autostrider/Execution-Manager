@@ -1,7 +1,6 @@
 #include "execution_manager.hpp"
 
 #include <json.hpp>
-#include <unistd.h>
 #include <fstream>
 #include <dirent.h>
 #include <exception>
@@ -34,7 +33,7 @@ void ExecutionManager::start()
     }
 }
 
-int ExecutionManager::loadListOfApplications(vector<string> &fileNames)
+void ExecutionManager::loadListOfApplications(vector<string> &fileNames)
 {
     DIR* dp;
 
@@ -53,8 +52,7 @@ int ExecutionManager::loadListOfApplications(vector<string> &fileNames)
         std::cout << drnt->d_name << std::endl;
     }
 
-    return 0;
-
+    closedir(dp);
 }
 
 vector<ApplicationManifest> ExecutionManager::processManifests()
@@ -69,7 +67,6 @@ vector<ApplicationManifest> ExecutionManager::processManifests()
     for (auto file: applicationNames)
     {
         file = corePath + file + "/manifest.json";
-        std::cout << file << std::endl;
         data.open(file);
 
         data >> content;
@@ -82,29 +79,29 @@ vector<ApplicationManifest> ExecutionManager::processManifests()
     return res;
 }
 
-applicationId ExecutionManager::startApplication(const ApplicationManifest &manifest)
+void ExecutionManager::startApplication(const ApplicationManifest &manifest)
 {
+    vector<pid_t> applicationProcessIds;
     for (auto name: manifest.processes)
     {
         pid_t processId = fork();
 
         if (!processId)
         {
-            auto processPath = corePath + manifest.name + "/processes/" + name.name;
-            std::cout << "process path: " << processPath << std::endl;
             // child process
+            auto processPath = corePath + manifest.name + "/processes/" + name.name;            
             int res = execl(processPath.c_str(), name.name.c_str(), nullptr);
 
             if (res)
             {
                 throw runtime_error(string{"Error occured creating process: "} + strerror(errno));
             }
+            // add process to application processes.
+            applicationProcessIds.push_back(processId);
         }
     }
 
-    return manifest.name;
-
-
+    activeApplications.insert(std::pair<string, vector<pid_t>>{manifest.name, applicationProcessIds});
 }
 
 } // namespace ExecutionManager

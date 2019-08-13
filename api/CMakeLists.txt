@@ -11,4 +11,7 @@ add_custom_target(gen
 )
 
 # Encapsulate all generating targets
-add_dependencies(gen execution_management_api_gen)
+add_dependencies(gen
+  execution_management_api_gen
+  application_state_client_gen
+)

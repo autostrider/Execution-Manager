@@ -22,8 +22,8 @@ add_custom_target(execution_management_api_gen
 
 # Create major target
 add_library(execution_management_api STATIC
-  ${EM_API_SRC}
-  ${emApiGenSources}
+   ${EM_API_SRC}
+   ${emApiGenSources}
 )
 # Lib target alias
 add_library(${API_NAMESPACE_NAME}::${PROJECT_NAME} ALIAS ${PROJECT_NAME})
@@ -40,7 +40,6 @@ target_link_libraries(execution_management_api
 # Specify include directory
 target_include_directories(execution_management_api
     PUBLIC
-        ${CMAKE_CURRENT_BINARY_DIR}
         $<BUILD_INTERFACE:${CMAKE_CURRENT_SOURCE_DIR}/include>
         $<INSTALL_INTERFACE:${CMAKE_CURRENT_SOURCE_DIR}/include>
 )

@@ -1,11 +1,10 @@
 #include <iostream>
-#include "em_in.hpp"
-#include <execution_management_api.hpp>
+#include "execution_manager.hpp"
 
 
 int main(int argc, char **argv)
 {
-  std::cout << "Alice id = " << hello() << std::endl;
-
-  return EXIT_SUCCESS;
+  ExecutionManager::ExecutionManager em;
+  
+  return em.start();
 }

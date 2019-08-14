@@ -2,8 +2,10 @@ cmake_minimum_required(VERSION 3.9)
 
 set(BUILD_TESTING OFF)
 set(CMAKE_RUNTIME_OUTPUT_DIRECTORY ${CMAKE_BINARY_DIR}/bin)
+
 add_subdirectory(tools/json)
 add_subdirectory(tools/googletest)
 add_subdirectory(tools/capnproto)
+add_subdirectory(gen)
 add_subdirectory(api)
 add_subdirectory(applications)

@@ -1,2 +1,3 @@
 add_subdirectory(ExecutionManager)
 add_subdirectory(MachineStateManager)
+add_subdirectory(SimpleApplication)

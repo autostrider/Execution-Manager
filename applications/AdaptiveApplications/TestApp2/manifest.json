@@ -1,1 +1,19 @@
-{"name":"TestApp2","processes":[{"avail_start_machine_states":[0,1],"process_name":"proc2"},{"avail_start_machine_states":[0,1],"process_name":"proc3"}]}
+{
+  "name": "TestApp2",
+  "processes": [
+    {
+      "avail_start_machine_states": [
+        0,
+        1
+      ],
+      "process_name": "proc2"
+    },
+    {
+      "avail_start_machine_states": [
+        0,
+        1
+      ],
+      "process_name": "proc3"
+    }
+  ]
+}

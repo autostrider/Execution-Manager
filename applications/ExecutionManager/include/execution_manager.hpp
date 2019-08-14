@@ -14,6 +14,7 @@ namespace ExecutionManager
 
 using std::vector;
 using std::map;
+using std::pair;
 using std::string;
 using applicationId = std::string;
 
@@ -25,8 +26,22 @@ public:
     /**
      * @brief Main method of Execution manager.
      */
-    void start();
+    int start();
 private:
+    /**
+     * typedef for holding process name and app it belongs to
+     */
+    struct ProcessName
+    {
+        string applicationName;
+        string processName;
+
+        bool operator< (const ProcessName& cmp)
+        {
+            return (applicationName < cmp.applicationName) ?
+                        true : (processName < cmp.processName);
+        }
+    };
     /**
      * @brief Loads all adaptive applications from corePath.
      * @param fileNames: output parameter, where all the applications
@@ -45,16 +60,25 @@ private:
      *        about it in activeApplications.
      * @param manifest: Application manifest of application to start.
      */
-    void startApplication(const ApplicationManifest &manifest);
+    void startApplication(const ProcessName &manifest);
 
     void startMachineStateManager();
     void confirmMachineState(MachineStates state);
+    void loadApplicationsForState();
+
 private:
     /// \brief Hardcoded path to folder with adaptive applications.
     const static string corePath;
 
     /// \brief structure that holds application and required processes.
-    map<applicationId, vector<pid_t>> activeApplications;
+    map<string, vector<pid_t>> activeApplications;
+
+    /// \brief structure for application that can run in certain state
+    /// vector consists of applicationId (name) and string param - executable name
+    map<MachineStates, vector<ProcessName>> applications;
+
+    /// \brief Current machine state.
+    MachineStates currentState = MachineStates::kInit;
 };
 
 } // namespace ExecutionManager

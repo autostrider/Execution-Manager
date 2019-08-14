@@ -8,7 +8,6 @@ int main(int argc, char **argv)
   std::cout << foo() << std::endl;
 
   ExecutionManager::ExecutionManager manager;
-  manager.start();
 
-  return EXIT_SUCCESS;
+  return manager.start();
 }

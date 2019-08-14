@@ -22,9 +22,9 @@ class MachineStateManager
 public:
     void registerInExecutionManager();
     void work();
+    const static vector<MachineStates> transition;
 private:
     MachineStateClient msc;
-    const static vector<MachineStates> transition;
 };
 
 } // namespace MachineStateManager

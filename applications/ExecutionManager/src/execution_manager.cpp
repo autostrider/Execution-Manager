@@ -7,7 +7,6 @@
 #include <thread>
 #include <signal.h>
 
-#include "machine_state_manager.hpp"
 
 #include <iostream>
 
@@ -18,30 +17,20 @@ using std::runtime_error;
 
 const string ExecutionManager::corePath = string{"../applications/AdaptiveApplications/"};
 
+const vector<MachineStates> ExecutionManager::transition =
+            {MachineStates::kInit, MachineStates::kRunning, MachineStates::kShutdown};
+
 int ExecutionManager::start()
 {
-    auto manifests = processManifests();
+    processManifests();
 
-    for (const auto& manif: manifests)
-    {
-        for (const auto& process: manif.processes)
-        {
-            for (const auto& procState: process.startMachineStates)
-            {
-                applications[procState].push_back({manif.name, process.name});
-            }
-        }
-    }
-
-    std::cout << "Here\n";
-    for (auto state = MachineStateManager::MachineStateManager::transition.begin();
-         state != MachineStateManager::MachineStateManager::transition.end();
-         state++)
+    for (const auto& state: transition)
     {
         std::cout << "————————————————————————————————————————————————————————\n";
-        currentState = *state;
+        currentState = state;
+
         killProcessesForState();
-        switch (currentState)
+        switch (state)
         {
         case  MachineStates::kInit:
             std::cout <<"init\n";
@@ -57,7 +46,7 @@ int ExecutionManager::start()
             break;
         }
 
-        loadApplicationsForState();
+        startApplicationsForState();
 
         std::this_thread::sleep_for(std::chrono::seconds{2});
     }
@@ -65,7 +54,7 @@ int ExecutionManager::start()
     return EXIT_SUCCESS;
 }
 
-void ExecutionManager::loadApplicationsForState()
+void ExecutionManager::startApplicationsForState()
 {
     vector<ProcessName> processesToStart;
     std::copy_if(applications[currentState].begin(),
@@ -78,7 +67,6 @@ void ExecutionManager::loadApplicationsForState()
     {
         try
         {
-            std::cout << executableToStart.processName << " " << executableToStart.applicationName << std::endl;
             startApplication(executableToStart);
         }
         catch (runtime_error err)
@@ -92,12 +80,6 @@ void ExecutionManager::loadApplicationsForState()
 void ExecutionManager::killProcessesForState()
 {
     const vector<ProcessName> allowedApps = applications[currentState];
-    std::cout << "Allowed apps\n";
-    for (auto item: allowedApps)
-    {
-        std::cout << item.applicationName << "\t" << item.processName << std::endl;
-    }
-    std::cout << "———————————————\n";
 
     for (auto app = activeApplications.begin(); app != activeApplications.end();)
     {
@@ -106,7 +88,6 @@ void ExecutionManager::killProcessesForState()
                          [&app](auto& allowedApp)
                          { return app->first == allowedApp.processName; }) == allowedApps.end())
         {
-            std::cout << "here\n";
             kill(app->second, SIGTERM);
             app = activeApplications.erase(app);
         } else {
@@ -129,7 +110,7 @@ void ExecutionManager::loadListOfApplications(vector<string> &fileNames)
         // check for "." and ".." files in directory, we don't need them
         if (!strcmp(drnt->d_name, ".") || !strcmp(drnt->d_name, "..")) continue;
 
-        fileNames.push_back(string{drnt->d_name});
+        fileNames.emplace_back(drnt->d_name);
 
         std::cout << drnt->d_name << std::endl;
     }
@@ -137,13 +118,12 @@ void ExecutionManager::loadListOfApplications(vector<string> &fileNames)
     closedir(dp);
 }
 
-vector<ApplicationManifest> ExecutionManager::processManifests()
+void ExecutionManager::processManifests()
 {
     vector<string> applicationNames;
 
     loadListOfApplications(applicationNames);
 
-    vector<ApplicationManifest> res;
     json content;
     ifstream data;
     for (auto file: applicationNames)
@@ -153,14 +133,17 @@ vector<ApplicationManifest> ExecutionManager::processManifests()
 
         data >> content;
         ApplicationManifest manifest = content;
-        res.push_back(manifest);
+
+        for (const auto& process: manifest.processes)
+        {
+            for (const auto& procState: process.startMachineStates)
+            {
+                applications[procState].push_back({manifest.name, process.name});
+            }
+        }
 
         data.close();
     }
-
-    std::cout << "size: " << res.size() << std::endl;
-
-    return res;
 }
 
 void ExecutionManager::startApplication(const ProcessName &manifest)
@@ -179,7 +162,7 @@ void ExecutionManager::startApplication(const ProcessName &manifest)
             throw runtime_error(string{"Error occured creating process: "} + strerror(errno));
         }
     } else {
-        std::cout << "app started: " << manifest.processName << "\t" << processId << std::endl;
+        // parent process
         activeApplications.insert({manifest.processName, processId});
     }
 

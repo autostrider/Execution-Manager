@@ -23,13 +23,15 @@ struct ApplicationManifest;
 class ExecutionManager
 {
 public:
+    ExecutionManager() = default;
+    ~ExecutionManager() = default;
     /**
      * @brief Main method of Execution manager.
      */
     int start();
 private:
     /**
-     * typedef for holding process name and app it belongs to
+     * Struct for process name and application it belongs to.
      */
     struct ProcessName
     {
@@ -38,17 +40,19 @@ private:
     };
     /**
      * @brief Loads all adaptive applications from corePath.
+     *
      * @param fileNames: output parameter, where all the applications
      *                   names are stored.
      */
-    void loadListOfApplications(vector<string>& fileNames);
+    void loadListOfApplications(vector<string> &fileNames);
 
     /**
      * @brief processManifests - loads manifests from corePath.
+     *
      * @return vector of Application manifest for available
      *          applications respectively.
      */
-    vector<ApplicationManifest> processManifests();
+    void processManifests();
     /**
      * @brief Starts given application and stores information
      *        about it in activeApplications.
@@ -56,24 +60,32 @@ private:
      */
     void startApplication(const ProcessName &manifest);
 
-    void startMachineStateManager();
-    void confirmMachineState(MachineStates state);
-    void loadApplicationsForState();
+    /**
+     * @brief starts all application that support current state.
+     */
+    void startApplicationsForState();
+
+    /**
+     * @brief kill all processes that doesn't support current state.
+     */
     void killProcessesForState();
 
 private:
     /// \brief Hardcoded path to folder with adaptive applications.
     const static string corePath;
 
-    /// \brief structure that holds application and required processes.
+    /// \brief Structure that holds application and required processes.
     map<string, pid_t> activeApplications;
 
-    /// \brief structure for application that can run in certain state
-    /// vector consists of applicationId (name) and string param - executable name
+    /// \brief Structure for application that can run in certain state
+    /// vector consists of applicationId (name) and string param - executable name.
     map<MachineStates, vector<ProcessName>> applications;
 
     /// \brief Current machine state.
     MachineStates currentState = MachineStates::kInit;
+
+    /// \brief Vector that holds state transitions.
+    const static vector<MachineStates> transition;
 };
 
 } // namespace ExecutionManager

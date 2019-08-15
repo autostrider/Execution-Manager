@@ -3,14 +3,12 @@
   "processes": [
     {
       "avail_start_machine_states": [
-        0,
-        1
+        0
       ],
       "process_name": "proc2"
     },
     {
       "avail_start_machine_states": [
-        0,
         1
       ],
       "process_name": "proc3"

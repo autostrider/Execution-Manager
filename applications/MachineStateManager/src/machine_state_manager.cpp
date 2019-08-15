@@ -5,7 +5,7 @@
 namespace MachineStateManager
 {
 
-const vector<string> MachineStateManager::transitions =
+const vector<MachineStates> MachineStateManager::transitions =
     {MachineStates::kInit, MachineStates::kRunning, MachineStates::kShutdown};
 
 void MachineStateManager::registerInExecutionManager()
@@ -23,6 +23,7 @@ void MachineStateManager::handleStateConfirmation()
         msc.setMachineState(*newStatePos);
     }
     else
+    {}
 }
 
 } // namespace MachineStateManager

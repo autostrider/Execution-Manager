@@ -5,6 +5,7 @@
 #include <dirent.h>
 #include <exception>
 #include <thread>
+#include <signal.h>
 
 #include "machine_state_manager.hpp"
 
@@ -39,7 +40,7 @@ int ExecutionManager::start()
     {
         std::cout << "------------------------------------------------------\n";
         currentState = *state;
-
+        killProcessesForState();
         switch (currentState)
         {
         case  MachineStates::kInit:
@@ -85,6 +86,29 @@ void ExecutionManager::loadApplicationsForState()
             continue;
         }
     }
+}
+
+void ExecutionManager::killProcessesForState()
+{
+        const vector<ProcessName> allowedApps = applications[currentState];
+        for (auto item: allowedApps)
+        {
+            std::cout << item.applicationName << "\t" << item.processName << std::endl;
+        }
+        /// find all processes to terminate
+        for (auto app = activeApplications.begin(); app != activeApplications.end();)
+        {
+            if (std::find_if(allowedApps.begin(),
+                          allowedApps.end(),
+                             [&app](auto& allowedApp)
+            { return app->first == allowedApp.processName; }) == allowedApps.end())
+            {
+                kill(app->second, SIGTERM);
+                app = activeApplications.erase(app);
+            } else {
+        app++;
+            }
+        }
 }
 
 void ExecutionManager::loadListOfApplications(vector<string> &fileNames)
@@ -137,8 +161,6 @@ vector<ApplicationManifest> ExecutionManager::processManifests()
 
 void ExecutionManager::startApplication(const ProcessName &manifest)
 {
-    vector<pid_t> applicationProcessIds;
-
         pid_t processId = fork();
 
         if (!processId)
@@ -151,11 +173,10 @@ void ExecutionManager::startApplication(const ProcessName &manifest)
             {
                 throw runtime_error(string{"Error occured creating process: "} + strerror(errno));
             }
-            // add process to application processes.
-            applicationProcessIds.push_back(processId);
+
+            activeApplications.insert({manifest.processName, processId});
         }
 
-    activeApplications[manifest.processName].push_back(processId);
 }
 
 } // namespace ExecutionManager

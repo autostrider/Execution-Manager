@@ -35,12 +35,6 @@ private:
     {
         string applicationName;
         string processName;
-
-        bool operator< (const ProcessName& cmp)
-        {
-            return (applicationName < cmp.applicationName) ?
-                        true : (processName < cmp.processName);
-        }
     };
     /**
      * @brief Loads all adaptive applications from corePath.
@@ -65,13 +59,14 @@ private:
     void startMachineStateManager();
     void confirmMachineState(MachineStates state);
     void loadApplicationsForState();
+    void killProcessesForState();
 
 private:
     /// \brief Hardcoded path to folder with adaptive applications.
     const static string corePath;
 
     /// \brief structure that holds application and required processes.
-    map<string, vector<pid_t>> activeApplications;
+    map<string, pid_t> activeApplications;
 
     /// \brief structure for application that can run in certain state
     /// vector consists of applicationId (name) and string param - executable name

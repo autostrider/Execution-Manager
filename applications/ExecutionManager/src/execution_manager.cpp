@@ -35,11 +35,14 @@ void ExecutionManager::start()
 
 void ExecutionManager::loadListOfApplications(vector<string> &fileNames)
 {
-    DIR* dp;
+    DIR* dp = nullptr;
 
     if ((dp = opendir(corePath.c_str())) == nullptr)
     {
-        throw runtime_error(string{"Error opening directory: "} + strerror(errno));
+        throw runtime_error(string{"Error opening directory: "}
+                            + corePath
+                            + " "
+                            + strerror(errno));
     }
 
     for (struct dirent *drnt = readdir(dp); drnt != nullptr; drnt = readdir(dp))
@@ -47,7 +50,7 @@ void ExecutionManager::loadListOfApplications(vector<string> &fileNames)
         // check for "." and ".." files in directory, we don't need them
         if (!strcmp(drnt->d_name, ".") || !strcmp(drnt->d_name, "..")) continue;
 
-        fileNames.push_back(string{drnt->d_name});
+        fileNames.emplace_back(drnt->d_name);
 
         std::cout << drnt->d_name << std::endl;
     }
@@ -82,19 +85,22 @@ vector<ApplicationManifest> ExecutionManager::processManifests()
 void ExecutionManager::startApplication(const ApplicationManifest &manifest)
 {
     vector<pid_t> applicationProcessIds;
-    for (auto name: manifest.processes)
+    for (const auto& process: manifest.processes)
     {
         pid_t processId = fork();
 
         if (!processId)
         {
             // child process
-            auto processPath = corePath + manifest.name + "/processes/" + name.name;            
-            int res = execl(processPath.c_str(), name.name.c_str(), nullptr);
+            auto processPath = corePath + manifest.name + "/processes/" + process.name;
+            int res = execl(processPath.c_str(), process.name.c_str(), nullptr);
 
             if (res)
             {
-                throw runtime_error(string{"Error occured creating process: "} + strerror(errno));
+                throw runtime_error(string{"Error occured creating process: "}
+                                    + process.name
+                                    + " "
+                                    + strerror(errno));
             }
             // add process to application processes.
             applicationProcessIds.push_back(processId);

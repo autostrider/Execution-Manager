@@ -38,7 +38,7 @@ int ExecutionManager::start()
          state != MachineStateManager::MachineStateManager::transition.end();
          state++)
     {
-        std::cout << "------------------------------------------------------\n";
+        std::cout << "————————————————————————————————————————————————————————\n";
         currentState = *state;
         killProcessesForState();
         switch (currentState)
@@ -71,7 +71,8 @@ void ExecutionManager::loadApplicationsForState()
     std::copy_if(applications[currentState].begin(),
                  applications[currentState].end(),
                  std::back_inserter(processesToStart),
-                 [this](auto item) { return this->activeApplications.find(item.processName) == this->activeApplications.end(); });
+                 [=](auto item)
+                 { return activeApplications.find(item.processName) == activeApplications.end(); });
 
     for (const auto& executableToStart: processesToStart)
     {
@@ -90,25 +91,28 @@ void ExecutionManager::loadApplicationsForState()
 
 void ExecutionManager::killProcessesForState()
 {
-        const vector<ProcessName> allowedApps = applications[currentState];
-        for (auto item: allowedApps)
+    const vector<ProcessName> allowedApps = applications[currentState];
+    std::cout << "Allowed apps\n";
+    for (auto item: allowedApps)
+    {
+        std::cout << item.applicationName << "\t" << item.processName << std::endl;
+    }
+    std::cout << "———————————————\n";
+
+    for (auto app = activeApplications.begin(); app != activeApplications.end();)
+    {
+        if (std::find_if(allowedApps.begin(),
+                         allowedApps.end(),
+                         [&app](auto& allowedApp)
+                         { return app->first == allowedApp.processName; }) == allowedApps.end())
         {
-            std::cout << item.applicationName << "\t" << item.processName << std::endl;
+            std::cout << "here\n";
+            kill(app->second, SIGTERM);
+            app = activeApplications.erase(app);
+        } else {
+            app++;
         }
-        /// find all processes to terminate
-        for (auto app = activeApplications.begin(); app != activeApplications.end();)
-        {
-            if (std::find_if(allowedApps.begin(),
-                          allowedApps.end(),
-                             [&app](auto& allowedApp)
-            { return app->first == allowedApp.processName; }) == allowedApps.end())
-            {
-                kill(app->second, SIGTERM);
-                app = activeApplications.erase(app);
-            } else {
-        app++;
-            }
-        }
+    }
 }
 
 void ExecutionManager::loadListOfApplications(vector<string> &fileNames)
@@ -161,21 +165,23 @@ vector<ApplicationManifest> ExecutionManager::processManifests()
 
 void ExecutionManager::startApplication(const ProcessName &manifest)
 {
-        pid_t processId = fork();
+    pid_t processId = fork();
 
-        if (!processId)
+    if (!processId)
+    {
+        // child process
+        auto processPath = corePath + manifest.applicationName + "/processes/" + manifest.processName;
+
+        int res = execl(processPath.c_str(), manifest.processName.c_str(), nullptr);
+
+        if (res)
         {
-            // child process
-            auto processPath = corePath + manifest.applicationName + "/processes/" + manifest.processName;
-            int res = execl(processPath.c_str(), manifest.processName.c_str(), nullptr);
-
-            if (res)
-            {
-                throw runtime_error(string{"Error occured creating process: "} + strerror(errno));
-            }
-
-            activeApplications.insert({manifest.processName, processId});
+            throw runtime_error(string{"Error occured creating process: "} + strerror(errno));
         }
+    } else {
+        std::cout << "app started: " << manifest.processName << "\t" << processId << std::endl;
+        activeApplications.insert({manifest.processName, processId});
+    }
 
 }
 

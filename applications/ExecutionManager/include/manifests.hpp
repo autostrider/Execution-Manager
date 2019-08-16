@@ -130,37 +130,35 @@ NLOHMANN_JSON_SERIALIZE_ENUM(api::ApplicationState, {
 })
 
 /// InterfaceConf serialization
-void to_json(json& j, const InterfaceConf& interfaceConf);
+void to_json(json& jsonObject, const InterfaceConf& interfaceConf);
 
 /// InterfaceConf  deserialization
-void from_json(const json& j, InterfaceConf& interfaceConf);
+void from_json(const json& jsonObject, InterfaceConf& interfaceConf);
 
 /// HwConf serialization
-void to_json(json& j, const HwConf& hwConf);
+void to_json(json& jsonObject, const HwConf& hwConf);
 
 /// HwConf  deserialization
-void from_json(const json& j, HwConf& hwConf);
+void from_json(const json& jsonObject, HwConf& hwConf);
 
 /// MachineState serialization
-void to_json(json& j, const MachineManifest& machineManifest);
+void to_json(json& jsonObject, const MachineManifest& machineManifest);
 
 /// MachineManifest deserialization
-void from_json(const json& j, MachineManifest& machineManifest);
+void from_json(const json& jsonObject, MachineManifest& machineManifest);
 
 /// Process serialization
-void to_json(json& j, const Process& process);
+void to_json(json& jsonObject, const Process& process);
 
 /// Process deserialization
-void from_json(const json& j, Process& process);
+void from_json(const json& jsonObject, Process& process);
 
 /// ApplicationManifest serialization
-void to_json(json& j, const ApplicationManifest& applicationManifest);
+void to_json(json& jsonObject, const ApplicationManifest& applicationManifest);
 
 /// ApplicationManifest deserialization
-void from_json(const json& j, ApplicationManifest& applicationManifest);
+void from_json(const json& jsonObject, ApplicationManifest& applicationManifest);
 
 } // namespace ExecutionManager
-
-//#include "../json_transformation.cpp"
 
 #endif // MANIFESTS_HPP

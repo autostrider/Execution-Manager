@@ -98,11 +98,14 @@ void ExecutionManager::killProcessesForState()
 
 void ExecutionManager::loadListOfApplications(vector<string> &fileNames)
 {
-    DIR* dp;
+    DIR* dp = nullptr;
 
     if ((dp = opendir(corePath.c_str())) == nullptr)
     {
-        throw runtime_error(string{"Error opening directory: "} + strerror(errno));
+        throw runtime_error(string{"Error opening directory: "}
+                            + corePath
+                            + " "
+                            + strerror(errno));
     }
 
     for (struct dirent *drnt = readdir(dp); drnt != nullptr; drnt = readdir(dp))
@@ -159,7 +162,10 @@ void ExecutionManager::startApplication(const ProcessName &manifest)
 
         if (res)
         {
-            throw runtime_error(string{"Error occured creating process: "} + strerror(errno));
+                throw runtime_error(string{"Error occured creating process: "}
+                                    + manifest.processName
+                                    + " "
+                                    + strerror(errno));
         }
     } else {
         // parent process

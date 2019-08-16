@@ -18,7 +18,7 @@ void MachineManifest::init()
 
 void MachineManifest::loadNetworkConf()
 {
-  ifaddrs *ifa;
+  ifaddrs *ifa = nullptr;
   getifaddrs(&ifa);
 
   for (ifaddrs *it = ifa; it != nullptr; it = it->ifa_next)
@@ -74,7 +74,8 @@ void MachineManifest::loadHwConf()
 #else
   ifstream procStat("/proc/stat");
 #endif
-  procStat.ignore(5, ' ');  // skip cpu prefix
+  constexpr int procStatFileStartSkit{5};
+  procStat.ignore(procStatFileStartSkit, ' ');  // skip cpu prefix
   vector<size_t> times;
   for (size_t time; procStat >> time; times.push_back(time))
     ;
@@ -84,20 +85,21 @@ void MachineManifest::loadHwConf()
     std::cout << "Error obtaining cpu data\n";
   }
 
-  size_t idleTime = times[3];
+  constexpr int cpuPowerInputData{3};
+  size_t idleTime = times[cpuPowerInputData];
   size_t totalTime = std::accumulate(times.begin(), times.end(), 0);
 
   float deltaIdle = idleTime - prevIdleTime;
   float deltaTotal = totalTime - prevTotalTime;
-  float utilization = 100.0 * (1.0 - deltaIdle / deltaTotal);
-  hwConf.cpu = 100 - utilization;
+  float utilization = 100.0f * (1.0f - deltaIdle / deltaTotal);
+  hwConf.cpu = static_cast<uint8_t>(100) - utilization;
 }
 
 
 /// InterfaceConf serialization
-void to_json(json& j, const InterfaceConf& interfaceConf)
+void to_json(json& jsonObject, const InterfaceConf& interfaceConf)
 {
-    j = json{
+    jsonObject = json{
             {"ifa_name", interfaceConf.ifa_name},
             {"family", interfaceConf.family},
             {"host", interfaceConf.host}
@@ -105,33 +107,33 @@ void to_json(json& j, const InterfaceConf& interfaceConf)
 }
 
 /// InterfaceConf  deserialization
-void from_json(const json& j, InterfaceConf& interfaceConf)
+void from_json(const json& jsonObject, InterfaceConf& interfaceConf)
 {
-    j.at("ifa_name").get_to(interfaceConf.ifa_name);
-    j.at("family").get_to(interfaceConf.family);
-    j.at("host").get_to(interfaceConf.host);
+    jsonObject.at("ifa_name").get_to(interfaceConf.ifa_name);
+    jsonObject.at("family").get_to(interfaceConf.family);
+    jsonObject.at("host").get_to(interfaceConf.host);
 }
 
 /// HwConf serialization
-void to_json(json& j, const HwConf& hwConf)
+void to_json(json& jsonObject, const HwConf& hwConf)
 {
-    j = json{
+    jsonObject = json{
             {"ram", hwConf.ram},
             {"cpu", hwConf.cpu}
     };
 }
 
 /// HwConf  deserialization
-void from_json(const json& j, HwConf& hwConf)
+void from_json(const json& jsonObject, HwConf& hwConf)
 {
-    j.at("ram").get_to(hwConf.ram);
-    j.at("cpu").get_to(hwConf.cpu);
+    jsonObject.at("ram").get_to(hwConf.ram);
+    jsonObject.at("cpu").get_to(hwConf.cpu);
 }
 
 /// MachineState serialization
-void to_json(json& j, const MachineManifest& machineManifest)
+void to_json(json& jsonObject, const MachineManifest& machineManifest)
 {
-    j = json{
+    jsonObject = json{
             {"network", machineManifest.network},
             {"hwConf", machineManifest.hwConf},
             {"states", machineManifest.states},
@@ -140,45 +142,45 @@ void to_json(json& j, const MachineManifest& machineManifest)
 }
 
 /// MachineManifest deserialization
-void from_json(const json& j, MachineManifest& machineManifest)
+void from_json(const json& jsonObject, MachineManifest& machineManifest)
 {
-    j.at("network").get_to(machineManifest.network);
-    j.at("hwConf").get_to(machineManifest.hwConf);
-    j.at("states").get_to(machineManifest.states);
-    j.at("adaptiveModules").get_to(machineManifest.adaptiveModules);
+    jsonObject.at("network").get_to(machineManifest.network);
+    jsonObject.at("hwConf").get_to(machineManifest.hwConf);
+    jsonObject.at("states").get_to(machineManifest.states);
+    jsonObject.at("adaptiveModules").get_to(machineManifest.adaptiveModules);
 }
 
 /// Process serialization
-void to_json(json& j, const Process& process)
+void to_json(json& jsonObject, const Process& process)
 {
-    j = json{
+    jsonObject = json{
           {"process_name", process.name},
           {"avail_start_machine_states", process.startMachineStates}
     };
 }
 
 /// Process deserialization
-void from_json(const json& j, Process& process)
+void from_json(const json& jsonObject, Process& process)
 {
-    j.at("process_name").get_to(process.name);
-    j.at("avail_start_machine_states").get_to(process.startMachineStates);
+    jsonObject.at("process_name").get_to(process.name);
+    jsonObject.at("avail_start_machine_states").get_to(process.startMachineStates);
 }
 
 
 /// ApplicationManifest serialization
-void to_json(json& j, const ApplicationManifest& applicationManifest)
+void to_json(json& jsonObject, const ApplicationManifest& applicationManifest)
 {
-    j = json{
+    jsonObject = json{
             {"name", applicationManifest.name},
             {"processes", applicationManifest.processes}
     };
 }
 
 /// ApplicationManifest deserialization
-void from_json(const json& j, ApplicationManifest& applicationManifest)
+void from_json(const json& jsonObject, ApplicationManifest& applicationManifest)
 {
-    j.at("name").get_to(applicationManifest.name);
-    j.at("processes").get_to(applicationManifest.processes);
+    jsonObject.at("name").get_to(applicationManifest.name);
+    jsonObject.at("processes").get_to(applicationManifest.processes);
 }
 
 }

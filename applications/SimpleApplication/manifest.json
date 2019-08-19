@@ -1,0 +1,12 @@
+{
+  "name": "SimpleApplication",
+  "processes": [
+    {
+      "avail_start_machine_states": [
+        "init",
+        "restart"
+      ],
+      "process_name": "simpleApp"
+    }
+  ]
+}

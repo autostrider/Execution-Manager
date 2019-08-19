@@ -7,6 +7,7 @@
 using namespace std;
 using namespace api;
 using namespace chrono;
+using ApplicationState = ApplicationStateClient::ApplicationState;
 
 class SimpleApp
 {

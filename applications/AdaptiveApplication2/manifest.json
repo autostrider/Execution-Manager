@@ -1,0 +1,19 @@
+{
+  "name": "AdaptiveApplication2",
+  "processes": [
+    {
+      "avail_start_machine_states": [
+        "init",
+        "restart"
+      ],
+      "process_name": "proc2"
+    },
+    {
+      "avail_start_machine_states": [
+        "init",
+        "restart"
+      ],
+      "process_name": "proc3"
+    }
+  ]
+}

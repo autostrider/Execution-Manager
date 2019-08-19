@@ -12,19 +12,21 @@
 #include <numeric>
 #include <string>
 #include <vector>
+#include <json.hpp>
+#include <application_state_management.capnp.h>
+#include <machine_state_management.capnp.h>
 
-#include <application_state_client.h>
-#include <machine_state_client.h>
 
 namespace ExecutionManager
 {
 
+using nlohmann::json;
 using std::ifstream;
 using std::string;
 using std::vector;
 
-using api::MachineStates;
-using api::ApplicationState;
+using MachineState = std::string;
+using ApplicationState = ::ApplicationStateManagement::ApplicationState;
 
 /**
  * @brief Struct, that holds network interface configuration.
@@ -64,7 +66,7 @@ struct MachineManifest
  public:
   vector<InterfaceConf> network;
   HwConf hwConf;
-  vector<MachineStates> states;
+  vector<MachineState> states;
   vector<string> adaptiveModules;
 
  public:
@@ -94,7 +96,7 @@ struct Process
   string name;
 
   /// Available machine states to run the executable.
-  vector<MachineStates> startMachineStates;
+  vector<MachineState> startMachineStates;
 
 };
 
@@ -110,93 +112,43 @@ struct ApplicationManifest
   vector<Process> processes;
 };
 
+/// AppStates serialization & deserialization
+NLOHMANN_JSON_SERIALIZE_ENUM(ApplicationState, {
+    {ApplicationState::K_INITIALIZING, "init"},
+    {ApplicationState::K_RUNNING, "running"},
+    {ApplicationState::K_SHUTTINGDOWN, "shutdown"}
+})
+
+/// InterfaceConf serialization
+void to_json(json& jsonObject, const InterfaceConf& interfaceConf);
+
+/// InterfaceConf  deserialization
+void from_json(const json& jsonObject, InterfaceConf& interfaceConf);
+
+/// HwConf serialization
+void to_json(json& jsonObject, const HwConf& hwConf);
+
+/// HwConf  deserialization
+void from_json(const json& jsonObject, HwConf& hwConf);
+
+/// MachineState serialization
+void to_json(json& jsonObject, const MachineManifest& machineManifest);
+
+/// MachineManifest deserialization
+void from_json(const json& jsonObject, MachineManifest& machineManifest);
+
+/// Process serialization
+void to_json(json& jsonObject, const Process& process);
+
+/// Process deserialization
+void from_json(const json& jsonObject, Process& process);
+
+/// ApplicationManifest serialization
+void to_json(json& jsonObject, const ApplicationManifest& applicationManifest);
+
+/// ApplicationManifest deserialization
+void from_json(const json& jsonObject, ApplicationManifest& applicationManifest);
+
 } // namespace ExecutionManager
-
-#include "json_converters.hpp"
-
-void ExecutionManager::MachineManifest::init()
-{
-  loadHwConf();
-  loadNetworkConf();
-  states = {MachineStates::kRunning};
-  adaptiveModules = {};
-}
-
-void ExecutionManager::MachineManifest::loadNetworkConf()
-{
-  ifaddrs *ifa;
-  getifaddrs(&ifa);
-
-  for (ifaddrs *it = ifa; it != nullptr; it = it->ifa_next)
-  {
-    InterfaceConf interfaceConf;
-    interfaceConf.ifa_name = string{it->ifa_name};
-    auto family = it->ifa_addr->sa_family;
-
-    interfaceConf.family =
-        (family == AF_INET)
-            ? "AF_INET"
-            : (family == AF_INET6)
-                  ? "AF_INET6"
-                  : (family == AF_PACKET) ? "AF_PACKET" : "Unknown";
-
-    if (family == AF_INET || family == AF_INET6)
-    {
-      int err = getnameinfo(it->ifa_addr,
-                            (family == AF_INET) ? sizeof(struct sockaddr_in)
-                                                : sizeof(struct sockaddr_in6),
-                            interfaceConf.host, NI_MAXHOST, nullptr, 0,
-                            NI_NUMERICHOST);
-      if (err != 0)
-      {
-        std::cerr << "getnameinfo() failed " << gai_strerror(err) << std::endl;
-        continue;
-      }
-    }
-
-    network.push_back(interfaceConf);
-  }
-
-  freeifaddrs(ifa);
-}
-
-void ExecutionManager::MachineManifest::loadHwConf()
-{
-  // load ram available
-  struct sysinfo info;
-  if (sysinfo(&info))
-  {
-    std::cout << "can't load ram info\n";
-    return;
-  }
-  hwConf.ram = info.freeram;
-
-  // load available cpu power
-  size_t prevIdleTime = 0;
-  size_t prevTotalTime = 0;
-
-#if UNIT_TEST
-  ifstream procStat("../test/cpu-mockfile");
-#else
-  ifstream procStat("/proc/stat");
-#endif
-  procStat.ignore(5, ' ');  // skip cpu prefix
-  vector<size_t> times;
-  for (size_t time; procStat >> time; times.push_back(time))
-    ;
-
-  if (times.size() < 4)
-  {
-    std::cout << "Error obtaining cpu data\n";
-  }
-
-  size_t idleTime = times[3];
-  size_t totalTime = std::accumulate(times.begin(), times.end(), 0);
-
-  float deltaIdle = idleTime - prevIdleTime;
-  float deltaTotal = totalTime - prevTotalTime;
-  float utilization = 100.0 * (1.0 - deltaIdle / deltaTotal);
-  hwConf.cpu = 100 - utilization;
-}
 
 #endif // MANIFESTS_HPP

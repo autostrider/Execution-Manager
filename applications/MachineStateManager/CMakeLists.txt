@@ -23,3 +23,10 @@ target_include_directories(msm
 
 target_compile_options(msm PRIVATE -Werror -Wall -fdiagnostics-color=always)
 target_compile_features(msm PRIVATE cxx_std_14)
+
+add_adaptive_application(
+  NAME
+    MachineStateManager
+  PROCESSES
+    msm
+)

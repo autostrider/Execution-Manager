@@ -12,7 +12,7 @@ void MachineManifest::init()
 {
   loadHwConf();
   loadNetworkConf();
-  states = {MachineStates::kRunning};
+  states = {"running"};
   adaptiveModules = {};
 }
 

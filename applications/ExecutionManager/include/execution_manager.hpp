@@ -16,7 +16,6 @@ using std::vector;
 using std::map;
 using std::pair;
 using std::string;
-using applicationId = std::string;
 
 struct ApplicationManifest;
 
@@ -24,7 +23,7 @@ class ExecutionManager
 {
 public:
     ExecutionManager() = default;
-    ~ExecutionManager() = default;
+
     /**
      * @brief Main method of Execution manager.
      */
@@ -44,7 +43,7 @@ private:
      * @param fileNames: output parameter, where all the applications
      *                   names are stored.
      */
-    void loadListOfApplications(vector<string> &fileNames);
+    vector<string> loadListOfApplications();
 
     /**
      * @brief processManifests - loads manifests from corePath.
@@ -79,13 +78,13 @@ private:
 
     /// \brief Structure for application that can run in certain state
     /// vector consists of applicationId (name) and string param - executable name.
-    map<MachineStates, vector<ProcessName>> applications;
+    map<MachineState, vector<ProcessName>> allowedApplicationForState;
 
     /// \brief Current machine state.
-    MachineStates currentState = MachineStates::kInit;
+    MachineState currentState = "init";
 
     /// \brief Vector that holds state transitions.
-    const static vector<MachineStates> transition;
+    const static vector<MachineState> transition;
 };
 
 } // namespace ExecutionManager

@@ -17,8 +17,8 @@ using std::runtime_error;
 
 const string ExecutionManager::corePath = string{"../applications/AdaptiveApplications/"};
 
-const vector<MachineStates> ExecutionManager::transition =
-            {MachineStates::kInit, MachineStates::kRunning, MachineStates::kShutdown};
+const vector<MachineState> ExecutionManager::transition =
+            {"init", "running", "shutdown"};
 
 int ExecutionManager::start()
 {
@@ -30,21 +30,7 @@ int ExecutionManager::start()
         currentState = state;
 
         killProcessesForState();
-        switch (state)
-        {
-        case  MachineStates::kInit:
-            std::cout <<"init\n";
-            break;
-        case MachineStates::kRunning:
-            std::cout << "run\n";
-            break;
-        case MachineStates::kShutdown:
-            std::cout << "shhutdown\n";
-            break;
-        case MachineStates::kRestart:
-            std::cout << "restart\n";
-            break;
-        }
+        std::cout << state << std::endl;
 
         startApplicationsForState();
 
@@ -56,15 +42,12 @@ int ExecutionManager::start()
 
 void ExecutionManager::startApplicationsForState()
 {
-    vector<ProcessName> processesToStart;
-    std::copy_if(applications[currentState].begin(),
-                 applications[currentState].end(),
-                 std::back_inserter(processesToStart),
-                 [=](auto item)
-                 { return activeApplications.find(item.processName) == activeApplications.end(); });
+    const auto& allowedApps = allowedApplicationForState[currentState];
 
-    for (const auto& executableToStart: processesToStart)
+    for (const auto& executableToStart: allowedApps)
     {
+        if (activeApplications.find(executableToStart.processName) != activeApplications.end())
+            continue;
         try
         {
             startApplication(executableToStart);
@@ -79,7 +62,7 @@ void ExecutionManager::startApplicationsForState()
 
 void ExecutionManager::killProcessesForState()
 {
-    const vector<ProcessName> allowedApps = applications[currentState];
+    const auto& allowedApps = allowedApplicationForState[currentState];
 
     for (auto app = activeApplications.begin(); app != activeApplications.end();)
     {
@@ -96,9 +79,10 @@ void ExecutionManager::killProcessesForState()
     }
 }
 
-void ExecutionManager::loadListOfApplications(vector<string> &fileNames)
+vector<string> ExecutionManager::loadListOfApplications()
 {
     DIR* dp = nullptr;
+    vector<string> fileNames;
 
     if ((dp = opendir(corePath.c_str())) == nullptr)
     {
@@ -119,20 +103,18 @@ void ExecutionManager::loadListOfApplications(vector<string> &fileNames)
     }
 
     closedir(dp);
+    return std::move(fileNames);
 }
 
 void ExecutionManager::processManifests()
 {
-    vector<string> applicationNames;
-
-    loadListOfApplications(applicationNames);
+    const auto& applicationNames = loadListOfApplications();
 
     json content;
-    ifstream data;
     for (auto file: applicationNames)
     {
         file = corePath + file + "/manifest.json";
-        data.open(file);
+        ifstream data{file};
 
         data >> content;
         ApplicationManifest manifest = content;
@@ -141,11 +123,10 @@ void ExecutionManager::processManifests()
         {
             for (const auto& procState: process.startMachineStates)
             {
-                applications[procState].push_back({manifest.name, process.name});
+                allowedApplicationForState[procState].push_back({manifest.name, process.name});
             }
         }
 
-        data.close();
     }
 }
 
@@ -162,10 +143,10 @@ void ExecutionManager::startApplication(const ProcessName &manifest)
 
         if (res)
         {
-                throw runtime_error(string{"Error occured creating process: "}
-                                    + manifest.processName
-                                    + " "
-                                    + strerror(errno));
+            throw runtime_error(string{"Error occured creating process: "}
+                                + manifest.processName
+                                + " "
+                                + strerror(errno));
         }
     } else {
         // parent process

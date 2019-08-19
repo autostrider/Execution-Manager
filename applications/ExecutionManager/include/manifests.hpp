@@ -15,7 +15,6 @@
 #include <json.hpp>
 
 #include <application_state_client.h>
-#include <machine_state_client.h>
 
 using nlohmann::json;
 
@@ -26,7 +25,7 @@ using std::ifstream;
 using std::string;
 using std::vector;
 
-using api::MachineStates;
+using MachineState = string;
 using api::ApplicationState;
 
 /**
@@ -67,7 +66,7 @@ struct MachineManifest
  public:
   vector<InterfaceConf> network;
   HwConf hwConf;
-  vector<MachineStates> states;
+  vector<MachineState> states;
   vector<string> adaptiveModules;
 
  public:
@@ -97,7 +96,7 @@ struct Process
   string name;
 
   /// Available machine states to run the executable.
-  vector<MachineStates> startMachineStates;
+  vector<MachineState> startMachineStates;
 
 };
 
@@ -112,14 +111,6 @@ struct ApplicationManifest
   /// Vector of executables of application
   vector<Process> processes;
 };
-
-/// MachineStates serialization & deserialization
-NLOHMANN_JSON_SERIALIZE_ENUM(api::MachineStates, {
-    {api::MachineStates::kInit, "init"},
-    {api::MachineStates::kRestart, "restart"},
-    {api::MachineStates::kRunning, "running"},
-    {api::MachineStates::kShutdown, "shutdown"}
-})
 
 
 /// AppStates serialization & deserialization

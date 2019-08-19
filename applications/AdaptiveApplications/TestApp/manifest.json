@@ -3,8 +3,8 @@
   "processes": [
     {
       "avail_start_machine_states": [
-        0,
-        1
+        "init",
+        "running"
       ],
       "process_name": "proc1"
     }

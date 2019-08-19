@@ -15,9 +15,9 @@ namespace ExecutionManager {
 
 using std::runtime_error;
 
-const string ExecutionManager::corePath = string{"../applications/AdaptiveApplications/"};
+const MachineState ExecutionManager::corePath = std::string{"../applications/AdaptiveApplications/"};
 
-const vector<MachineState> ExecutionManager::transition =
+const std::vector<MachineState> ExecutionManager::transition =
             {"init", "running", "shutdown"};
 
 int ExecutionManager::start()
@@ -79,14 +79,14 @@ void ExecutionManager::killProcessesForState()
     }
 }
 
-vector<string> ExecutionManager::loadListOfApplications()
+std::vector<std::string> ExecutionManager::loadListOfApplications()
 {
     DIR* dp = nullptr;
-    vector<string> fileNames;
+    std::vector<std::string> fileNames;
 
     if ((dp = opendir(corePath.c_str())) == nullptr)
     {
-        throw runtime_error(string{"Error opening directory: "}
+      throw runtime_error(std::string{"Error opening directory: "}
                             + corePath
                             + " "
                             + strerror(errno));
@@ -103,7 +103,7 @@ vector<string> ExecutionManager::loadListOfApplications()
     }
 
     closedir(dp);
-    return std::move(fileNames);
+    return fileNames;
 }
 
 void ExecutionManager::processManifests()
@@ -119,11 +119,11 @@ void ExecutionManager::processManifests()
         data >> content;
         ApplicationManifest manifest = content;
 
-        for (const auto& process: manifest.processes)
+        for (const auto& process: manifest.manifest.processes)
         {
-            for (const auto& procState: process.startMachineStates)
+            for (const auto& procState: process.modeDependentStartupConf)
             {
-                allowedApplicationForState[procState].push_back({manifest.name, process.name});
+                allowedApplicationForState[procState.modes].push_back({manifest.manifest.manifestId, process.name});
             }
         }
 

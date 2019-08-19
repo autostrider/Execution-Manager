@@ -22,10 +22,7 @@ namespace ExecutionManager
 {
 
 using std::ifstream;
-using std::string;
-using std::vector;
 
-using MachineState = string;
 using api::ApplicationState;
 
 /**
@@ -36,8 +33,8 @@ using api::ApplicationState;
  */
 struct InterfaceConf
 {
-  string ifa_name;
-  string family;
+  std::string ifa_name;
+  std::string family;
   char host[NI_MAXHOST];
 };
 
@@ -64,10 +61,10 @@ struct HwConf
 struct MachineManifest
 {
  public:
-  vector<InterfaceConf> network;
+  std::vector<InterfaceConf> network;
   HwConf hwConf;
-  vector<MachineState> states;
-  vector<string> adaptiveModules;
+  std::vector<MachineStates> states;
+  std::vector<std::string> adaptiveModules;
 
  public:
  /**
@@ -87,17 +84,35 @@ struct MachineManifest
   void loadHwConf();
 };
 
+struct MachineInstanceMode
+{
+    std::string functionGroup;
+    std::string mode;
+};
+
+struct ModeDepStartupConfig
+{
+    std::vector<MachineInstanceMode> modes;
+};
+
 /**
  * @brief The Process struct
  */
 struct Process
 {
   /// Name of executable.
-  string name;
+  std::string name;
 
-  /// Available machine states to run the executable.
-  vector<MachineState> startMachineStates;
+  /// Startup configs.
+  std::vector<ModeDepStartupConfig> modeDependentStartupConf;
+};
 
+struct Manifest
+{
+    /// Name of Adaptive Application.
+    std::string manifestId;
+    /// Vector of executables of application
+    std::vector<Process> processes;
 };
 
 /**
@@ -105,11 +120,7 @@ struct Process
  */
 struct ApplicationManifest
 {
-  /// Name of Adaptive Application.
-  string name;
-
-  /// Vector of executables of application
-  vector<Process> processes;
+    Manifest manifest;
 };
 
 
@@ -138,11 +149,25 @@ void to_json(json& jsonObject, const MachineManifest& machineManifest);
 /// MachineManifest deserialization
 void from_json(const json& jsonObject, MachineManifest& machineManifest);
 
+void to_json(json& jsonObject, const MachineInstanceMode& machineInstanceMode);
+
+void
+from_json(const json& jsonObject, MachineInstanceMode& machineInstanceMode);
+
+void to_json(json& jsonObject, const ModeDepStartupConfig& startupConf);
+
+void
+from_json(const json& jsonObject, const ModeDepStartupConfig& startupConf);
+
 /// Process serialization
-void to_json(json& jsonObject, const Process& process);
+void to_json(json& jsonObject, const ModeDepStartupConfig &startupConf);
 
 /// Process deserialization
 void from_json(const json& jsonObject, Process& process);
+
+void to_json(json& jsonObject, const Manifest& manifest);
+
+void from_json(const json& jsonObject, Manifest& manifest);
 
 /// ApplicationManifest serialization
 void to_json(json& jsonObject, const ApplicationManifest& applicationManifest);

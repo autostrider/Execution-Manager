@@ -5,15 +5,18 @@
 
 namespace api {
 
+using ApplicationState = ::ApplicationStateManagement::ApplicationState;
+
 class ApplicationStateClient
 {
 public:
-  ApplicationStateClient() = default;
+  ApplicationStateClient();
   ~ApplicationStateClient() = default;
 
-  using ApplicationState = ::ApplicationStateManagement::ApplicationState;
 
   void reportApplicationState(ApplicationState state);
+private:
+  capnp::EzRpcClient client;
 };
 
 } // namespace api

@@ -1,6 +1,6 @@
 #include <iostream>
 #include <memory>
-#include <chrono> 
+#include <chrono>
 #include <thread>
 #include <application_state_client.h>
 
@@ -11,7 +11,7 @@ using namespace chrono;
 class SimpleApp
 {
 public:
-  SimpleApp() :  
+  SimpleApp() :
     applState(make_unique<ApplicationStateClient>())
   {}
   ~SimpleApp()
@@ -21,21 +21,21 @@ public:
     cout << "Hello from SimpleApp" << endl;
 
     applState->reportApplicationState(
-      ApplicationStateClient::ApplicationState::K_INITIALIZING);
+      ApplicationState::K_INITIALIZING);
 
     cout << "K_INITIALIZING (0) sent" << endl;
 
     this_thread::sleep_for(seconds(1));
 
     applState->reportApplicationState(
-      ApplicationStateClient::ApplicationState::K_RUNNING);
+      ApplicationState::K_RUNNING);
 
     cout << "K_RUNNING (1) sent" << endl;
 
     this_thread::sleep_for(seconds(1));
 
     applState->reportApplicationState(
-      ApplicationStateClient::ApplicationState::K_SHUTTINGDOWN);
+      ApplicationState::K_SHUTTINGDOWN);
 
     cout << "K_SHUTTINGDOWN (2) sent" << endl;
 

@@ -1,9 +1,8 @@
 @0xa6c7c6f7aabe643e;
 
-interface MachineStateManagement 
+interface MachineStateManagement
 {
-
-  enum StateError 
+  enum StateError
   {
     kSuccess @0;
     kInvalidState @1;
@@ -11,19 +10,13 @@ interface MachineStateManagement
     kTimeout @3;
   }
 
-  struct MachineStateResult 
-  {
-    result @0 :StateError;
-    state @1 :Text; 
-  }
-
-  register @0 (app_name :Text, timeout :UInt32) 
+  register @0 (appName :Text)
     -> (result :StateError);
 
-  getMachineState @1 (timeout :UInt32) 
-    -> (result :MachineStateResult);
+  getMachineState @1 ()
+    -> (state :Text, result :StateError);
 
-  setMachineState @2 (state :Text, timeout :UInt32) 
+  setMachineState @2 (state :Text)
     -> (result :StateError);
-    
+
 }

@@ -21,9 +21,9 @@ NLOHMANN_JSON_SERIALIZE_ENUM(MachineStates, {
 
 // AppStates serialization & deserialization
 NLOHMANN_JSON_SERIALIZE_ENUM(ApplicationState, {
-    {ApplicationState::kInitializing, "init"},
-    {ApplicationState::kRunning, "running"},
-    {ApplicationState::kShuttingdown, "shutdown"}
+    {ApplicationState::K_INITIALIZING, "init"},
+    {ApplicationState::K_RUNNING, "running"},
+    {ApplicationState::K_SHUTTINGDOWN, "shutdown"}
 })
 
 

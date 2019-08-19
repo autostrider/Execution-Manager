@@ -8,7 +8,7 @@ list(REMOVE_ITEM EM_SRC ${CMAKE_CURRENT_SOURCE_DIR}/src/em_main.cpp)
 
 set(EM_INCLUDE ${CMAKE_CURRENT_SOURCE_DIR}/include)
 
-add_subdirectory(test)
+# add_subdirectory(test)
 
 add_executable(em src/em_main.cpp ${EM_SRC})
 

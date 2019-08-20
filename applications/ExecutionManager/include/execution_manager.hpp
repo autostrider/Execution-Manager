@@ -56,7 +56,7 @@ private:
      *        about it in activeApplications.
      * @param manifest: Application manifest of application to start.
   */
-  void startApplication(const ProcessName &manifest);
+  void startApplication(const ProcessName& process);
 
   /**
      * @brief starts all application that support current state.

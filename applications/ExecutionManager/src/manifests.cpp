@@ -211,7 +211,7 @@ void from_json(const json& jsonObject, Manifest& manifest)
 /// ApplicationManifest serialization
 void to_json(json& jsonObject, const ApplicationManifest& applicationManifest)
 {
-    jsonObject = json{ "Application_manifest", applicationManifest.manifest };
+    jsonObject = json{ {"Application_manifest", applicationManifest.manifest } };
 }
 
 /// ApplicationManifest deserialization

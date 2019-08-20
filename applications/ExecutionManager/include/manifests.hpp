@@ -22,6 +22,7 @@ namespace ExecutionManager
 {
 
 using std::ifstream;
+using MachineState = std::string;
 
 using api::ApplicationState;
 
@@ -63,7 +64,7 @@ struct MachineManifest
  public:
   std::vector<InterfaceConf> network;
   HwConf hwConf;
-  std::vector<MachineStates> states;
+  std::vector<MachineState> states;
   std::vector<std::string> adaptiveModules;
 
  public:
@@ -123,14 +124,6 @@ struct ApplicationManifest
     Manifest manifest;
 };
 
-
-/// AppStates serialization & deserialization
-NLOHMANN_JSON_SERIALIZE_ENUM(api::ApplicationState, {
-    {api::ApplicationState::kInitializing, "init"},
-    {api::ApplicationState::kRunning, "running"},
-    {api::ApplicationState::kShuttingdown, "shutdown"}
-})
-
 /// InterfaceConf serialization
 void to_json(json& jsonObject, const InterfaceConf& interfaceConf);
 
@@ -160,7 +153,7 @@ void
 from_json(const json& jsonObject, const ModeDepStartupConfig& startupConf);
 
 /// Process serialization
-void to_json(json& jsonObject, const ModeDepStartupConfig &startupConf);
+void to_json(json& jsonObject, const ModeDepStartupConfig& startupConf);
 
 /// Process deserialization
 void from_json(const json& jsonObject, Process& process);

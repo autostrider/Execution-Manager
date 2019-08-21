@@ -9,7 +9,7 @@ namespace {
         {
         case kj::Exception::Type::OVERLOADED:
         case kj::Exception::Type::DISCONNECTED:
-          return MachineStateClient::StateError::K_TIMEOUT; break;
+          return MachineStateClient::StateError::K_TIMEOUT;
         default:
           return MachineStateClient::StateError::K_INVALID_REQUEST;
         }
@@ -18,12 +18,12 @@ namespace {
 
 MachineStateClient::MachineStateClient(std::string path)
   : client(path),
-    timer(client.getIoProvider().getTimer()),
-    clientApplication(client.getMain<MachineStateManagement>())
+    clientApplication(client.getMain<MachineStateManagement>()),
+    timer(client.getIoProvider().getTimer())
 {}
 
 MachineStateClient::StateError
-MachineStateClient::registerClient(std::string appName, std::uint32_t timeout)
+MachineStateClient::Register(std::string appName, std::uint32_t timeout)
 {
   auto request = clientApplication.registerRequest();
   request.setAppName(appName);
@@ -39,7 +39,7 @@ MachineStateClient::registerClient(std::string appName, std::uint32_t timeout)
 }
 
 MachineStateClient::StateError
-MachineStateClient::getMachineState(std::uint32_t timeout, std::string& state)
+MachineStateClient::GetMachineState(std::uint32_t timeout, std::string& state)
 {
   auto request = clientApplication.getMachineStateRequest();
   auto promise = timer.timeoutAfter(timeout * kj::MILLISECONDS, request.send());
@@ -55,7 +55,7 @@ MachineStateClient::getMachineState(std::uint32_t timeout, std::string& state)
 }
 
 MachineStateClient::StateError
-MachineStateClient::setMachineState(std::string state, std::uint32_t timeout)
+MachineStateClient::SetMachineState(std::string state, std::uint32_t timeout)
 {
   auto request = clientApplication.setMachineStateRequest();
   request.setState(state);

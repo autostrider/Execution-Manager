@@ -21,21 +21,21 @@ public:
   {
     cout << "Hello from SimpleApp" << endl;
 
-    applState->reportApplicationState(
+    applState->ReportApplicationState(
       ApplicationState::K_INITIALIZING);
 
     cout << "K_INITIALIZING (0) sent" << endl;
 
     this_thread::sleep_for(seconds(1));
 
-    applState->reportApplicationState(
+    applState->ReportApplicationState(
       ApplicationState::K_RUNNING);
 
     cout << "K_RUNNING (1) sent" << endl;
 
     this_thread::sleep_for(seconds(1));
 
-    applState->reportApplicationState(
+    applState->ReportApplicationState(
       ApplicationState::K_SHUTTINGDOWN);
 
     cout << "K_SHUTTINGDOWN (2) sent" << endl;

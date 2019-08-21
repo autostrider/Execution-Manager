@@ -20,9 +20,9 @@ public:
   // K_TIMEOUT
   using StateError = MachineStateManagement::StateError;
 
-  StateError registerClient(std::string appName, std::uint32_t timeout);
-  StateError getMachineState(std::uint32_t timeout, std::string& state);
-  StateError setMachineState(std::string state, std::uint32_t timeout);
+  StateError Register(std::string appName, std::uint32_t timeout);
+  StateError GetMachineState(std::uint32_t timeout, std::string& state);
+  StateError SetMachineState(std::string state, std::uint32_t timeout);
 private:
   capnp::EzRpcClient client;
   MachineStateManagement::Client clientApplication;

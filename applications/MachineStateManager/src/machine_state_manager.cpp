@@ -22,7 +22,7 @@ int32_t MachineStateManager::start()
   constexpr int defaulTimeout = 3000;
 
   StateError result =
-    machineStateClient->registerClient(applicationName, defaulTimeout);
+    machineStateClient->Register(applicationName, defaulTimeout);
 
   if(StateError::K_SUCCESS == result)
   {
@@ -44,7 +44,7 @@ int32_t MachineStateManager::start()
       {
         string state;
         StateError result =
-          machineStateClient->getMachineState(defaulTimeout, state);
+          machineStateClient->GetMachineState(defaulTimeout, state);
 
         if(StateError::K_SUCCESS == result)
         {
@@ -60,7 +60,7 @@ int32_t MachineStateManager::start()
         string state = cli.substr(cli.find(' ')+1, cli.size() - cli.find(' '));
 
         StateError result =
-          machineStateClient->setMachineState(state, defaulTimeout);
+          machineStateClient->SetMachineState(state, defaulTimeout);
 
         if(StateError::K_SUCCESS == result)
         {

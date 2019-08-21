@@ -1,9 +1,9 @@
 @0xd020a01856bb8bcf;
 
-interface ApplicationStateManagement 
+interface ApplicationStateManagement
 {
 
-  enum ApplicationState 
+  enum ApplicationState
   {
     kInitializing @0;
     kRunning @1;

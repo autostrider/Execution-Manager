@@ -9,11 +9,10 @@ class ApplicationStateClient
 {
 public:
   ApplicationStateClient();
-  ~ApplicationStateClient() = default;
 
   using ApplicationState = ::ApplicationStateManagement::ApplicationState;
 
-  void reportApplicationState(ApplicationState state);
+  void ReportApplicationState(ApplicationState state);
 private:
   capnp::EzRpcClient client;
 };

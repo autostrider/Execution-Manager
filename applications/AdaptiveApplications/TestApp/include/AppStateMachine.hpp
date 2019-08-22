@@ -21,14 +21,28 @@ struct App : public tinyfsm::Fsm<App>
     virtual void entry(void) = 0;
     void exit(void){}
     virtual ~App(){}
+    static std::vector<double>& getData() {return  App::_rawData;}
 protected:
-    std::vector<double> _rawData;
-    std::vector<double> _filteredData;
+    static std::vector<double> _rawData;
+
     std::vector<double> readSensorData();
     double mean(const std::vector<double>& in);
-    auto getWindows(std::vector<double>& input, const size_t numberOfWindows, const size_t windowSize);
-    std::vector<double> filterData(std::vector<double>& input);
     void printVector(const std::vector<double>& vec);
+};
+
+struct kInitialize : public App
+{
+    virtual void entry() override;
+};
+
+struct kRun : public App
+{
+    virtual void entry() override;
+};
+
+struct kTerminate : public App
+{
+    virtual void entry() override;
 };
 
 #endif

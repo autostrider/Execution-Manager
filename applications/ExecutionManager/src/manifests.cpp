@@ -12,7 +12,7 @@ void MachineManifest::init()
 {
   loadHwConf();
   loadNetworkConf();
-  states = {MachineStates::kRunning};
+  states = {"init"};
   adaptiveModules = {};
 }
 
@@ -24,7 +24,7 @@ void MachineManifest::loadNetworkConf()
   for (ifaddrs *it = ifa; it != nullptr; it = it->ifa_next)
   {
     InterfaceConf interfaceConf;
-    interfaceConf.ifa_name = string{it->ifa_name};
+    interfaceConf.ifa_name = std::string{it->ifa_name};
     auto family = it->ifa_addr->sa_family;
 
     interfaceConf.family =
@@ -76,7 +76,7 @@ void MachineManifest::loadHwConf()
 #endif
   constexpr int procStatFileStartSkit{5};
   procStat.ignore(procStatFileStartSkit, ' ');  // skip cpu prefix
-  vector<size_t> times;
+  std::vector<size_t> times;
   for (size_t time; procStat >> time; times.push_back(time))
     ;
 
@@ -92,7 +92,7 @@ void MachineManifest::loadHwConf()
   float deltaIdle = idleTime - prevIdleTime;
   float deltaTotal = totalTime - prevTotalTime;
   float utilization = 100.0f * (1.0f - deltaIdle / deltaTotal);
-  hwConf.cpu = static_cast<uint8_t>(100) - utilization;
+  hwConf.cpu = 100 - static_cast<uint8_t>(utilization);
 }
 
 
@@ -150,37 +150,74 @@ void from_json(const json& jsonObject, MachineManifest& machineManifest)
     jsonObject.at("adaptiveModules").get_to(machineManifest.adaptiveModules);
 }
 
+void to_json(json& jsonObject, const MachineInstanceMode& machineInstanceMode)
+{
+  jsonObject = json{
+    {"Function_group", machineInstanceMode.functionGroup},
+    {"Mode", machineInstanceMode.mode}
+  };
+}
+
+void from_json(const json& jsonObject, MachineInstanceMode& machineInstanceMode)
+{
+  jsonObject.at("Function_group").get_to(machineInstanceMode.functionGroup);
+  jsonObject.at("Mode").get_to(machineInstanceMode.mode);
+}
+
+void to_json(json& jsonObject, const ModeDepStartupConfig& startupConf)
+{
+  jsonObject = json{
+    {"Mode_in_machine_instance_refs", startupConf.modes}
+  };
+}
+
+void from_json(const json& jsonObject, ModeDepStartupConfig& startupConf)
+{
+  jsonObject.at("Mode_in_machine_instance_refs").get_to(startupConf.modes);
+}
+
 /// Process serialization
 void to_json(json& jsonObject, const Process& process)
 {
     jsonObject = json{
-          {"process_name", process.name},
-          {"avail_start_machine_states", process.startMachineStates}
+          {"Process_name", process.name},
+          {"Mode_dependent_startup_configs", process.modeDependentStartupConf}
     };
 }
 
 /// Process deserialization
 void from_json(const json& jsonObject, Process& process)
 {
-    jsonObject.at("process_name").get_to(process.name);
-    jsonObject.at("avail_start_machine_states").get_to(process.startMachineStates);
+    jsonObject.at("Process_name").get_to(process.name);
+    jsonObject.at("Mode_dependent_startup_configs")
+      .get_to(process.modeDependentStartupConf);
+}
+
+void to_json(json& jsonObject, const Manifest& manifest)
+{
+  jsonObject = json{
+    {"Application_manifest_id", manifest.manifestId},
+    {"Process", manifest.processes}
+  };
+}
+
+void from_json(const json& jsonObject, Manifest& manifest)
+{
+  jsonObject.at("Application_manifest_id").get_to(manifest.manifestId);
+  jsonObject.at("Process").get_to(manifest.processes);
 }
 
 
 /// ApplicationManifest serialization
 void to_json(json& jsonObject, const ApplicationManifest& applicationManifest)
 {
-    jsonObject = json{
-            {"name", applicationManifest.name},
-            {"processes", applicationManifest.processes}
-    };
+    jsonObject = json{ {"Application_manifest", applicationManifest.manifest } };
 }
 
 /// ApplicationManifest deserialization
 void from_json(const json& jsonObject, ApplicationManifest& applicationManifest)
 {
-    jsonObject.at("name").get_to(applicationManifest.name);
-    jsonObject.at("processes").get_to(applicationManifest.processes);
+  jsonObject.at("Application_manifest").get_to(applicationManifest.manifest);
 }
 
-}
+} // namespace ExecutionManager

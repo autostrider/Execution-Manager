@@ -26,64 +26,7 @@ using std::ifstream;
 using MachineState = std::string;
 using ApplicationState = ::ApplicationStateManagement::ApplicationState;
 
-/**
- * @brief Struct, that holds network interface configuration.
- *
- * @field ifa_name: name of interface
- * @field family: family of interface
- */
-struct InterfaceConf
-{
-  std::string ifa_name;
-  std::string family;
-  char host[NI_MAXHOST];
-};
 
-/**
- * @brief Struct that holds current hardware configuration.
- *
- * @field ram: current available ram for running Adaptive Platform
- * @field cpu: available cpu power for running Adaptive Platform
- */
-struct HwConf
-{
-  uint64_t ram;
-  uint8_t cpu;
-};
-
-/**
- * @brief Struct that holds machine manifest configuration.
- *
- * network: vectors that holds all network interfaces
- * @field hwConf: hardware configuration for running Adaptive Platform
- * @field states: available machine states
- * @field adaptiveModules: all the available Adaptive Modules
- */
-struct MachineManifest
-{
- public:
-  std::vector<InterfaceConf> network;
-  HwConf hwConf;
-  std::vector<MachineState> states;
-  std::vector<std::string> adaptiveModules;
-
- public:
- /**
-  * @brief Method that generates machine manifest.
-  */
-  void init();
-
- private:
-  /**
-   * @brief Method that loads available network interfaces and its' configs.
-   */
-  void loadNetworkConf();
-
-  /**
-   * @brief Method that loads current hardware configuration
-   */
-  void loadHwConf();
-};
 
 struct MachineInstanceMode
 {
@@ -129,35 +72,6 @@ struct ApplicationManifest
     Manifest manifest;
 };
 
-/** 
- * @brief InterfaceConf serialization
- */
-void to_json(json& jsonObject, const InterfaceConf& interfaceConf);
-
-/**
- * @brief InterfaceConf  deserialization
- */
-void from_json(const json& jsonObject, InterfaceConf& interfaceConf);
-
-/**
- * @brief HwConf serialization
- */
-void to_json(json& jsonObject, const HwConf& hwConf);
-
-/** 
- * @brief HwConf  deserialization
- */
-void from_json(const json& jsonObject, HwConf& hwConf);
-
-/** 
- * @brief MachineState serialization
- */
-void to_json(json& jsonObject, const MachineManifest& machineManifest);
-
-/**
- * @brief MachineManifest deserialization
- */
-void from_json(const json& jsonObject, MachineManifest& machineManifest);
 
 void to_json(json& jsonObject, const MachineInstanceMode& machineInstanceMode);
 

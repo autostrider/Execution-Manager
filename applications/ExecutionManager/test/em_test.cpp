@@ -3,11 +3,8 @@
 #include <iostream>
 #include <string>
 
-// Dummy test case
-TEST(manifest_structures, json_serialization)
+TEST(SomeTest, DoesThis)
 {
-  //ExecutionManager::MachineManifest manif;
-  //manif.init();
-
-  //ASSERT_EQ(manif.hwConf.cpu, 97);
+  std::string testString = "Hello from Execution Manager";
+  EXPECT_EQ(testString, foo());
 }

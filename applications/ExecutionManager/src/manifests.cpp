@@ -50,7 +50,7 @@ void from_json(const json& jsonObject, Process& process)
     .get_to(process.modeDependentStartupConf);
 }
 
-void to_json(json& jsonObject, const Manifest& manifest)
+void to_json(json& jsonObject, const ApplicationManifestInternal& manifest)
 {
   jsonObject = json{
     {"Application_manifest_id", manifest.manifestId},
@@ -58,7 +58,7 @@ void to_json(json& jsonObject, const Manifest& manifest)
   };
 }
 
-void from_json(const json& jsonObject, Manifest& manifest)
+void from_json(const json& jsonObject, ApplicationManifestInternal& manifest)
 {
   jsonObject.at("Application_manifest_id").get_to(manifest.manifestId);
   jsonObject.at("Process").get_to(manifest.processes);
@@ -74,6 +74,58 @@ void to_json(json& jsonObject, const ApplicationManifest& applicationManifest)
 void from_json(const json& jsonObject, ApplicationManifest& applicationManifest)
 {
   jsonObject.at("Application_manifest").get_to(applicationManifest.manifest);
+}
+
+void to_json(json &jsonObject, const Mode &mode)
+{
+  jsonObject = json{
+    {"Mode", mode.mode}
+};
+}
+
+void from_json(const json &jsonObject, Mode &mode)
+{
+  jsonObject.at("Mode").get_to(mode.mode);
+}
+
+void to_json(json &jsonObject, const ModeDeclarationGroup& modeDeclGroup)
+{
+  jsonObject = json{
+    {"Function_group_name", modeDeclGroup.functionGroupName},
+    {"Mode_declarations", modeDeclGroup.modeDeclarations}
+};
+}
+
+void from_json(const json &jsonObject, ModeDeclarationGroup &modeDeclGroup)
+{
+  jsonObject.at("Function_group_name").get_to(modeDeclGroup.functionGroupName);
+  jsonObject.at("Mode_declarations").get_to(modeDeclGroup.modeDeclarations);
+}
+
+void to_json(json &jsonObject, const MachineManifestInternal &manifest)
+{
+  jsonObject = json{
+    {"Machine_manifest_id", manifest.manifestId},
+    {"Mode_declaration_group", manifest.modeDeclarationGroups}
+};
+}
+
+void from_json(const json &jsonObject, MachineManifestInternal &manifest)
+{
+  jsonObject.at("Machine_manifest_id").get_to(manifest.manifestId);
+  jsonObject.at("Mode_declaration_group").get_to(manifest.modeDeclarationGroups);
+}
+
+void to_json(json &jsonObject, const MachineManifest &manifest)
+{
+  jsonObject = json{
+    {"Machine_manifest", manifest.manifest}
+};
+}
+
+void from_json(const json &jsonObject, MachineManifest &manifest)
+{
+  jsonObject.at("Machine_manifest").get_to(manifest.manifest);
 }
 
 } // namespace ExecutionManager

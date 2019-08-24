@@ -57,9 +57,14 @@ private:
   std::vector<std::string> loadListOfApplications();
 
   /**
-   * @brief processManifests - loads manifests from corePath.
-   */
-  void processManifests();
+     * @brief processManifests - loads manifests from corePath.
+  */
+  void processApplicationManifests();
+
+  /**
+   * @brief Process machine manifest and loads available machine states.
+  */
+  void processMachineManifest();
   /**
    * @brief Starts given application and stores information
    *        about it in activeApplications.
@@ -113,7 +118,7 @@ private:
   /**
    * @brief Vector that holds state transitions.
    */
-  const static std::vector<MachineState> transition;
+  std::vector<MachineState> transition;
 
   std::string machineStateClientAppName;
 };

@@ -18,12 +18,13 @@ using std::string;
 const string ExecutionManager::corePath =
   string{"./bin/applications/"};
 
-const std::vector<MachineState> ExecutionManager::transition =
-{"init", "running", "shutdown"};
+//const std::vector<MachineState> ExecutionManager::transition =
+//{"init", "running", "shutdown"};
 
 int32_t ExecutionManager::start()
 {
-  processManifests();
+  processMachineManifest();
+  processApplicationManifests();
 
   for (const auto& state: transition)
   {
@@ -123,7 +124,7 @@ std::vector<std::string> ExecutionManager::loadListOfApplications()
   return fileNames;
 }
 
-void ExecutionManager::processManifests()
+void ExecutionManager::processApplicationManifests()
 {
   
   const auto& applicationNames = loadListOfApplications();
@@ -144,14 +145,45 @@ void ExecutionManager::processManifests()
       {
         for (const auto& mode: conf.modes)
         {
-          if (mode.functionGroup != "MachineState")
+          if (mode.functionGroup != "MachineState" ||
+              allowedApplicationForState.find(mode.mode)
+                == allowedApplicationForState.cend())
+          {
+            std::cout << mode.mode << std::endl;
             continue;
+          }
 
           allowedApplicationForState[mode.mode].push_back({manifest.manifest.manifestId, process.name});
         }
       }
     }
 
+  }
+}
+
+void ExecutionManager::processMachineManifest()
+{
+  static std::string manifestPath = "../applications/machine_manifest.json";
+
+  ifstream data{manifestPath};
+  json manifestData;
+
+  data >> manifestData;
+
+  MachineManifest manifest = manifestData;
+
+  for (const auto& modeDeclGroups : manifest.manifest.modeDeclarationGroups)
+  {
+    if (modeDeclGroups.functionGroupName != "MachineState")
+    {
+      continue;
+    }
+
+    for (const auto& mode: modeDeclGroups.modeDeclarations)
+    {
+      allowedApplicationForState[mode.mode] = {};
+      transition.emplace_back(mode.mode);
+    }
   }
 }
 

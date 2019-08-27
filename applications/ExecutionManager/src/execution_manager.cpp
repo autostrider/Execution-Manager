@@ -52,8 +52,8 @@ void ExecutionManager::killProcessesForState()
 {
   auto allowedApps = allowedApplicationForState.find(currentState);
 
-  for (auto app = activeApplications.cbegin();
-       app != activeApplications.cend();)
+  for (auto app = m_activeApplications.cbegin();
+       app != m_activeApplications.cend();)
   {
     if (allowedApps == allowedApplicationForState.cend() ||
         processToBeKilled(app->first, allowedApps->second))
@@ -93,7 +93,6 @@ std::vector<string> ExecutionManager::loadListOfApplications()
 
   for (struct dirent *drnt = readdir(dp); drnt != nullptr; drnt = readdir(dp))
   {
-    // check for "." and ".." files in directory, we don't need them
     if (drnt->d_name == std::string{"."} ||
         drnt->d_name == std::string{".."})
     {
@@ -122,7 +121,7 @@ void ExecutionManager::processApplicationManifests()
     ifstream data{file};
 
     data >> content;
-    ApplicationManifest manifest = content;
+    ApplicationManifest manifest = content.get<ApplicationManifest>();
 
     for (const auto& process: manifest.manifest.processes)
     {
@@ -131,8 +130,8 @@ void ExecutionManager::processApplicationManifests()
         for (const auto& mode: conf.modes)
         {
           if (mode.functionGroup != machineStateFunctionGroup ||
-              allowedApplicationForState.find(mode.mode)
-                == allowedApplicationForState.cend())
+              m_allowedApplicationForState.find(mode.mode)
+                == m_allowedApplicationForState.cend())
           {
             std::cout << mode.mode << std::endl;
             continue;
@@ -156,7 +155,7 @@ void ExecutionManager::processMachineManifest()
 
   data >> manifestData;
 
-  MachineManifest manifest = manifestData;
+  MachineManifest manifest = manifestData.get<MachineManifest>();
 
   for (const auto& modeDeclGroups : manifest.manifest.modeDeclarationGroups)
   {
@@ -167,8 +166,8 @@ void ExecutionManager::processMachineManifest()
 
     for (const auto& mode: modeDeclGroups.modeDeclarations)
     {
-      allowedApplicationForState[mode.mode] = {};
-      transition.emplace_back(mode.mode);
+      m_allowedApplicationForState[mode.mode] = {};
+      m_machineManifestStates.emplace_back(mode.mode);
     }
   }
 }
@@ -196,7 +195,7 @@ void ExecutionManager::startApplication(const ProcessName& process)
     }
   } else {
     // parent process
-    activeApplications.insert({process.processName, processId});
+    m_activeApplications.insert({process.processName, processId});
   }
 
 }

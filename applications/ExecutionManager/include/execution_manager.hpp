@@ -60,9 +60,6 @@ private:
   */
   void processApplicationManifests();
 
-  /**
-   * @brief Process machine manifest and loads available machine states.
-  */
   void processMachineManifest();
   /**
    * @brief Starts given application and stores information
@@ -105,23 +102,21 @@ private:
   /** 
    * @brief structure that holds application and required processes.
    */
-  std::map<MachineState, pid_t> activeApplications;
+  std::map<MachineState, pid_t> m_activeApplications;
 
   /**
    * @brief Structure for application that can run in certain state
    * vector consists of applicationId (name) and string param - executable name.
    */
-  std::map<MachineState, std::vector<ProcessName>> allowedApplicationForState;
-
+  std::map<MachineState, std::vector<ProcessName>> m_allowedApplicationForState;
   /**
    * brief Current machine state.
    */
-  MachineState currentState = "init";
-
+  MachineState m_currentState;
   /**
    * @brief Vector that holds state transitions.
    */
-  std::vector<MachineState> transition;
+  std::vector<MachineState> m_machineManifestStates;
 
   std::string machineStateClientAppName;
 };

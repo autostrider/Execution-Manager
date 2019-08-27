@@ -123,12 +123,19 @@ void ExecutionManager::processManifests()
     {
       for (const auto& conf: process.modeDependentStartupConf)
       {
+        for (const auto& opt: conf.startupOptions)
+        {
+          std::cout << opt.optionArg << std::endl;
+        }
         for (const auto& mode: conf.modes)
         {
           if (mode.functionGroup != "MachineState")
             continue;
-          std::cout<<"pushing to allowedApplicationForState  process.name =" <<  process.name << std::endl;
-          allowedApplicationForState[mode.mode].push_back({manifest.manifest.manifestId, process.name});
+
+          allowedApplicationForState[mode.mode]
+              .push_back({manifest.manifest.manifestId,
+                          process.name,
+                          conf.startupOptions});
         }
       }
     }
@@ -136,7 +143,7 @@ void ExecutionManager::processManifests()
   }
 }
 
-void ExecutionManager::startApplication(const ProcessName& process)
+void ExecutionManager::startApplication(const ProcessInfo& process)
 {
   pid_t processId = fork();
 
@@ -145,7 +152,22 @@ void ExecutionManager::startApplication(const ProcessName& process)
     // child process
     auto processPath = corePath + process.applicationName + "/processes/" + process.processName;
 
-    int res = execl(processPath.c_str(), process.processName.c_str(), nullptr);
+    // build argv command line arguments
+    // const_cast required here, because it doesn't work in other way.
+    std::vector<char*> argv; // = {const_cast<char*>(process.processName.c_str())};
+    std::transform(process.startOptions.cbegin(),
+                   process.startOptions.cend(),
+                   std::back_inserter(argv),
+                   [](const StartupOption& option)
+    { return const_cast<char*>(option.makeCommandLineOption().c_str()); });
+
+    // insert executable name as argv[0]
+    argv.emplace(argv.begin(), const_cast<char*>(process.processName.c_str()));
+
+    // terminating sign
+    argv.push_back(nullptr);
+
+    int res = execv(processPath.c_str(), argv.data());
 
     if (res)
     {

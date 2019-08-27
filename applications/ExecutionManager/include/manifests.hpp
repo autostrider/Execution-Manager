@@ -98,18 +98,20 @@ enum class StartupOptionKind
   commandLineLongForm
 };
 
-struct StartupOptions
+struct StartupOption
 {
   StartupOptionKind optionKind;
   std::string optionName;
   std::string optionArg;
+
+  std::string makeCommandLineOption() const;
 };
 
 struct ModeDepStartupConfig
 {
     std::vector<MachineInstanceMode> modes;
 
-    std::vector<StartupOptions> startupOptions;
+    std::vector<StartupOption> startupOptions;
 };
 
 /**
@@ -186,9 +188,9 @@ NLOHMANN_JSON_SERIALIZE_ENUM(StartupOptionKind, {
     {StartupOptionKind::commandLineLongForm, "commandLineLongForm"}
 })
 
-void to_json(json& jsonObject, const StartupOptions& startupOptions);
+void to_json(json& jsonObject, const StartupOption& startupOptions);
 
-void from_json(const json& jsonObject, StartupOptions& startupOptions);
+void from_json(const json& jsonObject, StartupOption& startupOptions);
 
 void to_json(json& jsonObject, const ModeDepStartupConfig& startupConf);
 

@@ -160,7 +160,7 @@ void from_json(const json& jsonObject, MachineInstanceMode& machineInstanceMode)
   jsonObject.at("Mode").get_to(machineInstanceMode.mode);
 }
 
-void to_json(json &jsonObject, const StartupOptions &startupOptions)
+void to_json(json &jsonObject, const StartupOption &startupOptions)
 {
   jsonObject = json{
   {"Option_kind", startupOptions.optionKind},
@@ -169,7 +169,7 @@ void to_json(json &jsonObject, const StartupOptions &startupOptions)
   };
 }
 
-void from_json(const json &jsonObject, StartupOptions &startupOptions)
+void from_json(const json &jsonObject, StartupOption &startupOptions)
 {
   jsonObject.at("Option_kind").get_to(startupOptions.optionKind);
   jsonObject.at("Option_name").get_to(startupOptions.optionName);
@@ -230,6 +230,25 @@ void to_json(json& jsonObject, const ApplicationManifest& applicationManifest)
 void from_json(const json& jsonObject, ApplicationManifest& applicationManifest)
 {
   jsonObject.at("Application_manifest").get_to(applicationManifest.manifest);
+}
+
+std::string StartupOption::makeCommandLineOption() const
+{
+  std::string res = optionName;
+
+  switch (optionKind) {
+    case StartupOptionKind::commandLineShortForm:
+      res = "-" + res +
+            (optionArg == std::string{""} ? "" : " " + optionArg);
+      break;
+    case StartupOptionKind::commandLineLongForm:
+      res = "--" + res +
+            (optionArg == std::string{""} ? "" : "=" + optionArg);
+    default:
+      break;
+  }
+  std::cout << res << std::endl;
+  return res;
 }
 
 } // namespace ExecutionManager

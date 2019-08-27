@@ -41,12 +41,13 @@ private:
   using StateError = ::MachineStateManagement::StateError;
 
   /**
-   * @brief Struct for process name and application it belongs to.
-   */
-  struct ProcessName
+     * @brief Struct for process name and application it belongs to.
+  */
+  struct ProcessInfo
   {
     std::string applicationName;
     std::string processName;
+    std::vector<StartupOption> startOptions;
   };
 
   /**
@@ -62,9 +63,9 @@ private:
   /**
    * @brief Starts given application and stores information
    *        about it in activeApplications.
-   * @param process: Application to start.
+   * @param process: Information about process to start.
    */
-  void startApplication(const ProcessName& process);
+  void startApplication(const ProcessInfo& process);
 
   /**
    * @brief starts all application that support current state.
@@ -101,15 +102,15 @@ private:
   std::map<applicationId, pid_t> activeApplications;
 
   /**
-   * @brief Structure for application that can run in certain state
    * vector consists of applicationId (name) and string param - executable name.
+   * @brief Structure for application that can run in certain state
    */
-  std::map<MachineState, std::vector<ProcessName>> allowedApplicationForState;
+  std::map<MachineState, std::vector<ProcessInfo>> allowedApplicationForState;
 
   /**
    * brief Current machine state.
    */
-  MachineState currentState = "init";
+  MachineState currentState;
 
   /**
    * @brief Vector that holds state transitions.

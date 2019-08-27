@@ -91,9 +91,25 @@ struct MachineInstanceMode
     std::string mode;
 };
 
+enum class StartupOptionKind
+{
+  commandLineSimpleForm,
+  commandLineShortForm,
+  commandLineLongForm
+};
+
+struct StartupOptions
+{
+  StartupOptionKind optionKind;
+  std::string optionName;
+  std::string optionArg;
+};
+
 struct ModeDepStartupConfig
 {
     std::vector<MachineInstanceMode> modes;
+
+    std::vector<StartupOptions> startupOptions;
 };
 
 /**
@@ -163,6 +179,16 @@ void to_json(json& jsonObject, const MachineInstanceMode& machineInstanceMode);
 
 void
 from_json(const json& jsonObject, MachineInstanceMode& machineInstanceMode);
+
+NLOHMANN_JSON_SERIALIZE_ENUM(StartupOptionKind, {
+    {StartupOptionKind::commandLineSimpleForm, "commandLineSimpleForm"},
+    {StartupOptionKind::commandLineShortForm, "commandLineShortForm"},
+    {StartupOptionKind::commandLineLongForm, "commandLineLongForm"}
+})
+
+void to_json(json& jsonObject, const StartupOptions& startupOptions);
+
+void from_json(const json& jsonObject, StartupOptions& startupOptions);
 
 void to_json(json& jsonObject, const ModeDepStartupConfig& startupConf);
 

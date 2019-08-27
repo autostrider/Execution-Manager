@@ -1,0 +1,21 @@
+{
+  "Machine_manifest": {
+    "Machine_manifest_id": "Machine",
+    "Mode_declaration_group": [
+      {
+        "Function_group_name": "MachineState",
+        "Mode_declarations": [
+          {
+            "Mode": "Startup"
+          },
+          {
+            "Mode": "Running"
+          },
+          {
+            "Mode": "Shutdown"
+          }
+        ]
+      }
+    ]
+  }
+}

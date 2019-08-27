@@ -160,9 +160,26 @@ void from_json(const json& jsonObject, MachineInstanceMode& machineInstanceMode)
   jsonObject.at("Mode").get_to(machineInstanceMode.mode);
 }
 
+void to_json(json &jsonObject, const StartupOptions &startupOptions)
+{
+  jsonObject = json{
+  {"Option_kind", startupOptions.optionKind},
+  {"Option_name", startupOptions.optionName},
+  {"Option_arg", startupOptions.optionArg}
+  };
+}
+
+void from_json(const json &jsonObject, StartupOptions &startupOptions)
+{
+  jsonObject.at("Option_kind").get_to(startupOptions.optionKind);
+  jsonObject.at("Option_name").get_to(startupOptions.optionName);
+  jsonObject.at("Option_arg").get_to(startupOptions.optionArg);
+}
+
 void to_json(json& jsonObject, const ModeDepStartupConfig& startupConf)
 {
   jsonObject = json{
+    {"Startup_options", startupConf.startupOptions},
     {"Mode_in_machine_instance_refs", startupConf.modes}
   };
 }
@@ -170,6 +187,7 @@ void to_json(json& jsonObject, const ModeDepStartupConfig& startupConf)
 void from_json(const json& jsonObject, ModeDepStartupConfig& startupConf)
 {
   jsonObject.at("Mode_in_machine_instance_refs").get_to(startupConf.modes);
+  jsonObject.at("Startup_options").get_to(startupConf.startupOptions);
 }
 
 // Process serialization
@@ -215,3 +233,5 @@ void from_json(const json& jsonObject, ApplicationManifest& applicationManifest)
 }
 
 } // namespace ExecutionManager
+
+

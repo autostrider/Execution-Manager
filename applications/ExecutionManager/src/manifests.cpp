@@ -1,5 +1,10 @@
 #include "manifests.hpp"
 
+#include <json.hpp>
+#include <application_state_client.h>
+
+using nlohmann::json;
+
 namespace ExecutionManager
 {
 
@@ -19,7 +24,7 @@ void MachineManifest::loadNetworkConf()
   for (ifaddrs *it = ifa; it != nullptr; it = it->ifa_next)
   {
     InterfaceConf interfaceConf;
-    interfaceConf.ifa_name = string{it->ifa_name};
+    interfaceConf.ifa_name = std::string{it->ifa_name};
     auto family = it->ifa_addr->sa_family;
 
     interfaceConf.family =
@@ -70,8 +75,8 @@ void MachineManifest::loadHwConf()
   ifstream procStat("/proc/stat");
 #endif
   constexpr int procStatFileStartSkit{5};
-  procStat.ignore(procStatFileStartSkit, ' '); // skip cpu prefix
-  vector<size_t> times;
+  procStat.ignore(procStatFileStartSkit, ' ');  // skip cpu prefix
+  std::vector<size_t> times;
   for (size_t time; procStat >> time; times.push_back(time))
     ;
 
@@ -87,11 +92,12 @@ void MachineManifest::loadHwConf()
   float deltaIdle = idleTime - prevIdleTime;
   float deltaTotal = totalTime - prevTotalTime;
   float utilization = 100.0f * (1.0f - deltaIdle / deltaTotal);
-  hwConf.cpu = static_cast<uint8_t>(100) - utilization;
+  hwConf.cpu = 100 - static_cast<uint8_t>(utilization);
 }
 
-/// InterfaceConf serialization
-void to_json(json &jsonObject, const InterfaceConf &interfaceConf)
+
+// InterfaceConf serialization
+void to_json(json& jsonObject, const InterfaceConf& interfaceConf)
 {
   jsonObject = json{
       {"ifa_name", interfaceConf.ifa_name},
@@ -99,31 +105,30 @@ void to_json(json &jsonObject, const InterfaceConf &interfaceConf)
       {"host", interfaceConf.host}};
 }
 
-/// InterfaceConf  deserialization
-void from_json(const json &jsonObject, InterfaceConf &interfaceConf)
+// InterfaceConf  deserialization
+void from_json(const json& jsonObject, InterfaceConf& interfaceConf)
 {
   jsonObject.at("ifa_name").get_to(interfaceConf.ifa_name);
   jsonObject.at("family").get_to(interfaceConf.family);
   jsonObject.at("host").get_to(interfaceConf.host);
 }
-
-/// HwConf serialization
-void to_json(json &jsonObject, const HwConf &hwConf)
+// HwConf serialization
+void to_json(json& jsonObject, const HwConf& hwConf)
 {
   jsonObject = json{
       {"ram", hwConf.ram},
       {"cpu", hwConf.cpu}};
 }
 
-/// HwConf  deserialization
-void from_json(const json &jsonObject, HwConf &hwConf)
+// HwConf  deserialization
+void from_json(const json& jsonObject, HwConf& hwConf)
 {
   jsonObject.at("ram").get_to(hwConf.ram);
   jsonObject.at("cpu").get_to(hwConf.cpu);
 }
 
-/// MachineState serialization
-void to_json(json &jsonObject, const MachineManifest &machineManifest)
+// MachineState serialization
+void to_json(json& jsonObject, const MachineManifest& machineManifest)
 {
   jsonObject = json{
       {"network", machineManifest.network},
@@ -132,8 +137,8 @@ void to_json(json &jsonObject, const MachineManifest &machineManifest)
       {"adaptiveModules", machineManifest.adaptiveModules}};
 }
 
-/// MachineManifest deserialization
-void from_json(const json &jsonObject, MachineManifest &machineManifest)
+// MachineManifest deserialization
+void from_json(const json& jsonObject, MachineManifest& machineManifest)
 {
   jsonObject.at("network").get_to(machineManifest.network);
   jsonObject.at("hwConf").get_to(machineManifest.hwConf);
@@ -141,34 +146,72 @@ void from_json(const json &jsonObject, MachineManifest &machineManifest)
   jsonObject.at("adaptiveModules").get_to(machineManifest.adaptiveModules);
 }
 
-/// Process serialization
-void to_json(json &jsonObject, const Process &process)
+void to_json(json& jsonObject, const MachineInstanceMode& machineInstanceMode)
 {
   jsonObject = json{
-      {"process_name", process.name},
-      {"avail_start_machine_states", process.startMachineStates}};
+    {"Function_group", machineInstanceMode.functionGroup},
+    {"Mode", machineInstanceMode.mode}
+  };
 }
 
-/// Process deserialization
-void from_json(const json &jsonObject, Process &process)
+void from_json(const json& jsonObject, MachineInstanceMode& machineInstanceMode)
 {
-  jsonObject.at("process_name").get_to(process.name);
-  jsonObject.at("avail_start_machine_states").get_to(process.startMachineStates);
+  jsonObject.at("Function_group").get_to(machineInstanceMode.functionGroup);
+  jsonObject.at("Mode").get_to(machineInstanceMode.mode);
 }
 
-/// ApplicationManifest serialization
-void to_json(json &jsonObject, const ApplicationManifest &applicationManifest)
+void to_json(json& jsonObject, const ModeDepStartupConfig& startupConf)
 {
   jsonObject = json{
-      {"name", applicationManifest.name},
-      {"processes", applicationManifest.processes}};
+    {"Mode_in_machine_instance_refs", startupConf.modes}
+  };
 }
 
-/// ApplicationManifest deserialization
-void from_json(const json &jsonObject, ApplicationManifest &applicationManifest)
+void from_json(const json& jsonObject, ModeDepStartupConfig& startupConf)
 {
-  jsonObject.at("name").get_to(applicationManifest.name);
-  jsonObject.at("processes").get_to(applicationManifest.processes);
+  jsonObject.at("Mode_in_machine_instance_refs").get_to(startupConf.modes);
+}
+
+// Process serialization
+void to_json(json& jsonObject, const Process& process)
+{
+  jsonObject = json{
+      {"Process_name", process.name},
+      {"Mode_dependent_startup_configs", process.modeDependentStartupConf}};
+}
+
+// Process deserialization
+void from_json(const json& jsonObject, Process& process)
+{
+  jsonObject.at("Process_name").get_to(process.name);
+  jsonObject.at("Mode_dependent_startup_configs")
+    .get_to(process.modeDependentStartupConf);
+}
+
+void to_json(json& jsonObject, const Manifest& manifest)
+{
+  jsonObject = json{
+    {"Application_manifest_id", manifest.manifestId},
+    {"Process", manifest.processes}
+  };
+}
+
+void from_json(const json& jsonObject, Manifest& manifest)
+{
+  jsonObject.at("Application_manifest_id").get_to(manifest.manifestId);
+  jsonObject.at("Process").get_to(manifest.processes);
+}
+
+// ApplicationManifest serialization
+void to_json(json& jsonObject, const ApplicationManifest& applicationManifest)
+{
+  jsonObject = json{ {"Application_manifest", applicationManifest.manifest } };
+}
+
+// ApplicationManifest deserialization
+void from_json(const json& jsonObject, ApplicationManifest& applicationManifest)
+{
+  jsonObject.at("Application_manifest").get_to(applicationManifest.manifest);
 }
 
 } // namespace ExecutionManager

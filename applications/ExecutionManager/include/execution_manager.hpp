@@ -1,7 +1,6 @@
 #ifndef EXECUTION_MANAGER_HPP
 #define EXECUTION_MANAGER_HPP
 
-#include <iostream>
 #include <vector>
 #include <map>
 #include <string>
@@ -24,40 +23,60 @@ namespace ExecutionManager
 {
 
 using applicationId = std::string;
+using MachineState = std::string;
+using std::pair;
 
 struct ApplicationManifest;
 
 class ExecutionManager final: public ExecutionManagement::Server
 {
 public:
+  ExecutionManager() = default;
+
   /**
-    * @brief Main method of Execution manager.
-    */
+   * @brief Main method of Execution manager.
+   */
   std::int32_t start();
 private:
   using ApplicationState = ::ApplicationStateManagement::ApplicationState;
   using StateError = ::MachineStateManagement::StateError;
 
   /**
-   * @brief Loads all adaptive applications from corePath.
-   * @param fileNames: output parameter, where all the applications
-   *                   names are stored.
+   * @brief Struct for process name and application it belongs to.
    */
-  void loadListOfApplications(std::vector<std::string>& fileNames);
+  struct ProcessName
+  {
+    std::string applicationName;
+    std::string processName;
+  };
+
+  /**
+   * @brief Loads all adaptive applications from corePath.
+   * @return Vector containing names of applications that were found in corePath.   
+   */
+  std::vector<std::string> loadListOfApplications();
 
   /**
    * @brief processManifests - loads manifests from corePath.
-   * @return vector of Application manifest for available
-   *          applications respectively.
    */
-  std::vector<ApplicationManifest> processManifests();
+  void processManifests();
   /**
    * @brief Starts given application and stores information
    *        about it in activeApplications.
-   * @param manifest: Application manifest of application to start.
+   * @param process: Application to start.
    */
-  void startApplication(const ApplicationManifest &manifest);
+  void startApplication(const ProcessName& process);
 
+  /**
+   * @brief starts all application that support current state.
+   */
+  void startApplicationsForState();
+
+  /**
+   * @brief kill all processes that doesn't support current state.
+   */
+  void killProcessesForState();
+ 
   ::kj::Promise<void>
   reportApplicationState(ReportApplicationStateContext context) override;
 
@@ -70,14 +89,31 @@ private:
   ::kj::Promise<void>
   setMachineState(SetMachineStateContext context) override;
 private:
-
-  /// \brief Hardcoded path to folder with adaptive applications.
+  /** 
+   * @brief Hardcoded path to folder with adaptive applications.
+   */
   const static std::string corePath;
 
-   /// \brief structure that holds application and required processes.
-  std::map<applicationId, std::vector<pid_t>> activeApplications;
+  /** 
+   * @brief structure that holds application and required processes.
+   */
+  std::map<applicationId, pid_t> activeApplications;
 
-  std::string machineState{"kRunning"};
+  /**
+   * @brief Structure for application that can run in certain state
+   * vector consists of applicationId (name) and string param - executable name.
+   */
+  std::map<MachineState, std::vector<ProcessName>> allowedApplicationForState;
+
+  /**
+   * brief Current machine state.
+   */
+  MachineState currentState = "init";
+
+  /**
+   * @brief Vector that holds state transitions.
+   */
+  const static std::vector<MachineState> transition;
 
   std::string machineStateClientAppName;
 };

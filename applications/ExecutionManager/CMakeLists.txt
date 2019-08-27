@@ -17,6 +17,7 @@ target_link_libraries(em
       nlohmann_json::nlohmann_json
     PUBLIC
       gen::execution_management
+      api::application_state_client
       CapnProto::capnp-rpc
 )
 

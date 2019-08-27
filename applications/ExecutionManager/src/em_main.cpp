@@ -1,9 +1,10 @@
-#include <iostream>
 #include "execution_manager.hpp"
+
+#include <iostream>
 
 int main(int argc, char **argv)
 {
-  ExecutionManager::ExecutionManager em;
+  ExecutionManager::ExecutionManager manager;
 
-  return em.start();
+  return manager.start();
 }

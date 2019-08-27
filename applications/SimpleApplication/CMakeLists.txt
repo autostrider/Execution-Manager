@@ -10,6 +10,7 @@ add_executable(simpleApp ${SIMPLE_SRC})
 target_link_libraries(simpleApp
   PRIVATE
     api::application_state_client
+    nlohmann_json::nlohmann_json
 )
 
 target_compile_options(simpleApp PRIVATE -Werror -Wall -fdiagnostics-color=always)

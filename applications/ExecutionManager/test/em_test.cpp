@@ -111,8 +111,8 @@ TEST(SerializationTest, machineManifestTest)
     "}"
   "}";
 
-  MachineManifest deserializaedManifest = json::parse(testJsonResult);
+  MachineManifest deserializedManifest = json::parse(testJsonResult);
 
   ASSERT_EQ(manifestSerialized.dump(), testJsonResult);
-  ASSERT_EQ(deserializaedManifest, manifestSerialized);
+  ASSERT_EQ(deserializedManifest, manifestSerialized);
 }

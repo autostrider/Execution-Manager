@@ -100,10 +100,12 @@ private:
    */
   const static std::string corePath;
 
+  const static std::string machineStateFunctionGroup;
+
   /** 
    * @brief structure that holds application and required processes.
    */
-  std::map<applicationId, pid_t> activeApplications;
+  std::map<MachineState, pid_t> activeApplications;
 
   /**
    * @brief Structure for application that can run in certain state

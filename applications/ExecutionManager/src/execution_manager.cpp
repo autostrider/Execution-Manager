@@ -18,8 +18,8 @@ using std::string;
 const string ExecutionManager::corePath =
   string{"./bin/applications/"};
 
-//const std::vector<MachineState> ExecutionManager::transition =
-//{"init", "running", "shutdown"};
+const std::string ExecutionManager::machineStateFunctionGroup =
+    "MachineState";
 
 int32_t ExecutionManager::start()
 {
@@ -63,7 +63,8 @@ void ExecutionManager::startApplicationsForState()
 
   for (const auto& executableToStart: allowedApps)
   {
-    if (activeApplications.find(executableToStart.processName) != activeApplications.cend())
+    if (activeApplications.find(executableToStart.processName) !=
+        activeApplications.cend())
     {
       continue;
     }
@@ -82,7 +83,8 @@ void ExecutionManager::killProcessesForState()
 {
   const auto& allowedApps = allowedApplicationForState[currentState];
 
-  for (auto app = activeApplications.cbegin(); app != activeApplications.cend();)
+  for (auto app = activeApplications.cbegin();
+       app != activeApplications.cend();)
   {
     if (std::find_if(allowedApps.cbegin(),
                      allowedApps.cend(),
@@ -113,7 +115,11 @@ std::vector<std::string> ExecutionManager::loadListOfApplications()
   for (struct dirent *drnt = readdir(dp); drnt != nullptr; drnt = readdir(dp))
   {
     // check for "." and ".." files in directory, we don't need them
-    if (!strcmp(drnt->d_name, ".") || !strcmp(drnt->d_name, "..")) continue;
+    if (drnt->d_name == std::string{"."} ||
+        drnt->d_name == std::string{".."})
+    {
+      continue;
+    }
 
     fileNames.emplace_back(drnt->d_name);
 
@@ -145,7 +151,7 @@ void ExecutionManager::processApplicationManifests()
       {
         for (const auto& mode: conf.modes)
         {
-          if (mode.functionGroup != "MachineState" ||
+          if (mode.functionGroup != machineStateFunctionGroup ||
               allowedApplicationForState.find(mode.mode)
                 == allowedApplicationForState.cend())
           {
@@ -153,7 +159,8 @@ void ExecutionManager::processApplicationManifests()
             continue;
           }
 
-          allowedApplicationForState[mode.mode].push_back({manifest.manifest.manifestId, process.name});
+          allowedApplicationForState[mode.mode]
+              .push_back({manifest.manifest.manifestId, process.name});
         }
       }
     }
@@ -163,7 +170,8 @@ void ExecutionManager::processApplicationManifests()
 
 void ExecutionManager::processMachineManifest()
 {
-  static std::string manifestPath = "../applications/machine_manifest.json";
+  static const std::string manifestPath =
+      "../applications/ExecutionManager/machine_manifest.json";
 
   ifstream data{manifestPath};
   json manifestData;
@@ -174,7 +182,7 @@ void ExecutionManager::processMachineManifest()
 
   for (const auto& modeDeclGroups : manifest.manifest.modeDeclarationGroups)
   {
-    if (modeDeclGroups.functionGroupName != "MachineState")
+    if (modeDeclGroups.functionGroupName != machineStateFunctionGroup)
     {
       continue;
     }
@@ -194,7 +202,10 @@ void ExecutionManager::startApplication(const ProcessName& process)
   if (!processId)
   {
     // child process
-    auto processPath = corePath + process.applicationName + "/processes/" + process.processName;
+    const auto processPath = corePath
+                     + process.applicationName
+                     + "/processes/"
+                     + process.processName;
 
     int res = execl(processPath.c_str(), process.processName.c_str(), nullptr);
 

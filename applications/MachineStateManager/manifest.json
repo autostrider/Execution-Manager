@@ -1,6 +1,6 @@
 {
   "Application_manifest": {
-      "Application_manifest_id": "TestApp2",
+      "Application_manifest_id": "MachineStateManager",
       "Process": [
           {
               "Mode_dependent_startup_configs": [
@@ -9,32 +9,16 @@
                           {
                               "Function_group": "MachineState",
                               "Mode": "init"
-                          }
-                      ]
-                  }
-              ],
-              "Process_name": "proc2"
-          },
-          {
-            "Mode_dependent_startup_configs": [
-                {
-                    "Mode_in_machine_instance_refs": [
-                        {
+                          },
+                          {
                             "Function_group": "MachineState",
                             "Mode": "running"
                         }
-                    ]
-                }
-            ],
-            "Process_name": "proc3"
-        }
+                      ]
+                  }
+              ],
+              "Process_name": "msm"
+          }
       ]
   }
 }
-
-
-
-
-
-
-

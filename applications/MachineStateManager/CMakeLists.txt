@@ -11,12 +11,22 @@ set(MSM_INCLUDE ${CMAKE_CURRENT_SOURCE_DIR}/include)
 add_executable(msm src/msm_main.cpp ${MSM_SRC})
 
 target_link_libraries(msm
-  PUBLIC
-      api::application_state_client
+    PUBLIC
       api::machine_state_client
+      CapnProto::capnp-rpc
 )
 
 target_include_directories(msm
-  PUBLIC
-    ${MSM_INCLUDE}
+    PUBLIC
+      ${MSM_INCLUDE}
+)
+
+target_compile_options(msm PRIVATE -Werror -Wall -fdiagnostics-color=always)
+target_compile_features(msm PRIVATE cxx_std_14)
+
+add_adaptive_application(
+  NAME
+    MachineStateManager
+  PROCESSES
+    msm
 )

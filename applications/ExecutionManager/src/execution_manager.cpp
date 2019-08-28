@@ -6,8 +6,6 @@
 #include <exception>
 #include <thread>
 #include <signal.h>
-
-
 #include <iostream>
 
 
@@ -15,13 +13,15 @@ namespace ExecutionManager
 {
 
 using std::runtime_error;
+using std::string;
 
-const std::string ExecutionManager::corePath = "../applications/AdaptiveApplications/";
+const string ExecutionManager::corePath =
+  string{"./bin/applications/"};
 
 const std::vector<MachineState> ExecutionManager::transition =
 {"init", "running", "shutdown"};
 
-int ExecutionManager::start()
+int32_t ExecutionManager::start()
 {
   processManifests();
 
@@ -36,6 +36,21 @@ int ExecutionManager::start()
     startApplicationsForState();
 
     std::this_thread::sleep_for(std::chrono::seconds{2});
+  }
+
+  try
+  {
+    capnp::EzRpcServer server(kj::heap<ExecutionManager>(),
+                              "unix:/tmp/execution_management");
+    auto &waitScope = server.getWaitScope();
+
+    std::cout << "Execution Manager started.." << std::endl;
+
+    kj::NEVER_DONE.wait(waitScope);
+  }
+  catch (const kj::Exception &e)
+  {
+    std::cerr << e.getDescription().cStr() << std::endl;
   }
 
   return EXIT_SUCCESS;
@@ -110,9 +125,11 @@ std::vector<std::string> ExecutionManager::loadListOfApplications()
 
 void ExecutionManager::processManifests()
 {
+  
   const auto& applicationNames = loadListOfApplications();
 
   json content;
+
   for (auto file: applicationNames)
   {
     file = corePath + file + "/manifest.json";
@@ -161,6 +178,87 @@ void ExecutionManager::startApplication(const ProcessName& process)
     activeApplications.insert({process.processName, processId});
   }
 
+}
+
+::kj::Promise<void>
+ExecutionManager::reportApplicationState(ReportApplicationStateContext context)
+{
+  ApplicationState state = context.getParams().getState();
+
+  std::cout << "State #" << static_cast<uint16_t>(state)
+            << " received"
+            << std::endl;
+
+  return kj::READY_NOW;
+}
+
+::kj::Promise<void>
+ExecutionManager::register_(RegisterContext context)
+{
+  string newMachineClient = context.getParams().getAppName();
+
+  if (machineStateClientAppName.empty() ||
+      machineStateClientAppName == newMachineClient)
+  {
+    machineStateClientAppName = newMachineClient;
+    context.getResults().setResult(StateError::K_SUCCESS);
+
+    std::cout << "State Machine Client \""
+              << machineStateClientAppName
+              << "\" registered"
+              << std::endl;
+  }
+  else
+  {
+    context.getResults().setResult(StateError::K_INVALID_REQUEST);
+
+    std::cout << "State Machine Client \""
+              << machineStateClientAppName
+              << "\" registration failed" 
+              << std::endl;
+  }
+
+  return kj::READY_NOW;
+}
+
+::kj::Promise<void>
+ExecutionManager::getMachineState(GetMachineStateContext context)
+{
+  std::cout << "getMachineState request received" << std::endl;
+
+  context.getResults().setState(currentState);
+
+  context.getResults().setResult(StateError::K_SUCCESS);
+
+  return kj::READY_NOW;
+}
+
+::kj::Promise<void>
+ExecutionManager::setMachineState(SetMachineStateContext context)
+{
+  std::string state = context.getParams().getState().cStr();
+
+  if (!state.empty() && state != currentState)
+  {
+    currentState = state;
+
+    context.getResults().setResult(StateError::K_SUCCESS);
+
+    std::cout << "Machine state changed successfully to "
+              << "\"" 
+              << currentState << "\"" 
+              << std::endl;
+  }
+  else
+  {
+    context.getResults().setResult(StateError::K_INVALID_STATE);
+
+    std::cout << "Invalid machine state received - "
+              << "\"" << currentState << "\"" 
+              << std::endl;
+  }
+
+  return kj::READY_NOW;
 }
 
 } // namespace ExecutionManager

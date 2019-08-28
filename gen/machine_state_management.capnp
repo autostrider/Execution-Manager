@@ -1,0 +1,22 @@
+@0xa6c7c6f7aabe643e;
+
+interface MachineStateManagement
+{
+  enum StateError
+  {
+    kSuccess @0;
+    kInvalidState @1;
+    kInvalidRequest @2;
+    kTimeout @3;
+  }
+
+  register @0 (appName :Text)
+    -> (result :StateError);
+
+  getMachineState @1 ()
+    -> (state :Text, result :StateError);
+
+  setMachineState @2 (state :Text)
+    -> (result :StateError);
+
+}

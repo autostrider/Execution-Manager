@@ -1,26 +1,22 @@
 #ifndef APPLICATION_STATE_CLIENT_H
 #define APPLICATION_STATE_CLIENT_H
-
+#include <application_state_management.capnp.h>
+#include <capnp/ez-rpc.h>
 #include <json.hpp>
 
 namespace api {
 
-/**
- * @brief Available application states.
- */
-enum class ApplicationState
+class ApplicationStateClient
 {
-    kInitializing,
-    kRunning,
-    kShuttingdown
+public:
+  ApplicationStateClient();
+
+  using ApplicationState = ::ApplicationStateManagement::ApplicationState;
+
+  void ReportApplicationState(ApplicationState state);
+private:
+  capnp::EzRpcClient client;
 };
 
-/// AppStates serialization & deserialization
-NLOHMANN_JSON_SERIALIZE_ENUM(ApplicationState, {
-    {ApplicationState::kInitializing, "init"},
-    {ApplicationState::kRunning, "running"},
-    {ApplicationState::kShuttingdown, "shutdown"}
-})
-
-}
+} // namespace api
 #endif // APPLICATION_STATE_CLIENT_H

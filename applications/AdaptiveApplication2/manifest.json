@@ -1,6 +1,6 @@
 {
   "Application_manifest": {
-      "Application_manifest_id": "TestApp",
+      "Application_manifest_id": "AdaptiveApplication2",
       "Process": [
           {
               "Mode_dependent_startup_configs": [
@@ -17,9 +17,8 @@
                       ]
                   }
               ],
-              "Process_name": "proc1"
+              "Process_name": "proc2"
           }
       ]
   }
 }
-

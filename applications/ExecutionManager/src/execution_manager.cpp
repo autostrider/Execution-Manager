@@ -268,7 +268,7 @@ ExecutionManager::getMachineState(GetMachineStateContext context)
 {
   std::cout << "getMachineState request received" << std::endl;
 
-  context.getResults().setState(currentState);
+  context.getResults().setState(m_currentState);
 
   context.getResults().setResult(StateError::K_SUCCESS);
 
@@ -280,15 +280,15 @@ ExecutionManager::setMachineState(SetMachineStateContext context)
 {
   std::string state = context.getParams().getState().cStr();
 
-  if (!state.empty() && state != currentState)
+  if (!state.empty() && state != m_currentState)
   {
-    currentState = state;
+    m_currentState = state;
 
     context.getResults().setResult(StateError::K_SUCCESS);
 
     std::cout << "Machine state changed successfully to "
               << "\"" 
-              << currentState << "\"" 
+              << m_currentState << "\""
               << std::endl;
   }
   else
@@ -296,7 +296,7 @@ ExecutionManager::setMachineState(SetMachineStateContext context)
     context.getResults().setResult(StateError::K_INVALID_STATE);
 
     std::cout << "Invalid machine state received - "
-              << "\"" << currentState << "\"" 
+              << "\"" << m_currentState << "\""
               << std::endl;
   }
 

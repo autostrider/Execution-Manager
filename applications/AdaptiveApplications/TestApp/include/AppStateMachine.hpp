@@ -1,17 +1,10 @@
 #ifndef __APP_STATE_MACHINE__
 #define __APP_STATE_MACHINE__
 
-#include <tinyfsm.hpp>
+#include <AppStateEvents.hpp>
 
 #include <iostream>
 #include <vector>
-
-struct kInitializing : tinyfsm::Event{};
-
-struct kRunning : tinyfsm::Event{};
-
-struct kTerminating : tinyfsm::Event{};
-
 
 struct App : public tinyfsm::Fsm<App>
 {

@@ -13,5 +13,12 @@ target_include_directories(aa1
     PUBLIC
         ${AA_INCLUDE}
 )
+
+target_link_libraries(
+    aa1
+    PUBLIC
+    tinyfsm
+    )
+
 target_compile_options(aa1 PRIVATE -Werror -Wall -fdiagnostics-color=always)
 target_compile_features(aa1 PRIVATE cxx_std_14)

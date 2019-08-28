@@ -1,7 +1,6 @@
-#include "AppStateMachine.hpp"
+#include <AppStateMachine.hpp>
 
 #include <signal.h>
-
 
 static void siginthandler(int signo);
 

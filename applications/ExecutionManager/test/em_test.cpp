@@ -34,30 +34,11 @@ TEST(SerializationTest, applicationManifestTest)
   json manifSerialized = manifest;
 
   std::string testJsonResult =
-    "{"
-      "\"Application_manifest\":{"
-        "\"Application_manifest_id\":\"SomeTestApp\","
-        "\"Process\":["
-          "{"
-            "\"Mode_dependent_startup_configs\":["
-              "{"
-               "\"Mode_in_machine_instance_refs\":["
-                  "{"
-                    "\"Function_group\":\"MachineManifest\","
-                    "\"Mode\":\"Startup\""
-                  "},"
-                  "{"
-                    "\"Function_group\":\"MachineManifest\","
-                    "\"Mode\":\"Running\""
-                  "}"
-                "]"
-              "}"
-            "],"
-            "\"Process_name\":\"TestApp\""
-          "}"
-        "]"
-      "}"
-    "}";
+    R"({"Application_manifest":{"Application_manifest_id":"SomeTestApp",)"
+    R"("Process":[{"Mode_dependent_startup_configs":[)"
+    R"({"Mode_in_machine_instance_refs":[{"Function_group":"MachineManifest",)"
+    R"("Mode":"Startup"},{"Function_group":"MachineManifest","Mode":"Running")"
+    R"(}]}],"Process_name":"TestApp"}]}})";
 
   ApplicationManifest deserializedManifest = json::parse(testJsonResult);
 
@@ -89,27 +70,10 @@ TEST(SerializationTest, machineManifestTest)
   json manifestSerialized = manifest;
 
   std::string testJsonResult =
-  "{"
-    "\"Machine_manifest\":{"
-      "\"Machine_manifest_id\":\"Machine\","
-      "\"Mode_declaration_group\":["
-        "{"
-          "\"Function_group_name\":\"MachineState\","
-          "\"Mode_declarations\":["
-            "{"
-              "\"Mode\":\"Startup\""
-            "},"
-            "{"
-              "\"Mode\":\"Running\""
-            "},"
-            "{"
-              "\"Mode\":\"Shutdown\""
-            "}"
-          "]"
-        "}"
-      "]"
-    "}"
-  "}";
+  R"({"Machine_manifest":{"Machine_manifest_id":"Machine")"
+  R"(,"Mode_declaration_group":[{"Function_group_name":"MachineState",)"
+  R"("Mode_declarations":[{"Mode":"Startup"},{"Mode":"Running")"
+  R"(},{"Mode":"Shutdown"}]}]}})";
 
   MachineManifest deserializedManifest = json::parse(testJsonResult);
 

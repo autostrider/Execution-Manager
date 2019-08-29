@@ -3,10 +3,10 @@
 
 #include <tinyfsm.hpp>
 
-struct kInitializing : tinyfsm::Event{};
+struct Initializing : tinyfsm::Event{};
 
-struct kRunning : tinyfsm::Event{};
+struct Running : tinyfsm::Event{};
 
-struct kTerminating : tinyfsm::Event{};
+struct Terminating : tinyfsm::Event{};
 
 #endif

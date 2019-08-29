@@ -8,7 +8,7 @@
 
 std::vector<double> App::_rawData{};
 
-void App::printVector(const std::vector<double>& vec)
+void App::printVector(const std::vector<double>& vec) const
 {
     for (const auto& item : vec) {
         std::cout << item << " | ";
@@ -19,8 +19,9 @@ void App::printVector(const std::vector<double>& vec)
 std::vector<double> App::readSensorData()
 {
     std::cout << "Read data from sensors\n";
-    const size_t numberOfSamples = 100000000;
+    const size_t numberOfSamples = 100;
     std::vector<double> data(numberOfSamples);
+    data.reserve(numberOfSamples);
 
     std::random_device rd{};
     std::mt19937 gen{rd()};
@@ -34,24 +35,24 @@ std::vector<double> App::readSensorData()
 }
 double App::mean(const std::vector<double>& in)
 {
-    double out = std::accumulate(in.cbegin(), in.cend(), 0);
+    double sum = std::accumulate(in.cbegin(), in.cend(), 0);
     std::cout << "";
-    out /= in.size();
-    return  out;
+    sum /= in.size();
+    return  sum;
 }
 
 void kInitialize::entry()
 {
     std::cout << "CustomInitialize::entry()\n";
     std::cout << "initialize data...\n";
-    App::getData() = readSensorData();
+    _rawData = readSensorData();
 }
 
 void kRun::entry()
 {
     std::cout << "CustomRun::entry()\n";
     std::cout << "calc mean of:";
-    std::cout << "" << mean(App::getData()) << "\n";
+    std::cout << "" << mean(_rawData) << "\n";
 }
 
 
@@ -59,19 +60,19 @@ void kTerminate::entry()
 {
     std::cout << "CustomTerminate::entry()\n";
     std::cout << "Clear data\n";
-    App::getData().clear();
+    _rawData.clear();
 }
 
-void App::react(const kInitializing &)
+void App::react(const Initializing &)
 {
     transit<kInitialize>();
 }
-void App::react(const kRunning &)
+void App::react(const Running &)
 {
     transit<kRun>();
 }
 
-void App::react(const kTerminating &)
+void App::react(const Terminating &)
 {
     transit<kTerminate>();
 }

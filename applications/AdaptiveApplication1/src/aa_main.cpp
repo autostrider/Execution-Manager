@@ -13,14 +13,14 @@ int main()
     std::cout << "app1\tproc1\n";
 
     App::start();
-    App::dispatch(kRunning());
-    App::dispatch(kTerminating());
+    App::dispatch(Running());
+    while(1);
     return 0;
 }
 
 static void siginthandler(int signo)
 {
     std::cout << "received signal:" << sys_siglist[signo] << "\n";
-    App::dispatch(kTerminating());
+    App::dispatch(Terminating());
     ::exit(EXIT_SUCCESS);
 }

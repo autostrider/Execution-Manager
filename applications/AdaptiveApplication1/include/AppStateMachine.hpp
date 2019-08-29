@@ -7,34 +7,33 @@
 
 struct App : public tinyfsm::Fsm<App>
 {
-    virtual void react(kInitializing const&);
-    virtual void react(kRunning const&);
-    virtual void react(kTerminating const&);
+    void react(Initializing const&);
+    void react(Running const&);
+    void react(Terminating const&);
     virtual void entry(void) = 0;
     void exit(void){}
     virtual ~App(){}
-    static std::vector<double>& getData() {return  App::_rawData;}
 protected:
     static std::vector<double> _rawData;
 
     std::vector<double> readSensorData();
     double mean(const std::vector<double>& in);
-    void printVector(const std::vector<double>& vec);
+    void printVector(const std::vector<double>& vec) const;
 };
 
 struct kInitialize : public App
 {
-    virtual void entry() override;
+    void entry() override;
 };
 
 struct kRun : public App
 {
-    virtual void entry() override;
+    void entry() override;
 };
 
 struct kTerminate : public App
 {
-    virtual void entry() override;
+    void entry() override;
 };
 
 #endif

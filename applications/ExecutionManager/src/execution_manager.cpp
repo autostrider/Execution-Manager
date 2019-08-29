@@ -19,9 +19,55 @@ const string ExecutionManager::corePath =
   string{"./bin/applications/"};
 
 
-ExecutionManager::ExecutionManager()
+ExecutionManager::ExecutionManager(std::unique_ptr<ManifestHandler> handler)
+  : manifestHandler{std::move(handler)}
+  , m_activeApplications{}
+  , m_allowedApplicationForState{}
+  , m_currentState{}
+  , machineStateClientAppName{}
 {
   processManifests();
+int32_t ExecutionManager::start()
+{
+  manifestHandler->processManifests(m_allowedApplicationForState,
+  for (const auto& allowedItem: m_allowedApplicationForState)
+                           m_machineManifestStates);
+  {
+    for (const auto& item: allowedItem.second)
+    {
+      std::cout << allowedItem.first << "\t" << item.processName << "\n";
+    }
+  }
+
+  for (const auto& state: m_machineManifestStates)
+  {
+    std::cout << "————————————————————————————————————————————————————————\n";
+    m_currentState = state;
+
+    killProcessesForState();
+    std::cout << state << std::endl;
+
+    startApplicationsForState();
+
+    std::this_thread::sleep_for(std::chrono::seconds{2});
+  }
+  try
+
+  {
+                              "unix:/tmp/execution_management");
+    capnp::EzRpcServer server(kj::heap<ExecutionManager>(),
+    auto &waitScope = server.getWaitScope();
+
+    std::cout << "Execution Manager started.." << std::endl;
+
+    kj::NEVER_DONE.wait(waitScope);
+  }
+  catch (const kj::Exception &e)
+  {
+    std::cerr << e.getDescription().cStr() << std::endl;
+  }
+
+  return EXIT_SUCCESS;
 }
 
 void ExecutionManager::startApplicationsForState()

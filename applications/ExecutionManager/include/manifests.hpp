@@ -22,6 +22,15 @@ using std::ifstream;
 using MachineState = std::string;
 using ApplicationState = ::ApplicationStateManagement::ApplicationState;
 
+/**
+ * @brief Struct for process name and application it belongs to.
+ */
+struct ProcessName
+{
+  std::string applicationName;
+  std::string processName;
+};
+
 struct MachineInstanceMode
 {
     std::string functionGroup;

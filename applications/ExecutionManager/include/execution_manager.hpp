@@ -1,22 +1,26 @@
 #ifndef EXECUTION_MANAGER_HPP
 #define EXECUTION_MANAGER_HPP
 
-#include <vector>
-#include <map>
-#include <string>
+#include "manifest_handler.hpp"
+#include "manifests.hpp"
+
+#include <capnp/ez-rpc.h>
+#include <chrono>
 #include <csignal>
 #include <cstdint>
-#include <unistd.h>
-#include <thread>
-#include <json.hpp>
-#include <fstream>
 #include <dirent.h>
 #include <exception>
-#include <iostream>
-#include <functional>
-#include <capnp/ez-rpc.h>
 #include <execution_management.capnp.h>
-#include "manifests.hpp"
+#include <fstream>
+#include <functional>
+#include <iostream>
+#include <json.hpp>
+#include <map>
+#include <memory>
+#include <string>
+#include <thread>
+#include <unistd.h>
+#include <vector>
 
 namespace ExecutionManager
 {
@@ -30,7 +34,8 @@ struct ApplicationManifest;
 class ExecutionManager final: public ExecutionManagement::Server
 {
 public:
-  ExecutionManager();
+  ExecutionManager(std::unique_ptr<ManifestHandler> handler =
+      std::make_unique<ManifestHandler>());
 
   /**
    * @brief Main method of Execution manager.
@@ -41,26 +46,12 @@ private:
   using StateError = ::MachineStateManagement::StateError;
 
   /**
-   * @brief Struct for process name and application it belongs to.
-   */
-  struct ProcessName
-  {
-    std::string applicationName;
-    std::string processName;
-  };
-
-  /**
    * @brief Loads all adaptive applications from corePath.
-   * @return Vector containing names of applications that were found in corePath.   
+   * @return Vector containing names of applications that were found in
+   *         corePath.
    */
   std::vector<std::string> loadListOfApplications();
 
-  /**
-     * @brief processManifests - loads manifests from corePath.
-  */
-  void processApplicationManifests();
-
-  void processMachineManifest();
   /**
    * @brief Starts given application and stores information
    *        about it in activeApplications.
@@ -92,6 +83,7 @@ private:
   ::kj::Promise<void>
   setMachineState(SetMachineStateContext context) override;
 private:
+  std::unique_ptr<ManifestHandler> manifestHandler;
   /** 
    * @brief Hardcoded path to folder with adaptive applications.
    */

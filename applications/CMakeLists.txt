@@ -1,3 +1,6 @@
+include(AdaptiveApplication.cmake)
 add_subdirectory(ExecutionManager)
 add_subdirectory(MachineStateManager)
-add_subdirectory(AdaptiveApplications)
+add_subdirectory(SimpleApplication)
+add_subdirectory(AdaptiveApplication1)
+add_subdirectory(AdaptiveApplication2)

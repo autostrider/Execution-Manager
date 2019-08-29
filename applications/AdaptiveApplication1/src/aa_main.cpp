@@ -24,5 +24,3 @@ static void siginthandler(int signo)
     App::dispatch(kTerminating());
     ::exit(EXIT_SUCCESS);
 }
-
-

@@ -2,7 +2,6 @@
 #define __APP_STATE_MACHINE__
 
 #include <AppStateEvents.hpp>
-
 #include <iostream>
 #include <vector>
 

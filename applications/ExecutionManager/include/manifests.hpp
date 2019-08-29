@@ -13,21 +13,18 @@
 #include <string>
 #include <vector>
 #include <json.hpp>
-
+#include <application_state_management.capnp.h>
+#include <machine_state_management.capnp.h>
 #include <application_state_client.h>
-#include <machine_state_client.h>
 
-using nlohmann::json;
 
 namespace ExecutionManager
 {
 
+using nlohmann::json;
 using std::ifstream;
-using std::string;
-using std::vector;
-
-using api::MachineStates;
-using api::ApplicationState;
+using MachineState = std::string;
+using ApplicationState = ::ApplicationStateManagement::ApplicationState;
 
 /**
  * @brief Struct, that holds network interface configuration.
@@ -37,8 +34,8 @@ using api::ApplicationState;
  */
 struct InterfaceConf
 {
-  string ifa_name;
-  string family;
+  std::string ifa_name;
+  std::string family;
   char host[NI_MAXHOST];
 };
 
@@ -65,10 +62,10 @@ struct HwConf
 struct MachineManifest
 {
  public:
-  vector<InterfaceConf> network;
+  std::vector<InterfaceConf> network;
   HwConf hwConf;
-  vector<MachineStates> states;
-  vector<string> adaptiveModules;
+  std::vector<MachineState> states;
+  std::vector<std::string> adaptiveModules;
 
  public:
  /**
@@ -88,17 +85,40 @@ struct MachineManifest
   void loadHwConf();
 };
 
+struct MachineInstanceMode
+{
+    std::string functionGroup;
+    std::string mode;
+};
+
+struct ModeDepStartupConfig
+{
+    std::vector<MachineInstanceMode> modes;
+};
+
 /**
  * @brief The Process struct
  */
 struct Process
 {
   /// Name of executable.
-  string name;
+  std::string name;
 
-  /// Available machine states to run the executable.
-  vector<MachineStates> startMachineStates;
+  /// Startup configs.
+  std::vector<ModeDepStartupConfig> modeDependentStartupConf;
+};
 
+struct Manifest
+{
+  /** 
+   * @brief Name of Adaptive Application.
+   */
+  std::string manifestId;
+
+  /**
+   * @brief Vector of executables of application
+   */
+  std::vector<Process> processes;
 };
 
 /**
@@ -106,57 +126,71 @@ struct Process
  */
 struct ApplicationManifest
 {
-  /// Name of Adaptive Application.
-  string name;
-
-  /// Vector of executables of application
-  vector<Process> processes;
+    Manifest manifest;
 };
 
-/// MachineStates serialization & deserialization
-NLOHMANN_JSON_SERIALIZE_ENUM(api::MachineStates, {
-    {api::MachineStates::kInit, "init"},
-    {api::MachineStates::kRestart, "restart"},
-    {api::MachineStates::kRunning, "running"},
-    {api::MachineStates::kShutdown, "shutdown"}
-})
-
-
-/// AppStates serialization & deserialization
-NLOHMANN_JSON_SERIALIZE_ENUM(api::ApplicationState, {
-    {api::ApplicationState::kInitializing, "init"},
-    {api::ApplicationState::kRunning, "running"},
-    {api::ApplicationState::kShuttingdown, "shutdown"}
-})
-
-/// InterfaceConf serialization
+/** 
+ * @brief InterfaceConf serialization
+ */
 void to_json(json& jsonObject, const InterfaceConf& interfaceConf);
 
-/// InterfaceConf  deserialization
+/**
+ * @brief InterfaceConf  deserialization
+ */
 void from_json(const json& jsonObject, InterfaceConf& interfaceConf);
 
-/// HwConf serialization
+/**
+ * @brief HwConf serialization
+ */
 void to_json(json& jsonObject, const HwConf& hwConf);
 
-/// HwConf  deserialization
+/** 
+ * @brief HwConf  deserialization
+ */
 void from_json(const json& jsonObject, HwConf& hwConf);
 
-/// MachineState serialization
+/** 
+ * @brief MachineState serialization
+ */
 void to_json(json& jsonObject, const MachineManifest& machineManifest);
 
-/// MachineManifest deserialization
+/**
+ * @brief MachineManifest deserialization
+ */
 void from_json(const json& jsonObject, MachineManifest& machineManifest);
 
-/// Process serialization
-void to_json(json& jsonObject, const Process& process);
+void to_json(json& jsonObject, const MachineInstanceMode& machineInstanceMode);
 
-/// Process deserialization
+void
+from_json(const json& jsonObject, MachineInstanceMode& machineInstanceMode);
+
+void to_json(json& jsonObject, const ModeDepStartupConfig& startupConf);
+
+void
+from_json(const json& jsonObject, const ModeDepStartupConfig& startupConf);
+
+/**
+ * @brief Process serialization
+ */
+void to_json(json& jsonObject, const ModeDepStartupConfig& startupConf);
+
+/**
+ * @brief Process deserialization
+ */
 void from_json(const json& jsonObject, Process& process);
 
-/// ApplicationManifest serialization
+void to_json(json& jsonObject, const Manifest& manifest);
+
+void from_json(const json& jsonObject, Manifest& manifest);
+
+/**
+ * @brief ApplicationManifest serialization
+ */
 void to_json(json& jsonObject, const ApplicationManifest& applicationManifest);
 
-/// ApplicationManifest deserialization
+/**
+ * @brief ApplicationManifest deserialization
+ */
 void from_json(const json& jsonObject, ApplicationManifest& applicationManifest);
 
 } // namespace ExecutionManager

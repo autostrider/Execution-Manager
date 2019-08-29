@@ -14,13 +14,35 @@ const std::string ManifestHandler::corePath = "./bin/applications/";
 
 const std::string ManifestHandler::machineStateFunctionGroup = "MachineState";
 
+
 void
 ManifestHandler::processManifests(
-    std::map<MachineState, std::vector<ProcessName> > &availApps,
+    std::map<MachineState, std::vector<ProcessName>> &availApps,
     std::vector<MachineState> &availMachineStates)
 {
   availApps = processApplicationManifests();
   availMachineStates = processMachineManifest();
+
+  filterStates(availApps, availMachineStates);
+}
+
+void ManifestHandler::filterStates(
+    std::map<MachineState, std::vector<ProcessName>> &availApps,
+    std::vector<MachineState> &availMachineStates)
+{
+  for (auto app = availApps.begin(); app != availApps.end();)
+  {
+    if (std::find(availMachineStates.cbegin(),
+                  availMachineStates.cend(),
+                  app->first) == availMachineStates.cend())
+    {
+      app = availApps.erase(app);
+    }
+    else
+    {
+      app++;
+    }
+  }
 }
 
 std::map<MachineState, std::vector<ProcessName>>

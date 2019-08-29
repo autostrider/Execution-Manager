@@ -20,13 +20,17 @@ class ManifestHandler
 public:
   /**
    * @brief Init fields with data processed from manifest.
-   * @param availApps: apps that can be in state "running" in state
-   * @param availMachineStates: machine states supported by machine.
+   * @param availApps: inout param. Apps that can be in state "running"
+   *                   in certain state
+   * @param availMachineStates: inout param. Machine states supported by
+   *                            machine.
    */
   virtual void
   processManifests(std::map<MachineState, std::vector<ProcessName>>& availApps,
                std::vector<MachineState>& availMachineStates);
 
+  virtual ~ManifestHandler() {}
+private:
   /**
     * @brief Load data from application manifests and process it.
     * @return Map of applications for each state in Application
@@ -41,8 +45,6 @@ public:
    */
   virtual std::vector<MachineState> processMachineManifest();
 
-  virtual ~ManifestHandler() {}
-private:
   /**
    * @brief Loads all adaptive applications from corePath.
    * @return Vector containing names of applications that were found in
@@ -50,6 +52,16 @@ private:
    */
   std::vector<std::string> loadListOfApplications();
 
+  /**
+   * @brief Removes unsupported states from availApps
+   * @param availApps: inout param. Apps that can be in state "running"
+   *                   in certain state
+   * @param availMachineStates: Machine states supported by
+   *                            machine.
+   */
+  void
+  filterStates(std::map<MachineState, std::vector<ProcessName>> &availApps,
+        std::vector<MachineState> &availMachineStates);
 private:
   /**
    * @brief Hardcoded path to folder with adaptive applications.

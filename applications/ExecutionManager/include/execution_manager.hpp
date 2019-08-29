@@ -84,12 +84,10 @@ private:
   setMachineState(SetMachineStateContext context) override;
 private:
   std::unique_ptr<ManifestHandler> manifestHandler;
-  /** 
+  /**
    * @brief Hardcoded path to folder with adaptive applications.
    */
   const static std::string corePath;
-
-  const static std::string machineStateFunctionGroup;
 
   /** 
    * @brief structure that holds application and required processes.

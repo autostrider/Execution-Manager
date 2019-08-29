@@ -13,7 +13,11 @@
                           {
                             "Function_group": "MachineState",
                             "Mode": "Running"
-                        }
+                          },
+			  {
+			      "Function_group": "MachineState",
+			      "Mode": "olololo"
+			  }
                       ]
                   }
               ],

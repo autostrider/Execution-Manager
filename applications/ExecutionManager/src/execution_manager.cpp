@@ -18,29 +18,13 @@ using std::string;
 const string ExecutionManager::corePath =
   string{"./bin/applications/"};
 
-const std::vector<MachineState> ExecutionManager::transition =
-{"init", "running", "shutdown"};
-
 int32_t ExecutionManager::start()
 {
   processManifests();
 
-  for (const auto& state: transition)
-  {
-    std::cout << "————————————————————————————————————————————————————————\n";
-    currentState = state;
-
-    killProcessesForState();
-    std::cout << state << std::endl;
-
-    startApplicationsForState();
-
-    std::this_thread::sleep_for(std::chrono::seconds{2});
-  }
-
   try
   {
-    capnp::EzRpcServer server(kj::heap<ExecutionManager>(),
+    capnp::EzRpcServer server(kj::heap(std::move(*this)),
                               "unix:/tmp/execution_management");
     auto &waitScope = server.getWaitScope();
 
@@ -58,39 +42,45 @@ int32_t ExecutionManager::start()
 
 void ExecutionManager::startApplicationsForState()
 {
-  const auto& allowedApps = allowedApplicationForState[currentState];
+  const auto& allowedApps = allowedApplicationForState.find(currentState);
 
-  for (const auto& executableToStart: allowedApps)
+  if (allowedApps != allowedApplicationForState.cend())
   {
-    if (activeApplications.find(executableToStart.processName) != activeApplications.cend())
+    for (const auto& executableToStart: allowedApps->second)
     {
-      continue;
-    }
-    try
-    {
-      startApplication(executableToStart);
-    }
-    catch (const runtime_error& err)
-    {
-      std::cout << err.what() << std::endl;
+      if (activeApplications.find(executableToStart.processName) != activeApplications.cend())
+      {
+        continue;
+      }
+      try
+      {
+        startApplication(executableToStart);
+      }
+      catch (const runtime_error& err)
+      {
+        std::cout << err.what() << std::endl;
+      }
     }
   }
 }
 
 void ExecutionManager::killProcessesForState()
 {
-  const auto& allowedApps = allowedApplicationForState[currentState];
+  const auto& allowedApps = allowedApplicationForState.find(currentState);
 
   for (auto app = activeApplications.cbegin(); app != activeApplications.cend();)
   {
-    if (std::find_if(allowedApps.cbegin(),
-                     allowedApps.cend(),
+    if (allowedApps == allowedApplicationForState.cend() ||
+        std::find_if(allowedApps->second.cbegin(),
+                     allowedApps->second.cend(),
                      [&app](auto& allowedApp)
-    { return app->first == allowedApp.processName; }) == allowedApps.cend())
+    { return app->first == allowedApp.processName; }) == allowedApps->second.cend())
     {
       kill(app->second, SIGTERM);
       app = activeApplications.erase(app);
-    } else {
+    }
+    else
+    {
       app++;
     }
   }
@@ -146,7 +136,7 @@ void ExecutionManager::processManifests()
         {
           if (mode.functionGroup != "MachineState")
             continue;
-
+          std::cout<<"pushing to allowedApplicationForState  process.name =" <<  process.name << std::endl;
           allowedApplicationForState[mode.mode].push_back({manifest.manifest.manifestId, process.name});
         }
       }
@@ -162,8 +152,8 @@ void ExecutionManager::startApplication(const ProcessName& process)
   if (!processId)
   {
     // child process
-    auto processPath = corePath + process.applicationName + "/processes/" + process.processName;
-
+    std::string processPath = corePath + process.applicationName + std::string("/processes/") + process.processName;
+    
     int res = execl(processPath.c_str(), process.processName.c_str(), nullptr);
 
     if (res)
@@ -236,12 +226,16 @@ ExecutionManager::getMachineState(GetMachineStateContext context)
 ::kj::Promise<void>
 ExecutionManager::setMachineState(SetMachineStateContext context)
 {
-  std::string state = context.getParams().getState().cStr();
+  string state = context.getParams().getState().cStr();
 
   if (!state.empty() && state != currentState)
   {
     currentState = state;
 
+    killProcessesForState();
+
+    startApplicationsForState();
+   
     context.getResults().setResult(StateError::K_SUCCESS);
 
     std::cout << "Machine state changed successfully to "

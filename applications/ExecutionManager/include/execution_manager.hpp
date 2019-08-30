@@ -1,6 +1,7 @@
 #ifndef EXECUTION_MANAGER_HPP
 #define EXECUTION_MANAGER_HPP
 
+#include "imanifest_reader.hpp"
 #include "manifest_handler.hpp"
 #include "manifests.hpp"
 
@@ -34,8 +35,8 @@ struct ApplicationManifest;
 class ExecutionManager final: public ExecutionManagement::Server
 {
 public:
-  ExecutionManager(std::unique_ptr<ManifestHandler> handler =
-      std::make_unique<ManifestHandler>());
+  ExecutionManager(std::unique_ptr<IManifestReader> handler =
+      std::make_unique<ManifestReader>());
 
   /**
    * @brief Main method of Execution manager.
@@ -83,7 +84,7 @@ private:
   ::kj::Promise<void>
   setMachineState(SetMachineStateContext context) override;
 private:
-  std::unique_ptr<ManifestHandler> manifestHandler;
+  std::unique_ptr<IManifestReader> manifestHandler;
   /**
    * @brief Hardcoded path to folder with adaptive applications.
    */

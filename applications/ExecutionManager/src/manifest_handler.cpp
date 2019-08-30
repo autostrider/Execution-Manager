@@ -10,23 +10,12 @@ namespace ExecutionManager {
 using std::runtime_error;
 using nlohmann::json;
 
-const std::string ManifestHandler::corePath = "./bin/applications/";
+const std::string ManifestReader::corePath = "./bin/applications/";
 
-const std::string ManifestHandler::machineStateFunctionGroup = "MachineState";
+const std::string ManifestReader::machineStateFunctionGroup = "MachineState";
 
 
-void
-ManifestHandler::processManifests(
-    std::map<MachineState, std::vector<ProcessName>> &availApps,
-    std::vector<MachineState> &availMachineStates)
-{
-  availApps = processApplicationManifests();
-  availMachineStates = processMachineManifest();
-
-  filterStates(availApps, availMachineStates);
-}
-
-void ManifestHandler::filterStates(
+void ManifestReader::filterStates(
     std::map<MachineState, std::vector<ProcessName>> &availApps,
     std::vector<MachineState> &availMachineStates)
 {
@@ -46,7 +35,7 @@ void ManifestHandler::filterStates(
 }
 
 std::map<MachineState, std::vector<ProcessName>>
-ManifestHandler::processApplicationManifests()
+ManifestReader::processApplicationManifests()
 {
   const auto& applicationNames = loadListOfApplications();
   std::map<MachineState, std::vector<ProcessName>> res;
@@ -82,7 +71,7 @@ ManifestHandler::processApplicationManifests()
   return res;
 }
 
-std::vector<MachineState> ManifestHandler::processMachineManifest()
+std::vector<MachineState> ManifestReader::processMachineManifest()
 {
   static const std::string manifestPath =
       "../applications/ExecutionManager/machine_manifest.json";
@@ -108,7 +97,7 @@ std::vector<MachineState> ManifestHandler::processMachineManifest()
   return res;
 }
 
-std::vector<std::string> ManifestHandler::loadListOfApplications()
+std::vector<std::string> ManifestReader::loadListOfApplications()
 {
   DIR* dp = nullptr;
   std::vector<std::string> fileNames;

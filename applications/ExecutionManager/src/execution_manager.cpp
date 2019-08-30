@@ -18,8 +18,7 @@ using std::string;
 const string ExecutionManager::corePath =
   string{"./bin/applications/"};
 
-
-ExecutionManager::ExecutionManager(std::unique_ptr<ManifestHandler> handler)
+ExecutionManager::ExecutionManager(std::unique_ptr<IManifestReader> handler)
   : manifestHandler{std::move(handler)}
   , m_activeApplications{}
   , m_allowedApplicationForState{}

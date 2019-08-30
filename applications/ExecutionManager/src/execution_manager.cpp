@@ -21,8 +21,9 @@ const string ExecutionManager::corePath =
 ExecutionManager::ExecutionManager(std::unique_ptr<IManifestReader> handler)
   : manifestHandler{std::move(handler)}
   , m_activeApplications{}
-  , m_allowedApplicationForState{}
+  , m_allowedApplicationForState{manifestHandler->getApplications()}
   , m_currentState{}
+  , m_machineManifestStates{manifestHandler->getMachineStates()}
   , machineStateClientAppName{}
 {
   processManifests();
@@ -67,6 +68,23 @@ int32_t ExecutionManager::start()
   }
 
   return EXIT_SUCCESS;
+}
+
+void ExecutionManager::filterStates()
+{
+  for (auto app = m_activeApplications.begin(); app != m_activeApplications.end();)
+  {
+    if (std::find(m_machineManifestStates.cbegin(),
+                  m_machineManifestStates.cend(),
+                  app->first) == m_machineManifestStates.cend())
+    {
+      app = m_activeApplications.erase(app);
+    }
+    else
+    {
+      app++;
+    }
+  }
 }
 
 void ExecutionManager::startApplicationsForState()

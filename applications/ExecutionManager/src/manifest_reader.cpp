@@ -1,4 +1,4 @@
-#include "manifest_handler.hpp"
+#include "manifest_reader.hpp"
 
 #include <dirent.h>
 #include <exception>
@@ -14,28 +14,8 @@ const std::string ManifestReader::corePath = "./bin/applications/";
 
 const std::string ManifestReader::machineStateFunctionGroup = "MachineState";
 
-
-void ManifestReader::filterStates(
-    std::map<MachineState, std::vector<ProcessName>> &availApps,
-    std::vector<MachineState> &availMachineStates)
-{
-  for (auto app = availApps.begin(); app != availApps.end();)
-  {
-    if (std::find(availMachineStates.cbegin(),
-                  availMachineStates.cend(),
-                  app->first) == availMachineStates.cend())
-    {
-      app = availApps.erase(app);
-    }
-    else
-    {
-      app++;
-    }
-  }
-}
-
 std::map<MachineState, std::vector<ProcessName>>
-ManifestReader::processApplicationManifests()
+ManifestReader::getApplications()
 {
   const auto& applicationNames = loadListOfApplications();
   std::map<MachineState, std::vector<ProcessName>> res;
@@ -71,7 +51,7 @@ ManifestReader::processApplicationManifests()
   return res;
 }
 
-std::vector<MachineState> ManifestReader::processMachineManifest()
+std::vector<MachineState> ManifestReader::getMachineStates()
 {
   static const std::string manifestPath =
       "../applications/ExecutionManager/machine_manifest.json";

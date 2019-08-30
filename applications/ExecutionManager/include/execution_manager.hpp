@@ -2,7 +2,7 @@
 #define EXECUTION_MANAGER_HPP
 
 #include "imanifest_reader.hpp"
-#include "manifest_handler.hpp"
+#include "manifest_reader.hpp"
 #include "manifests.hpp"
 
 #include <capnp/ez-rpc.h>
@@ -45,6 +45,11 @@ public:
 private:
   using ApplicationState = ::ApplicationStateManagement::ApplicationState;
   using StateError = ::MachineStateManagement::StateError;
+
+  /**
+   * @brief Removes unsupported states from availApps
+   */
+  void filterStates();
 
   /**
    * @brief Loads all adaptive applications from corePath.
@@ -100,6 +105,7 @@ private:
    * vector consists of applicationId (name) and string param - executable name.
    */
   std::map<MachineState, std::vector<ProcessName>> m_allowedApplicationForState;
+
   /**
    * brief Current machine state.
    */

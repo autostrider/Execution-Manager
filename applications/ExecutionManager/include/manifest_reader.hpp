@@ -25,16 +25,14 @@ public:
     *         manifest.
     */
    virtual std::map<MachineState, std::vector<ProcessName>>
-   processApplicationManifests() override;
+   getApplications() override;
 
    /**
    * @brief Loading data from Machine Manifest and process it.
    * @return All the machine states available.
    */
-  virtual std::vector<MachineState> processMachineManifest() override;
+  virtual std::vector<MachineState> getMachineStates() override;
 
-
-  ~ManifestReader() override {}
 private:
 
   /**
@@ -44,17 +42,6 @@ private:
    */
   std::vector<std::string> loadListOfApplications();
 
-  /**
-   * @brief Removes unsupported states from availApps
-   * @param availApps: inout param. Apps that can be in state "running"
-   *                   in certain state
-   * @param availMachineStates: Machine states supported by
-   *                            machine.
-   */
-  void
-  filterStates(std::map<MachineState, std::vector<ProcessName>> &availApps,
-        std::vector<MachineState> &availMachineStates);
-private:
   /**
    * @brief Hardcoded path to folder with adaptive applications.
    */

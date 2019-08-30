@@ -1,39 +1,56 @@
 #ifndef __APP_STATE_MACHINE__
 #define __APP_STATE_MACHINE__
 
-#include <AppStateEvents.hpp>
 #include <iostream>
 #include <vector>
+#include <memory>
 
-struct App : public tinyfsm::Fsm<App>
+class State;
+
+class App
 {
-    void react(Initializing const&);
-    void react(Running const&);
-    void react(Terminating const&);
-    virtual void entry(void) = 0;
-    void exit(void){}
+public:
+    App();
     virtual ~App(){}
-protected:
-    static std::vector<double> _rawData;
 
-    std::vector<double> readSensorData();
-    double mean(const std::vector<double>& in);
+    virtual void transitToNextState(int state = 0);
+    double mean();
+    void readSensorData();
     void printVector(const std::vector<double>& vec) const;
+
+    const static int TerminateApp = -1;
+private:
+    std::vector<double> _rawData;
+    std::unique_ptr<State> m_currentState;
+
 };
 
-struct kInitialize : public App
+class State
 {
-    void entry() override;
+public:
+    virtual ~State(){}
+    virtual std::unique_ptr<State> handleTransition(App& app, int state) = 0;
+    virtual void enter(App& app) = 0;
 };
 
-struct kRun : public App
+class Init : public State
 {
-    void entry() override;
+public:
+    std::unique_ptr<State> handleTransition(App& app, int state) override;
+    void enter(App& app) override;
 };
 
-struct kTerminate : public App
+class Run : public State
 {
-    void entry() override;
+public:
+    std::unique_ptr<State> handleTransition(App& app, int state) override;
+    void enter(App& app) override;
+};
+
+class Terminate : public State
+{
+    std::unique_ptr<State> handleTransition(App& app, int state) override;
+    void enter(App& app) override;
 };
 
 #endif

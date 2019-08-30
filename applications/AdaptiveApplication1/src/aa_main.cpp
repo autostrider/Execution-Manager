@@ -1,26 +1,25 @@
 #include <AppStateMachine.hpp>
 
 #include <signal.h>
+static void signalHandler(int signo);
 
-static void siginthandler(int signo);
-
+static App app;
 int main()
 {
-    if (::signal(SIGINT, siginthandler) == SIG_ERR)
+    if (::signal(SIGINT, signalHandler) == SIG_ERR)
     {
         std::cout << "Error while registering signal\n";
     }
-    std::cout << "app1\tproc1\n";
 
-    App::start();
-    App::dispatch(Running());
+    app.transitToNextState();
+    app.transitToNextState();
+    app.transitToNextState();
     while(1);
     return 0;
 }
 
-static void siginthandler(int signo)
+static void signalHandler(int signo)
 {
     std::cout << "received signal:" << sys_siglist[signo] << "\n";
-    App::dispatch(Terminating());
-    ::exit(EXIT_SUCCESS);
+    app.transitToNextState(App::TerminateApp);
 }

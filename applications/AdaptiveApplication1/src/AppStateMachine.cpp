@@ -6,8 +6,6 @@
 #include <vector>
 #include <cmath>
 
-std::vector<double> App::_rawData{};
-
 void App::printVector(const std::vector<double>& vec) const
 {
     for (const auto& item : vec) {
@@ -16,7 +14,7 @@ void App::printVector(const std::vector<double>& vec) const
     std::cout << "\n";
 }
 
-std::vector<double> App::readSensorData()
+void App::readSensorData()
 {
     std::cout << "Read data from sensors\n";
     const size_t numberOfSamples = 100;
@@ -31,50 +29,79 @@ std::vector<double> App::readSensorData()
     for (size_t k = 0; k < numberOfSamples; ++k) {
         data[k] = d(gen);
     }
-    return data;
+    _rawData = data;
 }
-double App::mean(const std::vector<double>& in)
+
+double App::mean()
 {
-    double sum = std::accumulate(in.cbegin(), in.cend(), 0);
+    double sum = std::accumulate(_rawData.cbegin(), _rawData.cend(), 0);
     std::cout << "";
-    sum /= in.size();
+    sum /= _rawData.size();
     return  sum;
 }
 
-void kInitialize::entry()
+App::App()
 {
-    std::cout << "CustomInitialize::entry()\n";
-    std::cout << "initialize data...\n";
-    _rawData = readSensorData();
+    m_currentState = std::make_unique<Init>();
+    m_currentState->enter(*this);
 }
 
-void kRun::entry()
+void App::transitToNextState(int state)
 {
-    std::cout << "CustomRun::entry()\n";
-    std::cout << "calc mean of:";
-    std::cout << "" << mean(_rawData) << "\n";
+    auto newState = m_currentState->handleTransition(*this, state);
+    if (newState != nullptr)
+    {
+        m_currentState = std::move(newState);
+        m_currentState->enter(*this);
+    }
 }
 
-
-void kTerminate::entry()
+std::unique_ptr<State> Init::handleTransition(App &app, int state)
 {
-    std::cout << "CustomTerminate::entry()\n";
-    std::cout << "Clear data\n";
-    _rawData.clear();
+    if (state == App::TerminateApp)
+    {
+        return std::make_unique<Terminate>();
+    }
+    app.readSensorData();
+    return std::make_unique<Run>();
 }
 
-void App::react(const Initializing &)
+void Init::enter(App &app)
 {
-    transit<kInitialize>();
-}
-void App::react(const Running &)
-{
-    transit<kRun>();
+    std::cout << "Enter init state\n";
 }
 
-void App::react(const Terminating &)
+std::unique_ptr<State> Run::handleTransition(App &app, int state)
 {
-    transit<kTerminate>();
+    if (state == App::TerminateApp)
+    {
+        return std::make_unique<Terminate>();
+    }
+    std::cout << "(Run state)\t mean: " << app.mean() << "\n";
+    return std::make_unique<Run>();
 }
 
-FSM_INITIAL_STATE(App, kInitialize)
+void Run::enter(App &app)
+{
+    std::cout << "Enter run state\n";
+}
+
+std::unique_ptr<State> Terminate::handleTransition(App &app, int state)
+{
+    if (state == App::TerminateApp)
+    {
+        std::cout << "Already in terminate state!";
+    }
+    else
+    {
+        std::cout << "terminating state. App is dead(\n";
+    }
+    return nullptr;
+}
+
+void Terminate::enter(App &app)
+{
+    std::cout << "Enter terminate state\n" <<
+            "Shut down app\n";
+    ::exit(EXIT_SUCCESS);
+}

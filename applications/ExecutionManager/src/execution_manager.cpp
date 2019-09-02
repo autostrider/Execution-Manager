@@ -67,14 +67,14 @@ void ExecutionManager::killProcessesForState()
   }
 }
 
-bool ExecutionManager::processToBeKilled(const string& app, const std::vector<ExecutionManager::ProcessName>& listOfProcessNames)
+bool ExecutionManager::processToBeKilled(const string& app, const std::vector<ExecutionManager::ProcessName>& allowedApps)
 {
-  auto it = std::find_if(listOfProcessNames.cbegin(),
-                     listOfProcessNames.cend(),
+  auto it = std::find_if(allowedApps.cbegin(),
+                     allowedApps.cend(),
                      [&app](auto& listItem)
     { return app == listItem.processName; });
 
-  return (it  == listOfProcessNames.cend()); 
+  return (it  == allowedApps.cend());
 };
 
 std::vector<string> ExecutionManager::loadListOfApplications()

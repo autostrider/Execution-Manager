@@ -19,28 +19,28 @@ public:
   {}
   int start()
   {
-    cout << "Hello from SimpleApp" << endl;
+    // cout << "Hello from SimpleApp" << endl;
 
-    applState->ReportApplicationState(
-      ApplicationState::K_INITIALIZING);
+    // // applState->ReportApplicationState(
+    // //   ApplicationState::K_INITIALIZING);
 
-    cout << "K_INITIALIZING (0) sent" << endl;
+    // cout << "K_INITIALIZING (0) sent" << endl;
 
-    this_thread::sleep_for(seconds(1));
+    // //this_thread::sleep_for(seconds(1));
 
-    applState->ReportApplicationState(
-      ApplicationState::K_RUNNING);
+    // // applState->ReportApplicationState(
+    // //   ApplicationState::K_RUNNING);
 
-    cout << "K_RUNNING (1) sent" << endl;
+    // cout << "K_RUNNING (1) sent" << endl;
 
-    this_thread::sleep_for(seconds(1));
+    // //this_thread::sleep_for(seconds(1));
 
-    applState->ReportApplicationState(
-      ApplicationState::K_SHUTTINGDOWN);
+    // // applState->ReportApplicationState(
+    // //   ApplicationState::K_SHUTTINGDOWN);
 
-    cout << "K_SHUTTINGDOWN (2) sent" << endl;
+    // cout << "K_SHUTTINGDOWN (2) sent" << endl;
 
-    cout << "Bye, bye from SimpleApp" << endl;
+    // cout << "Bye, bye from SimpleApp" << endl;
 
     return EXIT_SUCCESS;
   }
@@ -50,6 +50,6 @@ private:
 
 int main(int argc, char *argv[])
 {
-  SimpleApp foo;
-  return foo.start();
+ // SimpleApp foo;
+  return 0;// foo.start();
 }

@@ -30,7 +30,7 @@ struct ApplicationManifest;
 class ExecutionManager final: public ExecutionManagement::Server
 {
 public:
-  ExecutionManager() = default;
+  ExecutionManager();
 
   /**
    * @brief Main method of Execution manager.
@@ -48,6 +48,8 @@ private:
     std::string applicationName;
     std::string processName;
   };
+
+  using mapIterator = std::map<MachineState, std::vector<ProcessName>>::const_iterator;
 
   /**
    * @brief Loads all adaptive applications from corePath.
@@ -75,6 +77,11 @@ private:
    * @brief kill all processes that doesn't support current state.
    */
   void killProcessesForState();
+
+  /**
+   * @brief kill all processes that doesn't support current state.
+   */
+  bool processForKill (std::string app, mapIterator &allowedApp);
  
   ::kj::Promise<void>
   reportApplicationState(ReportApplicationStateContext context) override;

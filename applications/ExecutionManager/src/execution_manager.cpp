@@ -18,26 +18,10 @@ using std::string;
 const string ExecutionManager::corePath =
   string{"./bin/applications/"};
 
-int32_t ExecutionManager::start()
+
+ExecutionManager::ExecutionManager()
 {
   processManifests();
-
-  try
-  {
-    capnp::EzRpcServer server(kj::heap(std::move(*this)),
-                              "unix:/tmp/execution_management");
-    auto &waitScope = server.getWaitScope();
-
-    std::cout << "Execution Manager started.." << std::endl;
-
-    kj::NEVER_DONE.wait(waitScope);
-  }
-  catch (const kj::Exception &e)
-  {
-    std::cerr << e.getDescription().cStr() << std::endl;
-  }
-
-  return EXIT_SUCCESS;
 }
 
 void ExecutionManager::startApplicationsForState()
@@ -66,15 +50,12 @@ void ExecutionManager::startApplicationsForState()
 
 void ExecutionManager::killProcessesForState()
 {
-  const auto& allowedApps = allowedApplicationForState.find(currentState);
+  mapIterator allowedApps = allowedApplicationForState.find(currentState);
 
   for (auto app = activeApplications.cbegin(); app != activeApplications.cend();)
   {
     if (allowedApps == allowedApplicationForState.cend() ||
-        std::find_if(allowedApps->second.cbegin(),
-                     allowedApps->second.cend(),
-                     [&app](auto& allowedApp)
-    { return app->first == allowedApp.processName; }) == allowedApps->second.cend())
+        processForKill(app->first, allowedApps))
     {
       kill(app->second, SIGTERM);
       app = activeApplications.erase(app);
@@ -86,14 +67,24 @@ void ExecutionManager::killProcessesForState()
   }
 }
 
-std::vector<std::string> ExecutionManager::loadListOfApplications()
+bool ExecutionManager::processForKill(string app, mapIterator &allowedApp)
+{
+  auto it = std::find_if(allowedApp->second.cbegin(),
+                     allowedApp->second.cend(),
+                     [&app](auto& allowedApp)
+    { return app == allowedApp.processName; });
+
+  return (it  == allowedApp->second.cend()); 
+};
+
+std::vector<string> ExecutionManager::loadListOfApplications()
 {
   DIR* dp = nullptr;
-  std::vector<std::string> fileNames;
+  std::vector<string> fileNames;
 
   if ((dp = opendir(corePath.c_str())) == nullptr)
   {
-    throw runtime_error(std::string{"Error opening directory: "}
+    throw runtime_error(string{"Error opening directory: "}
                         + corePath
                         + " "
                         + strerror(errno));
@@ -152,13 +143,13 @@ void ExecutionManager::startApplication(const ProcessName& process)
   if (!processId)
   {
     // child process
-    std::string processPath = corePath + process.applicationName + std::string("/processes/") + process.processName;
-    
+    auto processPath = corePath + process.applicationName + string("/processes/") + process.processName;
+
     int res = execl(processPath.c_str(), process.processName.c_str(), nullptr);
 
     if (res)
     {
-      throw runtime_error(std::string{"Error occured creating process: "}
+      throw runtime_error(string{"Error occured creating process: "}
                           + process.processName
                           + " "
                           + strerror(errno));

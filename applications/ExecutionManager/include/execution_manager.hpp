@@ -1,9 +1,10 @@
 #ifndef EXECUTION_MANAGER_HPP
 #define EXECUTION_MANAGER_HPP
 
-#include <vector>
-#include <map>
-#include <string>
+#include "manifests.hpp"
+
+#include <capnp/ez-rpc.h>
+#include <chrono>
 #include <csignal>
 #include <cstdint>
 #include <unistd.h>
@@ -12,11 +13,16 @@
 #include <fstream>
 #include <dirent.h>
 #include <exception>
-#include <iostream>
-#include <functional>
-#include <capnp/ez-rpc.h>
 #include <execution_management.capnp.h>
-#include "manifests.hpp"
+#include <fstream>
+#include <functional>
+#include <iostream>
+#include <json.hpp>
+#include <map>
+#include <string>
+#include <thread>
+#include <unistd.h>
+#include <vector>
 
 namespace ExecutionManager
 {
@@ -55,6 +61,13 @@ private:
    * @return Vector containing names of applications that were found in corePath.   
    */
   std::vector<std::string> loadListOfApplications();
+
+  /**
+   * @brief Builds vector of command line arguments passed to application.
+   * @param process: process for certain mode dependent startup config.
+   * @return vector of command line arguments for application.
+   */
+  std::vector<char*> getArgumentsList(const ProcessInfo& process);
 
   /**
    * @brief processManifests - loads manifests from corePath.

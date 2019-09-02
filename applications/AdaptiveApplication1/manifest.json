@@ -5,7 +5,13 @@
             {
                 "Mode_dependent_startup_configs": [
                     {
-			"Startup_options": [],
+			"Startup_options": [
+			    {
+	"Option_kind": "commandLineShortForm",
+	"Option_name": "name",
+	"Option_arg": "as"
+}
+			],
                         "Mode_in_machine_instance_refs": [
                             {
                                 "Function_group": "MachineState",

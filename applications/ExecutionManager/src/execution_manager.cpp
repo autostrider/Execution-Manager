@@ -104,6 +104,34 @@ std::vector<string> ExecutionManager::loadListOfApplications()
   return fileNames;
 }
 
+std::vector<char *>
+ExecutionManager::getArgumentsList(const ExecutionManager::ProcessInfo& process)
+{
+  std::vector<std::string> argv;
+  std::transform(process.startOptions.cbegin(),
+                 process.startOptions.cend(),
+                 std::back_inserter(argv),
+                 [](const StartupOption& option)
+  { return option.makeCommandLineOption(); });
+
+  // insert app name
+  argv.insert(argv.begin(), process.processName);
+
+  std::vector<char*> nptArgv;
+  // include terminating sign, that not included in argv
+  nptArgv.reserve(argv.size() + 1);
+
+  for(auto& str: argv)
+  {
+    nptArgv.push_back(&str[0]);
+  }
+
+  // terminating sign
+  nptArgv.push_back(nullptr);
+
+  return nptArgv;
+}
+
 void ExecutionManager::processManifests()
 {
   
@@ -139,7 +167,6 @@ void ExecutionManager::processManifests()
         }
       }
     }
-
   }
 }
 
@@ -152,20 +179,7 @@ void ExecutionManager::startApplication(const ProcessInfo& process)
     // child process
     auto processPath = corePath + process.applicationName + "/processes/" + process.processName;
 
-    // build argv command line arguments
-    // const_cast required here, because it doesn't work in other way.
-    std::vector<char*> argv; // = {const_cast<char*>(process.processName.c_str())};
-    std::transform(process.startOptions.cbegin(),
-                   process.startOptions.cend(),
-                   std::back_inserter(argv),
-                   [](const StartupOption& option)
-    { return const_cast<char*>(option.makeCommandLineOption().c_str()); });
-
-    // insert executable name as argv[0]
-    argv.emplace(argv.begin(), const_cast<char*>(process.processName.c_str()));
-
-    // terminating sign
-    argv.push_back(nullptr);
+    const auto& argv = getArgumentsList(process);
 
     int res = execv(processPath.c_str(), argv.data());
 
@@ -176,7 +190,9 @@ void ExecutionManager::startApplication(const ProcessInfo& process)
                           + " "
                           + strerror(errno));
     }
-  } else {
+  }
+  else
+  {
     // parent process
     activeApplications.insert({process.processName, processId});
   }

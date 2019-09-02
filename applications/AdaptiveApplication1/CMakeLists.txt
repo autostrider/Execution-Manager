@@ -18,10 +18,7 @@ target_include_directories(proc1
   PUBLIC 
     ${AA_INCLUDE}
 )
-target_link_libraries(proc1
-  PUBLIC
-    tinyfsm
-)
+
 target_compile_options(proc1 PRIVATE -Werror -Wall -fdiagnostics-color=always)
 target_compile_features(proc1 PRIVATE cxx_std_14)
 

@@ -6,12 +6,6 @@
 using namespace ExecutionManager;
 using nlohmann::json;
 
-TEST(SomeTest, DoesThis)
-{
-  std::string testString = "Hello from Execution Manager";
-  EXPECT_EQ(testString, foo());
-}
-
 /**
  * @brief Check Application Manifest serialization and deserialization.
  */

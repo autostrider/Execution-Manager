@@ -25,12 +25,12 @@ ExecutionManager::ExecutionManager(std::unique_ptr<IManifestReader> handler)
   , m_machineManifestStates{handler->getMachineStatesVector()}
   , machineStateClientAppName{}
 {
-  processManifests();
+  filterStates();
+}
+
 int32_t ExecutionManager::start()
 {
-  manifestHandler->processManifests(m_allowedApplicationForState,
   for (const auto& allowedItem: m_allowedApplicationForState)
-                           m_machineManifestStates);
   {
     for (const auto& item: allowedItem.second)
     {
@@ -52,20 +52,6 @@ int32_t ExecutionManager::start()
   }
 
     std::cout << "Execution Manager started.." << std::endl;
-//  try
-//  {
-//    capnp::EzRpcServer server(kj::heap<ExecutionManager>(),
-//                              "unix:/tmp/execution_management");
-//    auto &waitScope = server.getWaitScope();
-
-//    std::cout << "Execution Manager started.." << std::endl;
-
-//    kj::NEVER_DONE.wait(waitScope);
-//  }
-//  catch (const kj::Exception &e)
-//  {
-//    std::cerr << e.getDescription().cStr() << std::endl;
-//  }
 
   return EXIT_SUCCESS;
 }
@@ -89,21 +75,24 @@ void ExecutionManager::filterStates()
 
 void ExecutionManager::startApplicationsForState()
 {
-  const auto& allowedApps = allowedApplicationForState.find(currentState);
+  const auto& allowedApps = m_allowedApplicationForState.find(m_currentState);
 
-  if (allowedApps != allowedApplicationForState.cend())
+  if (allowedApps != m_allowedApplicationForState.cend())
   {
-    if (m_activeApplications.find(executableToStart.processName) ==
-        m_activeApplications.cend())
+    for (const auto& executableToStart: allowedApps->second)
     {
+      if (m_activeApplications.find(executableToStart.processName) ==
+          m_activeApplications.cend())
+      {
 
-      try
-      {
-        startApplication(executableToStart);
-      }
-      catch (const runtime_error& err)
-      {
-        std::cout << err.what() << std::endl;
+        try
+        {
+          startApplication(executableToStart);
+        }
+        catch (const runtime_error& err)
+        {
+          std::cout << err.what() << std::endl;
+        }
       }
     }
   }
@@ -111,16 +100,16 @@ void ExecutionManager::startApplicationsForState()
 
 void ExecutionManager::killProcessesForState()
 {
-  auto allowedApps = allowedApplicationForState.find(currentState);
+  auto allowedApps = m_allowedApplicationForState.find(m_currentState);
 
   for (auto app = m_activeApplications.cbegin();
        app != m_activeApplications.cend();)
   {
-    if (allowedApps == allowedApplicationForState.cend() ||
+    if (allowedApps == m_allowedApplicationForState.cend() ||
         processToBeKilled(app->first, allowedApps->second))
     {
       kill(app->second, SIGTERM);
-      app = activeApplications.erase(app);
+      app = m_activeApplications.erase(app);
     }
     else
     {
@@ -129,7 +118,7 @@ void ExecutionManager::killProcessesForState()
   }
 }
 
-bool ExecutionManager::processToBeKilled(const string& app, const std::vector<ExecutionManager::ProcessName>& allowedApps)
+bool ExecutionManager::processToBeKilled(const string& app, const std::vector<ProcessName>& allowedApps)
 {
   auto it = std::find_if(allowedApps.cbegin(),
                      allowedApps.cend(),
@@ -167,70 +156,6 @@ std::vector<string> ExecutionManager::loadListOfApplications()
 
   closedir(dp);
   return fileNames;
-}
-
-void ExecutionManager::processApplicationManifests()
-{
-  
-  const auto& applicationNames = loadListOfApplications();
-
-  json content;
-
-  for (auto file: applicationNames)
-  {
-    file = corePath + file + "/manifest.json";
-    ifstream data{file};
-
-    data >> content;
-    ApplicationManifest manifest = content.get<ApplicationManifest>();
-
-    for (const auto& process: manifest.manifest.processes)
-    {
-      for (const auto& conf: process.modeDependentStartupConf)
-      {
-        for (const auto& mode: conf.modes)
-        {
-          if (mode.functionGroup != machineStateFunctionGroup ||
-              m_allowedApplicationForState.find(mode.mode)
-                == m_allowedApplicationForState.cend())
-          {
-            std::cout << mode.mode << std::endl;
-            continue;
-          }
-          std::cout<<"pushing to allowedApplicationForState  process.name =" <<  process.name << std::endl;
-          allowedApplicationForState[mode.mode].push_back({manifest.manifest.manifestId, process.name});
-        }
-      }
-    }
-
-  }
-}
-
-void ExecutionManager::processMachineManifest()
-{
-  static const std::string manifestPath =
-      "../applications/ExecutionManager/machine_manifest.json";
-
-  ifstream data{manifestPath};
-  json manifestData;
-
-  data >> manifestData;
-
-  MachineManifest manifest = manifestData.get<MachineManifest>();
-
-  for (const auto& modeDeclGroups : manifest.manifest.modeDeclarationGroups)
-  {
-    if (modeDeclGroups.functionGroupName != machineStateFunctionGroup)
-    {
-      continue;
-    }
-
-    for (const auto& mode: modeDeclGroups.modeDeclarations)
-    {
-      m_allowedApplicationForState[mode.mode] = {};
-      m_machineManifestStates.emplace_back(mode.mode);
-    }
-  }
 }
 
 void ExecutionManager::startApplication(const ProcessName& process)

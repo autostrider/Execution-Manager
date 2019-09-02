@@ -2,7 +2,7 @@
 
 namespace api {
 namespace {
-  const char* executionManagerAddr = "unix:/tmp/execution_management:5923";
+  const char* executionManagerAddr = "unix:/tmp/execution_management";
 }
 
 ApplicationStateClient::ApplicationStateClient()

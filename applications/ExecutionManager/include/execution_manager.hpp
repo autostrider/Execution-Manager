@@ -7,7 +7,6 @@
 #include <csignal>
 #include <cstdint>
 #include <unistd.h>
-#include <chrono>
 #include <thread>
 #include <json.hpp>
 #include <fstream>
@@ -31,7 +30,7 @@ struct ApplicationManifest;
 class ExecutionManager final: public ExecutionManagement::Server
 {
 public:
-  ExecutionManager() = default;
+  ExecutionManager();
 
   /**
    * @brief Main method of Execution manager.
@@ -76,6 +75,8 @@ private:
    * @brief kill all processes that doesn't support current state.
    */
   void killProcessesForState();
+
+  bool processToBeKilled (const std::string& app, const std::vector<ExecutionManager::ProcessName>&);
  
   ::kj::Promise<void>
   reportApplicationState(ReportApplicationStateContext context) override;

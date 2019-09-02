@@ -18,92 +18,73 @@ using std::string;
 const string ExecutionManager::corePath =
   string{"./bin/applications/"};
 
-const std::vector<MachineState> ExecutionManager::transition =
-{"init", "running", "shutdown"};
 
-int32_t ExecutionManager::start()
+ExecutionManager::ExecutionManager()
 {
   processManifests();
-
-  for (const auto& state: transition)
-  {
-    std::cout << "————————————————————————————————————————————————————————\n";
-    currentState = state;
-
-    killProcessesForState();
-    std::cout << state << std::endl;
-
-    startApplicationsForState();
-
-    std::this_thread::sleep_for(std::chrono::seconds{2});
-  }
-
-  try
-  {
-    capnp::EzRpcServer server(kj::heap<ExecutionManager>(),
-                              "unix:/tmp/execution_management");
-    auto &waitScope = server.getWaitScope();
-
-    std::cout << "Execution Manager started.." << std::endl;
-
-    kj::NEVER_DONE.wait(waitScope);
-  }
-  catch (const kj::Exception &e)
-  {
-    std::cerr << e.getDescription().cStr() << std::endl;
-  }
-
-  return EXIT_SUCCESS;
 }
 
 void ExecutionManager::startApplicationsForState()
 {
-  const auto& allowedApps = allowedApplicationForState[currentState];
+  const auto& allowedApps = allowedApplicationForState.find(currentState);
 
-  for (const auto& executableToStart: allowedApps)
+  if (allowedApps != allowedApplicationForState.cend())
   {
-    if (activeApplications.find(executableToStart.processName) != activeApplications.cend())
+    for (const auto& executableToStart: allowedApps->second)
     {
-      continue;
-    }
-    try
-    {
-      startApplication(executableToStart);
-    }
-    catch (const runtime_error& err)
-    {
-      std::cout << err.what() << std::endl;
+      if (activeApplications.find(executableToStart.processName) != activeApplications.cend())
+      {
+        continue;
+      }
+      try
+      {
+        startApplication(executableToStart);
+      }
+      catch (const runtime_error& err)
+      {
+        std::cout << err.what() << std::endl;
+      }
     }
   }
 }
 
 void ExecutionManager::killProcessesForState()
 {
-  const auto& allowedApps = allowedApplicationForState[currentState];
+  auto allowedApps = allowedApplicationForState.find(currentState);
 
   for (auto app = activeApplications.cbegin(); app != activeApplications.cend();)
   {
-    if (std::find_if(allowedApps.cbegin(),
-                     allowedApps.cend(),
-                     [&app](auto& allowedApp)
-    { return app->first == allowedApp.processName; }) == allowedApps.cend())
+    if (allowedApps == allowedApplicationForState.cend() ||
+        processToBeKilled(app->first, allowedApps->second))
     {
       kill(app->second, SIGTERM);
       app = activeApplications.erase(app);
-    } else {
+    }
+    else
+    {
       app++;
     }
   }
 }
 
-std::vector<std::string> ExecutionManager::loadListOfApplications()
+bool ExecutionManager::processToBeKilled(const string& app, const std::vector<ExecutionManager::ProcessName>& allowedApps)
+{
+  auto it = std::find_if(allowedApps.cbegin(),
+                     allowedApps.cend(),
+                     [&app](auto& listItem)
+    { return app == listItem.processName; });
+
+  return (it  == allowedApps.cend());
+};
+
+std::vector<string> ExecutionManager::loadListOfApplications()
 {
   DIR* dp = nullptr;
-  std::vector<std::string> fileNames;
+  std::vector<string> fileNames;
 
   if ((dp = opendir(corePath.c_str())) == nullptr)
   {
-    throw runtime_error(std::string{"Error opening directory: "}
+    throw runtime_error(string{"Error opening directory: "}
                         + corePath
                         + " "
                         + strerror(errno));
@@ -146,7 +127,7 @@ void ExecutionManager::processManifests()
         {
           if (mode.functionGroup != "MachineState")
             continue;
-
+          std::cout<<"pushing to allowedApplicationForState  process.name =" <<  process.name << std::endl;
           allowedApplicationForState[mode.mode].push_back({manifest.manifest.manifestId, process.name});
         }
       }
@@ -168,7 +149,7 @@ void ExecutionManager::startApplication(const ProcessName& process)
 
     if (res)
     {
-      throw runtime_error(std::string{"Error occured creating process: "}
+      throw runtime_error(string{"Error occured creating process: "}
                           + process.processName
                           + " "
                           + strerror(errno));
@@ -236,12 +217,16 @@ ExecutionManager::getMachineState(GetMachineStateContext context)
 ::kj::Promise<void>
 ExecutionManager::setMachineState(SetMachineStateContext context)
 {
-  std::string state = context.getParams().getState().cStr();
+  string state = context.getParams().getState().cStr();
 
   if (!state.empty() && state != currentState)
   {
     currentState = state;
 
+    killProcessesForState();
+
+    startApplicationsForState();
+   
     context.getResults().setResult(StateError::K_SUCCESS);
 
     std::cout << "Machine state changed successfully to "

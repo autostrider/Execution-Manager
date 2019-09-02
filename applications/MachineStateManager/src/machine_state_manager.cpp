@@ -19,7 +19,7 @@ int32_t MachineStateManager::start()
   cout << "Machine State Manager started.." << endl;
 
   const char* applicationName = "Machine state manager";
-  constexpr int defaulTimeout = 3000;
+  constexpr int defaulTimeout = 300000;
 
   StateError result =
     machineStateClient->Register(applicationName, defaulTimeout);
@@ -53,7 +53,11 @@ int32_t MachineStateManager::start()
         else if(StateError::K_TIMEOUT == result)
         {
           cout << "Get timeout" << endl;
-        } else{cout << "Failed" << endl;}
+        }
+        else
+        {
+          cout << "Failed" << endl;
+        }
       }
       else if(cli.find("set ") != string::npos)
       {
@@ -65,7 +69,11 @@ int32_t MachineStateManager::start()
         if(StateError::K_SUCCESS == result)
         {
           cout << "Machine state changed" << endl;
-        }else{cout << "Failed" << endl;}
+        }
+        else
+        {
+          cout << "Machine state change failed" << endl;
+        }
       }
     }
   }

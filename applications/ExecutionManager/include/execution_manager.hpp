@@ -90,7 +90,7 @@ private:
    */
   void killProcessesForState();
 
-  bool processToBeKilled (const std::string& app, const std::vector<ExecutionManager::ProcessName>&);
+  bool processToBeKilled (const std::string& app, const std::vector<ProcessInfo> &);
  
   ::kj::Promise<void>
   reportApplicationState(ReportApplicationStateContext context) override;

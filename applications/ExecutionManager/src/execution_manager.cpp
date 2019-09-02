@@ -18,10 +18,31 @@ using std::string;
 const string ExecutionManager::corePath =
   string{"./bin/applications/"};
 
+const std::vector<MachineState> ExecutionManager::transition =
+  {"init", "running", "shutdown"};
+
 
 ExecutionManager::ExecutionManager()
 {
   processManifests();
+}
+
+std::int32_t ExecutionManager::start()
+{
+  for (const auto& state: transition)
+  {
+    std::cout << "————————————————————————————————————————————————————————\n";
+    currentState = state;
+
+    killProcessesForState();
+    std::cout << state << std::endl;
+
+    startApplicationsForState();
+
+    std::this_thread::sleep_for(std::chrono::seconds{2});
+  }
+
+  return EXIT_SUCCESS;
 }
 
 void ExecutionManager::startApplicationsForState()
@@ -67,7 +88,7 @@ void ExecutionManager::killProcessesForState()
   }
 }
 
-bool ExecutionManager::processToBeKilled(const string& app, const std::vector<ExecutionManager::ProcessName>& allowedApps)
+bool ExecutionManager::processToBeKilled(const string& app, const std::vector<ProcessInfo>& allowedApps)
 {
   auto it = std::find_if(allowedApps.cbegin(),
                      allowedApps.cend(),

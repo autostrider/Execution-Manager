@@ -143,7 +143,7 @@ void ExecutionManager::startApplication(const ProcessName& process)
   if (!processId)
   {
     // child process
-    auto processPath = corePath + process.applicationName + string("/processes/") + process.processName;
+    auto processPath = corePath + process.applicationName + "/processes/" + process.processName;
 
     int res = execl(processPath.c_str(), process.processName.c_str(), nullptr);
 

@@ -8,6 +8,8 @@ list(REMOVE_ITEM MSM_SRC ${CMAKE_CURRENT_SOURCE_DIR}/src/msm_main.cpp)
 
 set(MSM_INCLUDE ${CMAKE_CURRENT_SOURCE_DIR}/include)
 
+add_subdirectory(test)
+
 add_executable(msm src/msm_main.cpp ${MSM_SRC})
 
 target_link_libraries(msm

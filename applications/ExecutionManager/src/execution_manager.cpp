@@ -50,12 +50,12 @@ void ExecutionManager::startApplicationsForState()
 
 void ExecutionManager::killProcessesForState()
 {
-  mapIterator allowedApps = allowedApplicationForState.find(currentState);
+  auto allowedApps = allowedApplicationForState.find(currentState);
 
   for (auto app = activeApplications.cbegin(); app != activeApplications.cend();)
   {
     if (allowedApps == allowedApplicationForState.cend() ||
-        processForKill(app->first, allowedApps))
+        processToBeKilled(app->first, allowedApps->second))
     {
       kill(app->second, SIGTERM);
       app = activeApplications.erase(app);
@@ -67,14 +67,14 @@ void ExecutionManager::killProcessesForState()
   }
 }
 
-bool ExecutionManager::processForKill(string app, mapIterator &allowedApp)
+bool ExecutionManager::processToBeKilled(const string& app, const std::vector<ExecutionManager::ProcessName>& listOfProcessNames)
 {
-  auto it = std::find_if(allowedApp->second.cbegin(),
-                     allowedApp->second.cend(),
-                     [&app](auto& allowedApp)
-    { return app == allowedApp.processName; });
+  auto it = std::find_if(listOfProcessNames.cbegin(),
+                     listOfProcessNames.cend(),
+                     [&app](auto& listItem)
+    { return app == listItem.processName; });
 
-  return (it  == allowedApp->second.cend()); 
+  return (it  == listOfProcessNames.cend()); 
 };
 
 std::vector<string> ExecutionManager::loadListOfApplications()

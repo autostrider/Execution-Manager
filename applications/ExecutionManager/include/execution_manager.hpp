@@ -49,8 +49,6 @@ private:
     std::string processName;
   };
 
-  using mapIterator = std::map<MachineState, std::vector<ProcessName>>::const_iterator;
-
   /**
    * @brief Loads all adaptive applications from corePath.
    * @return Vector containing names of applications that were found in corePath.   
@@ -78,10 +76,7 @@ private:
    */
   void killProcessesForState();
 
-  /**
-   * @brief kill all processes that doesn't support current state.
-   */
-  bool processForKill (std::string app, mapIterator &allowedApp);
+  bool processToBeKilled (const std::string& app, const std::vector<ExecutionManager::ProcessName>&);
  
   ::kj::Promise<void>
   reportApplicationState(ReportApplicationStateContext context) override;

@@ -1,5 +1,3 @@
-#include "execution_manager.hpp"
-
 #include <json.hpp>
 #include <fstream>
 #include <dirent.h>
@@ -7,6 +5,9 @@
 #include <thread>
 #include <signal.h>
 #include <iostream>
+#include <algorithm>
+
+#include "execution_manager.hpp"
 
 
 namespace ExecutionManager
@@ -19,9 +20,16 @@ const string ExecutionManager::corePath =
   string{"./bin/applications/"};
 
 
-ExecutionManager::ExecutionManager()
+ExecutionManager::ExecutionManager() : msmProcess({string{"MachineStateManager"}, string{"msm"}})
 {
   processManifests();
+
+  startApplication(msmProcess);
+}
+
+ExecutionManager::~ExecutionManager()
+{
+  kill(pidForMsm, SIGTERM);
 }
 
 void ExecutionManager::startApplicationsForState()
@@ -84,7 +92,7 @@ std::vector<string> ExecutionManager::loadListOfApplications()
 
   if ((dp = opendir(corePath.c_str())) == nullptr)
   {
-    throw runtime_error(string{"Error opening directory: "}
+    throw runtime_error(string{"ExecutionManager: Error opening directory: "}
                         + corePath
                         + " "
                         + strerror(errno));
@@ -127,7 +135,6 @@ void ExecutionManager::processManifests()
         {
           if (mode.functionGroup != "MachineState")
             continue;
-          std::cout<<"pushing to allowedApplicationForState  process.name =" <<  process.name << std::endl;
           allowedApplicationForState[mode.mode].push_back({manifest.manifest.manifestId, process.name});
         }
       }
@@ -149,14 +156,21 @@ void ExecutionManager::startApplication(const ProcessName& process)
 
     if (res)
     {
-      throw runtime_error(string{"Error occured creating process: "}
+      throw runtime_error(string{"ExecutionManager: Error occured creating process: "}
                           + process.processName
                           + " "
                           + strerror(errno));
     }
   } else {
     // parent process
-    activeApplications.insert({process.processName, processId});
+    if (process.processName == "msm")
+    {
+      pidForMsm = processId;
+    }
+    else
+    {
+      activeApplications.insert({process.processName, processId});
+    }
   }
 
 }
@@ -166,7 +180,7 @@ ExecutionManager::reportApplicationState(ReportApplicationStateContext context)
 {
   ApplicationState state = context.getParams().getState();
 
-  std::cout << "State #" << static_cast<uint16_t>(state)
+  std::cout << "ExecutionManager: State #" << static_cast<uint16_t>(state)
             << " received"
             << std::endl;
 
@@ -184,16 +198,32 @@ ExecutionManager::register_(RegisterContext context)
     machineStateClientAppName = newMachineClient;
     context.getResults().setResult(StateError::K_SUCCESS);
 
-    std::cout << "State Machine Client \""
+    std::cout << "ExecutionManager: State Machine Client \""
               << machineStateClientAppName
               << "\" registered"
               << std::endl;
+    
+    //removing msm from allowedApplicationForState
+    for (auto& pair:allowedApplicationForState)
+    {
+     
+        
+      auto toBeRemoved = std::remove_if(pair.second.begin(),
+                                    pair.second.end(),
+                                    [&](ProcessName & processName){
+                                      return (processName.applicationName == machineStateClientAppName);
+                                    }
+                                  ); 
+      
+      
+      pair.second.erase(toBeRemoved, pair.second.end());
+    }
   }
   else
   {
     context.getResults().setResult(StateError::K_INVALID_REQUEST);
 
-    std::cout << "State Machine Client \""
+    std::cout << "ExecutionManager: State Machine Client \""
               << machineStateClientAppName
               << "\" registration failed" 
               << std::endl;
@@ -205,7 +235,7 @@ ExecutionManager::register_(RegisterContext context)
 ::kj::Promise<void>
 ExecutionManager::getMachineState(GetMachineStateContext context)
 {
-  std::cout << "getMachineState request received" << std::endl;
+  std::cout << "ExecutionManager: getMachineState request received" << std::endl;
 
   context.getResults().setState(currentState);
 
@@ -229,7 +259,7 @@ ExecutionManager::setMachineState(SetMachineStateContext context)
    
     context.getResults().setResult(StateError::K_SUCCESS);
 
-    std::cout << "Machine state changed successfully to "
+    std::cout << "ExecutionManager: Machine state changed successfully to "
               << "\"" 
               << currentState << "\"" 
               << std::endl;
@@ -238,7 +268,7 @@ ExecutionManager::setMachineState(SetMachineStateContext context)
   {
     context.getResults().setResult(StateError::K_INVALID_STATE);
 
-    std::cout << "Invalid machine state received - "
+    std::cout << "ExecutionManager: Invalid machine state received - "
               << "\"" << currentState << "\"" 
               << std::endl;
   }

@@ -19,28 +19,28 @@ public:
   {}
   int start()
   {
-    cout << "Hello from SimpleApp" << endl;
+    cout << "SimpleApplication: Starting..." << endl;
+
+    cout << "SimpleApplication: Reporting state K_INITIALIZING..." << endl;
 
     applState->ReportApplicationState(
       ApplicationState::K_INITIALIZING);
 
-    cout << "K_INITIALIZING (0) sent" << endl;
+    this_thread::sleep_for(seconds(5));
 
-    this_thread::sleep_for(seconds(1));
+    cout << "SimpleApplication: Reporting state K_RUNNING..." << endl;
 
     applState->ReportApplicationState(
       ApplicationState::K_RUNNING);
 
-    cout << "K_RUNNING (1) sent" << endl;
+    this_thread::sleep_for(seconds(5));
 
-    this_thread::sleep_for(seconds(1));
+    cout << "SimpleApplication: Reporting state K_SHUTTINGDOWN..." << endl;
 
     applState->ReportApplicationState(
       ApplicationState::K_SHUTTINGDOWN);
 
-    cout << "K_SHUTTINGDOWN (2) sent" << endl;
-
-    cout << "Bye, bye from SimpleApp" << endl;
+    cout << "SimpleApplication: Terminating..." << endl;
 
     return EXIT_SUCCESS;
   }

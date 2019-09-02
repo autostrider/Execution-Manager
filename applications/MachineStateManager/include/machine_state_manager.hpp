@@ -13,13 +13,13 @@ namespace MachineStateManager
 
 class MachineStateManager
 {
+  using StateError = api::MachineStateClient::StateError;
+  void print(StateError);
+
 public:
   MachineStateManager();
   ~MachineStateManager() = default;
   int32_t start();
-
-private:
-  using StateError = api::MachineStateClient::StateError;
 
 private:
   std::unique_ptr<api::MachineStateClient> machineStateClient;

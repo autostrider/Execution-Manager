@@ -1,3 +1,6 @@
+#include <chrono>
+#include <thread>
+
 #include "machine_state_manager.hpp"
 
 namespace MachineStateManager {
@@ -16,9 +19,9 @@ MachineStateManager::MachineStateManager()
 
 int32_t MachineStateManager::start()
 {
-  cout << "Machine State Manager started.." << endl;
+  cout << "MachineStateManager: Machine State Manager started.." << endl;
 
-  const char* applicationName = "Machine state manager";
+  const char* applicationName = "MachineStateManager";
   constexpr int defaulTimeout = 300000;
 
   StateError result =
@@ -26,60 +29,36 @@ int32_t MachineStateManager::start()
 
   if(StateError::K_SUCCESS == result)
   {
-    cout << "Successful registration as a MSM" << endl;
+    cout << "MachineStateManager: Successful registration as a MSM" << endl;
   }
   else
   {
-    cerr << "Unsuccessful registration as a MSM.\nTerminating.." << endl;
+    cerr << "MachineStateManager: Unsuccessful registration as a MSM.\nTerminating.." << endl;
     return EXIT_FAILURE;
   }
 
+  while (1)
   {
-    string cli;
-    while(cli != "exit")
-    {
-      std::getline(std::cin, cli);
+    std::cout << "MachineStateManager: Setting machine state to INIT..." <<std::endl;
+    result =
+      machineStateClient->SetMachineState("init", 300000);
 
-      if(cli == "get")
-      {
-        string state;
-        StateError result =
-          machineStateClient->GetMachineState(defaulTimeout, state);
+    std::this_thread::sleep_for(std::chrono::seconds(10));
 
-        if(StateError::K_SUCCESS == result)
-        {
-          cout << "Current machine state: " << state << endl;
-        }
-        else if(StateError::K_TIMEOUT == result)
-        {
-          cout << "Get timeout" << endl;
-        }
-        else
-        {
-          cout << "Failed" << endl;
-        }
-      }
-      else if(cli.find("set ") != string::npos)
-      {
-        string state = cli.substr(cli.find(' ')+1, cli.size() - cli.find(' '));
+    std::cout << "MachineStateManager: Setting machine state to RUNNING..." <<std::endl;
+    result =
+      machineStateClient->SetMachineState("running", 300000);
 
-        StateError result =
-          machineStateClient->SetMachineState(state, defaulTimeout);
+    std::this_thread::sleep_for(std::chrono::seconds(10));
 
-        if(StateError::K_SUCCESS == result)
-        {
-          cout << "Machine state changed" << endl;
-        }
-        else
-        {
-          cout << "Machine state change failed" << endl;
-        }
-      }
-    }
+    std::cout << "MachineStateManager: Setting machine state to SHUTDOWN..." <<std::endl;
+    result =
+      machineStateClient->SetMachineState("shutdown", 300000);
+    
+    std::this_thread::sleep_for(std::chrono::seconds(30));
   }
 
   return EXIT_SUCCESS;
 }
-
 
 } // namespace MachineStateManager

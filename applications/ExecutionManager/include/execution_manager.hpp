@@ -16,6 +16,7 @@
 #include <functional>
 #include <capnp/ez-rpc.h>
 #include <execution_management.capnp.h>
+
 #include "manifests.hpp"
 
 namespace ExecutionManager
@@ -31,6 +32,7 @@ class ExecutionManager final: public ExecutionManagement::Server
 {
 public:
   ExecutionManager();
+  ~ExecutionManager();
 
   /**
    * @brief Main method of Execution manager.
@@ -109,7 +111,7 @@ private:
   /**
    * brief Current machine state.
    */
-  MachineState currentState = "init";
+  MachineState currentState;
 
   /**
    * @brief Vector that holds state transitions.
@@ -117,6 +119,11 @@ private:
   const static std::vector<MachineState> transition;
 
   std::string machineStateClientAppName;
+
+  pid_t pidForMsm;
+
+
+  ProcessName msmProcess;
 };
 
 } // namespace ExecutionManager

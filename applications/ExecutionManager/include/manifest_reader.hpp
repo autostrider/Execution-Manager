@@ -25,13 +25,20 @@ public:
     *         manifest.
     */
    virtual std::map<MachineState, std::vector<ProcessName>>
-   getApplications() override;
+   getApplicationStatesMap() override;
 
    /**
    * @brief Loading data from Machine Manifest and process it.
    * @return All the machine states available.
    */
-  virtual std::vector<MachineState> getMachineStates() override;
+  virtual std::vector<MachineState> getMachineStatesVector() override;
+
+  /**
+   * @brief Load json from file.
+   * @param manifestPath: path to file.
+   * @return parsed object.
+   */
+  json getJsonData(const std::string &manifestPath);
 
 private:
 
@@ -40,7 +47,7 @@ private:
    * @return Vector containing names of applications that were found in
    *          corePath.
    */
-  std::vector<std::string> loadListOfApplications();
+  std::vector<std::string> getListOfApplications();
 
   /**
    * @brief Hardcoded path to folder with adaptive applications.

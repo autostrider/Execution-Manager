@@ -14,19 +14,26 @@ const std::string ManifestReader::corePath = "./bin/applications/";
 
 const std::string ManifestReader::machineStateFunctionGroup = "MachineState";
 
-std::map<MachineState, std::vector<ProcessName>>
-ManifestReader::getApplications()
+json ManifestReader::getJsonData(const std::string& manifestPath)
 {
-  const auto& applicationNames = loadListOfApplications();
+  ifstream data{manifestPath};
+  json manifestData;
+  data >> manifestData;
+
+  return manifestData;
+}
+
+std::map<MachineState, std::vector<ProcessName>>
+ManifestReader::getApplicationStatesMap()
+{
+  const auto& applicationNames = getListOfApplications();
   std::map<MachineState, std::vector<ProcessName>> res;
 
   for (auto file: applicationNames)
   {
     file = corePath + file + "/manifest.json";
 
-    ifstream data{file};
-    json content;
-    data >> content;
+    json content = getJsonData(file);
 
     ApplicationManifest manifest = content.get<ApplicationManifest>();
 
@@ -36,13 +43,13 @@ ManifestReader::getApplications()
       {
         for (const auto& mode: conf.modes)
         {
-          if (mode.functionGroup != machineStateFunctionGroup)
+          if (mode.functionGroup == machineStateFunctionGroup)
           {
-            continue;
-          }
 
-          res[mode.mode]
+
+            res[mode.mode]
               .push_back({manifest.manifest.manifestId, process.name});
+          }
         }
       }
     }
@@ -51,15 +58,13 @@ ManifestReader::getApplications()
   return res;
 }
 
-std::vector<MachineState> ManifestReader::getMachineStates()
+std::vector<MachineState> ManifestReader::getMachineStatesVector()
 {
   static const std::string manifestPath =
       "../applications/ExecutionManager/machine_manifest.json";
 
-  ifstream data{manifestPath};
-  json manifestData;
+  json manifestData = getJsonData(manifestPath);
 
-  data >> manifestData;
   MachineManifest manifest = manifestData.get<MachineManifest>();
 
   std::vector<MachineState> res;
@@ -77,7 +82,7 @@ std::vector<MachineState> ManifestReader::getMachineStates()
   return res;
 }
 
-std::vector<std::string> ManifestReader::loadListOfApplications()
+std::vector<std::string> ManifestReader::getListOfApplications()
 {
   DIR* dp = nullptr;
   std::vector<std::string> fileNames;
@@ -92,15 +97,14 @@ std::vector<std::string> ManifestReader::loadListOfApplications()
 
   for (struct dirent *drnt = readdir(dp); drnt != nullptr; drnt = readdir(dp))
   {
-    if (drnt->d_name == std::string{"."} ||
-        drnt->d_name == std::string{".."})
+    if (drnt->d_name != std::string{"."} &&
+        drnt->d_name != std::string{".."})
     {
-      continue;
+
+      fileNames.emplace_back(drnt->d_name);
+
+      std::cout << drnt->d_name << std::endl;
     }
-
-    fileNames.emplace_back(drnt->d_name);
-
-    std::cout << drnt->d_name << std::endl;
   }
 
   closedir(dp);

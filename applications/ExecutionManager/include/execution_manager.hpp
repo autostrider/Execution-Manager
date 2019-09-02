@@ -89,7 +89,6 @@ private:
   ::kj::Promise<void>
   setMachineState(SetMachineStateContext context) override;
 private:
-  std::unique_ptr<IManifestReader> manifestHandler;
   /**
    * @brief Hardcoded path to folder with adaptive applications.
    */

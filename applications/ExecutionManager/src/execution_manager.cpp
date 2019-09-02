@@ -19,11 +19,10 @@ const string ExecutionManager::corePath =
   string{"./bin/applications/"};
 
 ExecutionManager::ExecutionManager(std::unique_ptr<IManifestReader> handler)
-  : manifestHandler{std::move(handler)}
-  , m_activeApplications{}
-  , m_allowedApplicationForState{manifestHandler->getApplications()}
+  : m_activeApplications{}
+  , m_allowedApplicationForState{handler->getApplicationStatesMap()}
   , m_currentState{}
-  , m_machineManifestStates{manifestHandler->getMachineStates()}
+  , m_machineManifestStates{handler->getMachineStatesVector()}
   , machineStateClientAppName{}
 {
   processManifests();
@@ -51,21 +50,22 @@ int32_t ExecutionManager::start()
 
     std::this_thread::sleep_for(std::chrono::seconds{2});
   }
-  try
-
-  {
-                              "unix:/tmp/execution_management");
-    capnp::EzRpcServer server(kj::heap<ExecutionManager>(),
-    auto &waitScope = server.getWaitScope();
 
     std::cout << "Execution Manager started.." << std::endl;
+//  try
+//  {
+//    capnp::EzRpcServer server(kj::heap<ExecutionManager>(),
+//                              "unix:/tmp/execution_management");
+//    auto &waitScope = server.getWaitScope();
 
-    kj::NEVER_DONE.wait(waitScope);
-  }
-  catch (const kj::Exception &e)
-  {
-    std::cerr << e.getDescription().cStr() << std::endl;
-  }
+//    std::cout << "Execution Manager started.." << std::endl;
+
+//    kj::NEVER_DONE.wait(waitScope);
+//  }
+//  catch (const kj::Exception &e)
+//  {
+//    std::cerr << e.getDescription().cStr() << std::endl;
+//  }
 
   return EXIT_SUCCESS;
 }
@@ -93,12 +93,10 @@ void ExecutionManager::startApplicationsForState()
 
   if (allowedApps != allowedApplicationForState.cend())
   {
-    for (const auto& executableToStart: allowedApps->second)
+    if (m_activeApplications.find(executableToStart.processName) ==
+        m_activeApplications.cend())
     {
-      if (activeApplications.find(executableToStart.processName) != activeApplications.cend())
-      {
-        continue;
-      }
+
       try
       {
         startApplication(executableToStart);

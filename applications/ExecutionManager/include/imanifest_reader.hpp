@@ -22,13 +22,13 @@ public:
     *         manifest.
     */
   virtual std::map<MachineState, std::vector<ProcessName>>
-  getApplications() = 0;
+  getApplicationStatesMap() = 0;
 
   /**
   * @brief Loading data from Machine Manifest and process it.
   * @return All the machine states available.
   */
-  virtual std::vector<MachineState> getMachineStates() = 0;
+  virtual std::vector<MachineState> getMachineStatesVector() = 0;
 
   virtual ~IManifestReader() = default;
 };

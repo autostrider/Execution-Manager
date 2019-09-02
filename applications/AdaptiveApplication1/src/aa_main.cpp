@@ -11,8 +11,6 @@ int main()
     }
 
     App::getInstance().transitToNextState();
-    App::getInstance().transitToNextState();
-    App::getInstance().transitToNextState();
     while(1);
     return 0;
 }
@@ -20,5 +18,6 @@ int main()
 static void signalHandler(int signo)
 {
     std::cout << "received signal:" << sys_siglist[signo] << "\n";
-    App::getInstance().transitToNextState(App::TerminateApp);
+    App::getInstance().terminate();
+    App::getInstance().transitToNextState();
 }

@@ -8,20 +8,27 @@
 
 
 
-void App::printVector(const std::vector<double>& vec) const
+void App::printVector() const
 {
-    for (const auto& item : vec) {
+    for (const auto& item : _rawData) {
         std::cout << item << " | ";
     }
     std::cout << "\n";
 }
 
+bool App::isTerminating() const
+{
+    return terminateApp;
+}
+
+void App::terminate()
+{
+    terminateApp = true;
+}
+
 void App::readSensorData()
 {
     std::cout << "Read data from sensors\n";
-    const size_t numberOfSamples = 100;
-    std::vector<double> data(numberOfSamples);
-    data.reserve(numberOfSamples);
 
     std::random_device rd{};
     std::mt19937 gen{rd()};
@@ -29,33 +36,28 @@ void App::readSensorData()
     std::normal_distribution<>d(mu, sigma);
 
     for (size_t k = 0; k < numberOfSamples; ++k) {
-        data[k] = d(gen);
+        _rawData[k] = d(gen);
     }
-    _rawData = data;
 }
 
 double App::mean()
 {
-    double sum = std::accumulate(_rawData.cbegin(), _rawData.cend(), 0);
-    std::cout << "";
+    double sum = std::accumulate(_rawData.cbegin(), _rawData.cend(), 0.0);
     sum /= _rawData.size();
     return  sum;
 }
 
-App::App()
+App::App() : _rawData(numberOfSamples), m_currentState{std::make_unique<Init>()}, terminateApp{false}
 {
-    m_currentState = std::make_unique<Init>();
+    _rawData.reserve(numberOfSamples);
     m_currentState->enter(*this);
 }
 
-void App::transitToNextState(int state)
+void App::transitToNextState()
 {
-    auto newState = m_currentState->handleTransition(*this, state);
-    if (newState != nullptr)
-    {
-        m_currentState = std::move(newState);
-        m_currentState->enter(*this);
-    }
+    auto newState = m_currentState->handleTransition(*this);
+    m_currentState = std::move(newState);
+    m_currentState->enter(*this);
 }
 
 App &App::getInstance()
@@ -64,9 +66,9 @@ App &App::getInstance()
    return  instance;
 }
 
-std::unique_ptr<State> Init::handleTransition(App &app, int state)
+std::unique_ptr<State> Init::handleTransition(App &app)
 {
-    if (state == App::TerminateApp)
+    if (app.isTerminating())
     {
         return std::make_unique<Terminate>();
     }
@@ -75,13 +77,13 @@ std::unique_ptr<State> Init::handleTransition(App &app, int state)
 
 void Init::enter(App &app)
 {
-    std::cout << "Enter init state\n";
-    app.readSensorData();
+    std::cout << "Enter init state\n"
+              << "App is created\n";
 }
 
-std::unique_ptr<State> Run::handleTransition(App &app, int state)
+std::unique_ptr<State> Run::handleTransition(App &app)
 {
-    if (state == App::TerminateApp)
+    if (app.isTerminating())
     {
         return std::make_unique<Terminate>();
     }
@@ -91,12 +93,14 @@ std::unique_ptr<State> Run::handleTransition(App &app, int state)
 void Run::enter(App &app)
 {
     std::cout << "Enter run state\n";
+    app.readSensorData();
+
     std::cout << "mean: " << app.mean() << "\n";
 }
 
-std::unique_ptr<State> Terminate::handleTransition(App &app, int state)
+std::unique_ptr<State> Terminate::handleTransition(App &app)
 {
-    if (state == App::TerminateApp)
+    if (app.isTerminating())
     {
         std::cout << "Already in terminate state!";
     }

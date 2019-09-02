@@ -11,14 +11,15 @@ class App
 {
 public:
     static App &getInstance();
-    virtual ~App(){}
+    virtual ~App() = default;
 
-    virtual void transitToNextState(int state = 0);
+    void transitToNextState();
     double mean();
     void readSensorData();
-    void printVector(const std::vector<double>& vec) const;
+    void printVector() const;
 
-    const static int TerminateApp = -1;
+    bool isTerminating() const;
+    void terminate();
 
 private:
     App();
@@ -27,36 +28,37 @@ private:
     App(App&&) = delete;
     App& operator=(App&&) = delete;
 
+    const size_t numberOfSamples = 50;
     std::vector<double> _rawData;
     std::unique_ptr<State> m_currentState;
-
+    bool terminateApp;
 };
 
 class State
 {
 public:
-    virtual ~State(){}
-    virtual std::unique_ptr<State> handleTransition(App& app, int state) = 0;
+    virtual ~State() = default;
+    virtual std::unique_ptr<State> handleTransition(App& app) = 0;
     virtual void enter(App& app) = 0;
 };
 
 class Init : public State
 {
 public:
-    std::unique_ptr<State> handleTransition(App& app, int state) override;
+    std::unique_ptr<State> handleTransition(App& app) override;
     void enter(App& app) override;
 };
 
 class Run : public State
 {
 public:
-    std::unique_ptr<State> handleTransition(App& app, int state) override;
+    std::unique_ptr<State> handleTransition(App& app) override;
     void enter(App& app) override;
 };
 
 class Terminate : public State
 {
-    std::unique_ptr<State> handleTransition(App& app, int state) override;
+    std::unique_ptr<State> handleTransition(App& app) override;
     void enter(App& app) override;
 };
 

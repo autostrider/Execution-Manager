@@ -10,7 +10,7 @@ class State;
 class App
 {
 public:
-    App();
+    static App &getInstance();
     virtual ~App(){}
 
     virtual void transitToNextState(int state = 0);
@@ -19,7 +19,14 @@ public:
     void printVector(const std::vector<double>& vec) const;
 
     const static int TerminateApp = -1;
+
 private:
+    App();
+    App(const App&) = delete;
+    App& operator=(const App&) = delete;
+    App(App&&) = delete;
+    App& operator=(App&&) = delete;
+
     std::vector<double> _rawData;
     std::unique_ptr<State> m_currentState;
 

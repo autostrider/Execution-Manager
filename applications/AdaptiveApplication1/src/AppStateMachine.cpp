@@ -6,6 +6,8 @@
 #include <vector>
 #include <cmath>
 
+
+
 void App::printVector(const std::vector<double>& vec) const
 {
     for (const auto& item : vec) {
@@ -56,19 +58,25 @@ void App::transitToNextState(int state)
     }
 }
 
+App &App::getInstance()
+{
+   static App instance;
+   return  instance;
+}
+
 std::unique_ptr<State> Init::handleTransition(App &app, int state)
 {
     if (state == App::TerminateApp)
     {
         return std::make_unique<Terminate>();
     }
-    app.readSensorData();
     return std::make_unique<Run>();
 }
 
 void Init::enter(App &app)
 {
     std::cout << "Enter init state\n";
+    app.readSensorData();
 }
 
 std::unique_ptr<State> Run::handleTransition(App &app, int state)
@@ -77,13 +85,13 @@ std::unique_ptr<State> Run::handleTransition(App &app, int state)
     {
         return std::make_unique<Terminate>();
     }
-    std::cout << "(Run state)\t mean: " << app.mean() << "\n";
     return std::make_unique<Run>();
 }
 
 void Run::enter(App &app)
 {
     std::cout << "Enter run state\n";
+    std::cout << "mean: " << app.mean() << "\n";
 }
 
 std::unique_ptr<State> Terminate::handleTransition(App &app, int state)

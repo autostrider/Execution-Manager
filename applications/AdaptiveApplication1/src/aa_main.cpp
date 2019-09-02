@@ -1,4 +1,4 @@
-#include <Application.hpp>
+#include <AppStateMachine.hpp>
 
 #include <signal.h>
 static void signalHandler(int signo);
@@ -10,9 +10,9 @@ int main()
         std::cout << "Error while registering signal\n";
     }
 
-    Application::getInstance().transitToNextState();
-    Application::getInstance().transitToNextState();
-    Application::getInstance().transitToNextState();
+    App::getInstance().transitToNextState();
+    App::getInstance().transitToNextState();
+    App::getInstance().transitToNextState();
     while(1);
     return 0;
 }
@@ -20,5 +20,5 @@ int main()
 static void signalHandler(int signo)
 {
     std::cout << "received signal:" << sys_siglist[signo] << "\n";
-    Application::getInstance().transitToNextState(App::TerminateApp);
+    App::getInstance().transitToNextState(App::TerminateApp);
 }

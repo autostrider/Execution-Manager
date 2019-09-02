@@ -4,14 +4,15 @@
 #include <iostream>
 #include <vector>
 #include <memory>
+#include <atomic>
 
 class State;
 
 class App
 {
 public:
-    static App &getInstance();
     virtual ~App() = default;
+    App(std::atomic<bool>& termRef);
 
     void transitToNextState();
     double mean();
@@ -19,10 +20,8 @@ public:
     void printVector() const;
 
     bool isTerminating() const;
-    void terminate();
 
 private:
-    App();
     App(const App&) = delete;
     App& operator=(const App&) = delete;
     App(App&&) = delete;
@@ -31,7 +30,7 @@ private:
     const size_t numberOfSamples = 50;
     std::vector<double> _rawData;
     std::unique_ptr<State> m_currentState;
-    bool terminateApp;
+    std::atomic<bool>& terminateApp;
 };
 
 class State

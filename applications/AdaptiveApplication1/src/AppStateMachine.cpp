@@ -18,12 +18,7 @@ void App::printVector() const
 
 bool App::isTerminating() const
 {
-    return terminateApp;
-}
-
-void App::terminate()
-{
-    terminateApp = true;
+    return terminateApp.load();
 }
 
 void App::readSensorData()
@@ -47,7 +42,7 @@ double App::mean()
     return  sum;
 }
 
-App::App() : _rawData(numberOfSamples), m_currentState{std::make_unique<Init>()}, terminateApp{false}
+App::App(std::atomic<bool> &termRef) : _rawData(numberOfSamples), m_currentState{std::make_unique<Init>()}, terminateApp{termRef}
 {
     _rawData.reserve(numberOfSamples);
     m_currentState->enter(*this);
@@ -56,14 +51,11 @@ App::App() : _rawData(numberOfSamples), m_currentState{std::make_unique<Init>()}
 void App::transitToNextState()
 {
     auto newState = m_currentState->handleTransition(*this);
-    m_currentState = std::move(newState);
+    if (newState != nullptr)
+    {
+        m_currentState = std::move(newState);
+    }
     m_currentState->enter(*this);
-}
-
-App &App::getInstance()
-{
-   static App instance;
-   return  instance;
 }
 
 std::unique_ptr<State> Init::handleTransition(App &app)
@@ -87,7 +79,7 @@ std::unique_ptr<State> Run::handleTransition(App &app)
     {
         return std::make_unique<Terminate>();
     }
-    return std::make_unique<Run>();
+    return nullptr;
 }
 
 void Run::enter(App &app)

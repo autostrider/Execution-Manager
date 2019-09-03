@@ -67,7 +67,7 @@ private:
    * @param process: process for certain mode dependent startup config.
    * @return vector of command line arguments for application.
    */
-  std::vector<char*> getArgumentsList(const ProcessInfo& process);
+  std::vector<char*> getArgumentsList(const ProcessInfo& process) const;
 
   /**
    * @brief processManifests - loads manifests from corePath.

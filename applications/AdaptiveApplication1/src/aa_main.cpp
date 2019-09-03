@@ -17,7 +17,7 @@ int main(int argc, char* argv[])
   for (int i = 0; i < argc; i++)
   {
     std::cout << "argv[" << i << "]=" << std::string{argv[i]} << std::endl;
-    }
+  }
 
   std::cout << "app1\tproc1\n";
   while (1)

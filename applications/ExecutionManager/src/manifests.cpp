@@ -99,11 +99,11 @@ std::string StartupOption::makeCommandLineOption() const
   std::string res = optionName;
 
   switch (optionKind) {
-    case StartupOptionKind::commandLineShortForm:
+    case StartupOptionKindEnum::commandLineShortForm:
       res = "-" + res +
             (optionArg == std::string{""} ? "" : " " + optionArg);
       break;
-    case StartupOptionKind::commandLineLongForm:
+    case StartupOptionKindEnum::commandLineLongForm:
       res = "--" + res +
             (optionArg == std::string{""} ? "" : "=" + optionArg);
     default:

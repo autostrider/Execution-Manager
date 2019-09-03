@@ -126,7 +126,7 @@ std::vector<string> ExecutionManager::loadListOfApplications()
 }
 
 std::vector<char *>
-ExecutionManager::getArgumentsList(const ExecutionManager::ProcessInfo& process)
+ExecutionManager::getArgumentsList(const ExecutionManager::ProcessInfo& process) const
 {
   std::vector<std::string> argv;
   std::transform(process.startOptions.cbegin(),

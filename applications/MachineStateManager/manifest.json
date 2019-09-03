@@ -1,27 +1,25 @@
 {
-  "Application_manifest": {
-      "Application_manifest_id": "MachineStateManager",
-      "Process": [
-          {
-	     
-              "Mode_dependent_startup_configs": [
-                  {
-"Startup_options": [
-	      ],
-                      "Mode_in_machine_instance_refs": [
-                          {
-                              "Function_group": "MachineState",
-                              "Mode": "init"
-                          },
-                          {
-                            "Function_group": "MachineState",
-                            "Mode": "running"
-                        }
-                      ]
-                  }
-              ],
-              "Process_name": "msm"
-          }
-      ]
-  }
+    "Application_manifest": {
+        "Application_manifest_id": "MachineStateManager",
+        "Process": [
+            {
+                "Mode_dependent_startup_configs": [
+                    {
+                        "Startup_options": [],
+                        "Mode_in_machine_instance_refs": [
+                            {
+                                "Function_group": "MachineState",
+                                "Mode": "init"
+                            },
+                            {
+                                "Function_group": "MachineState",
+                                "Mode": "running"
+                            }
+                        ]
+                    }
+                ],
+                "Process_name": "msm"
+            }
+        ]
+    }
 }

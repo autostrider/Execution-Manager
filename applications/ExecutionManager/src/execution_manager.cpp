@@ -18,11 +18,11 @@ using std::string;
 const string ExecutionManager::corePath =
   string{"./bin/applications/"};
 
-ExecutionManager::ExecutionManager(std::unique_ptr<IManifestReader> handler)
+ExecutionManager::ExecutionManager(std::unique_ptr<IManifestReader> reader)
   : m_activeApplications{}
-  , m_allowedApplicationForState{handler->getApplicationStatesMap()}
+  , m_allowedApplicationForState{reader->getApplicationStatesMap()}
   , m_currentState{}
-  , m_machineManifestStates{handler->getMachineStatesVector()}
+  , m_machineManifestStates{reader->getMachineStates()}
   , machineStateClientAppName{}
 {
   filterStates();

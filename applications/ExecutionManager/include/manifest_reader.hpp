@@ -31,7 +31,7 @@ public:
    * @brief Loading data from Machine Manifest and process it.
    * @return All the machine states available.
    */
-  virtual std::vector<MachineState> getMachineStatesVector() override;
+  virtual std::vector<MachineState> getMachineStates() override;
 
   /**
    * @brief Load json from file.
@@ -39,6 +39,8 @@ public:
    * @return parsed object.
    */
   json getJsonData(const std::string &manifestPath);
+
+  ~ManifestReader() override = default;
 
 private:
 

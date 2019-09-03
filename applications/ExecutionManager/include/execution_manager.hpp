@@ -2,7 +2,6 @@
 #define EXECUTION_MANAGER_HPP
 
 #include "imanifest_reader.hpp"
-#include "manifest_reader.hpp"
 #include "manifests.hpp"
 
 #include <capnp/ez-rpc.h>
@@ -35,8 +34,7 @@ struct ApplicationManifest;
 class ExecutionManager final: public ExecutionManagement::Server
 {
 public:
-  ExecutionManager(std::unique_ptr<IManifestReader> handler =
-      std::make_unique<ManifestReader>());
+  ExecutionManager(std::unique_ptr<IManifestReader> reader);
 
   /**
    * @brief Main method of Execution manager.

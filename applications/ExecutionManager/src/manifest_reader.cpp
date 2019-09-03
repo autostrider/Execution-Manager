@@ -58,7 +58,7 @@ ManifestReader::getApplicationStatesMap()
   return res;
 }
 
-std::vector<MachineState> ManifestReader::getMachineStatesVector()
+std::vector<MachineState> ManifestReader::getMachineStates()
 {
   static const std::string manifestPath =
       "../applications/ExecutionManager/machine_manifest.json";

@@ -8,9 +8,9 @@
 
 
 
-void App::printVector() const
+void App::printSensorData() const
 {
-    for (const auto& item : m_rawData) {
+    for (const auto& item : m_sensorData) {
         std::cout << item << " | ";
     }
     std::cout << "\n";
@@ -31,19 +31,19 @@ void App::readSensorData()
     std::normal_distribution<>d(mu, sigma);
 
     for (size_t k = 0; k < c_numberOfSamples; ++k) {
-        m_rawData[k] = d(gen);
+        m_sensorData[k] = d(gen);
     }
 }
 
 double App::mean()
 {
-    double sum = std::accumulate(m_rawData.cbegin(), m_rawData.cend(), 0.0);
-    return sum / m_rawData.size();
+    double sum = std::accumulate(m_sensorData.cbegin(), m_sensorData.cend(), 0.0);
+    return sum / m_sensorData.size();
 }
 
-App::App(std::atomic<bool> &termRef) : m_rawData(c_numberOfSamples), m_currentState{std::make_unique<Init>()}, m_terminateApp{termRef}
+App::App(std::atomic<bool> &terminate) : m_sensorData(c_numberOfSamples), m_currentState{std::make_unique<Init>()}, m_terminateApp{terminate}
 {
-    m_rawData.reserve(c_numberOfSamples);
+    m_sensorData.reserve(c_numberOfSamples);
     m_currentState->enter(*this);
 }
 

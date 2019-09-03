@@ -11,24 +11,18 @@ class State;
 class App
 {
 public:
-    virtual ~App() = default;
-    App(std::atomic<bool>& termRef);
+    App(std::atomic<bool>& terminate);
 
     void transitToNextState();
     double mean();
     void readSensorData();
-    void printVector() const;
+    void printSensorData() const;
 
     bool isTerminating() const;
 
 private:
-    App(const App&) = delete;
-    App& operator=(const App&) = delete;
-    App(App&&) = delete;
-    App& operator=(App&&) = delete;
-
     const size_t c_numberOfSamples = 50;
-    std::vector<double> m_rawData;
+    std::vector<double> m_sensorData;
     std::unique_ptr<State> m_currentState;
     std::atomic<bool>& m_terminateApp;
 };

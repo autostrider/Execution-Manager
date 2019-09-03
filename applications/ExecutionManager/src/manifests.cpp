@@ -106,10 +106,11 @@ std::string StartupOption::makeCommandLineOption() const
     case StartupOptionKindEnum::commandLineLongForm:
       res = "--" + res +
             (optionArg == std::string{""} ? "" : "=" + optionArg);
-    default:
+      break;
+  case StartupOptionKindEnum::commandLineSimpleForm:
       break;
   }
-  std::cout << res << std::endl;
+
   return res;
 }
 

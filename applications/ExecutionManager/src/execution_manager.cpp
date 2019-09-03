@@ -138,19 +138,19 @@ ExecutionManager::getArgumentsList(const ExecutionManager::ProcessInfo& process)
   // insert app name
   argv.insert(argv.begin(), process.processName);
 
-  std::vector<char*> nptArgv;
+  std::vector<char*> result;
   // include terminating sign, that not included in argv
-  nptArgv.reserve(argv.size() + 1);
+  result.reserve(argv.size() + 1);
 
   for(auto& str: argv)
   {
-    nptArgv.push_back(&str[0]);
+    result.push_back(&str[0]);
   }
 
   // terminating sign
-  nptArgv.push_back(nullptr);
+  result.push_back(nullptr);
 
-  return nptArgv;
+  return result;
 }
 
 void ExecutionManager::processManifests()

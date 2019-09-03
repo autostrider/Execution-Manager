@@ -27,10 +27,10 @@ private:
     App(App&&) = delete;
     App& operator=(App&&) = delete;
 
-    const size_t numberOfSamples = 50;
-    std::vector<double> _rawData;
+    const size_t c_numberOfSamples = 50;
+    std::vector<double> m_rawData;
     std::unique_ptr<State> m_currentState;
-    std::atomic<bool>& terminateApp;
+    std::atomic<bool>& m_terminateApp;
 };
 
 class State

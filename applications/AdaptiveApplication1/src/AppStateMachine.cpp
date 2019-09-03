@@ -10,7 +10,7 @@
 
 void App::printVector() const
 {
-    for (const auto& item : _rawData) {
+    for (const auto& item : m_rawData) {
         std::cout << item << " | ";
     }
     std::cout << "\n";
@@ -18,7 +18,7 @@ void App::printVector() const
 
 bool App::isTerminating() const
 {
-    return terminateApp.load();
+    return m_terminateApp.load();
 }
 
 void App::readSensorData()
@@ -30,31 +30,27 @@ void App::readSensorData()
     double mu = 10, sigma = 0.5;
     std::normal_distribution<>d(mu, sigma);
 
-    for (size_t k = 0; k < numberOfSamples; ++k) {
-        _rawData[k] = d(gen);
+    for (size_t k = 0; k < c_numberOfSamples; ++k) {
+        m_rawData[k] = d(gen);
     }
 }
 
 double App::mean()
 {
-    double sum = std::accumulate(_rawData.cbegin(), _rawData.cend(), 0.0);
-    sum /= _rawData.size();
-    return  sum;
+    double sum = std::accumulate(m_rawData.cbegin(), m_rawData.cend(), 0.0);
+    return sum / m_rawData.size();
 }
 
-App::App(std::atomic<bool> &termRef) : _rawData(numberOfSamples), m_currentState{std::make_unique<Init>()}, terminateApp{termRef}
+App::App(std::atomic<bool> &termRef) : m_rawData(c_numberOfSamples), m_currentState{std::make_unique<Init>()}, m_terminateApp{termRef}
 {
-    _rawData.reserve(numberOfSamples);
+    m_rawData.reserve(c_numberOfSamples);
     m_currentState->enter(*this);
 }
 
 void App::transitToNextState()
 {
     auto newState = m_currentState->handleTransition(*this);
-    if (newState != nullptr)
-    {
-        m_currentState = std::move(newState);
-    }
+    m_currentState = std::move(newState);
     m_currentState->enter(*this);
 }
 
@@ -79,7 +75,7 @@ std::unique_ptr<State> Run::handleTransition(App &app)
     {
         return std::make_unique<Terminate>();
     }
-    return nullptr;
+    return std::make_unique<Run>();
 }
 
 void Run::enter(App &app)
@@ -100,7 +96,7 @@ std::unique_ptr<State> Terminate::handleTransition(App &app)
     {
         std::cout << "terminating state. App is dead(\n";
     }
-    return nullptr;
+    return std::make_unique<Terminate>();
 }
 
 void Terminate::enter(App &app)

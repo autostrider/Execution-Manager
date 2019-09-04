@@ -22,7 +22,7 @@ public:
     *         manifest.
     */
   virtual std::map<MachineState, std::vector<ProcessName>>
-  getApplicationStatesMap() = 0;
+  getStatesSupportedByApplication() = 0;
 
   /**
   * @brief Loading data from Machine Manifest and process it.

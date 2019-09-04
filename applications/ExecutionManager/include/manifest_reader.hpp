@@ -25,7 +25,7 @@ public:
     *         manifest.
     */
    virtual std::map<MachineState, std::vector<ProcessName>>
-   getApplicationStatesMap() override;
+   getStatesSupportedByApplication() override;
 
    /**
    * @brief Loading data from Machine Manifest and process it.

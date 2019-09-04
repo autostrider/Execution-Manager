@@ -24,14 +24,15 @@ json ManifestReader::getJsonData(const std::string& manifestPath)
 }
 
 std::map<MachineState, std::vector<ProcessName>>
-ManifestReader::getApplicationStatesMap()
+ManifestReader::getStatesSupportedByApplication()
 {
   const auto& applicationNames = getListOfApplications();
   std::map<MachineState, std::vector<ProcessName>> res;
+  const static std::string manifestFile = "/manifest.json";
 
   for (auto file: applicationNames)
   {
-    file = corePath + file + "/manifest.json";
+    file = corePath + file + manifestFile;
 
     json content = getJsonData(file);
 

@@ -50,13 +50,6 @@ private:
   void filterStates();
 
   /**
-   * @brief Loads all adaptive applications from corePath.
-   * @return Vector containing names of applications that were found in
-   *         corePath.
-   */
-  std::vector<std::string> loadListOfApplications();
-
-  /**
    * @brief Starts given application and stores information
    *        about it in activeApplications.
    * @param process: Application to start.

@@ -20,7 +20,7 @@ const string ExecutionManager::corePath =
 
 ExecutionManager::ExecutionManager(std::unique_ptr<IManifestReader> reader)
   : m_activeApplications{}
-  , m_allowedApplicationForState{reader->getApplicationStatesMap()}
+  , m_allowedApplicationForState{reader->getStatesSupportedByApplication()}
   , m_currentState{}
   , m_machineManifestStates{reader->getMachineStates()}
   , machineStateClientAppName{}
@@ -127,36 +127,6 @@ bool ExecutionManager::processToBeKilled(const string& app, const std::vector<Pr
 
   return (it  == allowedApps.cend());
 };
-
-std::vector<string> ExecutionManager::loadListOfApplications()
-{
-  DIR* dp = nullptr;
-  std::vector<string> fileNames;
-
-  if ((dp = opendir(corePath.c_str())) == nullptr)
-  {
-    throw runtime_error(string{"Error opening directory: "}
-                        + corePath
-                        + " "
-                        + strerror(errno));
-  }
-
-  for (struct dirent *drnt = readdir(dp); drnt != nullptr; drnt = readdir(dp))
-  {
-    if (drnt->d_name == std::string{"."} ||
-        drnt->d_name == std::string{".."})
-    {
-      continue;
-    }
-
-    fileNames.emplace_back(drnt->d_name);
-
-    std::cout << drnt->d_name << std::endl;
-  }
-
-  closedir(dp);
-  return fileNames;
-}
 
 void ExecutionManager::startApplication(const ProcessName& process)
 {

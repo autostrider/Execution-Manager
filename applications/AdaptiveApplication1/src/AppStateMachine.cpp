@@ -49,8 +49,7 @@ App::App(std::atomic<bool> &terminate) : m_sensorData(c_numberOfSamples), m_curr
 
 void App::transitToNextState()
 {
-    auto newState = m_currentState->handleTransition(*this);
-    m_currentState = std::move(newState);
+    m_currentState = m_currentState->handleTransition(*this);
     m_currentState->enter(*this);
 }
 

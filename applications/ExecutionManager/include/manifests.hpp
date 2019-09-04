@@ -30,9 +30,9 @@ struct MachineInstanceMode
 
 enum class StartupOptionKindEnum
 {
+  commandLineLongForm,
   commandLineShortForm,
-  commandLineSimpleForm,
-  commandLineLongForm
+  commandLineSimpleForm
 };
 
 struct StartupOption

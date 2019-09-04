@@ -18,17 +18,30 @@ using std::string;
 const string ExecutionManager::corePath =
   string{"./bin/applications/"};
 
-const std::vector<MachineState> ExecutionManager::transition =
-{"init", "running", "shutdown"};
+ExecutionManager::ExecutionManager(std::unique_ptr<IManifestReader> reader)
+  : m_activeApplications{}
+  , m_allowedApplicationForState{reader->getStatesSupportedByApplication()}
+  , m_currentState{}
+  , m_machineManifestStates{reader->getMachineStates()}
+  , machineStateClientAppName{}
+{
+  filterStates();
+}
 
 int32_t ExecutionManager::start()
 {
-  processManifests();
+  for (const auto& allowedItem: m_allowedApplicationForState)
+  {
+    for (const auto& item: allowedItem.second)
+    {
+      std::cout << allowedItem.first << "\t" << item.processName << "\n";
+    }
+  }
 
-  for (const auto& state: transition)
+  for (const auto& state: m_machineManifestStates)
   {
     std::cout << "————————————————————————————————————————————————————————\n";
-    currentState = state;
+    m_currentState = state;
 
     killProcessesForState();
     std::cout << state << std::endl;
@@ -38,123 +51,82 @@ int32_t ExecutionManager::start()
     std::this_thread::sleep_for(std::chrono::seconds{2});
   }
 
-  try
-  {
-    ::unlink("unix:/tmp/execution_management");
-    capnp::EzRpcServer server(kj::heap<ExecutionManager>(),
-                              "unix:/tmp/execution_management");
-    auto &waitScope = server.getWaitScope();
-
     std::cout << "Execution Manager started.." << std::endl;
-
-    kj::NEVER_DONE.wait(waitScope);
-  }
-  catch (const kj::Exception &e)
-  {
-    std::cerr << e.getDescription().cStr() << std::endl;
-  }
 
   return EXIT_SUCCESS;
 }
 
+void ExecutionManager::filterStates()
+{
+  for (auto app = m_activeApplications.begin(); app != m_activeApplications.end();)
+  {
+    if (std::find(m_machineManifestStates.cbegin(),
+                  m_machineManifestStates.cend(),
+                  app->first) == m_machineManifestStates.cend())
+    {
+      app = m_activeApplications.erase(app);
+    }
+    else
+    {
+      app++;
+    }
+  }
+}
+
 void ExecutionManager::startApplicationsForState()
 {
-  const auto& allowedApps = allowedApplicationForState[currentState];
+  const auto& allowedApps = m_allowedApplicationForState.find(m_currentState);
 
-  for (const auto& executableToStart: allowedApps)
+  if (allowedApps != m_allowedApplicationForState.cend())
   {
-    if (activeApplications.find(executableToStart.processName) != activeApplications.cend())
+    for (const auto& executableToStart: allowedApps->second)
     {
-      continue;
-    }
-    try
-    {
-      startApplication(executableToStart);
-    }
-    catch (const runtime_error& err)
-    {
-      std::cout << err.what() << std::endl;
+      if (m_activeApplications.find(executableToStart.processName) ==
+          m_activeApplications.cend())
+      {
+
+        try
+        {
+          startApplication(executableToStart);
+        }
+        catch (const runtime_error& err)
+        {
+          std::cout << err.what() << std::endl;
+        }
+      }
     }
   }
 }
 
 void ExecutionManager::killProcessesForState()
 {
-  const auto& allowedApps = allowedApplicationForState[currentState];
+  auto allowedApps = m_allowedApplicationForState.find(m_currentState);
 
-  for (auto app = activeApplications.cbegin(); app != activeApplications.cend();)
+  for (auto app = m_activeApplications.cbegin();
+       app != m_activeApplications.cend();)
   {
-    if (std::find_if(allowedApps.cbegin(),
-                     allowedApps.cend(),
-                     [&app](auto& allowedApp)
-    { return app->first == allowedApp.processName; }) == allowedApps.cend())
+    if (allowedApps == m_allowedApplicationForState.cend() ||
+        processToBeKilled(app->first, allowedApps->second))
     {
       kill(app->second, SIGTERM);
-      app = activeApplications.erase(app);
-    } else {
+      app = m_activeApplications.erase(app);
+    }
+    else
+    {
       app++;
     }
   }
 }
 
-std::vector<std::string> ExecutionManager::loadListOfApplications()
+bool ExecutionManager::processToBeKilled(const string& app, const std::vector<ProcessName>& allowedApps)
 {
-  DIR* dp = nullptr;
-  std::vector<std::string> fileNames;
+  auto it = std::find_if(allowedApps.cbegin(),
+                     allowedApps.cend(),
+                     [&app](auto& listItem)
+    { return app == listItem.processName; });
 
-  if ((dp = opendir(corePath.c_str())) == nullptr)
-  {
-    throw runtime_error(std::string{"Error opening directory: "}
-                        + corePath
-                        + " "
-                        + strerror(errno));
-  }
-
-  for (struct dirent *drnt = readdir(dp); drnt != nullptr; drnt = readdir(dp))
-  {
-    // check for "." and ".." files in directory, we don't need them
-    if (!strcmp(drnt->d_name, ".") || !strcmp(drnt->d_name, "..")) continue;
-
-    fileNames.emplace_back(drnt->d_name);
-
-    std::cout << drnt->d_name << std::endl;
-  }
-
-  closedir(dp);
-  return fileNames;
-}
-
-void ExecutionManager::processManifests()
-{
-  
-  const auto& applicationNames = loadListOfApplications();
-
-  json content;
-
-  for (auto file: applicationNames)
-  {
-    file = corePath + file + "/manifest.json";
-    ifstream data{file};
-
-    data >> content;
-    ApplicationManifest manifest = content;
-
-    for (const auto& process: manifest.manifest.processes)
-    {
-      for (const auto& conf: process.modeDependentStartupConf)
-      {
-        for (const auto& mode: conf.modes)
-        {
-          if (mode.functionGroup != "MachineState")
-            continue;
-
-          allowedApplicationForState[mode.mode].push_back({manifest.manifest.manifestId, process.name});
-        }
-      }
-    }
-
-  }
-}
+  return (it  == allowedApps.cend());
+};
 
 void ExecutionManager::startApplication(const ProcessName& process)
 {
@@ -163,20 +135,23 @@ void ExecutionManager::startApplication(const ProcessName& process)
   if (!processId)
   {
     // child process
-    auto processPath = corePath + process.applicationName + "/processes/" + process.processName;
+    const auto processPath = corePath
+                     + process.applicationName
+                     + "/processes/"
+                     + process.processName;
 
     int res = execl(processPath.c_str(), process.processName.c_str(), nullptr);
 
     if (res)
     {
-      throw runtime_error(std::string{"Error occured creating process: "}
+      throw runtime_error(string{"Error occured creating process: "}
                           + process.processName
                           + " "
                           + strerror(errno));
     }
   } else {
     // parent process
-    activeApplications.insert({process.processName, processId});
+    m_activeApplications.insert({process.processName, processId});
   }
 
 }
@@ -227,7 +202,7 @@ ExecutionManager::getMachineState(GetMachineStateContext context)
 {
   std::cout << "getMachineState request received" << std::endl;
 
-  context.getResults().setState(currentState);
+  context.getResults().setState(m_currentState);
 
   context.getResults().setResult(StateError::K_SUCCESS);
 
@@ -237,17 +212,21 @@ ExecutionManager::getMachineState(GetMachineStateContext context)
 ::kj::Promise<void>
 ExecutionManager::setMachineState(SetMachineStateContext context)
 {
-  std::string state = context.getParams().getState().cStr();
+  string state = context.getParams().getState().cStr();
 
-  if (!state.empty() && state != currentState)
+  if (!state.empty() && state != m_currentState)
   {
-    currentState = state;
+    m_currentState = state;
 
+    killProcessesForState();
+
+    startApplicationsForState();
+   
     context.getResults().setResult(StateError::K_SUCCESS);
 
     std::cout << "Machine state changed successfully to "
               << "\"" 
-              << currentState << "\"" 
+              << m_currentState << "\""
               << std::endl;
   }
   else
@@ -255,7 +234,7 @@ ExecutionManager::setMachineState(SetMachineStateContext context)
     context.getResults().setResult(StateError::K_INVALID_STATE);
 
     std::cout << "Invalid machine state received - "
-              << "\"" << currentState << "\"" 
+              << "\"" << m_currentState << "\""
               << std::endl;
   }
 

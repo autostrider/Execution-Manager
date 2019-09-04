@@ -1,11 +1,7 @@
 #ifndef MANIFESTS_HPP
 #define MANIFESTS_HPP
 
-#include <ifaddrs.h>
-#include <netdb.h>
-#include <sys/socket.h>
-#include <sys/sysinfo.h>
-#include <sys/unistd.h>
+
 #include <cstdint>
 #include <fstream>
 #include <iostream>
@@ -27,62 +23,12 @@ using MachineState = std::string;
 using ApplicationState = ::ApplicationStateManagement::ApplicationState;
 
 /**
- * @brief Struct, that holds network interface configuration.
- *
- * @field ifa_name: name of interface
- * @field family: family of interface
+ * @brief Struct for process name and application it belongs to.
  */
-struct InterfaceConf
+struct ProcessName
 {
-  std::string ifa_name;
-  std::string family;
-  char host[NI_MAXHOST];
-};
-
-/**
- * @brief Struct that holds current hardware configuration.
- *
- * @field ram: current available ram for running Adaptive Platform
- * @field cpu: available cpu power for running Adaptive Platform
- */
-struct HwConf
-{
-  uint64_t ram;
-  uint8_t cpu;
-};
-
-/**
- * @brief Struct that holds machine manifest configuration.
- *
- * network: vectors that holds all network interfaces
- * @field hwConf: hardware configuration for running Adaptive Platform
- * @field states: available machine states
- * @field adaptiveModules: all the available Adaptive Modules
- */
-struct MachineManifest
-{
- public:
-  std::vector<InterfaceConf> network;
-  HwConf hwConf;
-  std::vector<MachineState> states;
-  std::vector<std::string> adaptiveModules;
-
- public:
- /**
-  * @brief Method that generates machine manifest.
-  */
-  void init();
-
- private:
-  /**
-   * @brief Method that loads available network interfaces and its' configs.
-   */
-  void loadNetworkConf();
-
-  /**
-   * @brief Method that loads current hardware configuration
-   */
-  void loadHwConf();
+  std::string applicationName;
+  std::string processName;
 };
 
 struct MachineInstanceMode
@@ -108,7 +54,7 @@ struct Process
   std::vector<ModeDepStartupConfig> modeDependentStartupConf;
 };
 
-struct Manifest
+struct ApplicationManifestInternal
 {
   /** 
    * @brief Name of Adaptive Application.
@@ -126,38 +72,52 @@ struct Manifest
  */
 struct ApplicationManifest
 {
-    Manifest manifest;
+    ApplicationManifestInternal manifest;
 };
 
-/** 
- * @brief InterfaceConf serialization
- */
-void to_json(json& jsonObject, const InterfaceConf& interfaceConf);
 
-/**
- * @brief InterfaceConf  deserialization
- */
-void from_json(const json& jsonObject, InterfaceConf& interfaceConf);
+struct Mode
+{
+  MachineState mode;
+};
 
-/**
- * @brief HwConf serialization
- */
-void to_json(json& jsonObject, const HwConf& hwConf);
 
-/** 
- * @brief HwConf  deserialization
- */
-void from_json(const json& jsonObject, HwConf& hwConf);
+struct ModeDeclarationGroup
+{
+  std::string functionGroupName;
 
-/** 
- * @brief MachineState serialization
- */
-void to_json(json& jsonObject, const MachineManifest& machineManifest);
+  std::vector<Mode> modeDeclarations;
 
-/**
- * @brief MachineManifest deserialization
- */
-void from_json(const json& jsonObject, MachineManifest& machineManifest);
+};
+
+struct MachineManifestInternal
+{
+  std::string manifestId;
+
+  std::vector<ModeDeclarationGroup> modeDeclarationGroups;
+};
+
+struct MachineManifest
+{
+  MachineManifestInternal manifest;
+};
+
+
+void to_json(json& jsonObject, const Mode& mode);
+
+void from_json(const json& jsonObject, Mode& mode);
+
+void to_json(json& jsonObject, const ModeDeclarationGroup& modeDeclGroup);
+
+void from_json(const json& jsonObject, ModeDeclarationGroup& modeDeclGroup);
+
+void to_json(json& jsonObject, const MachineManifestInternal& manifest);
+
+void from_json(const json& jsonObject, MachineManifestInternal& manifest);
+
+void to_json(json& jsonObject, const MachineManifest& manifest);
+
+void from_json(const json& jsonObject, MachineManifest& manifest);
 
 void to_json(json& jsonObject, const MachineInstanceMode& machineInstanceMode);
 
@@ -169,19 +129,17 @@ void to_json(json& jsonObject, const ModeDepStartupConfig& startupConf);
 void
 from_json(const json& jsonObject, const ModeDepStartupConfig& startupConf);
 
-/**
- * @brief Process serialization
- */
-void to_json(json& jsonObject, const ModeDepStartupConfig& startupConf);
+/// Process serialization
+void to_json(json& jsonObject, const Process& process);
 
 /**
  * @brief Process deserialization
  */
 void from_json(const json& jsonObject, Process& process);
 
-void to_json(json& jsonObject, const Manifest& manifest);
+void to_json(json& jsonObject, const ApplicationManifestInternal& manifest);
 
-void from_json(const json& jsonObject, Manifest& manifest);
+void from_json(const json& jsonObject, ApplicationManifestInternal& manifest);
 
 /**
  * @brief ApplicationManifest serialization

@@ -4,3 +4,6 @@
 [submodule "tools/capnproto"]
 	path = tools/capnproto
 	url = https://github.com/capnproto/capnproto.git
+[submodule "tools/lcov"]
+	path = tools/lcov
+	url = https://github.com/linux-test-project/lcov.git

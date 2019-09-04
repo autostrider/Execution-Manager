@@ -1,5 +1,7 @@
 #include "machine_state_client.h"
 
+using std::string;
+
 namespace api {
 
 namespace {
@@ -16,14 +18,14 @@ namespace {
     };
 }
 
-MachineStateClient::MachineStateClient(std::string path)
+MachineStateClient::MachineStateClient(string path)
   : client(path),
     clientApplication(client.getMain<MachineStateManagement>()),
     timer(client.getIoProvider().getTimer())
 {}
 
 MachineStateClient::StateError
-MachineStateClient::Register(std::string appName, std::uint32_t timeout)
+MachineStateClient::Register(string appName, std::uint32_t timeout)
 {
   auto request = clientApplication.registerRequest();
   request.setAppName(appName);
@@ -39,7 +41,7 @@ MachineStateClient::Register(std::string appName, std::uint32_t timeout)
 }
 
 MachineStateClient::StateError
-MachineStateClient::GetMachineState(std::uint32_t timeout, std::string& state)
+MachineStateClient::GetMachineState(std::uint32_t timeout, string& state)
 {
   auto request = clientApplication.getMachineStateRequest();
   auto promise = timer.timeoutAfter(timeout * kj::MILLISECONDS, request.send());
@@ -55,7 +57,7 @@ MachineStateClient::GetMachineState(std::uint32_t timeout, std::string& state)
 }
 
 MachineStateClient::StateError
-MachineStateClient::SetMachineState(std::string state, std::uint32_t timeout)
+MachineStateClient::SetMachineState(string state, std::uint32_t timeout)
 {
   auto request = clientApplication.setMachineStateRequest();
   request.setState(state);

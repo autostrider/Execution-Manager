@@ -1,6 +1,7 @@
 #ifndef EXECUTION_MANAGER_HPP
 #define EXECUTION_MANAGER_HPP
 
+#include "imanifest_reader.hpp"
 #include "manifests.hpp"
 
 #include <capnp/ez-rpc.h>
@@ -19,6 +20,7 @@
 #include <iostream>
 #include <json.hpp>
 #include <map>
+#include <memory>
 #include <string>
 #include <thread>
 #include <unistd.h>
@@ -36,7 +38,7 @@ struct ApplicationManifest;
 class ExecutionManager final: public ExecutionManagement::Server
 {
 public:
-  ExecutionManager();
+  ExecutionManager(std::unique_ptr<IManifestReader> reader);
 
   /**
    * @brief Main method of Execution manager.
@@ -47,20 +49,9 @@ private:
   using StateError = ::MachineStateManagement::StateError;
 
   /**
-     * @brief Struct for process name and application it belongs to.
-  */
-  struct ProcessInfo
-  {
-    std::string applicationName;
-    std::string processName;
-    std::vector<StartupOption> startOptions;
-  };
-
-  /**
-   * @brief Loads all adaptive applications from corePath.
-   * @return Vector containing names of applications that were found in corePath.   
+   * @brief Removes unsupported states from availApps
    */
-  std::vector<std::string> loadListOfApplications();
+  void filterStates();
 
   /**
    * @brief Builds vector of command line arguments passed to application.
@@ -70,13 +61,9 @@ private:
   std::vector<char*> getArgumentsList(const ProcessInfo& process) const;
 
   /**
-   * @brief processManifests - loads manifests from corePath.
-   */
-  void processManifests();
-  /**
    * @brief Starts given application and stores information
    *        about it in activeApplications.
-   * @param process: Information about process to start.
+   * @param process: Application to start.
    */
   void startApplication(const ProcessInfo& process);
 
@@ -90,7 +77,7 @@ private:
    */
   void killProcessesForState();
 
-  bool processToBeKilled (const std::string& app, const std::vector<ProcessInfo> &);
+  bool processToBeKilled (const std::string& app, const std::vector<ProcessInfo>&);
  
   ::kj::Promise<void>
   reportApplicationState(ReportApplicationStateContext context) override;
@@ -104,7 +91,7 @@ private:
   ::kj::Promise<void>
   setMachineState(SetMachineStateContext context) override;
 private:
-  /** 
+  /**
    * @brief Hardcoded path to folder with adaptive applications.
    */
   const static std::string corePath;
@@ -112,23 +99,23 @@ private:
   /** 
    * @brief structure that holds application and required processes.
    */
-  std::map<applicationId, pid_t> activeApplications;
+  std::map<MachineState, pid_t> m_activeApplications;
 
   /**
-   * vector consists of applicationId (name) and string param - executable name.
    * @brief Structure for application that can run in certain state
+   * vector consists of applicationId (name) and string param - executable name.
    */
-  std::map<MachineState, std::vector<ProcessInfo>> allowedApplicationForState;
+  std::map<MachineState, std::vector<ProcessInfo>> m_allowedApplicationForState;
 
   /**
    * brief Current machine state.
    */
-  MachineState currentState;
+  MachineState m_currentState;
 
   /**
    * @brief Vector that holds state transitions.
    */
-  const static std::vector<MachineState> transition;
+  std::vector<MachineState> m_machineManifestStates;
 
   std::string machineStateClientAppName;
 };

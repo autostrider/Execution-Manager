@@ -1,7 +1,7 @@
 #ifndef MANIFESTS_HPP
 #define MANIFESTS_HPP
 
-#include <sys/unistd.h>
+
 #include <cstdint>
 #include <fstream>
 #include <iostream>
@@ -21,6 +21,7 @@ using nlohmann::json;
 using std::ifstream;
 using MachineState = std::string;
 using ApplicationState = ::ApplicationStateManagement::ApplicationState;
+
 
 struct MachineInstanceMode
 {
@@ -44,6 +45,13 @@ struct StartupOption
   std::string makeCommandLineOption() const;
 };
 
+struct ProcessInfo
+{
+  std::string applicationName;
+  std::string processName;
+  std::vector<StartupOption> startOptions;
+};
+
 struct ModeDepStartupConfig
 {
     std::vector<MachineInstanceMode> modes;
@@ -63,7 +71,7 @@ struct Process
   std::vector<ModeDepStartupConfig> modeDependentStartupConf;
 };
 
-struct Manifest
+struct ApplicationManifestInternal
 {
   /** 
    * @brief Name of Adaptive Application.
@@ -81,13 +89,53 @@ struct Manifest
  */
 struct ApplicationManifest
 {
-    Manifest manifest;
+    ApplicationManifestInternal manifest;
 };
 
 void to_json(json& jsonObject, const MachineInstanceMode& machineInstanceMode);
 
-void
-from_json(const json& jsonObject, MachineInstanceMode& machineInstanceMode);
+struct Mode
+{
+  MachineState mode;
+};
+
+
+struct ModeDeclarationGroup
+{
+  std::string functionGroupName;
+
+  std::vector<Mode> modeDeclarations;
+
+};
+
+struct MachineManifestInternal
+{
+  std::string manifestId;
+
+  std::vector<ModeDeclarationGroup> modeDeclarationGroups;
+};
+
+struct MachineManifest
+{
+  MachineManifestInternal manifest;
+};
+
+
+void to_json(json& jsonObject, const StartupOption& startupOptions);
+
+void from_json(const json& jsonObject, StartupOption& startupOptions);
+
+void to_json(json& jsonObject, const Mode& mode);
+
+void from_json(const json& jsonObject, Mode& mode);
+
+void to_json(json& jsonObject, const ModeDeclarationGroup& modeDeclGroup);
+
+void from_json(const json& jsonObject, ModeDeclarationGroup& modeDeclGroup);
+
+void to_json(json& jsonObject, const MachineManifestInternal& manifest);
+
+void from_json(const json& jsonObject, MachineManifestInternal& manifest);
 
 NLOHMANN_JSON_SERIALIZE_ENUM(StartupOptionKindEnum, {
     {StartupOptionKindEnum::commandLineSimpleForm, "commandLineSimpleForm"},
@@ -95,9 +143,15 @@ NLOHMANN_JSON_SERIALIZE_ENUM(StartupOptionKindEnum, {
     {StartupOptionKindEnum::commandLineLongForm, "commandLineLongForm"}
 })
 
-void to_json(json& jsonObject, const StartupOption& startupOptions);
 
-void from_json(const json& jsonObject, StartupOption& startupOptions);
+void to_json(json& jsonObject, const MachineManifest& manifest);
+
+void from_json(const json& jsonObject, MachineManifest& manifest);
+
+void to_json(json& jsonObject, const MachineInstanceMode& machineInstanceMode);
+
+void
+from_json(const json& jsonObject, MachineInstanceMode& machineInstanceMode);
 
 void to_json(json& jsonObject, const ModeDepStartupConfig& startupConf);
 
@@ -107,16 +161,16 @@ from_json(const json& jsonObject, const ModeDepStartupConfig& startupConf);
 /**
  * @brief Process serialization
  */
-void to_json(json& jsonObject, const ModeDepStartupConfig& startupConf);
+void to_json(json& jsonObject, const Process& process);
 
 /**
  * @brief Process deserialization
  */
 void from_json(const json& jsonObject, Process& process);
 
-void to_json(json& jsonObject, const Manifest& manifest);
+void to_json(json& jsonObject, const ApplicationManifestInternal& manifest);
 
-void from_json(const json& jsonObject, Manifest& manifest);
+void from_json(const json& jsonObject, ApplicationManifestInternal& manifest);
 
 /**
  * @brief ApplicationManifest serialization

@@ -1,8 +1,9 @@
-#include <AppStateMachine.hpp>
+#include <adaptive_app.hpp>
+#include <state.hpp>
 
 #include <signal.h>
+#include <iostream>
 #include <chrono>
-
 #include <thread>
 
 static void signalHandler(int signo);
@@ -14,7 +15,7 @@ int main()
     {
         std::cout << "Error while registering signal\n";
     }
-    App app(isTerminating);
+    AdaptiveApp app(isTerminating);
 
     while (true)
     {
@@ -27,5 +28,5 @@ int main()
 static void signalHandler(int signo)
 {
     std::cout << "received signal:" << sys_siglist[signo] << "\n";
-    isTerminating.store(true);
+    isTerminating = true;
 }

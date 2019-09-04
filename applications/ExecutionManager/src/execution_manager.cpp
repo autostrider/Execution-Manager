@@ -105,7 +105,7 @@ std::vector<string> ExecutionManager::loadListOfApplications()
 
   if ((dp = opendir(corePath.c_str())) == nullptr)
   {
-    throw runtime_error(string{"Error opening directory: "}
+    throw runtime_error("Error opening directory: "
                         + corePath
                         + " "
                         + strerror(errno));
@@ -114,7 +114,8 @@ std::vector<string> ExecutionManager::loadListOfApplications()
   for (struct dirent *drnt = readdir(dp); drnt != nullptr; drnt = readdir(dp))
   {
     // check for "." and ".." files in directory, we don't need them
-    if (!strcmp(drnt->d_name, ".") || !strcmp(drnt->d_name, "..")) continue;
+    if ((drnt->d_name == std::string{"."}) ||
+        (drnt->d_name == std::string{".."})) continue;
 
     fileNames.emplace_back(drnt->d_name);
 
@@ -206,7 +207,7 @@ void ExecutionManager::startApplication(const ProcessInfo& process)
 
     if (res)
     {
-      throw runtime_error(string{"Error occured creating process: "}
+      throw runtime_error("Error occured creating process: "
                           + process.processName
                           + " "
                           + strerror(errno));

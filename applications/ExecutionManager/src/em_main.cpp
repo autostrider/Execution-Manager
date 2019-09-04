@@ -4,10 +4,6 @@
 
 int main(int argc, char **argv)
 {
-  {
-    ExecutionManager::ExecutionManager manager;
-    manager.start();
-  }
   try
   {
     capnp::EzRpcServer server(kj::heap<ExecutionManager::ExecutionManager>(),

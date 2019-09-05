@@ -4,7 +4,10 @@
 #include <random>
 #include <iostream>
 
-AdaptiveApp::AdaptiveApp(std::atomic<bool> &terminate) : m_sensorData(c_numberOfSamples), m_currentState{std::make_unique<Init>()}, m_terminateApp{terminate}
+AdaptiveApp::AdaptiveApp(std::atomic<bool> &terminate) : m_sensorData(c_numberOfSamples),
+    m_currentState{std::make_unique<Init>()},
+    m_terminateApp{terminate},
+    m_appClient{std::make_unique<ApplicationStateClient>()}
 {
     m_sensorData.reserve(c_numberOfSamples);
     m_currentState->enter(*this);
@@ -47,5 +50,10 @@ void AdaptiveApp::printSensorData() const
 bool AdaptiveApp::isTerminating() const
 {
     return m_terminateApp;
+}
+
+void AdaptiveApp::ReportApplicationState(ApplicationState state)
+{
+    m_appClient->ReportApplicationState(state);
 }
 

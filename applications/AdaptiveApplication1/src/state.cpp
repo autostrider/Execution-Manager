@@ -15,6 +15,8 @@ void Init::enter(AdaptiveApp &app)
 {
     std::cout << "Enter init state\n"
               << "App is created\n";
+
+    app.ReportApplicationState(ApplicationState::K_INITIALIZING);
 }
 
 std::unique_ptr<State> Run::handleTransition(AdaptiveApp &app)
@@ -29,6 +31,8 @@ std::unique_ptr<State> Run::handleTransition(AdaptiveApp &app)
 void Run::enter(AdaptiveApp &app)
 {
     std::cout << "Enter run state\n";
+
+    app.ReportApplicationState(ApplicationState::K_RUNNING);
     app.readSensorData();
 
     std::cout << "mean: " << app.mean() << "\n";
@@ -51,5 +55,7 @@ void Terminate::enter(AdaptiveApp &app)
 {
     std::cout << "Enter terminate state\n" <<
             "Shut down app\n";
+
+    app.ReportApplicationState(ApplicationState::K_SHUTTINGDOWN);
     ::exit(EXIT_SUCCESS);
 }

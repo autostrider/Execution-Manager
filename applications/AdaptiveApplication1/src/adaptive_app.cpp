@@ -4,18 +4,24 @@
 #include <random>
 #include <iostream>
 
+using ApplicationState = api::ApplicationStateClient::ApplicationState;
 AdaptiveApp::AdaptiveApp(std::atomic<bool> &terminate) : m_sensorData(c_numberOfSamples),
     m_currentState{std::make_unique<Init>()},
     m_terminateApp{terminate},
     m_appClient{}
 {
-    m_sensorData.reserve(c_numberOfSamples);
+    reportApplicationState(m_currentState->getStateName());
     m_currentState->enter(*this);
 }
 
 void AdaptiveApp::transitToNextState()
 {
-    m_currentState = m_currentState->handleTransition(*this);
+    auto newState = m_currentState->handleTransition(*this);
+    if (newState->getStateName() != m_currentState->getStateName())
+    {
+        m_currentState = std::move(newState);
+        reportApplicationState(m_currentState->getStateName());
+    }
     m_currentState->enter(*this);
 }
 
@@ -52,7 +58,7 @@ bool AdaptiveApp::isTerminating() const
     return m_terminateApp;
 }
 
-void AdaptiveApp::ReportApplicationState(api::ApplicationStateClient::ApplicationState state)
+void AdaptiveApp::reportApplicationState(ApplicationState state)
 {
     m_appClient.ReportApplicationState(state);
 }

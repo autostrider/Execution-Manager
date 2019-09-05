@@ -19,7 +19,7 @@ public:
     void readSensorData();
     void printSensorData() const;
     bool isTerminating() const;
-    void ReportApplicationState(api::ApplicationStateClient::ApplicationState state);
+    void reportApplicationState(api::ApplicationStateClient::ApplicationState state);
 
 private:
     const size_t c_numberOfSamples = 50;

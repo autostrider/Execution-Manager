@@ -2,6 +2,7 @@
 
 #include <iostream>
 
+using ApplicationState = api::ApplicationStateClient::ApplicationState;
 std::unique_ptr<State> Init::handleTransition(AdaptiveApp &app)
 {
     if (app.isTerminating())
@@ -15,8 +16,11 @@ void Init::enter(AdaptiveApp &app)
 {
     std::cout << "Enter init state\n"
               << "App is created\n";
+}
 
-    app.ReportApplicationState(api::ApplicationStateClient::ApplicationState::K_INITIALIZING);
+ApplicationState Init::getStateName()
+{
+    return ApplicationState::K_INITIALIZING;
 }
 
 std::unique_ptr<State> Run::handleTransition(AdaptiveApp &app)
@@ -32,10 +36,13 @@ void Run::enter(AdaptiveApp &app)
 {
     std::cout << "Enter run state\n";
 
-    app.ReportApplicationState(api::ApplicationStateClient::ApplicationState::K_RUNNING);
     app.readSensorData();
-
     std::cout << "mean: " << app.mean() << "\n";
+}
+
+ApplicationState Run::getStateName()
+{
+    return ApplicationState::K_RUNNING;
 }
 
 std::unique_ptr<State> Terminate::handleTransition(AdaptiveApp &app)
@@ -56,6 +63,10 @@ void Terminate::enter(AdaptiveApp &app)
     std::cout << "Enter terminate state\n" <<
             "Shut down app\n";
 
-    app.ReportApplicationState(api::ApplicationStateClient::ApplicationState::K_SHUTTINGDOWN);
     ::exit(EXIT_SUCCESS);
+}
+
+ApplicationState Terminate::getStateName()
+{
+    return ApplicationState::K_SHUTTINGDOWN;
 }

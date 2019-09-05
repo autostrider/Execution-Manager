@@ -29,6 +29,13 @@ struct ProcessName
 {
   std::string applicationName;
   std::string processName;
+
+  bool operator==(const ProcessName& procName) const
+  {
+    return processName == procName.processName &&
+           applicationName == procName.processName;
+
+  }
 };
 
 struct MachineInstanceMode

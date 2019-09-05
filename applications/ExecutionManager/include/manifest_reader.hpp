@@ -58,9 +58,9 @@ private:
    */
   const std::string corePath =
       #ifndef UNIT_TEST
-        "./bin/applications";
+        "./bin/applications/";
       #else
-        "./test-data";
+        "./test-data/";
       #endif
 
   const static std::string machineStateFunctionGroup;

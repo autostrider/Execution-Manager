@@ -10,8 +10,6 @@ namespace ExecutionManager {
 using std::runtime_error;
 using nlohmann::json;
 
-const std::string ManifestReader::corePath = "./bin/applications/";
-
 const std::string ManifestReader::machineStateFunctionGroup = "MachineState";
 
 json ManifestReader::getJsonData(const std::string& manifestPath)
@@ -62,7 +60,11 @@ ManifestReader::getStatesSupportedByApplication()
 std::vector<MachineState> ManifestReader::getMachineStates()
 {
   static const std::string manifestPath =
+    #ifdef UNIT_TEST
+      corePath + "/msm/machine_manifest.json";
+    #else
       "../applications/ExecutionManager/machine_manifest.json";
+    #endif
 
   json manifestData = getJsonData(manifestPath);
 

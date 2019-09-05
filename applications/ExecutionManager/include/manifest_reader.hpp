@@ -42,7 +42,9 @@ public:
 
   ~ManifestReader() override = default;
 
+#ifndef UNIT_TEST
 private:
+#endif
 
   /**
    * @brief Loads all adaptive applications from corePath.
@@ -54,7 +56,12 @@ private:
   /**
    * @brief Hardcoded path to folder with adaptive applications.
    */
-  const static std::string corePath;
+  const std::string corePath =
+      #ifndef UNIT_TEST
+        "./bin/applications";
+      #else
+        "./test-data";
+      #endif
 
   const static std::string machineStateFunctionGroup;
 };

@@ -58,7 +58,7 @@ private:
    * @param process: process for certain mode dependent startup config.
    * @return vector of command line arguments for application.
    */
-  std::vector<char*> getArgumentsList(const ProcessInfo& process) const;
+  int32_t executeProcess(const std::string &processPath, const ProcessInfo& process) const;
 
   /**
    * @brief Starts given application and stores information

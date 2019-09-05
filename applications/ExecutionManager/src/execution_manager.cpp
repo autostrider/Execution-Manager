@@ -127,32 +127,34 @@ bool ExecutionManager::processToBeKilled(const string& app, const std::vector<Pr
   return (it  == allowedApps.cend());
 };
 
-std::vector<char *>
-ExecutionManager::getArgumentsList(const ProcessInfo& process) const
+int32_t
+ExecutionManager::executeProcess(const std::string& processPath, const ProcessInfo& process) const
 {
-  std::vector<std::string> argv;
+  std::vector<std::string> strArguments;
   std::transform(process.startOptions.cbegin(),
                  process.startOptions.cend(),
-                 std::back_inserter(argv),
+                 std::back_inserter(strArguments),
                  [](const StartupOption& option)
   { return option.makeCommandLineOption(); });
 
   // insert app name
-  argv.insert(argv.begin(), process.processName);
+  strArguments.insert(strArguments.begin(), process.processName);
 
-  std::vector<char*> result;
+  std::vector<char*> argv;
   // include terminating sign, that not included in argv
-  result.reserve(argv.size() + 1);
+  argv.reserve(strArguments.size() + 1);
 
-  for(auto& str: argv)
+  for(auto& str: strArguments)
   {
-    result.push_back(&str[0]);
+    argv.push_back(&str[0]);
   }
 
   // terminating sign
-  result.push_back(nullptr);
+  argv.push_back(nullptr);
 
-  return result;
+
+  int res = execv(processPath.c_str(), argv.data());
+  return res;
 }
 
 void ExecutionManager::startApplication(const ProcessInfo& process)
@@ -167,9 +169,7 @@ void ExecutionManager::startApplication(const ProcessInfo& process)
                      + "/processes/"
                      + process.processName;
 
-    const auto& argv = getArgumentsList(process);
-
-    int res = execv(processPath.c_str(), argv.data());
+    const auto& res = executeProcess(processPath, process);
 
     if (res)
     {

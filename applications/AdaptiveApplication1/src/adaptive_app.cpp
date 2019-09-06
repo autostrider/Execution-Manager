@@ -4,16 +4,20 @@
 #include <random>
 #include <iostream>
 
-AdaptiveApp::AdaptiveApp(std::atomic<bool> &terminate) : m_sensorData(c_numberOfSamples), m_currentState{std::make_unique<Init>()}, m_terminateApp{terminate}
+using ApplicationState = api::ApplicationStateClient::ApplicationState;
+
+AdaptiveApp::AdaptiveApp(std::atomic<bool> &terminate) : m_sensorData(c_numberOfSamples),
+    m_currentState{std::make_unique<Init>(*this)},
+    m_terminateApp{terminate}
 {
-    m_sensorData.reserve(c_numberOfSamples);
-    m_currentState->enter(*this);
+    m_currentState->enter();
 }
 
 void AdaptiveApp::transitToNextState()
 {
-    m_currentState = m_currentState->handleTransition(*this);
-    m_currentState->enter(*this);
+    m_currentState->leave();
+    m_currentState = m_currentState->handleTransition();
+    m_currentState->enter();
 }
 
 double AdaptiveApp::mean()
@@ -47,5 +51,10 @@ void AdaptiveApp::printSensorData() const
 bool AdaptiveApp::isTerminating() const
 {
     return m_terminateApp;
+}
+
+void AdaptiveApp::reportApplicationState(ApplicationState state)
+{
+    m_appClient.ReportApplicationState(state);
 }
 

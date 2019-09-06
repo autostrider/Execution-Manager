@@ -4,9 +4,10 @@
 
 using ApplicationState = api::ApplicationStateClient::ApplicationState;
 
-State::State(AdaptiveApp &app, api::ApplicationStateClient::ApplicationState state, std::string stateName) :
-    m_app{app}, m_applState{state}, m_stateName{std::move(stateName)}
+State::State(AdaptiveApp &app, api::ApplicationStateClient::ApplicationState state, const std::string &stateName) :
+    m_app{app}, m_applState{state}, m_stateName{stateName}
 {
+    std::cout << "Enter " << m_stateName << " state\n";
 }
 
 void State::leave() const
@@ -14,9 +15,13 @@ void State::leave() const
 
 }
 
+api::ApplicationStateClient::ApplicationState State::getApplicationState() const
+{
+    return m_applState;
+}
+
 Init::Init(AdaptiveApp &app) : State (app, ApplicationState::K_INITIALIZING, "Initializing")
 {
-    std::cout << "Enter " << m_stateName << " state\n";
 }
 
 std::unique_ptr<State> Init::handleTransition()
@@ -33,11 +38,6 @@ void Init::enter()
     m_app.reportApplicationState(getApplicationState());
 }
 
-api::ApplicationStateClient::ApplicationState Init::getApplicationState() const
-{
-    return ApplicationState::K_INITIALIZING;
-}
-
 void Init::leave() const
 {
     m_app.reportApplicationState(ApplicationState::K_RUNNING);
@@ -45,7 +45,6 @@ void Init::leave() const
 
 Run::Run(AdaptiveApp &app) : State (app, ApplicationState::K_RUNNING, "Running")
 {
-    std::cout << "Enter " << m_stateName << " state\n";
 }
 
 std::unique_ptr<State> Run::handleTransition()
@@ -63,14 +62,8 @@ void Run::enter()
     std::cout << "mean: " << m_app.mean() << "\n";
 }
 
-ApplicationState Run::getApplicationState() const
-{
-    return ApplicationState::K_RUNNING;
-}
-
 Terminate::Terminate(AdaptiveApp &app) : State (app, ApplicationState::K_SHUTTINGDOWN, "Terminating")
 {
-    std::cout << "Enter " << m_stateName << " state\n";
 }
 
 std::unique_ptr<State> Terminate::handleTransition()
@@ -91,9 +84,4 @@ void Terminate::enter()
     std::cout << "App is dead...\n";
     m_app.reportApplicationState(getApplicationState());
     ::exit(EXIT_SUCCESS);
-}
-
-ApplicationState Terminate::getApplicationState() const
-{
-    return ApplicationState::K_SHUTTINGDOWN;
 }

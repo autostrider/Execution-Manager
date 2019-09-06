@@ -20,7 +20,7 @@ int main()
     while (true)
     {
         app.transitToNextState();
-        std::this_thread::sleep_for(std::chrono::seconds(1));
+        std::this_thread::sleep_for(std::chrono::seconds(5));
     }
     return 0;
 }

@@ -5,23 +5,18 @@
 #include <iostream>
 
 using ApplicationState = api::ApplicationStateClient::ApplicationState;
+
 AdaptiveApp::AdaptiveApp(std::atomic<bool> &terminate) : m_sensorData(c_numberOfSamples),
     m_currentState{std::make_unique<Init>()},
-    m_terminateApp{terminate},
-    m_appClient{}
+    m_terminateApp{terminate}
 {
-    reportApplicationState(m_currentState->getStateName());
     m_currentState->enter(*this);
 }
 
 void AdaptiveApp::transitToNextState()
 {
-    auto newState = m_currentState->handleTransition(*this);
-    if (newState->getStateName() != m_currentState->getStateName())
-    {
-        m_currentState = std::move(newState);
-        reportApplicationState(m_currentState->getStateName());
-    }
+    m_currentState->leave(*this);
+    m_currentState = m_currentState->handleTransition(*this);
     m_currentState->enter(*this);
 }
 

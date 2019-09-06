@@ -103,10 +103,7 @@ std::vector<std::string> ManifestReader::getListOfApplications()
     if (drnt->d_name != std::string{"."} &&
         drnt->d_name != std::string{".."})
     {
-
       fileNames.emplace_back(drnt->d_name);
-
-      std::cout << drnt->d_name << std::endl;
     }
   }
 

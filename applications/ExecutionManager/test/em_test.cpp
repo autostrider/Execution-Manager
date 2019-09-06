@@ -136,7 +136,6 @@ void ManifestReaderEnvironment::createDirs()
 
       system(createNestedDir.c_str());
     }
-    system("ls -la ./test-data");
 }
 
 void ManifestReaderEnvironment::createApplicationManifests()
@@ -151,14 +150,25 @@ void ManifestReaderEnvironment::createApplicationManifests()
     json applicationManifestForPath = appManifest.second;
     output << applicationManifestForPath;
   }
-
-  system(("tree " + ManifestReaderTestData::reader.corePath).c_str());
 }
 
 /// INIT ENVIRONMENT
 ::testing::Environment* const manifestReaderEnvironment =
     ::testing::AddGlobalTestEnvironment(new ManifestReaderEnvironment);
 /// -------------------
+
+TEST(ManifestReaderTest, getApplicationListFail)
+{
+  // remove folder with data
+  manifestReaderEnvironment->TearDown();
+
+  ManifestReader reader;
+  ASSERT_THROW(reader.getListOfApplications(),
+               std::runtime_error);
+
+  // create folder with data
+  manifestReaderEnvironment->SetUp();
+}
 
 TEST(ManifestReaderTest, getJsonDataTest)
 {

@@ -7,17 +7,17 @@
 using ApplicationState = api::ApplicationStateClient::ApplicationState;
 
 AdaptiveApp::AdaptiveApp(std::atomic<bool> &terminate) : m_sensorData(c_numberOfSamples),
-    m_currentState{std::make_unique<Init>()},
+    m_currentState{std::make_unique<Init>(*this)},
     m_terminateApp{terminate}
 {
-    m_currentState->enter(*this);
+    m_currentState->enter();
 }
 
 void AdaptiveApp::transitToNextState()
 {
-    m_currentState->leave(*this);
-    m_currentState = m_currentState->handleTransition(*this);
-    m_currentState->enter(*this);
+    m_currentState->leave();
+    m_currentState = m_currentState->handleTransition();
+    m_currentState->enter();
 }
 
 double AdaptiveApp::mean()

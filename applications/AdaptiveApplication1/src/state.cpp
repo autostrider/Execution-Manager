@@ -4,73 +4,78 @@
 
 using ApplicationState = api::ApplicationStateClient::ApplicationState;
 
-const std::unordered_map<ApplicationState, std::string>State::c_stateToString =
+State::State(AdaptiveApp &app, api::ApplicationStateClient::ApplicationState state, std::string stateName) :
+    m_app{app}, m_applState{state}, m_stateName{std::move(stateName)}
 {
-    {ApplicationState::K_INITIALIZING, "Initializing"},
-    {ApplicationState::K_RUNNING, "Running"},
-    {ApplicationState::K_SHUTTINGDOWN, "Terminating"},
-};
-
-void State::enter(AdaptiveApp &app)
-{
-    std::cout << "Enter " << c_stateToString.at(getStateName())
-              << " state\n";
 }
 
-void State::leave(AdaptiveApp &app) const
+void State::leave() const
 {
 
 }
 
-std::unique_ptr<State> Init::handleTransition(AdaptiveApp &app)
+Init::Init(AdaptiveApp &app) : State (app, ApplicationState::K_INITIALIZING, "Initializing")
 {
-    if (app.isTerminating())
+    std::cout << "Enter " << m_stateName << " state\n";
+}
+
+std::unique_ptr<State> Init::handleTransition()
+{
+    if (m_app.isTerminating())
     {
-        return std::make_unique<Terminate>();
+        return std::make_unique<Terminate>(m_app);
     }
-    return std::make_unique<Run>();
+    return std::make_unique<Run>(m_app);
 }
 
-void Init::enter(AdaptiveApp &app)
+void Init::enter()
 {
-    State::enter(app);
-    app.reportApplicationState(getStateName());
+    m_app.reportApplicationState(getApplicationState());
 }
 
-ApplicationState Init::getStateName() const
+api::ApplicationStateClient::ApplicationState Init::getApplicationState() const
 {
     return ApplicationState::K_INITIALIZING;
 }
 
-void Init::leave(AdaptiveApp &app) const
+void Init::leave() const
 {
-    app.reportApplicationState(ApplicationState::K_RUNNING);
+    m_app.reportApplicationState(ApplicationState::K_RUNNING);
 }
 
-std::unique_ptr<State> Run::handleTransition(AdaptiveApp &app)
+Run::Run(AdaptiveApp &app) : State (app, ApplicationState::K_RUNNING, "Running")
 {
-    if (app.isTerminating())
+    std::cout << "Enter " << m_stateName << " state\n";
+}
+
+std::unique_ptr<State> Run::handleTransition()
+{
+    if (m_app.isTerminating())
     {
-        return std::make_unique<Terminate>();
+        return std::make_unique<Terminate>(m_app);
     }
-    return std::make_unique<Run>();
+    return std::make_unique<Run>(m_app);
 }
 
-void Run::enter(AdaptiveApp &app)
+void Run::enter()
 {
-    State::enter(app);
-    app.readSensorData();
-    std::cout << "mean: " << app.mean() << "\n";
+    m_app.readSensorData();
+    std::cout << "mean: " << m_app.mean() << "\n";
 }
 
-ApplicationState Run::getStateName() const
+ApplicationState Run::getApplicationState() const
 {
     return ApplicationState::K_RUNNING;
 }
 
-std::unique_ptr<State> Terminate::handleTransition(AdaptiveApp &app)
+Terminate::Terminate(AdaptiveApp &app) : State (app, ApplicationState::K_SHUTTINGDOWN, "Terminating")
 {
-    if (app.isTerminating())
+    std::cout << "Enter " << m_stateName << " state\n";
+}
+
+std::unique_ptr<State> Terminate::handleTransition()
+{
+    if (m_app.isTerminating())
     {
         std::cout << "Already in terminate state!";
     }
@@ -78,18 +83,17 @@ std::unique_ptr<State> Terminate::handleTransition(AdaptiveApp &app)
     {
         std::cout << "terminating state. App is dead(\n";
     }
-    return std::make_unique<Terminate>();
+    return std::make_unique<Terminate>(m_app);
 }
 
-void Terminate::enter(AdaptiveApp &app)
+void Terminate::enter()
 {
-    State::enter(app);
     std::cout << "App is dead...\n";
-    app.reportApplicationState(getStateName());
+    m_app.reportApplicationState(getApplicationState());
     ::exit(EXIT_SUCCESS);
 }
 
-ApplicationState Terminate::getStateName() const
+ApplicationState Terminate::getApplicationState() const
 {
     return ApplicationState::K_SHUTTINGDOWN;
 }

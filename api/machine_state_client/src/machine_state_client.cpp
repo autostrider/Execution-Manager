@@ -61,15 +61,15 @@ MachineStateClient::SetMachineState(string state, std::uint32_t timeout)
 {
   auto request = clientApplication.setMachineStateRequest();
   request.setState(state);
-
+  
   auto promise = timer.timeoutAfter(timeout * kj::MILLISECONDS, request.send());
-
+  
   auto result = promise
   .then([](auto&& res)
     {
       return res.getResult();
     }, exceptionLambda).wait(client.getWaitScope());
-
+  
   return result;
 }
 

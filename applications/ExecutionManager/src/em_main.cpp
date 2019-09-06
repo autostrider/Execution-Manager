@@ -1,10 +1,12 @@
 #include "execution_manager.hpp"
 #include <iostream>
+#include <unistd.h>
 
 int main(int argc, char **argv)
 {
   try
   {
+    ::unlink("/tmp/execution_management");
     capnp::EzRpcServer server(kj::heap<ExecutionManager::ExecutionManager>(),
                               "unix:/tmp/execution_management");
     auto &waitScope = server.getWaitScope();

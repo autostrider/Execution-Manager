@@ -79,7 +79,9 @@ private:
   void killProcessesForState();
 
   bool processToBeKilled (const std::string& app, const std::vector<ExecutionManager::ProcessName>&);
- 
+
+  void confirmMachineState();
+
   ::kj::Promise<void>
   reportApplicationState(ReportApplicationStateContext context) override;
 
@@ -113,6 +115,8 @@ private:
    */
   MachineState currentState;
 
+  const static MachineState defaultState;
+
   /**
    * @brief Vector that holds state transitions.
    */
@@ -120,10 +124,8 @@ private:
 
   std::string machineStateClientAppName;
 
-  pid_t pidForMsm;
+  std::map<applicationId, pid_t> reportedApplications;
 
-
-  ProcessName msmProcess;
 };
 
 } // namespace ExecutionManager

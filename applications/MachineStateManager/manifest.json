@@ -8,12 +8,16 @@
                       "Mode_in_machine_instance_refs": [
                           {
                               "Function_group": "MachineState",
-                              "Mode": "init"
+                              "Mode": "Starting-up"
                           },
                           {
                             "Function_group": "MachineState",
-                            "Mode": "running"
-                        }
+                            "Mode": "Driving"
+                          },
+                          {
+                            "Function_group": "MachineState",
+                            "Mode": "Living"
+                          }
                       ]
                   }
               ],

@@ -19,18 +19,17 @@ using std::string;
 const string ExecutionManager::corePath =
   string{"./bin/applications/"};
 
+const MachineState ExecutionManager::defaultState {"Starting-up"};
 
-ExecutionManager::ExecutionManager() : msmProcess({string{"MachineStateManager"}, string{"msm"}})
+
+ExecutionManager::ExecutionManager() : currentState (defaultState)
 {
   processManifests();
 
-  startApplication(msmProcess);
+  startApplicationsForState();
 }
 
-ExecutionManager::~ExecutionManager()
-{
-  kill(pidForMsm, SIGTERM);
-}
+ExecutionManager::~ExecutionManager(){}
 
 void ExecutionManager::startApplicationsForState()
 {
@@ -105,7 +104,8 @@ std::vector<string> ExecutionManager::loadListOfApplications()
 
     fileNames.emplace_back(drnt->d_name);
 
-    std::cout << drnt->d_name << std::endl;
+    std::cout << "ExecutionManager: List of existing Adaptive Application: "
+              << drnt->d_name << std::endl;
   }
 
   closedir(dp);
@@ -163,14 +163,7 @@ void ExecutionManager::startApplication(const ProcessName& process)
     }
   } else {
     // parent process
-    if (process.processName == "msm")
-    {
-      pidForMsm = processId;
-    }
-    else
-    {
-      activeApplications.insert({process.processName, processId});
-    }
+    activeApplications.insert({process.processName, processId});
   }
 
 }
@@ -202,22 +195,6 @@ ExecutionManager::register_(RegisterContext context)
               << machineStateClientAppName
               << "\" registered"
               << std::endl;
-    
-    //removing msm from allowedApplicationForState
-    for (auto& pair:allowedApplicationForState)
-    {
-     
-        
-      auto toBeRemoved = std::remove_if(pair.second.begin(),
-                                    pair.second.end(),
-                                    [&](ProcessName & processName){
-                                      return (processName.applicationName == machineStateClientAppName);
-                                    }
-                                  ); 
-      
-      
-      pair.second.erase(toBeRemoved, pair.second.end());
-    }
   }
   else
   {

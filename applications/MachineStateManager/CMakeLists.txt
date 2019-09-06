@@ -16,6 +16,9 @@ target_link_libraries(msm
     PUBLIC
       api::machine_state_client
       CapnProto::capnp-rpc
+    PRIVATE
+      api::application_state_client
+      nlohmann_json::nlohmann_json
 )
 
 target_include_directories(msm

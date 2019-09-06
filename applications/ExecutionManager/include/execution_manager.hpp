@@ -58,7 +58,16 @@ private:
    * @param process: process for certain mode dependent startup config.
    * @return vector of command line arguments for application.
    */
-  int32_t executeProcess(const std::string &processPath, const ProcessInfo& process) const;
+  std::vector<std::string> getArgumentsList(const ProcessInfo& process) const;
+
+  /**
+   * @brief Method that converts input std::vector of std::string to
+   *        std::vector<char*> to pass as argv in application.
+   * @param vectorToConvert: vector that will be converted.
+   * @return Vector of char* including `nullptr` that be passed to application.
+   */
+  std::vector<char*>
+  convertArgumentsList(std::vector<std::string> &vectorToConvert);
 
   /**
    * @brief Starts given application and stores information

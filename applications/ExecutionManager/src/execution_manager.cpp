@@ -127,24 +127,33 @@ bool ExecutionManager::processToBeKilled(const string& app, const std::vector<Pr
   return (it  == allowedApps.cend());
 };
 
-int32_t
-ExecutionManager::executeProcess(const std::string& processPath, const ProcessInfo& process) const
+std::vector<std::string>
+ExecutionManager::getArgumentsList(const ProcessInfo& process) const
 {
-  std::vector<std::string> strArguments;
+  std::vector<std::string> arguments;
+  arguments.reserve(process.startOptions.size());
+
+  // insert app name
+  arguments.push_back(process.processName);
+
   std::transform(process.startOptions.cbegin(),
                  process.startOptions.cend(),
-                 std::back_inserter(strArguments),
+                 std::back_inserter(arguments),
                  [](const StartupOption& option)
   { return option.makeCommandLineOption(); });
 
-  // insert app name
-  strArguments.insert(strArguments.begin(), process.processName);
+  return arguments;
+}
 
+std::vector<char *>
+ExecutionManager::convertArgumentsList(std::vector<std::string> &vectorToConvert)
+{
   std::vector<char*> argv;
-  // include terminating sign, that not included in argv
-  argv.reserve(strArguments.size() + 1);
 
-  for(auto& str: strArguments)
+  // include terminating sign, that not included in argv
+  argv.reserve(vectorToConvert.size() + 1);
+
+  for(auto& str: vectorToConvert)
   {
     argv.push_back(&str[0]);
   }
@@ -152,9 +161,7 @@ ExecutionManager::executeProcess(const std::string& processPath, const ProcessIn
   // terminating sign
   argv.push_back(nullptr);
 
-
-  int res = execv(processPath.c_str(), argv.data());
-  return res;
+  return argv;
 }
 
 void ExecutionManager::startApplication(const ProcessInfo& process)
@@ -165,11 +172,11 @@ void ExecutionManager::startApplication(const ProcessInfo& process)
   {
     // child process
     const auto processPath = corePath
-                     + process.applicationName
-                     + "/processes/"
-                     + process.processName;
+                     + process.createRelativePath();
 
-    const auto& res = executeProcess(processPath, process);
+    auto arguments = getArgumentsList(process);
+    auto argv = convertArgumentsList(arguments);
+    int res = execv(processPath.c_str(), argv.data());
 
     if (res)
     {

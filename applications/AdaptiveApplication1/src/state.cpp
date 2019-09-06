@@ -4,6 +4,19 @@
 
 using ApplicationState = api::ApplicationStateClient::ApplicationState;
 
+const std::unordered_map<ApplicationState, std::string>State::c_stateToString =
+{
+    {ApplicationState::K_INITIALIZING, "Initializing"},
+    {ApplicationState::K_RUNNING, "Running"},
+    {ApplicationState::K_SHUTTINGDOWN, "Terminating"},
+};
+
+void State::enter(AdaptiveApp &app)
+{
+    std::cout << "Enter " << c_stateToString.at(getStateName())
+              << " state\n";
+}
+
 void State::leave(AdaptiveApp &app) const
 {
 
@@ -20,9 +33,8 @@ std::unique_ptr<State> Init::handleTransition(AdaptiveApp &app)
 
 void Init::enter(AdaptiveApp &app)
 {
-    std::cout << "Enter init state\n"
-              << "App is created\n";
-    app.reportApplicationState(this->getStateName());
+    State::enter(app);
+    app.reportApplicationState(getStateName());
 }
 
 ApplicationState Init::getStateName() const
@@ -46,8 +58,7 @@ std::unique_ptr<State> Run::handleTransition(AdaptiveApp &app)
 
 void Run::enter(AdaptiveApp &app)
 {
-    std::cout << "Enter run state\n";
-
+    State::enter(app);
     app.readSensorData();
     std::cout << "mean: " << app.mean() << "\n";
 }
@@ -72,9 +83,9 @@ std::unique_ptr<State> Terminate::handleTransition(AdaptiveApp &app)
 
 void Terminate::enter(AdaptiveApp &app)
 {
-    std::cout << "Enter terminate state\n" <<
-            "Shut down app\n";
-    app.reportApplicationState(this->getStateName());
+    State::enter(app);
+    std::cout << "App is dead...\n";
+    app.reportApplicationState(getStateName());
     ::exit(EXIT_SUCCESS);
 }
 

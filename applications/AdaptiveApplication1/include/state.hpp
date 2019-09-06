@@ -4,6 +4,8 @@
 #include <adaptive_app.hpp>
 #include <application_state_client.h>
 
+#include <unordered_map>
+
 class State
 {
 public:
@@ -12,6 +14,8 @@ public:
     virtual void enter(AdaptiveApp& app) = 0;
     virtual api::ApplicationStateClient::ApplicationState getStateName() const = 0;
     virtual void leave(AdaptiveApp& app) const;
+protected:
+    const static std::unordered_map<api::ApplicationStateClient::ApplicationState, std::string> c_stateToString;
 };
 
 class Init : public State

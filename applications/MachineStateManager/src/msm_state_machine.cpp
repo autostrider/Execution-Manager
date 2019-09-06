@@ -3,7 +3,7 @@
 #include <iostream>
 
 #include <application_state_client.h>
-#include "msmStateMachine.hpp"
+#include "msm_state_machine.hpp"
 #include "machine_state_manager.hpp"
 
 using api::MachineStateClient;
@@ -14,6 +14,7 @@ std::unique_ptr<State> Init::handleTransition(MachineStateManager &msm)
 {
     if (msm.isTerminating())
     {
+        std::cout<< "Msm must be shutdown" << std::endl;
         return std::make_unique<Shutdown>();
     }
     return std::make_unique<Running>();
@@ -34,7 +35,7 @@ void Init::enter(MachineStateManager &msm)
     if(MachineStateManager::StateError::K_SUCCESS == result)
     {
         std::cout << "MachineStateManager: Successful registration as a MSM" << std::endl;
-        
+        std::this_thread::sleep_for(std::chrono::seconds(5));
     }
     else
     {
@@ -50,23 +51,24 @@ std::unique_ptr<State> Running::handleTransition(MachineStateManager &msm)
 
 void Running::enter(MachineStateManager &msm)
 {
+    std::this_thread::sleep_for(std::chrono::seconds(5));
     std::cout << "MachineStateManager: Reporting state K_RUNNING..." << std::endl;
     msm.reportStateToEm(api::ApplicationStateClient::ApplicationState::K_RUNNING);
+
+    std::this_thread::sleep_for(std::chrono::seconds(5));
 
     std::cout << "MachineStateManager: Setting machine state to DRIVING..." <<std::endl;
     msm.setMachineState("Driving", 300000);
 
-    std::this_thread::sleep_for(std::chrono::seconds(1));
+    std::this_thread::sleep_for(std::chrono::seconds(5));
 
     std::cout << "MachineStateManager: Setting machine state to LIVING..." <<std::endl;
     msm.setMachineState("Living", 300000);
 
-    std::this_thread::sleep_for(std::chrono::seconds(1));
+    std::this_thread::sleep_for(std::chrono::seconds(5));
 
     std::cout << "MachineStateManager: Setting machine state to SHUTTINGDOWN..." <<std::endl;
     msm.setMachineState("Shuttingdown", 300000);
-        
-    std::this_thread::sleep_for(std::chrono::seconds(3));
 }
 
 //Application state shutdown

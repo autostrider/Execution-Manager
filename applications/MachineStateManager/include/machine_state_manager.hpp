@@ -9,7 +9,7 @@
 
 #include "machine_state_client.h"
 #include "application_state_client.h"
-#include "msmStateMachine.hpp"
+#include "msm_state_machine.hpp"
 
 namespace MachineStateManager
 {

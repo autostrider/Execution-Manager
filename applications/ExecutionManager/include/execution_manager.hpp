@@ -108,7 +108,8 @@ private:
    */
   std::vector<MachineState> m_machineManifestStates;
 
-  std::string machineStateClientAppName;
+  std::string m_machineStateClientAppName;
+  pid_t m_machineStateClientPid {-1};
 };
 
 } // namespace ExecutionManager

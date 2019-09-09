@@ -1,30 +1,32 @@
-#include <iostream>
+#include <adaptive_app.hpp>
+#include <state.hpp>
+
 #include <signal.h>
+#include <iostream>
 #include <chrono>
 #include <thread>
 
-void signal_handler(int signal)
+static void signalHandler(int signo);
+static std::atomic<bool> isTerminating{false};
+
+int main()
 {
-    std::cout << "=============Bye from proc1============" << std::endl;
-    exit(EXIT_SUCCESS);
+    if (::signal(SIGINT, signalHandler) == SIG_ERR)
+    {
+        std::cout << "Error while registering signal\n";
+    }
+    AdaptiveApp app(isTerminating);
+
+    while (true)
+    {
+        app.transitToNextState();
+        std::this_thread::sleep_for(std::chrono::seconds(5));
+    }
+    return 0;
 }
 
-
-int main(int argc, char* argv[])
+static void signalHandler(int signo)
 {
-  signal(SIGTERM, signal_handler);
-
-  for (int i = 0; i < argc; i++)
-  {
-    std::cout << "argv[" << i << "]=" << std::string{argv[i]} << std::endl;
-  }
-
-  std::cout << "app1\tproc1\n";
-  while (1)
-  {
-    std::cout << "proc1" <<std::endl;
-    std::this_thread::sleep_for(std::chrono::seconds(1));
-  }
-
-	return 0;
+    std::cout << "received signal:" << sys_siglist[signo] << "\n";
+    isTerminating = true;
 }

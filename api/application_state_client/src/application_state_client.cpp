@@ -6,18 +6,21 @@ namespace {
 }
 
 ApplicationStateClient::ApplicationStateClient()
-  : client(executionManagerAddr)
+  : m_client(executionManagerAddr),
+    m_pid(getpid())
 {}
 
 void ApplicationStateClient::ReportApplicationState(ApplicationState state)
 {
-  auto& waitScope = client.getWaitScope();
+  auto& waitScope = m_client.getWaitScope();
 
   auto cap =
-    client.getMain<ApplicationStateManagement>();
+    m_client.getMain<ApplicationStateManagement>();
 
   auto request = cap.reportApplicationStateRequest();
   request.setState(state);
+
+  request.setPid(m_pid);
 
   auto promise = request.send();
   promise.wait(waitScope);

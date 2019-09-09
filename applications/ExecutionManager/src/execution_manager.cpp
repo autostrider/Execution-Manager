@@ -1,5 +1,4 @@
 #include "execution_manager.hpp"
-
 #include <json.hpp>
 #include <fstream>
 #include <dirent.h>
@@ -27,47 +26,28 @@ namespace {
 const string ExecutionManager::corePath =
   string{"./bin/applications/"};
 
+const MachineState ExecutionManager::defaultState {"Startup"};
+
 ExecutionManager::ExecutionManager(std::unique_ptr<IManifestReader> reader)
   : m_activeApplications{}
-  , m_allowedApplicationForState{reader->getStatesSupportedByApplication()}
-  , m_currentState{}
-  , m_machineManifestStates{reader->getMachineStates()}
+  , m_allowedApplicationForState{
+      std::move(reader->getStatesSupportedByApplication())}
+  , m_currentState{defaultState}
+  , m_machineManifestStates{std::move(reader->getMachineStates())}
   , m_machineStateClientAppName{}
 {
   filterStates();
 }
 
-int32_t ExecutionManager::start()
+void ExecutionManager::start()
 {
-  for (const auto& allowedItem: m_allowedApplicationForState)
-  {
-    for (const auto& item: allowedItem.second)
-    {
-      std::cout << allowedItem.first << "\t" << item.processName << "\n";
-    }
-  }
-
-  for (const auto& state: m_machineManifestStates)
-  {
-    std::cout << "————————————————————————————————————————————————————————\n";
-    m_currentState = state;
-
-    killProcessesForState();
-    std::cout << state << std::endl;
-
-    startApplicationsForState();
-
-    std::this_thread::sleep_for(std::chrono::seconds{2});
-  }
-
-    std::cout << "Execution Manager started.." << std::endl;
-
-  return EXIT_SUCCESS;
+  startApplicationsForState();
 }
 
 void ExecutionManager::filterStates()
 {
-  for (auto app = m_activeApplications.begin(); app != m_activeApplications.end();)
+  for (auto app = m_activeApplications.begin();
+       app != m_activeApplications.end();)
   {
     if (std::find(m_machineManifestStates.cbegin(),
                   m_machineManifestStates.cend(),
@@ -165,34 +145,25 @@ void ExecutionManager::startApplication(const ProcessName& process)
 
 }
 
-::kj::Promise<void>
-ExecutionManager::reportApplicationState(ReportApplicationStateContext context)
+void
+ExecutionManager::reportApplicationState(pid_t processId, AppState state)
 {
-  ApplicationState state = context.getParams().getState();
-  pid_t applicationPid = context.getParams().getPid();
-
   std::cout << "State \"" << applicationStateNames[static_cast<uint16_t>(state)]
             << "\" for application with pid "
-            << applicationPid
+            << processId
+            << " received"
             << " received"
             << std::endl;
-
-  return kj::READY_NOW;
 }
 
-::kj::Promise<void>
-ExecutionManager::register_(RegisterContext context)
+bool
+ExecutionManager::registerMachineStateClient(pid_t processId, string appName)
 {
-  string newMachineClientAppName = context.getParams().getAppName();
-  pid_t newMachineClientAppPid = context.getParams().getPid();
-
   if (m_machineStateClientPid == -1 ||
-      m_machineStateClientPid == newMachineClientAppPid)
+      m_machineStateClientPid == processId)
   {
-    m_machineStateClientPid = newMachineClientAppPid;
-    m_machineStateClientAppName = newMachineClientAppName;
-
-    context.getResults().setResult(StateError::K_SUCCESS);
+    m_machineStateClientPid = processId;
+    m_machineStateClientAppName = appName;
 
     std::cout << "State Machine Client \""
               << m_machineStateClientAppName
@@ -200,43 +171,38 @@ ExecutionManager::register_(RegisterContext context)
               << m_machineStateClientPid
               << " registered"
               << std::endl;
-  }
-  else
-  {
-    context.getResults().setResult(StateError::K_INVALID_REQUEST);
 
-    std::cout << "State Machine Client \""
-              << m_machineStateClientAppName
-              << "\" with pid "
-              << m_machineStateClientPid
-              << "\" registration failed"
-              << std::endl;
+    return true;
   }
 
-  return kj::READY_NOW;
+  std::cout << "State Machine Client \""
+            << appName
+            << "\" registration failed"
+            << "\" with pid "
+            << processId
+            << " registration failed"
+            << std::endl;
+
+  return false;
 }
 
-::kj::Promise<void>
-ExecutionManager::getMachineState(GetMachineStateContext context)
+MachineState
+ExecutionManager::getMachineState(pid_t processId) const
 {
   std::cout << "getMachineState request received" << std::endl;
 
-  context.getResults().setState(m_currentState);
-
-  context.getResults().setResult(StateError::K_SUCCESS);
-
-  return kj::READY_NOW;
+  return m_currentState;
 }
 
-::kj::Promise<void>
-ExecutionManager::setMachineState(SetMachineStateContext context)
+bool
+ExecutionManager::setMachineState(pid_t processId, string state)
 {
-  string state = context.getParams().getState().cStr();
-  pid_t machineStateClientPid = context.getParams().getPid();
+  auto stateIt = std::find(m_machineManifestStates.cbegin(),
+                                 m_machineManifestStates.cend(),
+                                 state);
 
-  if (!state.empty() &&
-      state != m_currentState &&
-      machineStateClientPid == m_machineStateClientPid)
+  if (stateIt != m_machineManifestStates.cend() &&
+      processId == m_machineStateClientPid)
   {
     m_currentState = state;
 
@@ -244,23 +210,20 @@ ExecutionManager::setMachineState(SetMachineStateContext context)
 
     startApplicationsForState();
 
-    context.getResults().setResult(StateError::K_SUCCESS);
-
     std::cout << "Machine state changed successfully to "
               << "\""
-              << m_currentState << "\""
+              << m_currentState
+              << "\""
               << std::endl;
-  }
-  else
-  {
-    context.getResults().setResult(StateError::K_INVALID_STATE);
 
-    std::cout << "Invalid machine state received - "
-              << "\"" << m_currentState << "\""
-              << std::endl;
+    return true;
   }
 
-  return kj::READY_NOW;
+  std::cout << "Invalid machine state received - "
+            << "\"" << state << "\""
+            << std::endl;
+
+  return false;
 }
 
 } // namespace ExecutionManager

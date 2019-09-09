@@ -36,10 +36,6 @@ class ExecutionManager final: public ExecutionManagement::Server
 public:
   ExecutionManager(std::unique_ptr<IManifestReader> reader);
 
-  /**
-   * @brief Main method of Execution manager.
-   */
-  std::int32_t start();
 private:
   using ApplicationState = ::ApplicationStateManagement::ApplicationState;
   using StateError = ::MachineStateManagement::StateError;

@@ -4,6 +4,7 @@
 #include <thread>
 
 #include "machine_state_manager.hpp"
+#include "msm_state_machine.hpp"
 
 static void signalHandler(int signo);
 static std::atomic<bool> isTerminating{false};

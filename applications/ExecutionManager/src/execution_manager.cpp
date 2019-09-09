@@ -108,7 +108,7 @@ std::vector<std::string>
 ExecutionManager::getArgumentsList(const ProcessInfo& process) const
 {
   std::vector<std::string> arguments;
-  arguments.reserve(process.startOptions.size());
+  arguments.reserve(process.startOptions.size() + 1);
 
   // insert app name
   arguments.push_back(process.processName);
@@ -123,7 +123,7 @@ ExecutionManager::getArgumentsList(const ProcessInfo& process) const
 }
 
 std::vector<char *>
-ExecutionManager::convertArgumentsListIncludeTerminating(
+ExecutionManager::convertToNullTerminatingArgv(
     std::vector<std::string> &vectorToConvert)
 {
   std::vector<char*> outputVector;
@@ -153,7 +153,7 @@ void ExecutionManager::startApplication(const ProcessInfo& process)
                      + process.createRelativePath();
 
     auto arguments = getArgumentsList(process);
-    auto applicationArguments = convertArgumentsListIncludeTerminating(arguments);
+    auto applicationArguments = convertToNullTerminatingArgv(arguments);
     int res = execv(processPath.c_str(), applicationArguments.data());
 
     if (res)

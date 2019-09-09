@@ -48,7 +48,7 @@ private:
    * @return Vector of char* including `nullptr` that be passed to application.
    */
   std::vector<char*>
-  convertArgumentsListIncludeTerminating(
+  convertToNullTerminatingArgv(
       std::vector<std::string> &vectorToConvert);
 
   /**

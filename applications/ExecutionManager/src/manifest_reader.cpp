@@ -29,12 +29,13 @@ std::map<MachineState, std::vector<ProcessName>>
 ManifestReader::getStatesSupportedByApplication()
 {
   const auto& applicationNames = getListOfApplications();
+
   std::map<MachineState, std::vector<ProcessName>> res;
   const static std::string manifestFile = "/manifest.json";
 
   for (auto file: applicationNames)
   {
-    file = conf.corePath + file + manifestFile;
+    file = conf.corePath + "/" + file + manifestFile;
 
     json content = getJsonData(file);
 
@@ -48,8 +49,6 @@ ManifestReader::getStatesSupportedByApplication()
         {
           if (mode.functionGroup == machineStateFunctionGroup)
           {
-
-            std::cout << "here ";
             res[mode.mode]
               .push_back({manifest.manifest.manifestId, process.name});
           }
@@ -58,17 +57,13 @@ ManifestReader::getStatesSupportedByApplication()
     }
   }
 
-  std::cout << std::endl;
-
   return res;
 }
 
 std::vector<MachineState> ManifestReader::getMachineStates()
 {
   json manifestData = getJsonData(conf.machineManifestPath);
-
   MachineManifest manifest = manifestData.get<MachineManifest>();
-
   std::vector<MachineState> res;
   const auto& availableMachineStates =
       std::find_if(manifest.manifest.modeDeclarationGroups.cbegin(),
@@ -76,11 +71,16 @@ std::vector<MachineState> ManifestReader::getMachineStates()
                    [=](const ModeDeclarationGroup& group)
   { return group.functionGroupName == machineStateFunctionGroup; });
 
+  // check whether this function group existed in manifest
+  if (manifest.manifest.modeDeclarationGroups.cend() == availableMachineStates)
+  {
+    return {};
+  }
+
   std::transform(availableMachineStates->modeDeclarations.cbegin(),
                  availableMachineStates->modeDeclarations.cend(),
                  std::back_inserter(res),
                  [](const Mode& mode) {return mode.mode;});
-
   return res;
 }
 
@@ -105,7 +105,6 @@ std::vector<std::string> ManifestReader::getListOfApplications()
       fileNames.emplace_back(drnt->d_name);
     }
   }
-  std::cout << "file names size: " << fileNames.size() << std::endl;
 
   closedir(dp);
   return fileNames;

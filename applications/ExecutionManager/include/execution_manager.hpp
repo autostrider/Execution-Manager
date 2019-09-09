@@ -5,25 +5,10 @@
 #include "manifests.hpp"
 
 #include <capnp/ez-rpc.h>
-#include <chrono>
-#include <csignal>
-#include <cstdint>
-#include <unistd.h>
-#include <thread>
-#include <json.hpp>
-#include <fstream>
-#include <dirent.h>
-#include <exception>
 #include <execution_management.capnp.h>
-#include <fstream>
-#include <functional>
-#include <iostream>
-#include <json.hpp>
 #include <map>
 #include <memory>
 #include <string>
-#include <thread>
-#include <unistd.h>
 #include <vector>
 
 namespace ExecutionManager
@@ -40,10 +25,6 @@ class ExecutionManager final: public ExecutionManagement::Server
 public:
   ExecutionManager(std::unique_ptr<IManifestReader> reader);
 
-  /**
-   * @brief Main method of Execution manager.
-   */
-  std::int32_t start();
 private:
   using ApplicationState = ::ApplicationStateManagement::ApplicationState;
   using StateError = ::MachineStateManagement::StateError;
@@ -67,7 +48,8 @@ private:
    * @return Vector of char* including `nullptr` that be passed to application.
    */
   std::vector<char*>
-  convertArgumentsList(std::vector<std::string> &vectorToConvert);
+  convertArgumentsListIncludeTerminating(
+      std::vector<std::string> &vectorToConvert);
 
   /**
    * @brief Starts given application and stores information

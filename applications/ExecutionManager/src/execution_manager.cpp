@@ -1,13 +1,9 @@
 #include "execution_manager.hpp"
 
-#include <json.hpp>
-#include <fstream>
-#include <dirent.h>
 #include <exception>
-#include <thread>
 #include <signal.h>
 #include <iostream>
-
+#include <unistd.h>
 
 namespace ExecutionManager
 {
@@ -26,34 +22,6 @@ ExecutionManager::ExecutionManager(std::unique_ptr<IManifestReader> reader)
   , machineStateClientAppName{}
 {
   filterStates();
-}
-
-int32_t ExecutionManager::start()
-{
-  for (const auto& allowedItem: m_allowedApplicationForState)
-  {
-    for (const auto& item: allowedItem.second)
-    {
-      std::cout << allowedItem.first << "\t" << item.processName << "\n";
-    }
-  }
-
-  for (const auto& state: m_machineManifestStates)
-  {
-    std::cout << "————————————————————————————————————————————————————————\n";
-    m_currentState = state;
-
-    killProcessesForState();
-    std::cout << state << std::endl;
-
-    startApplicationsForState();
-
-    std::this_thread::sleep_for(std::chrono::seconds{2});
-  }
-
-    std::cout << "Execution Manager started.." << std::endl;
-
-  return EXIT_SUCCESS;
 }
 
 void ExecutionManager::filterStates()
@@ -146,22 +114,23 @@ ExecutionManager::getArgumentsList(const ProcessInfo& process) const
 }
 
 std::vector<char *>
-ExecutionManager::convertArgumentsList(std::vector<std::string> &vectorToConvert)
+ExecutionManager::convertArgumentsListIncludeTerminating(
+    std::vector<std::string> &vectorToConvert)
 {
-  std::vector<char*> argv;
+  std::vector<char*> outputVector;
 
   // include terminating sign, that not included in argv
-  argv.reserve(vectorToConvert.size() + 1);
+  outputVector.reserve(vectorToConvert.size() + 1);
 
   for(auto& str: vectorToConvert)
   {
-    argv.push_back(&str[0]);
+    outputVector.push_back(&str[0]);
   }
 
   // terminating sign
-  argv.push_back(nullptr);
+  outputVector.push_back(nullptr);
 
-  return argv;
+  return outputVector;
 }
 
 void ExecutionManager::startApplication(const ProcessInfo& process)
@@ -175,8 +144,8 @@ void ExecutionManager::startApplication(const ProcessInfo& process)
                      + process.createRelativePath();
 
     auto arguments = getArgumentsList(process);
-    auto argv = convertArgumentsList(arguments);
-    int res = execv(processPath.c_str(), argv.data());
+    auto applicationArguments = convertArgumentsListIncludeTerminating(arguments);
+    int res = execv(processPath.c_str(), applicationArguments.data());
 
     if (res)
     {

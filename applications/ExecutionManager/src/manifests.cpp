@@ -1,7 +1,5 @@
 #include "manifests.hpp"
 
-#include <json.hpp>
-#include <application_state_client.h>
 
 using nlohmann::json;
 

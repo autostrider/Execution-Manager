@@ -5,8 +5,6 @@
 #include "imanifest_reader.hpp"
 
 #include <string>
-#include <map>
-#include <vector>
 
 namespace ExecutionManager
 {

@@ -2,17 +2,10 @@
 #define MANIFESTS_HPP
 
 
-#include <cstdint>
-#include <fstream>
-#include <iostream>
-#include <numeric>
 #include <string>
 #include <vector>
 #include <json.hpp>
-#include <application_state_management.capnp.h>
-#include <machine_state_management.capnp.h>
 #include <application_state_client.h>
-
 
 namespace ExecutionManager
 {
@@ -51,7 +44,7 @@ struct ProcessInfo
   std::string processName;
   std::vector<StartupOption> startOptions;
 
-  inline std::string createRelativePath() const
+  std::string createRelativePath() const
   {
     return applicationName
         + "/processes/"

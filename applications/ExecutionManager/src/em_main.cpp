@@ -15,8 +15,6 @@ int main(int argc, char **argv)
                               "unix:/tmp/execution_management");
     auto &waitScope = server.getWaitScope();
 
-    std::cout << "Execution Manager started.." << std::endl;
-
     kj::NEVER_DONE.wait(waitScope);
   }
   catch (const kj::Exception &e)

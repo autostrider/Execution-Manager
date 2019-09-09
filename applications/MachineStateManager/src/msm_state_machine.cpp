@@ -15,7 +15,7 @@ namespace MachineStateManager{
 State::State(MachineStateManager &msm, ApplicationState state, const std::string &stateName)
     : m_msm{msm}, m_applState{state}, m_stateName{stateName}
 {
-    std::cout << "Enter " << m_stateName
+    std::cout << "[ MachineStateManager ]:\tEntergggggggggggggggg " << m_stateName
               << " state" << std::endl;
 }
 
@@ -38,7 +38,7 @@ std::unique_ptr<State> Init::handleTransition()
 {
     if (m_msm.isTerminating())
     {
-        std::cout<< "Msm must be shutdown" << std::endl;
+        std::cout<< "[ MachineStateManager ]:\tMust be shutdown." << std::endl;
         return std::make_unique<Shutdown>(m_msm);
     }
     return std::make_unique<Running>(m_msm);
@@ -46,10 +46,10 @@ std::unique_ptr<State> Init::handleTransition()
 
 void Init::enter()
 {
-    std::cout << "[MachineStateManager]: Reporting state K_INITIALIZING..." << std::endl;
+    std::cout << "[ MachineStateManager ]:\tReporting state Initializing..." << std::endl;
     m_msm.reportApplicationState(getApplicationState());
 
-    std::cout << "[MachineStateManager]: Machine State Manager started.." << std::endl;
+    std::cout << "[ MachineStateManager ]:\tMachine State Manager started.." << std::endl;
 
     const char* applicationName = "MachineStateManager";
     constexpr int defaulTimeout = 300000;
@@ -58,18 +58,19 @@ void Init::enter()
 
     if(StateError::K_SUCCESS == result)
     {
-        std::cout << "[MachineStateManager]: Successful registration as a MSM" << std::endl;
+        std::cout << "[ MachineStateManager ]:\tSuccessful registration as a MSM." << std::endl;
         std::this_thread::sleep_for(std::chrono::seconds(5));
     }
     else
     {
-        std::cerr << "[MachineStateManager]: Unsuccessful registration as a MSM." << std::endl
-                  << "Terminating.." << std::endl;
+        std::cerr << "[ MachineStateManager ]:\tUnsuccessful registration as a MSM." << std::endl
+                  << "[ MachineStateManager ]:\tTerminating.." << std::endl;
     }
 }
 
 void Init::leave() const
 {
+    std::cout << "[ MachineStateManager ]:\tReporting state Running..." << std::endl;
     m_msm.reportApplicationState(ApplicationState::K_RUNNING);
 }
 
@@ -82,28 +83,29 @@ Running::Running(MachineStateManager &msm)
 
 std::unique_ptr<State> Running::handleTransition()
 {
-    return std::make_unique<Shutdown>(m_msm);
+    if (m_msm.isTerminating())
+    {
+        return std::make_unique<Shutdown>(m_msm);
+    }
+
+    return std::make_unique<Running>(m_msm);
 }
 
 void Running::enter()
 {
     std::this_thread::sleep_for(std::chrono::seconds(5));
-    std::cout << "[MachineStateManager]: Reporting state K_RUNNING..." << std::endl;
-    m_msm.reportApplicationState(getApplicationState());
 
-    std::this_thread::sleep_for(std::chrono::seconds(5));
-
-    std::cout << "[MachineStateManager]: Setting machine state to RUNNING..." << std::endl;
+    std::cout << "[ MachineStateManager ]:\tSetting machine state to RUNNING..." << std::endl;
     m_msm.setMachineState("Running", 300000);
 
     std::this_thread::sleep_for(std::chrono::seconds(5));
 
-    std::cout << "[MachineStateManager]: Setting machine state to LIVING..." << std::endl;
+    std::cout << "[ MachineStateManager ]:\tSetting machine state to LIVING..." << std::endl;
     m_msm.setMachineState("Living", 300000);
 
     std::this_thread::sleep_for(std::chrono::seconds(5));
 
-    std::cout << "[MachineStateManager]: Setting machine state to SHUTTINGDOWN..." << std::endl;
+    std::cout << "[ MachineStateManager ]:\tSetting machine state to SHUTTINGDOWN..." << std::endl;
     m_msm.setMachineState("Shuttingdown", 300000);
 }
 
@@ -118,22 +120,24 @@ std::unique_ptr<State> Shutdown::handleTransition()
 {
     if (m_msm.isTerminating())
     {
-        std::cout << "[MachineStateManager]: Already in terminate state!" << std::endl;
+        std::cout << "[ MachineStateManager ]:\tAlready in Shutdown state!" << std::endl;
     }
     else
     {
-        std::cout << "[MachineStateManager]: Terminating state. App is dead." << std::endl;
+        std::cout << "[ MachineStateManager ]:\tEntering Shutdown state." << std::endl;
     }
     return std::make_unique<Shutdown>(m_msm);
 }
 
 void Shutdown::enter()
 {
-    std::cout << "[MachineStateManager]: Reporting state K_SHUTTINGDOWN..." << std::endl;
-    m_msm.reportApplicationState(getApplicationState());
+    std::cout << "[ MachineStateManager ]:\tReporting state "
+              << m_stateName << "." << std::endl;
 
-    std::cout << "[MachineStateManager]: Enter terminate state" << std::endl
-              << "MachineStateManager is SHUTTINGDOWN..." << std::endl;
+    std::cout << "[ MachineStateManager ]:\tIn Shutdown state." << std::endl
+              << "[ MachineStateManager ]:\tIs dead..." << std::endl;
+
+    m_msm.reportApplicationState(getApplicationState());
 
     ::exit(EXIT_SUCCESS);
 }

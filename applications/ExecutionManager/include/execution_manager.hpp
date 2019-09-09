@@ -21,12 +21,15 @@
 #include <thread>
 #include <unistd.h>
 #include <vector>
+#include <set>
+#include <mutex>
 
 namespace ExecutionManager
 {
 
 using applicationId = std::string;
 using MachineState = std::string;
+using ProcName = std::string;
 using std::pair;
 
 struct ApplicationManifest;
@@ -46,16 +49,6 @@ private:
   void filterStates();
 
   /**
-   * @brief Loads all adaptive applications from corePath.
-   * @return Vector containing names of applications that were found in corePath.   
-   */
-  std::vector<std::string> loadListOfApplications();
-
-  /**
-   * @brief processManifests - loads manifests from corePath.
-   */
-  void processManifests();
-  /**
    * @brief Starts given application and stores information
    *        about it in activeApplications.
    * @param process: Application to start.
@@ -73,9 +66,7 @@ private:
   void killProcessesForState();
 
   bool processToBeKilled (const std::string& app, const std::vector<ProcessName>&);
-
-  void confirmMachineState();
-
+ 
   ::kj::Promise<void>
   reportApplicationState(ReportApplicationStateContext context) override;
 
@@ -88,15 +79,15 @@ private:
   ::kj::Promise<void>
   setMachineState(SetMachineStateContext context) override;
 private:
-  /** 
+  /**
    * @brief Hardcoded path to folder with adaptive applications.
    */
   const static std::string corePath;
 
-  /** 
+  /**
    * @brief structure that holds application and required processes.
    */
-  std::map<MachineState, pid_t> m_activeApplications;
+  std::map<ProcName, pid_t> m_activeProcesses;
 
   /**
    * @brief Structure for application that can run in certain state
@@ -115,9 +106,15 @@ private:
    */
   std::vector<MachineState> m_machineManifestStates;
 
-  std::string machineStateClientAppName;
+  std::string m_machineStateClientAppName;
 
-  std::map<applicationId, pid_t> reportedApplications;
+  pid_t m_machineStateClientPid {-1};
+
+  std::map<pid_t, std::string> m_reportedApplications;
+
+  std::set<pid_t> m_stateConfirmToBeReceived;
+
+  std::mutex m;
 };
 
 } // namespace ExecutionManager

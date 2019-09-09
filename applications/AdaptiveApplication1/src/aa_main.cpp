@@ -11,9 +11,9 @@ static std::atomic<bool> isTerminating{false};
 
 int main()
 {
-    if (::signal(SIGINT, signalHandler) == SIG_ERR)
+    if (::signal(SIGTERM, signalHandler) == SIG_ERR)
     {
-        std::cout << "Error while registering signal\n";
+        std::cout << "[ AdaptiveApplication1 ]:\tError while registering signal." << std::endl;
     }
     AdaptiveApp app(isTerminating);
 
@@ -27,6 +27,7 @@ int main()
 
 static void signalHandler(int signo)
 {
-    std::cout << "received signal:" << sys_siglist[signo] << "\n";
+    std::cout << "[ AdaptiveApplication1 ]:\tReceived signal: "
+              << sys_siglist[signo] << std::endl;
     isTerminating = true;
 }

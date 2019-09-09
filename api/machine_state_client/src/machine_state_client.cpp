@@ -19,23 +19,25 @@ namespace {
 }
 
 MachineStateClient::MachineStateClient(string path)
-  : client(path),
-    clientApplication(client.getMain<MachineStateManagement>()),
-    timer(client.getIoProvider().getTimer())
+  : m_client(path),
+    m_clientApplication(m_client.getMain<MachineStateManagement>()),
+    m_timer(m_client.getIoProvider().getTimer()),
+    m_pid(getpid())
 {}
 
 MachineStateClient::StateError
 MachineStateClient::Register(string appName, std::uint32_t timeout)
 {
-  auto request = clientApplication.registerRequest();
+  auto request = m_clientApplication.registerRequest();
   request.setAppName(appName);
+  request.setPid(m_pid);
 
-  auto promise = timer.timeoutAfter(timeout * kj::MILLISECONDS, request.send());
+  auto promise = m_timer.timeoutAfter(timeout * kj::MILLISECONDS, request.send());
 
   auto result = promise.then([](auto&& res)
       {
         return res.getResult();
-      }, exceptionLambda).wait(client.getWaitScope());
+      }, exceptionLambda).wait(m_client.getWaitScope());
 
   return result;
 }
@@ -43,15 +45,17 @@ MachineStateClient::Register(string appName, std::uint32_t timeout)
 MachineStateClient::StateError
 MachineStateClient::GetMachineState(std::uint32_t timeout, string& state)
 {
-  auto request = clientApplication.getMachineStateRequest();
-  auto promise = timer.timeoutAfter(timeout * kj::MILLISECONDS, request.send());
+  auto request = m_clientApplication.getMachineStateRequest();
+  auto promise = m_timer.timeoutAfter(timeout * kj::MILLISECONDS, request.send());
+
+  request.setPid(m_pid);
 
   auto result = promise.then([&state](auto&& res)
     {
       state = res.getState();
 
       return res.getResult();
-    }, exceptionLambda).wait(client.getWaitScope());
+    }, exceptionLambda).wait(m_client.getWaitScope());
 
   return result;
 }
@@ -59,17 +63,18 @@ MachineStateClient::GetMachineState(std::uint32_t timeout, string& state)
 MachineStateClient::StateError
 MachineStateClient::SetMachineState(string state, std::uint32_t timeout)
 {
-  auto request = clientApplication.setMachineStateRequest();
+  auto request = m_clientApplication.setMachineStateRequest();
   request.setState(state);
-  
-  auto promise = timer.timeoutAfter(timeout * kj::MILLISECONDS, request.send());
-  
+  request.setPid(m_pid);
+
+  auto promise = m_timer.timeoutAfter(timeout * kj::MILLISECONDS, request.send());
+
   auto result = promise
   .then([](auto&& res)
     {
       return res.getResult();
-    }, exceptionLambda).wait(client.getWaitScope());
-  
+    }, exceptionLambda).wait(m_client.getWaitScope());
+
   return result;
 }
 

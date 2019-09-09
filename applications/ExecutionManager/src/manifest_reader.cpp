@@ -88,7 +88,7 @@ std::vector<std::string> ManifestReader::getListOfApplications()
 
   if ((dp = opendir(corePath.c_str())) == nullptr)
   {
-    throw runtime_error(std::string{"Error opening directory: "}
+    throw runtime_error(std::string{"[ ManifestReader ]:\tError opening directory: "}
                         + corePath
                         + " "
                         + strerror(errno));

@@ -28,7 +28,7 @@ double AdaptiveApp::mean()
 
 void AdaptiveApp::readSensorData()
 {
-    std::cout << "Read data from sensors\n";
+    std::cout << "[ AdaptiveApplication1 ]:\tRead data from sensors." << std::endl;
 
     std::random_device rd{};
     std::mt19937 gen{rd()};
@@ -45,7 +45,7 @@ void AdaptiveApp::printSensorData() const
     for (const auto& item : m_sensorData) {
         std::cout << item << " | ";
     }
-    std::cout << "\n";
+    std::cout << std::endl;
 }
 
 bool AdaptiveApp::isTerminating() const

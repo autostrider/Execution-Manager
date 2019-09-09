@@ -37,10 +37,10 @@ public:
     void enter() override;
 };
 
-class Terminate : public State
+class Shutdown : public State
 {
 public:
-    Terminate(AdaptiveApp& app);
+    Shutdown(AdaptiveApp& app);
     std::unique_ptr<State> handleTransition() override;
     void enter() override;
 };

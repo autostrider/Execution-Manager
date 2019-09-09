@@ -11,9 +11,9 @@ static std::atomic<bool> isTerminating{false};
 
 int main(int argc, char **argv)
 {
-  if (::signal(SIGINT, signalHandler) == SIG_ERR)
+  if (::signal(SIGTERM, signalHandler) == SIG_ERR)
   {
-    std::cout << "Error while registering signal\n";
+    std::cout << "[ MachineStateManager ]:\tError while registering signal." << std::endl;
   }
   
   MachineStateManager::MachineStateManager msm(isTerminating);
@@ -29,6 +29,7 @@ int main(int argc, char **argv)
 
 static void signalHandler(int signo)
 {
-    std::cout << "received signal:" << sys_siglist[signo] << "\n";
+    std::cout << "[ MachineStateManager ]:\tReceived signal: "
+              << sys_siglist[signo] << "." << std::endl;
     isTerminating = true;
 }

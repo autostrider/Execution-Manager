@@ -7,7 +7,8 @@ using ApplicationState = api::ApplicationStateClient::ApplicationState;
 State::State(AdaptiveApp &app, api::ApplicationStateClient::ApplicationState state, const std::string &stateName) :
     m_app{app}, m_applState{state}, m_stateName{stateName}
 {
-    std::cout << "Enter " << m_stateName << " state\n";
+//    std::cout << "[ AdaptiveApplication1 ]:\tEntering "
+//              << m_stateName << " styyyyyyyyyyyyyyyyyyyate." << std::endl;
 }
 
 void State::leave() const
@@ -28,13 +29,15 @@ std::unique_ptr<State> Init::handleTransition()
 {
     if (m_app.isTerminating())
     {
-        return std::make_unique<Terminate>(m_app);
+        return std::make_unique<Shutdown>(m_app);
     }
     return std::make_unique<Run>(m_app);
 }
 
 void Init::enter()
 {
+    std::cout << "[ AdaptiveApplication1 ]:\tReporting state "
+              << m_stateName << "." << std::endl;
     m_app.reportApplicationState(getApplicationState());
 }
 
@@ -44,14 +47,14 @@ void Init::leave() const
 }
 
 Run::Run(AdaptiveApp &app) : State (app, ApplicationState::K_RUNNING, "Running")
-{
+{  
 }
 
 std::unique_ptr<State> Run::handleTransition()
 {
     if (m_app.isTerminating())
     {
-        return std::make_unique<Terminate>(m_app);
+        return std::make_unique<Shutdown>(m_app);
     }
     return std::make_unique<Run>(m_app);
 }
@@ -59,29 +62,35 @@ std::unique_ptr<State> Run::handleTransition()
 void Run::enter()
 {
     m_app.readSensorData();
-    std::cout << "mean: " << m_app.mean() << "\n";
+    std::cout << "[ AdaptiveApplication1 ]:\tMean: "
+              << m_app.mean() << std::endl;
 }
 
-Terminate::Terminate(AdaptiveApp &app) : State (app, ApplicationState::K_SHUTTINGDOWN, "Terminating")
+Shutdown::Shutdown(AdaptiveApp &app) : State (app, ApplicationState::K_SHUTTINGDOWN, "Shutdown")
 {
 }
 
-std::unique_ptr<State> Terminate::handleTransition()
+std::unique_ptr<State> Shutdown::handleTransition()
 {
     if (m_app.isTerminating())
     {
-        std::cout << "Already in terminate state!";
+        std::cout << "[ AdaptiveApplication1 ]:\tAlready in Shutdown state!" << std::endl;
     }
     else
     {
-        std::cout << "terminating state. App is dead(\n";
+        std::cout << "[ AdaptiveApplication1 ]:\tEntering Shutdown state." << std::endl;
     }
-    return std::make_unique<Terminate>(m_app);
+    return std::make_unique<Shutdown>(m_app);
 }
 
-void Terminate::enter()
+void Shutdown::enter()
 {
-    std::cout << "App is dead...\n";
+    std::cout << "[ AdaptiveApplication1 ]:\tReporting state "
+              << m_stateName << "." << std::endl;
+
+    std::cout << "[ AdaptiveApplication1 ]:\tIn Shutdown state." << std::endl
+              << "[ AdaptiveApplication1 ]:\tIs dead..." << std::endl;
     m_app.reportApplicationState(getApplicationState());
+
     ::exit(EXIT_SUCCESS);
 }

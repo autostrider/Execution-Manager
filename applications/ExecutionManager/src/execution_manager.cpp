@@ -159,8 +159,9 @@ ExecutionManager::reportApplicationState(pid_t processId, AppState state)
 bool
 ExecutionManager::registerMachineStateClient(pid_t processId, string appName)
 {
-  if (m_machineStateClientPid == -1 ||
-      m_machineStateClientPid == processId)
+  if (!appName.empty() &&
+      (m_machineStateClientPid == -1 ||
+       m_machineStateClientPid == processId))
   {
     m_machineStateClientPid = processId;
     m_machineStateClientAppName = appName;
@@ -202,6 +203,7 @@ ExecutionManager::setMachineState(pid_t processId, string state)
                                  state);
 
   if (stateIt != m_machineManifestStates.cend() &&
+      state != m_currentState &&
       processId == m_machineStateClientPid)
   {
     m_currentState = state;

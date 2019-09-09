@@ -11,6 +11,7 @@ target_include_directories(${TEST_NAME}_test PRIVATE ${EM_INCLUDE})
 target_link_libraries(${TEST_NAME}_test
   gtest
   gtest_main
+  gmock
   nlohmann_json::nlohmann_json
   api::application_state_client
   api::machine_state_client
@@ -37,6 +38,7 @@ target_link_libraries(${COVERAGE_BUILD}
   gcov
   gtest
   gtest_main
+  gmock
   nlohmann_json::nlohmann_json
   api::application_state_client
   api::machine_state_client

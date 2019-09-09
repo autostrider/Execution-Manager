@@ -15,12 +15,20 @@ int main()
     {
         std::cout << "Error while registering signal\n";
     }
-    AdaptiveApp app(isTerminating);
 
-    while (true)
-    {
-        app.transitToNextState();
-        std::this_thread::sleep_for(std::chrono::seconds(5));
+    try {
+        AdaptiveApp app(isTerminating);
+        app.init(std::make_unique<Init>(app),
+                 std::make_unique<api::ApplicationStateClient>());
+        while (true)
+        {
+            app.transitToNextState();
+            std::this_thread::sleep_for(std::chrono::seconds(5));
+        }
+
+    } catch (std::exception& ex) {
+        std::cout << ex.what() << std::endl;
+        ::exit(EXIT_SUCCESS);
     }
     return 0;
 }

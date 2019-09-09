@@ -28,3 +28,4 @@ add_adaptive_application(
   PROCESSES
     proc1
 )
+add_subdirectory(test)

@@ -81,7 +81,6 @@ std::unique_ptr<State> Terminate::handleTransition()
 
 void Terminate::enter()
 {
-    std::cout << "App is dead...\n";
     m_app.reportApplicationState(getApplicationState());
-    ::exit(EXIT_SUCCESS);
+    throw std::runtime_error("killing app...\n");
 }

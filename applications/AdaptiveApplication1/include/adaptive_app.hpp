@@ -4,6 +4,7 @@
 #include <vector>
 #include <memory>
 #include <atomic>
+#include <iostream>
 
 #include <application_state_client.h>
 
@@ -13,19 +14,21 @@ class AdaptiveApp
 {
 public:
     AdaptiveApp(std::atomic<bool>& terminate);
+    virtual ~AdaptiveApp() = default;
 
+    void init(std::unique_ptr<State> initialState, std::unique_ptr<api::ApplicationStateClient> client);
     void transitToNextState();
-    double mean();
-    void readSensorData();
+    virtual double mean();
+    virtual void readSensorData();
     void printSensorData() const;
-    bool isTerminating() const;
-    void reportApplicationState(api::ApplicationStateClient::ApplicationState state);
+    virtual bool isTerminating() const;
+    virtual void reportApplicationState(api::ApplicationStateClient::ApplicationState state);
 
 private:
     const size_t c_numberOfSamples = 50;
     std::vector<double> m_sensorData;
     std::unique_ptr<State> m_currentState;
     std::atomic<bool>& m_terminateApp;
-    api::ApplicationStateClient m_appClient;
+    std::unique_ptr<api::ApplicationStateClient> m_appClient;
 };
 #endif

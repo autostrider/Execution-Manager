@@ -7,9 +7,16 @@
 using ApplicationState = api::ApplicationStateClient::ApplicationState;
 
 AdaptiveApp::AdaptiveApp(std::atomic<bool> &terminate) : m_sensorData(c_numberOfSamples),
-    m_currentState{std::make_unique<Init>(*this)},
-    m_terminateApp{terminate}
+    m_currentState{nullptr},
+    m_terminateApp{terminate},
+    m_appClient{nullptr}
 {
+}
+
+void AdaptiveApp::init(std::unique_ptr<State> initialState, std::unique_ptr<api::ApplicationStateClient> client)
+{
+    m_appClient = std::move(client);
+    m_currentState = std::move(initialState);
     m_currentState->enter();
 }
 
@@ -55,6 +62,5 @@ bool AdaptiveApp::isTerminating() const
 
 void AdaptiveApp::reportApplicationState(ApplicationState state)
 {
-    m_appClient.ReportApplicationState(state);
+    m_appClient->ReportApplicationState(state);
 }
-

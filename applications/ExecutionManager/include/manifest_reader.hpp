@@ -12,6 +12,17 @@ namespace ExecutionManager
 {
 
 using MachineState = std::string;
+
+/**
+ * @brief Config of Manifest Reader: main consts that will be
+ *        injected externally.
+ */
+struct ManifestReaderConf
+{
+  const std::string corePath{"./bin/applications"};
+  const std::string machineManifestPath{ "../applications/ExecutionManager/machine_manifest.json"};
+};
+
 /**
  * @brief Class, responsible for reading manifests from filesystem and
  * processing manifest data.
@@ -19,6 +30,7 @@ using MachineState = std::string;
 class ManifestReader : public IManifestReader
 {
 public:
+  ManifestReader(const ManifestReaderConf& conf = ManifestReaderConf{});
   /**
     * @brief Load data from application manifests and process it.
     * @return Map of applications for each state in Application
@@ -33,18 +45,16 @@ public:
    */
   virtual std::vector<MachineState> getMachineStates() override;
 
+
+  ~ManifestReader() override = default;
+
+private:
   /**
    * @brief Load json from file.
    * @param manifestPath: path to file.
    * @return parsed object.
    */
   json getJsonData(const std::string &manifestPath);
-
-  ~ManifestReader() override = default;
-
-#ifndef UNIT_TEST
-private:
-#endif
 
   /**
    * @brief Loads all adaptive applications from corePath.
@@ -54,14 +64,10 @@ private:
   std::vector<std::string> getListOfApplications();
 
   /**
-   * @brief Hardcoded path to folder with adaptive applications.
+   * @brief Config with pathes to machine manfiest and
+   *        folder with applications;
    */
-  const std::string corePath =
-      #ifndef UNIT_TEST
-        "./bin/applications/";
-      #else
-        "./test-data/";
-      #endif
+  const ManifestReaderConf conf;
 
   const static std::string machineStateFunctionGroup;
 };

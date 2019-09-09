@@ -30,10 +30,10 @@ struct ProcessName
   std::string applicationName;
   std::string processName;
 
-  bool operator==(const ProcessName& procName) const
+  bool operator==(const ProcessName& rhs) const
   {
-    return processName == procName.processName &&
-           applicationName == procName.processName;
+    return processName == rhs.processName &&
+           applicationName == rhs.processName;
 
   }
 };

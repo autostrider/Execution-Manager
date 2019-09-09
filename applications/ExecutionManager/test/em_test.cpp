@@ -9,140 +9,127 @@
 using namespace ExecutionManager;
 using nlohmann::json;
 
-namespace ManifestReaderTestData
+
+class ManifestReaderTest : public ::testing::Test
 {
-
-const ManifestReader reader;
-const MachineManifest machineManifest =
-  MachineManifest{
-  MachineManifestInternal{
-    "Machine",
-    {
-      ModeDeclarationGroup{
-        "MachineState",
-        {
-          Mode{"Startup"},
-            Mode{"Running"},
-            Mode{"Shutdown"}
-        }
-      }
-    }
-  }
- };
-
-std::vector<std::string> nestedDirs =
-  {"msm", "test-aa1", "test-aa2"};
-
-const std::string machineManifestPath =
-  reader.corePath + "/" + nestedDirs.at(0) + "/machine_manifest.json";
-
-const std::map<std::string, ApplicationManifest> applicationManifestsInfo =
-  {
-  {"test-aa1",
-     ApplicationManifest{
-       ApplicationManifestInternal{
-         "test-aa1",
-         {Process{
-           "proc1",
-           {ModeDepStartupConfig{
-             {MachineInstanceMode{"MachineManifest", "Running"}
-             }}}
-         }}
-       }
-     }
-    },
-    {"test-aa2",
-     ApplicationManifest{
-       ApplicationManifestInternal{
-         "test-aa2",
-         {Process{
-           "proc2",
-           {ModeDepStartupConfig{
-             {MachineInstanceMode{"MachineManifest", "Startup"}
-             }}}
-         }}
-       }
-     }
-    },
-    {"msm",
-     ApplicationManifest{
-       ApplicationManifestInternal{
-         "msm",
-         {Process{
-           "msm",
-           {ModeDepStartupConfig{
-             {MachineInstanceMode{"MachineManifest", "Startup"},
-              MachineInstanceMode{"MachineManifest", "Running"}
-             }}}
-         }}
-       }
-     }
-    }
-};
-} // namespace ManifestReaderTestData
-
-class ManifestReaderEnvironment : public ::testing::Environment
-{
-public:
-  ~ManifestReaderEnvironment() override = default;
-
+protected:
   void SetUp() override;
-
   void TearDown() override;
+protected:
+  const ManifestReaderConf testConf{"./test-data/",
+                                    "./test-data/msm/machine_manifest.json"};
 
 private:
   void createMachineManifest();
-
   void createDirs();
-
   void createApplicationManifests();
-
 };
 
-void ManifestReaderEnvironment::SetUp()
+void ManifestReaderTest::SetUp()
 {
-    createDirs();
-    createMachineManifest();
-    createApplicationManifests();
+  createDirs();
+  createMachineManifest();
+  createApplicationManifests();
 }
 
-void ManifestReaderEnvironment::TearDown()
+void ManifestReaderTest::TearDown()
 {
-  std::string rmTestDir = "rm -rf " + ManifestReaderTestData::reader.corePath;
-  system(rmTestDir.c_str());
+    std::string rmTestDir = "rm -rf " + testConf.corePath;
+    system(rmTestDir.c_str());
 }
 
-void ManifestReaderEnvironment::createMachineManifest()
-{
-  json manifSerialized = ManifestReaderTestData::machineManifest;
-
-    std::ofstream output;
-    output.open(ManifestReaderTestData::machineManifestPath);
-    output << manifSerialized;
-}
-
-void ManifestReaderEnvironment::createDirs()
+void ManifestReaderTest::createDirs()
 {
     std::string createDir = "mkdir ";
+    std::vector<std::string> nestedDirs =
+      {"msm", "test-aa1", "test-aa2"};
 
-    std::string createCoreDir = createDir + ManifestReaderTestData::reader.corePath;
+    std::string createCoreDir = createDir +testConf.corePath;
     system(createCoreDir.c_str());
 
-    for (const auto& dir: ManifestReaderTestData::nestedDirs)
+    for (const auto& dir: nestedDirs)
     {
       std::string createNestedDir = createDir
-                                    + ManifestReaderTestData::reader.corePath
+                                    + testConf.corePath
                                     + dir;
 
       system(createNestedDir.c_str());
     }
 }
 
-void ManifestReaderEnvironment::createApplicationManifests()
+void ManifestReaderTest::createMachineManifest()
 {
-  for (const auto& appManifest: ManifestReaderTestData::applicationManifestsInfo)
+  const MachineManifest machineManifest =
+    MachineManifest{
+    MachineManifestInternal{
+      "Machine",
+      {
+        ModeDeclarationGroup{
+          "MachineState",
+          {
+            Mode{"Startup"},
+              Mode{"Running"},
+              Mode{"Shutdown"}
+          }
+        }
+      }
+    }
+   };
+
+  json manifSerialized = machineManifest;
+
+    std::ofstream output{testConf.machineManifestPath};
+    output << manifSerialized;
+}
+
+void ManifestReaderTest::createApplicationManifests()
+{
+  const std::map<std::string, ApplicationManifest> applicationManifestsInfo =
+    {
+    {"test-aa1",
+       ApplicationManifest{
+         ApplicationManifestInternal{
+           "test-aa1",
+           {Process{
+             "proc1",
+             {ModeDepStartupConfig{
+               {MachineInstanceMode{"MachineState", "Running"}
+               }}}
+           }}
+         }
+       }
+      },
+      {"test-aa2",
+       ApplicationManifest{
+         ApplicationManifestInternal{
+           "test-aa2",
+           {Process{
+             "proc2",
+             {ModeDepStartupConfig{
+               {MachineInstanceMode{"MachineState", "Startup"}
+               }}}
+           }}
+         }
+       }
+      },
+      {"msm",
+       ApplicationManifest{
+         ApplicationManifestInternal{
+           "msm",
+           {Process{
+             "msm",
+             {ModeDepStartupConfig{
+               {MachineInstanceMode{"MachineState", "Startup"},
+                MachineInstanceMode{"MachineState", "Running"}
+               }}}
+           }}
+         }
+       }
+      }
+  };
+  for (const auto& appManifest: applicationManifestsInfo)
   {
-    std::string path = ManifestReaderTestData::reader.corePath
+    std::string path = testConf.corePath
                        + appManifest.first
                        + "/manifest.json";
     std::ofstream output{path};
@@ -152,90 +139,43 @@ void ManifestReaderEnvironment::createApplicationManifests()
   }
 }
 
-/// INIT ENVIRONMENT
-::testing::Environment* const manifestReaderEnvironment =
-    ::testing::AddGlobalTestEnvironment(new ManifestReaderEnvironment);
-/// -------------------
-
-TEST(ManifestReaderTest, getApplicationListFail)
+TEST_F(ManifestReaderTest, ShouldReturnAvailableMachineStates)
 {
-  // remove folder with data
-  manifestReaderEnvironment->TearDown();
+  ManifestReader reader{testConf};
 
-  ManifestReader reader;
-  ASSERT_THROW(reader.getListOfApplications(),
-               std::runtime_error);
+  auto res = reader.getMachineStates();
 
-  // create folder with data
-  manifestReaderEnvironment->SetUp();
+  ASSERT_EQ(res,
+            (std::vector<MachineState>{"Startup", "Running", "Shutdown"}));
 }
 
-TEST(ManifestReaderTest, getJsonDataTest)
+TEST_F(ManifestReaderTest, ShouldFaildWhenDirectoryNotExists)
 {
-  ManifestReader reader;
+  ManifestReader reader{ManifestReaderConf{"./not-exists", "manifest"}};
 
-  json manifSerialized = ManifestReaderTestData::machineManifest;
-
-  json returnObj = reader.getJsonData(ManifestReaderTestData::machineManifestPath);
-
-  ASSERT_EQ(manifSerialized, returnObj);
+  EXPECT_THROW(reader.getStatesSupportedByApplication(), std::runtime_error);
 }
 
-TEST(ManifestReaderTest, getMachineStates)
+TEST_F(ManifestReaderTest, ShouldReturnMapOfApplicationsForStates)
 {
-  ManifestReader reader;
-
-  const std::vector<MachineState> expectedOutput
-      = {"Startup", "Running", "Shutdown"};
-  const auto& result = reader.getMachineStates();
-
- ASSERT_EQ(expectedOutput, result);
-}
-
-TEST(ManifestReaderTest, getListOfApplications)
-{
-  ManifestReaderEnvironment env;
-  ManifestReader reader;
-
-  auto resultAppsList = reader.getListOfApplications();
-  std::sort(ManifestReaderTestData::nestedDirs.begin(),
-            ManifestReaderTestData::nestedDirs.end());
-
-  std::sort(resultAppsList.begin(),
-            resultAppsList.end());
-
-  ASSERT_EQ(ManifestReaderTestData::nestedDirs, resultAppsList);
-}
-
-TEST(ManifestReaderTest, getStatesSupportedByApplicationTest)
-{
-  ManifestReader reader;
-
-  const auto comp = [](const ProcessName& proc1, const ProcessName& proc2)
-  { return proc1.processName < proc2.processName; };
-
+  ManifestReader reader{testConf};
   std::map<MachineState, std::vector<ProcessName>> expectedResult =
   {
-      {"Startup", {ProcessName{"test-aa1", "proc1"},
-                   ProcessName{"msm", "msm"}}},
-      {"Running", {ProcessName{"test-aa2", "proc2"},
-                   ProcessName{"msm", "msm"}}},
+      {"Startup", {
+                   ProcessName{"msm", "msm"},
+                   ProcessName{"test-aa2", "proc2"}
+                   }},
+      {"Running", {
+                   ProcessName{"test-aa1", "proc1"},
+                   ProcessName{"msm", "msm"}
+                  }},
   };
 
-  for (auto& expAppsForState: expectedResult)
-  {
-    std::sort(expAppsForState.second.begin(),
-              expAppsForState.second.end(),
-              comp);
-  }
 
   auto result = reader.getStatesSupportedByApplication();
+
   for (auto& appsForState: result)
   {
-    std::sort(appsForState.second.begin(),
-              appsForState.second.end(),
-              comp);
-
     ASSERT_EQ(appsForState.second.size(),
               expectedResult[appsForState.first].size());
 
@@ -243,8 +183,10 @@ TEST(ManifestReaderTest, getStatesSupportedByApplicationTest)
 
     for (size_t i = 0; i < expResultForState.size(); i++)
     {
-      ASSERT_EQ(appsForState.second.at(i),
-                expResultForState.at(i));
+      ASSERT_EQ(appsForState.second.at(i).processName,
+                expResultForState.at(i).processName);
+      ASSERT_EQ(appsForState.second.at(i).applicationName,
+                expResultForState.at(i).applicationName);
     }
   }
 }

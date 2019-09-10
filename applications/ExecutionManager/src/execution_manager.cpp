@@ -38,7 +38,7 @@ ExecutionManager::ExecutionManager(std::unique_ptr<IManifestReader> reader)
    m_machineStateClientAppName(""),
    m_stateConfirmToBeReceived({})
 {
-  std::cout << "[ ExecutionManager ]:\t\tSAAAAtarted.." << std::endl;
+  std::cout << "[ ExecutionManager ]:\t\tStarted.." << std::endl;
 
   filterStates();
 
@@ -155,14 +155,8 @@ void ExecutionManager::startApplication(const ProcessName& process)
       m_activeProcesses.insert({process.processName, {processId}});
     }
 
-    std::cout << "Started : " << process.applicationName << std::endl;
-
-std::lock_guard<std::mutex> lock(m);
-{
-    std::cout << "Adding2 :" << processId << std::endl;
-
     m_stateConfirmToBeReceived.insert(processId);
-}
+
     m_reportedApplications.insert({processId, process.applicationName});
     std::cout << "[ ExecutionManager ]:\t\tAdaptive aplication \""
               << process.applicationName
@@ -179,12 +173,7 @@ ExecutionManager::reportApplicationState(ReportApplicationStateContext context)
 {
   ApplicationState state = context.getParams().getState();
   pid_t applicationPid = context.getParams().getPid();
-  // std::remove_if(m_stateConfirmToBeReceived.begin(),
-  //                m_stateConfirmToBeReceived.end(),
-  //                [&](pid_t id) mutable
-  //                {
-  //                  return (id == applicationPid);
-  //                });
+
   std::cout << "[ ExecutionManager ]:\t\tState \"" << applicationStateNames[static_cast<uint16_t>(state)]
             << "\" for "
             << m_reportedApplications[applicationPid]
@@ -257,8 +246,8 @@ ExecutionManager::setMachineState(SetMachineStateContext context)
   string state = context.getParams().getState().cStr();
   pid_t machineStateClientPid = context.getParams().getPid();
 
-  std::cout << "==============================================" << std::endl;
-  std::cout << "STATE TO BE SET : " << state<< std::endl;
+  std::cout << "============================================================================" << std::endl;
+  std::cout << "[ ExecutionManager ]:\t\tSTATE TO BE SET : " << state<< std::endl;
   std::vector<ProcessName> tmp = m_allowedApplicationForState[state];
   std::string res;
 
@@ -303,22 +292,13 @@ ExecutionManager::setMachineState(SetMachineStateContext context)
     res4 += process + ", ";
   }
 
-
-
-
-
-  std::cout << "Applications allowed for this state: "  << res << std::endl;
-  std::cout << "Active applications: "  << res2 << std::endl;
-  std::cout << "To be killed: "  << res3 << std::endl;
-  std::cout << "To be started: "  << res4 << std::endl;
-
+  std::cout << "[ ExecutionManager ]:\t\tApplications allowed for this state: "  << res << std::endl;
+  std::cout << "[ ExecutionManager ]:\t\tActive process: "  << res2 << std::endl;
+  std::cout << "[ ExecutionManager ]:\t\tProcess to be killed: "  << res3 << std::endl;
+  std::cout << "[ ExecutionManager ]:\t\tProcess to be started: "  << res4 << std::endl;
 
   res.clear();
   res2.clear();
-  std::cout << "==============================================" << std::endl;
-
-
-
 
   if (!state.empty() &&
       state != m_currentState &&
@@ -328,13 +308,11 @@ ExecutionManager::setMachineState(SetMachineStateContext context)
 
     killProcessesForState();
 
-
     startApplicationsForState();
 
-    std::cout << "[ ExecutionManager ]:\t\tMachine state changed successfully to "
-              << "\""
-              << m_currentState << "\"."
-              << std::endl;
+    confirmFromApplication();
+
+    std::cout << "============================================================================" << std::endl;
   }
   else
   {
@@ -347,27 +325,25 @@ ExecutionManager::setMachineState(SetMachineStateContext context)
     return kj::READY_NOW;
   }
 
-        std::string tmp1;
+  context.getResults().setResult(StateError::K_SUCCESS);
+  return kj::READY_NOW;
+}
 
-
-std::lock_guard<std::mutex> lock(m);
+void ExecutionManager::confirmFromApplication()
 {
+  std::string tmp1;
   while(!m_stateConfirmToBeReceived.empty())
   {
     for (auto pid : m_stateConfirmToBeReceived)
     {
       tmp1 += std::to_string(pid) + ", ";
     }
-    std::cout << "Waiting confirm for :" << tmp1 << std::endl;
+    std::cout << "[ ExecutionManager ]:\t\tWaiting confirm for application with pid == " << tmp1 << std::endl;
 
     kj::NEVER_DONE.wait(kj::setupAsyncIo().waitScope);
 
-    tmp1.clear();
+    tmp1.clear();      
   }
-}
-
-  context.getResults().setResult(StateError::K_SUCCESS);
-  return kj::READY_NOW;
 }
 
 } // namespace ExecutionManager

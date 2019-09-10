@@ -15,7 +15,7 @@ namespace MachineStateManager{
 State::State(MachineStateManager &msm, ApplicationState state, const std::string &stateName)
     : m_msm{msm}, m_applState{state}, m_stateName{stateName}
 {
-    std::cout << "[ MachineStateManager ]:\tEntergggggggggggggggg " << m_stateName
+    std::cout << "[ MachineStateManager ]:\tEnter " << m_stateName
               << " state" << std::endl;
 }
 

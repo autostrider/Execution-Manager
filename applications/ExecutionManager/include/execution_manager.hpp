@@ -115,6 +115,8 @@ private:
   std::set<pid_t> m_stateConfirmToBeReceived;
 
   std::mutex m;
+
+  void confirmFromApplication();
 };
 
 } // namespace ExecutionManager

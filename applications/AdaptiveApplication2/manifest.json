@@ -1,33 +1,35 @@
 {
-  "Application_manifest": {
-      "Application_manifest_id": "AdaptiveApplication2",
-      "Process": [
-          {
-              "Mode_dependent_startup_configs": [
-                  {
-                      "Mode_in_machine_instance_refs": [
-                          {
-                            "Function_group": "MachineState",
-                            "Mode": "1Running"
-                        }
-                      ]
-                  }
-              ],
-              "Process_name": "proc2"
-          },
-          {
-            "Mode_dependent_startup_configs": [
-                {
-                    "Mode_in_machine_instance_refs": [
-                        {
-                            "Function_group": "MachineState",
-                            "Mode": "1Living"
-                        }
-                    ]
-                }
-            ],
-            "Process_name": "proc3"
-        }
-      ]
+    "Application_manifest": {
+        "Application_manifest_id": "AdaptiveApplication2",
+        "Process": [
+            {
+                "Mode_dependent_startup_configs": [
+                    {
+                        "Mode_in_machine_instance_refs": [
+                            {
+                                "Function_group": "MachineState",
+                                "Mode": "Living"
+                            }
+                        ]
+                    }
+                ],
+                "Process_name": "proc2"
+            },
+
+ 	        {
+                "Mode_dependent_startup_configs": [
+                    {
+                        "Mode_in_machine_instance_refs": [
+                            {
+                                "Function_group": "MachineState",
+                                "Mode": "Running"
+                            }
+                        ]
+                    }
+                ],
+                "Process_name": "proc3"
+            }
+        ]
+    }
   }
-}
+  

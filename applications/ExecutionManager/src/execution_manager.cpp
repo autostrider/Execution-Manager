@@ -29,7 +29,7 @@ ExecutionManager::ExecutionManager(std::unique_ptr<IManifestReader> reader)
   , m_allowedApplicationForState{
       std::move(reader->getStatesSupportedByApplication())}
   , m_currentState{defaultState}
-  , m_machineManifestStates{std::move(reader->getMachineStates())}
+  , m_machineManifestStates{reader->getMachineStates()}
   , m_machineStateClientAppName{}
 {
   filterStates();

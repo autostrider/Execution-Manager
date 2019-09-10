@@ -1,10 +1,8 @@
 #include "execution_manager_server.hpp"
 #include "execution_manager.hpp"
 #include "manifest_reader.hpp"
-
 #include <iostream>
 #include <memory>
-#include <thread>
 
 int main(int argc, char **argv)
 {

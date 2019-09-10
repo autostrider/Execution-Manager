@@ -64,7 +64,6 @@ std::vector<MachineState> ManifestReader::getMachineStates()
 {
   json manifestData = getJsonData(conf.machineManifestPath);
   MachineManifest manifest = manifestData.get<MachineManifest>();
-  std::vector<MachineState> res;
   const auto& availableMachineStates =
       std::find_if(manifest.manifest.modeDeclarationGroups.cbegin(),
                    manifest.manifest.modeDeclarationGroups.cend(),
@@ -77,6 +76,8 @@ std::vector<MachineState> ManifestReader::getMachineStates()
     return {};
   }
 
+  std::vector<MachineState> res;
+  res.reserve(availableMachineStates->modeDeclarations.size());
   std::transform(availableMachineStates->modeDeclarations.cbegin(),
                  availableMachineStates->modeDeclarations.cend(),
                  std::back_inserter(res),

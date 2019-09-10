@@ -14,8 +14,6 @@
 
 namespace ExecutionManager
 {
-using std::runtime_error;
-using std::string;
 
 namespace {
   const char * applicationStateNames[] =
@@ -26,23 +24,26 @@ namespace {
   };
 } // anonymous namespace
 
-const string ExecutionManager::corePath =
-  string{"./bin/applications/"};
+const std::string ExecutionManager::corePath =
+  std::string{"./bin/applications/"};
 
 const MachineState ExecutionManager::defaultState {"Starting-up"};
 
 ExecutionManager::ExecutionManager(std::unique_ptr<IManifestReader> reader)
-  : m_activeProcesses({}),
-    m_allowedApplicationForState(std::move(reader->getStatesSupportedByApplication())),
-    m_currentState (defaultState),
-    m_machineManifestStates({reader->getMachineStates()}),
-    m_machineStateClientAppName(""),
-    m_stateConfirmToBeReceived({})
+  : m_activeProcesses{},
+    m_allowedProcessForState{reader->getStatesSupportedByApplication()},
+    m_currentState{defaultState},
+    m_machineManifestStates{reader->getMachineStates()},
+    m_machineStateClientAppName{""},
+    m_stateConfirmToBeReceived{}
 {
   std::cout << "[ ExecutionManager ]:\t\tStarted.." << std::endl;
 
   filterStates();
+}
 
+void ExecutionManager::start()
+{
   startApplicationsForState();
 }
 
@@ -65,9 +66,9 @@ void ExecutionManager::filterStates()
 
 void ExecutionManager::startApplicationsForState()
 {
-  const auto& allowedApps = m_allowedApplicationForState.find(m_currentState);
+  const auto& allowedApps = m_allowedProcessForState.find(m_currentState);
 
-  if (allowedApps != m_allowedApplicationForState.cend())
+  if (allowedApps != m_allowedProcessForState.cend())
   {
     for (const auto& executableToStart: allowedApps->second)
     {
@@ -78,7 +79,7 @@ void ExecutionManager::startApplicationsForState()
         {
           startApplication(executableToStart);
         }
-        catch (const runtime_error& err)
+        catch (const std::runtime_error& err)
         {
           std::cout << err.what() << std::endl;
         }
@@ -89,12 +90,12 @@ void ExecutionManager::startApplicationsForState()
 
 void ExecutionManager::killProcessesForState()
 {
-  auto allowedApps = m_allowedApplicationForState.find(m_currentState);
+  auto allowedApps = m_allowedProcessForState.find(m_currentState);
 
   for (auto app = m_activeProcesses.cbegin();
        	    app != m_activeProcesses.cend();)
   {
-    if (allowedApps == m_allowedApplicationForState.cend() ||
+    if (allowedApps == m_allowedProcessForState.cend() ||
         processToBeKilled(app->first, allowedApps->second))
     {
       kill(app->second, SIGTERM);
@@ -110,7 +111,7 @@ void ExecutionManager::killProcessesForState()
   }
 }
 
-bool ExecutionManager::processToBeKilled(const string& app, const std::vector<ProcessInfo>& allowedApps)
+bool ExecutionManager::processToBeKilled(const std::string& app, const std::vector<ProcessInfo>& allowedApps)
 {
   auto it = std::find_if(allowedApps.cbegin(),
                      allowedApps.cend(),
@@ -166,7 +167,7 @@ void ExecutionManager::startApplication(const ProcessInfo& process)
   {
     // child process
     const auto processPath = corePath
-                     + process.createRelativePath();
+                           + process.createRelativePath();
 
     auto arguments = getArgumentsList(process);
     auto applicationArguments = convertToNullTerminatingArgv(arguments);
@@ -174,7 +175,7 @@ void ExecutionManager::startApplication(const ProcessInfo& process)
 
     if (res)
     {
-      throw runtime_error(string{"[ ExecutionManager ]:\t\tError occured creating process: "}
+      throw std::runtime_error(std::string{"[ ExecutionManager ]:\t\tError occured creating process: "}
                           + process.processName
                           + " "
                           + strerror(errno));
@@ -203,135 +204,99 @@ void ExecutionManager::startApplication(const ProcessInfo& process)
 
 }
 
-::kj::Promise<void>
-ExecutionManager::reportApplicationState(ReportApplicationStateContext context)
+void
+ExecutionManager::reportApplicationState(pid_t processId, AppState state)
 {
-  ApplicationState state = context.getParams().getState();
-  pid_t applicationPid = context.getParams().getPid();
-
   std::cout << "[ ExecutionManager ]:\t\tState \"" << applicationStateNames[static_cast<uint16_t>(state)]
             << "\" for "
-            << m_reportedApplications[applicationPid]
+            << m_reportedApplications[processId]
             << " received."
             << std::endl;
 
-  m_stateConfirmToBeReceived.erase(applicationPid);
-
-
-  return kj::READY_NOW;
+  m_stateConfirmToBeReceived.erase(processId);
 }
 
-::kj::Promise<void>
-ExecutionManager::register_(RegisterContext context)
+bool
+ExecutionManager::registerMachineStateClient(pid_t processId, std::string appName)
 {
-  string newMachineClientAppName = context.getParams().getAppName();
-  pid_t newMachineClientAppPid = context.getParams().getPid();
-
   if (m_machineStateClientPid == -1 ||
-      m_machineStateClientPid == newMachineClientAppPid)
+      m_machineStateClientPid == processId)
   {
-    m_machineStateClientPid = newMachineClientAppPid;
-    m_machineStateClientAppName = newMachineClientAppName;
-
-    context.getResults().setResult(StateError::K_SUCCESS);
-
-    std::cout << "[ ExecutionManager ]:\t\tState Machine Client \""
-              << m_machineStateClientAppName
-              << "\" with pid "
-              << newMachineClientAppPid
-              << " registered."
-              << std::endl;
-  }
-  else
-  {
-    context.getResults().setResult(StateError::K_INVALID_REQUEST);
+    m_machineStateClientPid = processId;
+    m_machineStateClientAppName = appName;
 
     std::cout << "[ ExecutionManager ]:\t\tState Machine Client \""
               << m_machineStateClientAppName
               << "\" with pid "
               << m_machineStateClientPid
-              << "\" registration failed."
+              << " registered."
               << std::endl;
+
+    return true;
   }
 
-  return kj::READY_NOW;
+  std::cout << "[ ExecutionManager ]:\t\tState Machine Client \""
+            << appName
+            << "\" with pid "
+            << processId
+            << "\" registration failed."
+            << std::endl;
+
+  return false;
 }
 
-::kj::Promise<void>
-ExecutionManager::getMachineState(GetMachineStateContext context)
+MachineState
+ExecutionManager::getMachineState(pid_t processId) const
 {
   std::cout << "[ ExecutionManager ]:\t\tgetMachineState request received." << std::endl;
 
-  context.getResults().setState(m_currentState);
-
-  context.getResults().setResult(StateError::K_SUCCESS);
-
-  return kj::READY_NOW;
+  return m_currentState;
 }
 
-::kj::Promise<void>
-ExecutionManager::setMachineState(SetMachineStateContext context)
+bool
+ExecutionManager::setMachineState(pid_t processId, std::string state)
 {
-  string state = context.getParams().getState().cStr();
-  pid_t machineStateClientPid = context.getParams().getPid();
+  auto stateIt = std::find(m_machineManifestStates.cbegin(),
+                                 m_machineManifestStates.cend(),
+                                 state);
 
   std::cout << "============================================================================" << std::endl;
   std::cout << "[ ExecutionManager ]:\t\tSTATE TO BE SET : " << state<< std::endl;
-  std::vector<ProcessInfo> tmp = m_allowedApplicationForState[state];
-  std::string res;
 
-  std::set<std::string> allowedAppsSet;
+  std::set<std::string> allowedAppsSet = getAllowedProcessForState(state);
+  std::set<std::string> activeAppsSet = getActiveProcessForCurrentState();
 
-  for (auto id : tmp)
-  {
-    res += id.processName + ", ";
+  std::set<std::string> processToBeKilledSet;
+  std::set<std::string> processToBeStartedSet;
 
-    allowedAppsSet.insert(id.processName);
-  }
-
-  std::string res2;
-  std::set<std::string> activeAppsSet;
-
-  for (auto process : m_activeProcesses)
-  {
-    res2 += process.first + ", ";
-    activeAppsSet.insert(process.first);
-  }
-
-  std::set<std::string> processeToBeKilled;
   std::set_difference(activeAppsSet.begin(), activeAppsSet.end(),
                       allowedAppsSet.begin(), allowedAppsSet.end(),
-                      std::inserter(processeToBeKilled, processeToBeKilled.begin()));
+                      std::inserter(processToBeKilledSet, processToBeKilledSet.begin()));
 
+  std::cout << "[ ExecutionManager ]:\t\tProcesses to be killed: ";
+  for (auto process : processToBeKilledSet)
+  {
+    std::cout << process << ", ";
+  }
 
-  std::set<std::string> processeToBeStarted;
   std::set_difference(allowedAppsSet.begin(), allowedAppsSet.end(),
                       activeAppsSet.begin(), activeAppsSet.end(),
-                      std::inserter(processeToBeStarted, processeToBeStarted.begin()));
+                      std::inserter(processToBeStartedSet, processToBeStartedSet.begin()));
 
-  std::string res3;
-  for (auto process : processeToBeKilled)
+  std::cout << std::endl << "[ ExecutionManager ]:\t\tProcesses to be started: ";
+  for (auto process : processToBeStartedSet)
   {
-    res3 += process + ", ";
+    std::cout << process <<  ", ";
   }
+  std::cout << std::endl;
 
-  std::string res4;
-  for (auto process : processeToBeStarted)
-  {
-    res4 += process + ", ";
-  }
+  allowedAppsSet.clear();
+  activeAppsSet.clear();
+  processToBeKilledSet.clear();
+  processToBeStartedSet.clear();
 
-  std::cout << "[ ExecutionManager ]:\t\tApplications allowed for this state: "  << res << std::endl;
-  std::cout << "[ ExecutionManager ]:\t\tActive process: "  << res2 << std::endl;
-  std::cout << "[ ExecutionManager ]:\t\tProcess to be killed: "  << res3 << std::endl;
-  std::cout << "[ ExecutionManager ]:\t\tProcess to be started: "  << res4 << std::endl;
-
-  res.clear();
-  res2.clear();
-
-  if (!state.empty() &&
-      state != m_currentState &&
-      machineStateClientPid == m_machineStateClientPid)
+  if (stateIt != m_machineManifestStates.cend() &&
+      processId == m_machineStateClientPid)
   {
     m_currentState = state;
 
@@ -341,38 +306,74 @@ ExecutionManager::setMachineState(SetMachineStateContext context)
 
     confirmFromApplication();
 
-    std::cout << "============================================================================" << std::endl;
-  }
-  else
-  {
-    context.getResults().setResult(StateError::K_INVALID_STATE);
-
-    std::cout << "[ ExecutionManager ]:\t\tInvalid machine state received - "
-              << "\"" << m_currentState << "\"."
+    std::cout << "Machine state changed successfully to "
+              << "\""
+              << m_currentState
+              << "\""
               << std::endl;
 
-    return kj::READY_NOW;
-  }
+    std::cout << "============================================================================" << std::endl;
 
-  context.getResults().setResult(StateError::K_SUCCESS);
-  return kj::READY_NOW;
+    return true;
+  }
+  
+  std::cout << "[ ExecutionManager ]:\t\tInvalid machine state received - "
+            << "\"" << state << "\"."
+            << std::endl;
+
+  return false;
 }
 
 void ExecutionManager::confirmFromApplication()
 {
-  std::string tmp1;
+  std::string listOfPid;
   while(!m_stateConfirmToBeReceived.empty())
   {
     for (auto pid : m_stateConfirmToBeReceived)
     {
-      tmp1 += std::to_string(pid) + ", ";
+      listOfPid += std::to_string(pid) + ", ";
     }
-    std::cout << "[ ExecutionManager ]:\t\tWaiting confirm for application with pid == " << tmp1 << std::endl;
+    std::cout << "[ ExecutionManager ]:\t\tWaiting confirm for application with pid == "
+              << listOfPid
+              << std::endl;
 
     kj::NEVER_DONE.wait(kj::setupAsyncIo().waitScope);
 
-    tmp1.clear();      
+    listOfPid.clear();      
   }
+}
+
+std::set<std::string> ExecutionManager::getAllowedProcessForState(std::string state)
+{
+  std::set<std::string> allowedProc;
+
+  std::cout << "[ ExecutionManager ]:\t\tProcesses allowed for this state: ";
+  auto tmp = m_allowedProcessForState[state];
+  
+  for (auto id : tmp)
+  {
+    std::cout << id.processName << ", ";
+
+    allowedProc.insert(id.processName);
+  }
+  std::cout << std::endl;
+
+  return allowedProc;
+}
+
+std::set<std::string> ExecutionManager::getActiveProcessForCurrentState()
+{
+  std::set<std::string> activeProc;
+
+  std::cout << "[ ExecutionManager ]:\t\tActive process: ";
+  for (auto process : m_activeProcesses)
+  {
+    std::cout << process.first <<  ", ";
+    activeProc.insert(process.first);
+  }
+  std::cout << std::endl;
+
+  return activeProc;
 }
 
 } // namespace ExecutionManager

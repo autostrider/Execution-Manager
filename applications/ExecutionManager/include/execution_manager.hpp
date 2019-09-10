@@ -34,11 +34,30 @@ using std::pair;
 
 struct ApplicationManifest;
 
-class ExecutionManager final: public ExecutionManagement::Server
+enum class AppState : uint16_t
+{
+  INITIALIZING,
+  RUNNING,
+  SHUTTINGDOWN
+};
+
+class ExecutionManager
 {
 public:
-  ExecutionManager(std::unique_ptr<IManifestReader> reader);
+  explicit ExecutionManager(std::unique_ptr<IManifestReader> reader);
 
+  /**
+   * @brief Main method of Execution manager.
+   */
+  void start();
+
+  void reportApplicationState(pid_t processId, AppState state);
+
+  bool registerMachineStateClient(pid_t processId, std::string appName);
+
+  MachineState getMachineState(pid_t processId) const;
+
+  bool setMachineState(pid_t processId, std::string state);
 private:
   using ApplicationState = ::ApplicationStateManagement::ApplicationState;
   using StateError = ::MachineStateManagement::StateError;
@@ -48,7 +67,7 @@ private:
    */
   void filterStates();
 
- /**
+  /**
    * @brief Builds vector of command line arguments passed to application.
    * @param process: process for certain mode dependent startup config.
    * @return vector of command line arguments for application.
@@ -61,7 +80,8 @@ private:
    * @param vectorToConvert: vector that will be converted.
    * @return Vector of char* including `nullptr` that be passed to application.
    */
-  std::vector<char*> convertToNullTerminatingArgv(
+  std::vector<char*>
+  convertToNullTerminatingArgv(
       std::vector<std::string> &vectorToConvert);
 
   /**
@@ -83,17 +103,6 @@ private:
 
   bool processToBeKilled (const std::string& app, const std::vector<ProcessInfo>&);
  
-  ::kj::Promise<void>
-  reportApplicationState(ReportApplicationStateContext context) override;
-
-  ::kj::Promise<void>
-  register_(RegisterContext context) override;
-
-  ::kj::Promise<void>
-  getMachineState(GetMachineStateContext context) override;
-
-  ::kj::Promise<void>
-  setMachineState(SetMachineStateContext context) override;
 private:
   /**
    * @brief Hardcoded path to folder with adaptive applications.
@@ -109,9 +118,9 @@ private:
    * @brief Structure for application that can run in certain state
    * vector consists of applicationId (name) and string param - executable name.
    */
-  std::map<MachineState, std::vector<ProcessInfo>> m_allowedApplicationForState;
+  std::map<MachineState, std::vector<ProcessInfo>> m_allowedProcessForState;
 
-  const static std::string defaultState;
+  const static MachineState defaultState;
 
   /**
    * brief Current machine state.
@@ -131,9 +140,11 @@ private:
 
   std::set<pid_t> m_stateConfirmToBeReceived;
 
-  std::mutex m;
-
   void confirmFromApplication();
+  
+  std::set<std::string> getAllowedProcessForState(std::string);
+  
+  std::set<std::string> getActiveProcessForCurrentState();
 };
 
 } // namespace ExecutionManager

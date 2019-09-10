@@ -83,21 +83,24 @@ void ManifestReaderTests::createApplicationManifests()
     {"test-aa1",
        R"({"Application_manifest":{"Application_manifest_id":"test-aa1",)"
        R"("Process":[{"Mode_dependent_startup_configs":)"
-       R"([{"Mode_in_machine_instance_refs":)"
+       R"([{"Startup_options":[],)"
+       R"("Mode_in_machine_instance_refs":)"
        R"([{"Function_group":"MachineState","Mode":"Running"}]}],)"
        R"("Process_name":"proc1"}]}})"
       },
       {"test-aa2",
        R"({"Application_manifest":{"Application_manifest_id":"test-aa2",)"
        R"("Process":[{"Mode_dependent_startup_configs":)"
-       R"([{"Mode_in_machine_instance_refs":)"
+       R"([{"Startup_options":[],)"
+       R"("Mode_in_machine_instance_refs":)"
        R"([{"Function_group":"MachineState","Mode":"Startup"}]}],)"
        R"("Process_name":"proc2"}]}})"
       },
       {"msm",
        R"({"Application_manifest":{"Application_manifest_id":"msm",)"
        R"("Process":[{"Mode_dependent_startup_configs":)"
-       R"([{"Mode_in_machine_instance_refs":[{"Function_group":)"
+       R"([{"Startup_options":[],)"
+       R"("Mode_in_machine_instance_refs":[{"Function_group":)"
        R"("MachineState","Mode":"Startup"},{"Function_group":)"
        R"("MachineState","Mode":"Running"}]}],"Process_name":"msm"}]}})"
       }
@@ -133,7 +136,8 @@ TEST_F(ManifestReaderTests, ShouldDiscardOtherKeysThanMachineStateWhenParse)
 {
   std::string machineManifestWithUnsupportedGroup =
       R"({"Machine_manifest":{"Machine_manifest_id":"Machine",)"
-      R"("Mode_declaration_group":[{"Function_group_name":"MachineState",)"
+      R"("Mode_declaration_group":[)"
+      R"({"Function_group_name":"MachineState",)"
       R"("Mode_declarations":[{"Mode":"Startup"},{"Mode":"Running"},)"
       R"({"Mode":"Shutdown"}]},{"Function_group_name":"TestGroupName",)"
       R"("Mode_declarations":[{"Mode":"tes1"},{"Mode":"tes2"}]}]}})";
@@ -152,7 +156,8 @@ TEST_F(ManifestReaderTests, ShouldEmptyReturnWhenNoMachineStateFunctionGroup)
 {
   std::string machineManifestWithoutMachineStates =
       R"({"Machine_manifest":{"Machine_manifest_id":"Machine",)"
-      R"("Mode_declaration_group":[{"Function_group_name":"TestGroupName",)"
+      R"("Mode_declaration_group":[)"
+      R"({"Function_group_name":"TestGroupName",)"
       R"("Mode_declarations":[{"Mode":"tes1"},{"Mode":"tes2"}]}]}})";
 
   ManifestReaderConf conf{"./test-data", "./test-data/msm/test-conf.json"};
@@ -191,19 +196,19 @@ TEST_F(ManifestReaderTests, ShouldReturnMapOfApplicationsForStates)
   std::map<MachineState, std::vector<ProcessInfo>> expectedResult =
   {
       {"Startup", {
+         ProcessInfo{"test-aa2", "proc2", {}},
          ProcessInfo{"msm", "msm", {}},
-         ProcessInfo{"test-aa2", "proc2", {}}
                    }},
       {"Running", {
          ProcessInfo{"test-aa1", "proc1", {}},
-         ProcessInfo{"msm", "msm", {}}
+         ProcessInfo{"msm", "msm", {}},
                   }},
   };
 
   auto result = reader.getStatesSupportedByApplication();
   for (auto& appsForState: result)
   {
-    ASSERT_EQ(appsForState.second.size(),
+    EXPECT_EQ(appsForState.second.size(),
               expectedResult[appsForState.first].size());
 
     const auto& expResultForState = expectedResult[appsForState.first];
@@ -223,7 +228,9 @@ TEST_F(ManifestReaderTests, ShouldDiscardRedundantFunctionGroupsWhenProvided)
   std::string input =
       R"({"Application_manifest":{"Application_manifest_id":)"
       R"("app","Process":[{"Mode_dependent_startup_configs":)"
-      R"([{"Mode_in_machine_instance_refs":[{"Function_group":"MachineState",)"
+      R"([{"Startup_options":[],)"
+      R"("Mode_in_machine_instance_refs":)"
+      R"([{"Function_group":"MachineState",)"
       R"("Mode": "Startup"},{"Function_group": "MachineState","Mode":)"
       R"("Running"},{"Function_group": "Test", "Mode": "test"}]}],"Process_name":)"
       R"("app"}]}})";
@@ -235,9 +242,9 @@ TEST_F(ManifestReaderTests, ShouldDiscardRedundantFunctionGroupsWhenProvided)
   std::map<MachineState, std::vector<ProcessInfo>> expectedResult =
   {
       {"Startup", {
+         ProcessInfo{"test-aa2", "proc2", {}},
          ProcessInfo{"app", "app", {}},
          ProcessInfo{"msm", "msm", {}},
-         ProcessInfo{"test-aa2", "proc2", {}}
                    }},
       {"Running", {
          ProcessInfo{"app", "app", {}},

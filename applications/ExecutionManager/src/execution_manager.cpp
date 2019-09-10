@@ -15,6 +15,15 @@ namespace ExecutionManager
 using std::runtime_error;
 using std::string;
 
+namespace {
+  const char * applicationStateNames[] =
+  {
+    "Initializing",
+    "Running",
+    "Shuttingdown"
+  };
+} // anonymous namespace
+
 const string ExecutionManager::corePath =
   string{"./bin/applications/"};
 
@@ -23,7 +32,7 @@ ExecutionManager::ExecutionManager(std::unique_ptr<IManifestReader> reader)
   , m_allowedApplicationForState{reader->getStatesSupportedByApplication()}
   , m_currentState{}
   , m_machineManifestStates{reader->getMachineStates()}
-  , machineStateClientAppName{}
+  , m_machineStateClientAppName{}
 {
   filterStates();
 }
@@ -132,8 +141,11 @@ void ExecutionManager::startApplication(const ProcessName& process)
 ExecutionManager::reportApplicationState(ReportApplicationStateContext context)
 {
   ApplicationState state = context.getParams().getState();
+  pid_t applicationPid = context.getParams().getPid();
 
-  std::cout << "State #" << static_cast<uint16_t>(state)
+  std::cout << "State \"" << applicationStateNames[static_cast<uint16_t>(state)]
+            << "\" for application with pid "
+            << applicationPid
             << " received"
             << std::endl;
 
@@ -143,17 +155,22 @@ ExecutionManager::reportApplicationState(ReportApplicationStateContext context)
 ::kj::Promise<void>
 ExecutionManager::register_(RegisterContext context)
 {
-  string newMachineClient = context.getParams().getAppName();
+  string newMachineClientAppName = context.getParams().getAppName();
+  pid_t newMachineClientAppPid = context.getParams().getPid();
 
-  if (machineStateClientAppName.empty() ||
-      machineStateClientAppName == newMachineClient)
+  if (m_machineStateClientPid == -1 ||
+      m_machineStateClientPid == newMachineClientAppPid)
   {
-    machineStateClientAppName = newMachineClient;
+    m_machineStateClientPid = newMachineClientAppPid;
+    m_machineStateClientAppName = newMachineClientAppName;
+
     context.getResults().setResult(StateError::K_SUCCESS);
 
     std::cout << "State Machine Client \""
-              << machineStateClientAppName
-              << "\" registered"
+              << m_machineStateClientAppName
+              << "\" with pid "
+              << m_machineStateClientPid
+              << " registered"
               << std::endl;
   }
   else
@@ -161,8 +178,10 @@ ExecutionManager::register_(RegisterContext context)
     context.getResults().setResult(StateError::K_INVALID_REQUEST);
 
     std::cout << "State Machine Client \""
-              << machineStateClientAppName
-              << "\" registration failed" 
+              << m_machineStateClientAppName
+              << "\" with pid "
+              << m_machineStateClientPid
+              << "\" registration failed"
               << std::endl;
   }
 
@@ -185,19 +204,22 @@ ExecutionManager::getMachineState(GetMachineStateContext context)
 ExecutionManager::setMachineState(SetMachineStateContext context)
 {
   string state = context.getParams().getState().cStr();
+  pid_t machineStateClientPid = context.getParams().getPid();
 
-  if (!state.empty() && state != m_currentState)
+  if (!state.empty() &&
+      state != m_currentState &&
+      machineStateClientPid == m_machineStateClientPid)
   {
     m_currentState = state;
 
     killProcessesForState();
 
     startApplicationsForState();
-   
+
     context.getResults().setResult(StateError::K_SUCCESS);
 
     std::cout << "Machine state changed successfully to "
-              << "\"" 
+              << "\""
               << m_currentState << "\""
               << std::endl;
   }

@@ -52,7 +52,7 @@ private:
   void killProcessesForState();
 
   bool processToBeKilled (const std::string& app, const std::vector<ProcessName>&);
- 
+
   ::kj::Promise<void>
   reportApplicationState(ReportApplicationStateContext context) override;
 
@@ -70,7 +70,7 @@ private:
    */
   const static std::string corePath;
 
-  /** 
+  /**
    * @brief structure that holds application and required processes.
    */
   std::map<MachineState, pid_t> m_activeApplications;
@@ -90,7 +90,8 @@ private:
    */
   std::vector<MachineState> m_machineManifestStates;
 
-  std::string machineStateClientAppName;
+  std::string m_machineStateClientAppName;
+  pid_t m_machineStateClientPid {-1};
 };
 
 } // namespace ExecutionManager

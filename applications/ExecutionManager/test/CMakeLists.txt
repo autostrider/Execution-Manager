@@ -15,6 +15,7 @@ target_link_libraries(${TEST_NAME}_test
   api::application_state_client
   api::machine_state_client
   gen::execution_management
+  CapnProto::capnp-rpc
 )
 
 target_compile_definitions(${TEST_NAME}_test PUBLIC -DUNIT_TEST)
@@ -25,7 +26,7 @@ add_custom_target(${TEST_NAME}_test_run
 )
 
 # =============================================
-# Coverage 
+# Coverage
 # =============================================
 set(COVERAGE_BUILD ${TEST_NAME}_coverage_build)
 
@@ -40,6 +41,7 @@ target_link_libraries(${COVERAGE_BUILD}
   api::application_state_client
   api::machine_state_client
   gen::execution_management
+  CapnProto::capnp-rpc
 )
 
 target_compile_definitions(${COVERAGE_BUILD} PUBLIC -DUNIT_TEST)

@@ -3,6 +3,7 @@
 #include <dirent.h>
 #include <exception>
 #include <json.hpp>
+#include <fstream>
 #include <algorithm>
 
 namespace ExecutionManager {
@@ -25,12 +26,10 @@ ManifestReader::ManifestReader(const ManifestReaderConf &conf)
   : conf(conf)
 { }
 
-std::map<MachineState, std::vector<ProcessName>>
-ManifestReader::getStatesSupportedByApplication()
+std::map<MachineState, std::vector<ProcessInfo> > ManifestReader::getStatesSupportedByApplication()
 {
   const auto& applicationNames = getListOfApplications();
-
-  std::map<MachineState, std::vector<ProcessName>> res;
+  std::map<MachineState, std::vector<ProcessInfo>> res;
   const static std::string manifestFile = "/manifest.json";
 
   for (auto file: applicationNames)
@@ -50,7 +49,9 @@ ManifestReader::getStatesSupportedByApplication()
           if (mode.functionGroup == machineStateFunctionGroup)
           {
             res[mode.mode]
-              .push_back({manifest.manifest.manifestId, process.name});
+              .push_back({manifest.manifest.manifestId,
+                          process.name,
+                          conf.startupOptions});
           }
         }
       }
@@ -64,6 +65,7 @@ std::vector<MachineState> ManifestReader::getMachineStates()
 {
   json manifestData = getJsonData(conf.machineManifestPath);
   MachineManifest manifest = manifestData.get<MachineManifest>();
+
   const auto& availableMachineStates =
       std::find_if(manifest.manifest.modeDeclarationGroups.cbegin(),
                    manifest.manifest.modeDeclarationGroups.cend(),
@@ -82,6 +84,7 @@ std::vector<MachineState> ManifestReader::getMachineStates()
                  availableMachineStates->modeDeclarations.cend(),
                  std::back_inserter(res),
                  [](const Mode& mode) {return mode.mode;});
+
   return res;
 }
 

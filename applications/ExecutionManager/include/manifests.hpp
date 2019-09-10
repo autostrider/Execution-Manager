@@ -22,15 +22,42 @@ using std::ifstream;
 using MachineState = std::string;
 using ApplicationState = ::ApplicationStateManagement::ApplicationState;
 
-/**
- * @brief Struct for process name and application it belongs to.
- */
-struct ProcessName
+struct MachineInstanceMode
+{
+    std::string functionGroup;
+    std::string mode;
+};
+
+enum class StartupOptionKindEnum
+{
+  commandLineLongForm,
+  commandLineShortForm,
+  commandLineSimpleForm
+};
+
+struct StartupOption
+{
+  StartupOptionKindEnum optionKind;
+  std::string optionName;
+  std::string optionArg;
+
+  std::string makeCommandLineOption() const;
+};
+
+struct ProcessInfo
 {
   std::string applicationName;
   std::string processName;
+  std::vector<StartupOption> startOptions;
 
-  bool operator==(const ProcessName& rhs) const
+  std::string createRelativePath() const
+  {
+    return applicationName
+        + "/processes/"
+        + processName;
+  }
+
+  bool operator==(const ProcessInfo& rhs) const
   {
     return processName == rhs.processName &&
            applicationName == rhs.processName;
@@ -38,15 +65,11 @@ struct ProcessName
   }
 };
 
-struct MachineInstanceMode
-{
-    std::string functionGroup;
-    std::string mode;
-};
-
 struct ModeDepStartupConfig
 {
     std::vector<MachineInstanceMode> modes;
+
+    std::vector<StartupOption> startupOptions;
 };
 
 /**
@@ -82,6 +105,7 @@ struct ApplicationManifest
     ApplicationManifestInternal manifest;
 };
 
+void to_json(json& jsonObject, const MachineInstanceMode& machineInstanceMode);
 
 struct Mode
 {
@@ -110,6 +134,10 @@ struct MachineManifest
 };
 
 
+void to_json(json& jsonObject, const StartupOption& startupOptions);
+
+void from_json(const json& jsonObject, StartupOption& startupOptions);
+
 void to_json(json& jsonObject, const Mode& mode);
 
 void from_json(const json& jsonObject, Mode& mode);
@@ -121,6 +149,13 @@ void from_json(const json& jsonObject, ModeDeclarationGroup& modeDeclGroup);
 void to_json(json& jsonObject, const MachineManifestInternal& manifest);
 
 void from_json(const json& jsonObject, MachineManifestInternal& manifest);
+
+NLOHMANN_JSON_SERIALIZE_ENUM(StartupOptionKindEnum, {
+    {StartupOptionKindEnum::commandLineSimpleForm, "commandLineSimpleForm"},
+    {StartupOptionKindEnum::commandLineShortForm, "commandLineShortForm"},
+    {StartupOptionKindEnum::commandLineLongForm, "commandLineLongForm"}
+})
+
 
 void to_json(json& jsonObject, const MachineManifest& manifest);
 
@@ -136,7 +171,9 @@ void to_json(json& jsonObject, const ModeDepStartupConfig& startupConf);
 void
 from_json(const json& jsonObject, const ModeDepStartupConfig& startupConf);
 
-/// Process serialization
+/**
+ * @brief Process serialization
+ */
 void to_json(json& jsonObject, const Process& process);
 
 /**

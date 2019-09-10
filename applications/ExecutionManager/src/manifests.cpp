@@ -1,12 +1,30 @@
 #include "manifests.hpp"
 
-#include <json.hpp>
-#include <application_state_client.h>
 
 using nlohmann::json;
 
 namespace ExecutionManager
 {
+
+std::string StartupOption::makeCommandLineOption() const
+{
+  std::string res = optionName;
+
+  switch (optionKind) {
+    case StartupOptionKindEnum::commandLineShortForm:
+      res = "-" + res +
+            (optionArg == "" ? "" : " " + optionArg);
+      break;
+    case StartupOptionKindEnum::commandLineLongForm:
+      res = "--" + res +
+            (optionArg == "" ? "" : "=" + optionArg);
+      break;
+  case StartupOptionKindEnum::commandLineSimpleForm:
+      break;
+  }
+
+  return res;
+}
 
 void to_json(json& jsonObject, const MachineInstanceMode& machineInstanceMode)
 {
@@ -22,9 +40,26 @@ void from_json(const json& jsonObject, MachineInstanceMode& machineInstanceMode)
   jsonObject.at("Mode").get_to(machineInstanceMode.mode);
 }
 
+void to_json(json &jsonObject, const StartupOption& startupOptions)
+{
+  jsonObject = json{
+  {"Option_kind", startupOptions.optionKind},
+  {"Option_name", startupOptions.optionName},
+  {"Option_arg", startupOptions.optionArg}
+  };
+}
+
+void from_json(const json& jsonObject, StartupOption& startupOptions)
+{
+  jsonObject.at("Option_kind").get_to(startupOptions.optionKind);
+  jsonObject.at("Option_name").get_to(startupOptions.optionName);
+  jsonObject.at("Option_arg").get_to(startupOptions.optionArg);
+}
+
 void to_json(json& jsonObject, const ModeDepStartupConfig& startupConf)
 {
   jsonObject = json{
+    {"Startup_options", startupConf.startupOptions},
     {"Mode_in_machine_instance_refs", startupConf.modes}
   };
 }
@@ -32,6 +67,7 @@ void to_json(json& jsonObject, const ModeDepStartupConfig& startupConf)
 void from_json(const json& jsonObject, ModeDepStartupConfig& startupConf)
 {
   jsonObject.at("Mode_in_machine_instance_refs").get_to(startupConf.modes);
+  jsonObject.at("Startup_options").get_to(startupConf.startupOptions);
 }
 
 // Process serialization
@@ -83,7 +119,7 @@ void to_json(json &jsonObject, const Mode &mode)
 };
 }
 
-void from_json(const json &jsonObject, Mode &mode)
+void from_json(const json &jsonObject, Mode& mode)
 {
   jsonObject.at("Mode").get_to(mode.mode);
 }
@@ -96,13 +132,13 @@ void to_json(json &jsonObject, const ModeDeclarationGroup& modeDeclGroup)
 };
 }
 
-void from_json(const json &jsonObject, ModeDeclarationGroup &modeDeclGroup)
+void from_json(const json &jsonObject, ModeDeclarationGroup& modeDeclGroup)
 {
   jsonObject.at("Function_group_name").get_to(modeDeclGroup.functionGroupName);
   jsonObject.at("Mode_declarations").get_to(modeDeclGroup.modeDeclarations);
 }
 
-void to_json(json &jsonObject, const MachineManifestInternal &manifest)
+void to_json(json &jsonObject, const MachineManifestInternal& manifest)
 {
   jsonObject = json{
     {"Machine_manifest_id", manifest.manifestId},
@@ -110,20 +146,20 @@ void to_json(json &jsonObject, const MachineManifestInternal &manifest)
 };
 }
 
-void from_json(const json &jsonObject, MachineManifestInternal &manifest)
+void from_json(const json &jsonObject, MachineManifestInternal& manifest)
 {
   jsonObject.at("Machine_manifest_id").get_to(manifest.manifestId);
   jsonObject.at("Mode_declaration_group").get_to(manifest.modeDeclarationGroups);
 }
 
-void to_json(json &jsonObject, const MachineManifest &manifest)
+void to_json(json &jsonObject, const MachineManifest& manifest)
 {
   jsonObject = json{
     {"Machine_manifest", manifest.manifest}
 };
 }
 
-void from_json(const json &jsonObject, MachineManifest &manifest)
+void from_json(const json &jsonObject, MachineManifest& manifest)
 {
   jsonObject.at("Machine_manifest").get_to(manifest.manifest);
 }

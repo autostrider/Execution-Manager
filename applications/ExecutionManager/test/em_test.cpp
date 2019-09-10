@@ -188,15 +188,15 @@ TEST_F(ManifestReaderTests, ShouldEmptyReturnWhenEmptyMachineStates)
 TEST_F(ManifestReaderTests, ShouldReturnMapOfApplicationsForStates)
 {
   ManifestReader reader{testConf};
-  std::map<MachineState, std::vector<ProcessName>> expectedResult =
+  std::map<MachineState, std::vector<ProcessInfo>> expectedResult =
   {
       {"Startup", {
-                   ProcessName{"msm", "msm"},
-                   ProcessName{"test-aa2", "proc2"}
+         ProcessInfo{"msm", "msm", {}},
+         ProcessInfo{"test-aa2", "proc2", {}}
                    }},
       {"Running", {
-                   ProcessName{"test-aa1", "proc1"},
-                   ProcessName{"msm", "msm"}
+         ProcessInfo{"test-aa1", "proc1", {}},
+         ProcessInfo{"msm", "msm", {}}
                   }},
   };
 
@@ -232,17 +232,17 @@ TEST_F(ManifestReaderTests, ShouldDiscardRedundantFunctionGroupsWhenProvided)
   writeJson(input, "./test-data/app/manifest.json");
 
   ManifestReader reader{testConf};
-  std::map<MachineState, std::vector<ProcessName>> expectedResult =
+  std::map<MachineState, std::vector<ProcessInfo>> expectedResult =
   {
       {"Startup", {
-                   ProcessName{"app", "app"},
-                   ProcessName{"msm", "msm"},
-                   ProcessName{"test-aa2", "proc2"}
+         ProcessInfo{"app", "app", {}},
+         ProcessInfo{"msm", "msm", {}},
+         ProcessInfo{"test-aa2", "proc2", {}}
                    }},
       {"Running", {
-                   ProcessName{"app", "app"},
-                   ProcessName{"test-aa1", "proc1"},
-                   ProcessName{"msm", "msm"}
+         ProcessInfo{"app", "app", {}},
+         ProcessInfo{"test-aa1", "proc1", {}},
+         ProcessInfo{"msm", "msm", {}}
                   }},
   };
 
@@ -284,7 +284,7 @@ TEST_F(ManifestReaderTests, ShouldEmptyMapWhenNoProvided)
   auto result = reader.getStatesSupportedByApplication();
 
   ASSERT_EQ(result,
-            (std::map<MachineState, std::vector<ProcessName>>{}));
+            (std::map<MachineState, std::vector<ProcessInfo>>{}));
 
   system(("rm -rf " + conf.corePathToApplicationsFolder).c_str());
 }

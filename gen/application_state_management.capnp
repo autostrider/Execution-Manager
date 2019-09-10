@@ -10,5 +10,5 @@ interface ApplicationStateManagement
     kShuttingdown @2;
   }
 
-  reportApplicationState @0 (state :ApplicationState);
+  reportApplicationState @0 (pid :Int32, state :ApplicationState);
 }

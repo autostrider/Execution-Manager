@@ -9,6 +9,7 @@
 #include <signal.h>
 #include <iostream>
 #include <algorithm>
+#include <kj/async-io.h>
 
 namespace ExecutionManager
 {
@@ -96,7 +97,7 @@ void ExecutionManager::killProcessesForState()
         processToBeKilled(app->first, allowedApps->second))
     {
       kill(app->second, SIGTERM);
- 
+
       std::lock_guard<std::mutex> lock(m);
 {
       m_stateConfirmToBeReceived.insert(app->second);
@@ -161,7 +162,7 @@ std::lock_guard<std::mutex> lock(m);
     std::cout << "Adding2 :" << processId << std::endl;
 
     m_stateConfirmToBeReceived.insert(processId);
-}   
+}
     m_reportedApplications.insert({processId, process.applicationName});
     std::cout << "[ ExecutionManager ]:\t\tAdaptive aplication \""
               << process.applicationName
@@ -255,7 +256,7 @@ ExecutionManager::setMachineState(SetMachineStateContext context)
 {
   string state = context.getParams().getState().cStr();
   pid_t machineStateClientPid = context.getParams().getPid();
- 
+
   std::cout << "==============================================" << std::endl;
   std::cout << "STATE TO BE SET : " << state<< std::endl;
   std::vector<ProcessName> tmp = m_allowedApplicationForState[state];
@@ -266,7 +267,7 @@ ExecutionManager::setMachineState(SetMachineStateContext context)
   for (auto id : tmp)
   {
     res += id.processName + ", ";
-    
+
     allowedAppsSet.insert(id.processName);
   }
 
@@ -278,16 +279,16 @@ ExecutionManager::setMachineState(SetMachineStateContext context)
     res2 += process.first + ", ";
     activeAppsSet.insert(process.first);
   }
-  
+
   std::set<std::string> processeToBeKilled;
   std::set_difference(activeAppsSet.begin(), activeAppsSet.end(),
-                      allowedAppsSet.begin(), allowedAppsSet.end(), 
+                      allowedAppsSet.begin(), allowedAppsSet.end(),
                       std::inserter(processeToBeKilled, processeToBeKilled.begin()));
 
 
   std::set<std::string> processeToBeStarted;
   std::set_difference(allowedAppsSet.begin(), allowedAppsSet.end(),
-                      activeAppsSet.begin(), activeAppsSet.end(), 
+                      activeAppsSet.begin(), activeAppsSet.end(),
                       std::inserter(processeToBeStarted, processeToBeStarted.begin()));
 
   std::string res3;
@@ -295,13 +296,13 @@ ExecutionManager::setMachineState(SetMachineStateContext context)
   {
     res3 += process + ", ";
   }
-  
+
   std::string res4;
   for (auto process : processeToBeStarted)
   {
     res4 += process + ", ";
   }
-  
+
 
 
 
@@ -330,9 +331,6 @@ ExecutionManager::setMachineState(SetMachineStateContext context)
 
     startApplicationsForState();
 
-
-    context.getResults().setResult(StateError::K_SUCCESS);
-
     std::cout << "[ ExecutionManager ]:\t\tMachine state changed successfully to "
               << "\""
               << m_currentState << "\"."
@@ -345,9 +343,11 @@ ExecutionManager::setMachineState(SetMachineStateContext context)
     std::cout << "[ ExecutionManager ]:\t\tInvalid machine state received - "
               << "\"" << m_currentState << "\"."
               << std::endl;
+
+    return kj::READY_NOW;
   }
 
-        std::string tmp1; 
+        std::string tmp1;
 
 
 std::lock_guard<std::mutex> lock(m);
@@ -360,12 +360,13 @@ std::lock_guard<std::mutex> lock(m);
     }
     std::cout << "Waiting confirm for :" << tmp1 << std::endl;
 
-    std::this_thread::sleep_for(std::chrono::seconds(5));
+    kj::NEVER_DONE.wait(kj::setupAsyncIo().waitScope);
 
     tmp1.clear();
   }
 }
 
+  context.getResults().setResult(StateError::K_SUCCESS);
   return kj::READY_NOW;
 }
 

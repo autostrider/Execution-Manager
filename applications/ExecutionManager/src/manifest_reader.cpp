@@ -35,7 +35,7 @@ ManifestReader::getStatesSupportedByApplication()
 
   for (auto file: applicationNames)
   {
-    file = conf.corePath + "/" + file + manifestFile;
+    file = conf.corePathToApplicationsFolder + "/" + file + manifestFile;
 
     json content = getJsonData(file);
 
@@ -90,10 +90,10 @@ std::vector<std::string> ManifestReader::getListOfApplications()
   DIR* dp = nullptr;
   std::vector<std::string> fileNames;
 
-  if ((dp = opendir(conf.corePath.c_str())) == nullptr)
+  if ((dp = opendir(conf.corePathToApplicationsFolder.c_str())) == nullptr)
   {
     throw runtime_error(std::string{"Error opening directory: "}
-                        + conf.corePath
+                        + conf.corePathToApplicationsFolder
                         + " "
                         + strerror(errno));
   }

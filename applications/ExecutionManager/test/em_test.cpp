@@ -36,7 +36,7 @@ void ManifestReaderTests::SetUp()
 
 void ManifestReaderTests::TearDown()
 {
-    std::string rmTestDir = "rm -rf " + testConf.corePath;
+    std::string rmTestDir = "rm -rf " + testConf.corePathToApplicationsFolder;
     system(rmTestDir.c_str());
 }
 
@@ -52,13 +52,13 @@ void ManifestReaderTests::createDirs()
     std::vector<std::string> nestedDirs =
       {"msm", "test-aa1", "test-aa2"};
 
-    std::string createCoreDir = createDir +testConf.corePath;
+    std::string createCoreDir = createDir +testConf.corePathToApplicationsFolder;
     system(createCoreDir.c_str());
 
     for (const auto& dir: nestedDirs)
     {
       std::string createNestedDir = createDir
-                                    + testConf.corePath
+                                    + testConf.corePathToApplicationsFolder
                                     + dir;
 
       system(createNestedDir.c_str());
@@ -104,7 +104,7 @@ void ManifestReaderTests::createApplicationManifests()
   };
   for (const auto& appManifest: applicationManifestsInfo)
   {
-    std::string path = testConf.corePath
+    std::string path = testConf.corePathToApplicationsFolder
                        + appManifest.first
                        + "/manifest.json";
 
@@ -270,13 +270,13 @@ TEST_F(ManifestReaderTests, ShouldEmptyMapWhenNoProvided)
 {
   ManifestReaderConf conf{"./empty-manifest/", ""};
 
-  system(("mkdir -p " + conf.corePath + "/app").c_str());
+  system(("mkdir -p " + conf.corePathToApplicationsFolder + "/app").c_str());
 
   std::string input =
       R"({"Application_manifest":{"Application_manifest_id":)"
       R"("app","Process":[]}})";
 
-  std::ofstream testOutput{conf.corePath + "/app/manifest.json"};
+  std::ofstream testOutput{conf.corePathToApplicationsFolder + "/app/manifest.json"};
   testOutput << input;
   testOutput.close();
 
@@ -286,5 +286,5 @@ TEST_F(ManifestReaderTests, ShouldEmptyMapWhenNoProvided)
   ASSERT_EQ(result,
             (std::map<MachineState, std::vector<ProcessName>>{}));
 
-  system(("rm -rf " + conf.corePath).c_str());
+  system(("rm -rf " + conf.corePathToApplicationsFolder).c_str());
 }

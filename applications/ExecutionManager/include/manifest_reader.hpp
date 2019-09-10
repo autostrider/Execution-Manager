@@ -13,13 +13,9 @@ namespace ExecutionManager
 
 using MachineState = std::string;
 
-/**
- * @brief Config of Manifest Reader: main consts that will be
- *        injected externally.
- */
 struct ManifestReaderConf
 {
-  const std::string corePath{"./bin/applications"};
+  const std::string corePathToApplicationsFolder{"./bin/applications"};
   const std::string machineManifestPath{ "../applications/ExecutionManager/machine_manifest.json"};
 };
 

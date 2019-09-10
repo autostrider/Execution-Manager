@@ -1,10 +1,10 @@
 #include "execution_manager.hpp"
 
 #include <json.hpp>
-#include <fstream>
 #include <dirent.h>
 #include <exception>
 #include <thread>
+#include <unistd.h>
 #include <signal.h>
 #include <iostream>
 
@@ -26,34 +26,6 @@ ExecutionManager::ExecutionManager(std::unique_ptr<IManifestReader> reader)
   , machineStateClientAppName{}
 {
   filterStates();
-}
-
-int32_t ExecutionManager::start()
-{
-  for (const auto& allowedItem: m_allowedApplicationForState)
-  {
-    for (const auto& item: allowedItem.second)
-    {
-      std::cout << allowedItem.first << "\t" << item.processName << "\n";
-    }
-  }
-
-  for (const auto& state: m_machineManifestStates)
-  {
-    std::cout << "————————————————————————————————————————————————————————\n";
-    m_currentState = state;
-
-    killProcessesForState();
-    std::cout << state << std::endl;
-
-    startApplicationsForState();
-
-    std::this_thread::sleep_for(std::chrono::seconds{2});
-  }
-
-    std::cout << "Execution Manager started.." << std::endl;
-
-  return EXIT_SUCCESS;
 }
 
 void ExecutionManager::filterStates()

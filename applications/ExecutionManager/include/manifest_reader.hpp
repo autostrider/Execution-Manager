@@ -5,8 +5,6 @@
 #include "imanifest_reader.hpp"
 
 #include <string>
-#include <map>
-#include <vector>
 
 namespace ExecutionManager
 {
@@ -24,7 +22,7 @@ public:
     * @return Map of applications for each state in Application
     *         manifest.
     */
-   virtual std::map<MachineState, std::vector<ProcessName>>
+   virtual std::map<MachineState, std::vector<ProcessInfo>>
    getStatesSupportedByApplication() override;
 
    /**

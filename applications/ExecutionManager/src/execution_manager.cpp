@@ -1,12 +1,8 @@
 #include "execution_manager.hpp"
-#include <json.hpp>
-#include <fstream>
-#include <dirent.h>
 #include <exception>
-#include <thread>
 #include <signal.h>
 #include <iostream>
-
+#include <unistd.h>
 
 namespace ExecutionManager
 {
@@ -91,8 +87,7 @@ void ExecutionManager::killProcessesForState()
 {
   auto allowedApps = m_allowedApplicationForState.find(m_currentState);
 
-  for (auto app = m_activeApplications.cbegin();
-       app != m_activeApplications.cend();)
+  for (auto app = m_activeApplications.cbegin(); app != m_activeApplications.cend();)
   {
     if (allowedApps == m_allowedApplicationForState.cend() ||
         processToBeKilled(app->first, allowedApps->second))
@@ -107,7 +102,7 @@ void ExecutionManager::killProcessesForState()
   }
 }
 
-bool ExecutionManager::processToBeKilled(const string& app, const std::vector<ProcessName>& allowedApps)
+bool ExecutionManager::processToBeKilled(const string& app, const std::vector<ProcessInfo>& allowedApps)
 {
   auto it = std::find_if(allowedApps.cbegin(),
                      allowedApps.cend(),
@@ -117,7 +112,45 @@ bool ExecutionManager::processToBeKilled(const string& app, const std::vector<Pr
   return (it  == allowedApps.cend());
 };
 
-void ExecutionManager::startApplication(const ProcessName& process)
+std::vector<std::string>
+ExecutionManager::getArgumentsList(const ProcessInfo& process) const
+{
+  std::vector<std::string> arguments;
+  arguments.reserve(process.startOptions.size() + 1);
+
+  // insert app name
+  arguments.push_back(process.processName);
+
+  std::transform(process.startOptions.cbegin(),
+                 process.startOptions.cend(),
+                 std::back_inserter(arguments),
+                 [](const StartupOption& option)
+  { return option.makeCommandLineOption(); });
+
+  return arguments;
+}
+
+std::vector<char *>
+ExecutionManager::convertToNullTerminatingArgv(
+    std::vector<std::string> &vectorToConvert)
+{
+  std::vector<char*> outputVector;
+
+  // include terminating sign, that not included in argv
+  outputVector.reserve(vectorToConvert.size() + 1);
+
+  for(auto& str: vectorToConvert)
+  {
+    outputVector.push_back(&str[0]);
+  }
+
+  // terminating sign
+  outputVector.push_back(nullptr);
+
+  return outputVector;
+}
+
+void ExecutionManager::startApplication(const ProcessInfo& process)
 {
   pid_t processId = fork();
 
@@ -125,11 +158,11 @@ void ExecutionManager::startApplication(const ProcessName& process)
   {
     // child process
     const auto processPath = corePath
-                     + process.applicationName
-                     + "/processes/"
-                     + process.processName;
+                     + process.createRelativePath();
 
-    int res = execl(processPath.c_str(), process.processName.c_str(), nullptr);
+    auto arguments = getArgumentsList(process);
+    auto applicationArguments = convertToNullTerminatingArgv(arguments);
+    int res = execv(processPath.c_str(), applicationArguments.data());
 
     if (res)
     {

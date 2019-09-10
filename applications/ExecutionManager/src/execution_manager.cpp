@@ -26,8 +26,7 @@ const MachineState ExecutionManager::defaultState {"Startup"};
 
 ExecutionManager::ExecutionManager(std::unique_ptr<IManifestReader> reader)
   : m_activeApplications{}
-  , m_allowedApplicationForState{
-      std::move(reader->getStatesSupportedByApplication())}
+  , m_allowedApplicationForState{reader->getStatesSupportedByApplication()}
   , m_currentState{defaultState}
   , m_machineManifestStates{reader->getMachineStates()}
   , m_machineStateClientAppName{}

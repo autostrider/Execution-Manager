@@ -3,6 +3,7 @@
 #include <dirent.h>
 #include <exception>
 #include <json.hpp>
+#include <fstream>
 #include <algorithm>
 
 namespace ExecutionManager {
@@ -23,11 +24,10 @@ json ManifestReader::getJsonData(const std::string& manifestPath)
   return manifestData;
 }
 
-std::map<MachineState, std::vector<ProcessName>>
-ManifestReader::getStatesSupportedByApplication()
+std::map<MachineState, std::vector<ProcessInfo> > ManifestReader::getStatesSupportedByApplication()
 {
   const auto& applicationNames = getListOfApplications();
-  std::map<MachineState, std::vector<ProcessName>> res;
+  std::map<MachineState, std::vector<ProcessInfo>> res;
   const static std::string manifestFile = "/manifest.json";
 
   for (auto file: applicationNames)
@@ -47,7 +47,9 @@ ManifestReader::getStatesSupportedByApplication()
           if (mode.functionGroup == machineStateFunctionGroup)
           {
             res[mode.mode]
-              .push_back({manifest.manifest.manifestId, process.name});
+              .push_back({manifest.manifest.manifestId,
+                          process.name,
+                          conf.startupOptions});
           }
         }
       }
@@ -99,10 +101,7 @@ std::vector<std::string> ManifestReader::getListOfApplications()
     if (drnt->d_name != std::string{"."} &&
         drnt->d_name != std::string{".."})
     {
-
       fileNames.emplace_back(drnt->d_name);
-
-      std::cout << drnt->d_name << std::endl;
     }
   }
 

@@ -1,15 +1,16 @@
 #include "execution_manager.hpp"
 
+#include <algorithm>
 #include <chrono>
-#include <json.hpp>
-#include <fstream>
 #include <dirent.h>
 #include <exception>
-#include <thread>
-#include <signal.h>
+#include <fstream>
 #include <iostream>
-#include <algorithm>
+#include <json.hpp>
 #include <kj/async-io.h>
+#include <signal.h>
+#include <thread>
+#include <unistd.h>
 
 namespace ExecutionManager
 {
@@ -32,11 +33,11 @@ const MachineState ExecutionManager::defaultState {"Starting-up"};
 
 ExecutionManager::ExecutionManager(std::unique_ptr<IManifestReader> reader)
   : m_activeProcesses({}),
-   m_allowedApplicationForState(std::move(reader->getStatesSupportedByApplication())),
-   m_currentState (defaultState),
-   m_machineManifestStates({reader->getMachineStates()}),
-   m_machineStateClientAppName(""),
-   m_stateConfirmToBeReceived({})
+    m_allowedApplicationForState(std::move(reader->getStatesSupportedByApplication())),
+    m_currentState (defaultState),
+    m_machineManifestStates({reader->getMachineStates()}),
+    m_machineStateClientAppName(""),
+    m_stateConfirmToBeReceived({})
 {
   std::cout << "[ ExecutionManager ]:\t\tStarted.." << std::endl;
 
@@ -91,18 +92,14 @@ void ExecutionManager::killProcessesForState()
   auto allowedApps = m_allowedApplicationForState.find(m_currentState);
 
   for (auto app = m_activeProcesses.cbegin();
-       app != m_activeProcesses.cend();)
+       	    app != m_activeProcesses.cend();)
   {
     if (allowedApps == m_allowedApplicationForState.cend() ||
         processToBeKilled(app->first, allowedApps->second))
     {
       kill(app->second, SIGTERM);
 
-      std::lock_guard<std::mutex> lock(m);
-{
       m_stateConfirmToBeReceived.insert(app->second);
-
-}
       app = m_activeProcesses.erase(app);
 
     }
@@ -113,7 +110,7 @@ void ExecutionManager::killProcessesForState()
   }
 }
 
-bool ExecutionManager::processToBeKilled(const string& app, const std::vector<ProcessName>& allowedApps)
+bool ExecutionManager::processToBeKilled(const string& app, const std::vector<ProcessInfo>& allowedApps)
 {
   auto it = std::find_if(allowedApps.cbegin(),
                      allowedApps.cend(),
@@ -123,7 +120,45 @@ bool ExecutionManager::processToBeKilled(const string& app, const std::vector<Pr
   return (it  == allowedApps.cend());
 };
 
-void ExecutionManager::startApplication(const ProcessName& process)
+std::vector<std::string>
+ExecutionManager::getArgumentsList(const ProcessInfo& process) const
+{
+  std::vector<std::string> arguments;
+  arguments.reserve(process.startOptions.size() + 1);
+
+  // insert app name
+  arguments.push_back(process.processName);
+
+  std::transform(process.startOptions.cbegin(),
+                 process.startOptions.cend(),
+                 std::back_inserter(arguments),
+                 [](const StartupOption& option)
+  { return option.makeCommandLineOption(); });
+
+  return arguments;
+}
+
+std::vector<char *>
+ExecutionManager::convertToNullTerminatingArgv(
+    std::vector<std::string> &vectorToConvert)
+{
+  std::vector<char*> outputVector;
+
+  // include terminating sign, that not included in argv
+  outputVector.reserve(vectorToConvert.size() + 1);
+
+  for(auto& str: vectorToConvert)
+  {
+    outputVector.push_back(&str[0]);
+  }
+
+  // terminating sign
+  outputVector.push_back(nullptr);
+
+  return outputVector;
+}
+
+void ExecutionManager::startApplication(const ProcessInfo& process)
 {
   pid_t processId = fork();
 
@@ -131,11 +166,11 @@ void ExecutionManager::startApplication(const ProcessName& process)
   {
     // child process
     const auto processPath = corePath
-                     + process.applicationName
-                     + "/processes/"
-                     + process.processName;
+                     + process.createRelativePath();
 
-    int res = execl(processPath.c_str(), process.processName.c_str(), nullptr);
+    auto arguments = getArgumentsList(process);
+    auto applicationArguments = convertToNullTerminatingArgv(arguments);
+    int res = execv(processPath.c_str(), applicationArguments.data());
 
     if (res)
     {
@@ -180,13 +215,7 @@ ExecutionManager::reportApplicationState(ReportApplicationStateContext context)
             << " received."
             << std::endl;
 
-
- std::lock_guard<std::mutex> lock(m);
- {
- m_stateConfirmToBeReceived.erase(applicationPid);
-
- }
-
+  m_stateConfirmToBeReceived.erase(applicationPid);
 
 
   return kj::READY_NOW;
@@ -248,7 +277,7 @@ ExecutionManager::setMachineState(SetMachineStateContext context)
 
   std::cout << "============================================================================" << std::endl;
   std::cout << "[ ExecutionManager ]:\t\tSTATE TO BE SET : " << state<< std::endl;
-  std::vector<ProcessName> tmp = m_allowedApplicationForState[state];
+  std::vector<ProcessInfo> tmp = m_allowedApplicationForState[state];
   std::string res;
 
   std::set<std::string> allowedAppsSet;

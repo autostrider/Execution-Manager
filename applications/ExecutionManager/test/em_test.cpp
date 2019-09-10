@@ -14,7 +14,7 @@ class ManifestReaderTests : public ::testing::Test
 {
 protected:
   void SetUp() override;
-  void TearDown() override;
+  void removeManifests();
 protected:
   const ManifestReaderConf testConf{"./test-data/",
                                     "./test-data/msm/machine_manifest.json"};
@@ -34,7 +34,7 @@ void ManifestReaderTests::SetUp()
   createApplicationManifests();
 }
 
-void ManifestReaderTests::TearDown()
+void ManifestReaderTests::removeManifests()
 {
     std::string rmTestDir = "rm -rf " + testConf.corePathToApplicationsFolder;
     system(rmTestDir.c_str());
@@ -196,8 +196,8 @@ TEST_F(ManifestReaderTests, ShouldReturnMapOfApplicationsForStates)
   std::map<MachineState, std::vector<ProcessInfo>> expectedResult =
   {
       {"Startup", {
-         ProcessInfo{"test-aa2", "proc2", {}},
          ProcessInfo{"msm", "msm", {}},
+         ProcessInfo{"test-aa2", "proc2", {}},
                    }},
       {"Running", {
          ProcessInfo{"test-aa1", "proc1", {}},
@@ -206,21 +206,8 @@ TEST_F(ManifestReaderTests, ShouldReturnMapOfApplicationsForStates)
   };
 
   auto result = reader.getStatesSupportedByApplication();
-  for (auto& appsForState: result)
-  {
-    EXPECT_EQ(appsForState.second.size(),
-              expectedResult[appsForState.first].size());
 
-    const auto& expResultForState = expectedResult[appsForState.first];
-
-    for (size_t i = 0; i < expResultForState.size(); i++)
-    {
-      ASSERT_EQ(appsForState.second.at(i).processName,
-                expResultForState.at(i).processName);
-      ASSERT_EQ(appsForState.second.at(i).applicationName,
-                expResultForState.at(i).applicationName);
-    }
-  }
+  EXPECT_EQ(result, expectedResult);
 }
 
 TEST_F(ManifestReaderTests, ShouldDiscardRedundantFunctionGroupsWhenProvided)
@@ -242,9 +229,9 @@ TEST_F(ManifestReaderTests, ShouldDiscardRedundantFunctionGroupsWhenProvided)
   std::map<MachineState, std::vector<ProcessInfo>> expectedResult =
   {
       {"Startup", {
-         ProcessInfo{"test-aa2", "proc2", {}},
          ProcessInfo{"app", "app", {}},
          ProcessInfo{"msm", "msm", {}},
+         ProcessInfo{"test-aa2", "proc2", {}},
                    }},
       {"Running", {
          ProcessInfo{"app", "app", {}},
@@ -256,21 +243,7 @@ TEST_F(ManifestReaderTests, ShouldDiscardRedundantFunctionGroupsWhenProvided)
 
   auto result = reader.getStatesSupportedByApplication();
 
-  for (auto& appsForState: result)
-  {
-    ASSERT_EQ(appsForState.second.size(),
-              expectedResult[appsForState.first].size());
-
-    const auto& expResultForState = expectedResult[appsForState.first];
-
-    for (size_t i = 0; i < expResultForState.size(); i++)
-    {
-      ASSERT_EQ(appsForState.second.at(i).processName,
-                expResultForState.at(i).processName);
-      ASSERT_EQ(appsForState.second.at(i).applicationName,
-                expResultForState.at(i).applicationName);
-    }
-  }
+  ASSERT_EQ(result, expectedResult);
 }
 
 TEST_F(ManifestReaderTests, ShouldEmptyMapWhenNoProvided)

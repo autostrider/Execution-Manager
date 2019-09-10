@@ -60,7 +60,7 @@ struct ProcessInfo
   bool operator==(const ProcessInfo& rhs) const
   {
     return processName == rhs.processName &&
-           applicationName == rhs.processName;
+           applicationName == rhs.applicationName;
 
   }
 };

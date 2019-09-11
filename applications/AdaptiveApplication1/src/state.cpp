@@ -7,8 +7,6 @@ using ApplicationState = api::ApplicationStateClient::ApplicationState;
 State::State(AdaptiveApp &app, api::ApplicationStateClient::ApplicationState state, const std::string &stateName) :
     m_app{app}, m_applState{state}, m_stateName{stateName}
 {
-//    std::cout << "[ AdaptiveApplication1 ]:\tEntering "
-//              << m_stateName << " styyyyyyyyyyyyyyyyyyyate." << std::endl;
 }
 
 void State::leave() const

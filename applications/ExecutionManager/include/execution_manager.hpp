@@ -20,8 +20,6 @@
 #include <mutex>
 #include <set>
 #include <string>
-#include <thread>
-#include <unistd.h>
 #include <vector>
 
 namespace ExecutionManager
@@ -140,11 +138,7 @@ private:
 
   std::set<pid_t> m_stateConfirmToBeReceived;
 
-  void confirmFromApplication();
-  
-  std::set<std::string> getAllowedProcessForState(std::string);
-  
-  std::set<std::string> getActiveProcessForCurrentState();
+  void waitForReports();
 };
 
 } // namespace ExecutionManager

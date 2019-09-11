@@ -9,7 +9,6 @@
 #include <json.hpp>
 #include <kj/async-io.h>
 #include <signal.h>
-#include <thread>
 #include <unistd.h>
 
 namespace ExecutionManager
@@ -260,41 +259,6 @@ ExecutionManager::setMachineState(pid_t processId, std::string state)
                                  m_machineManifestStates.cend(),
                                  state);
 
-  std::cout << "============================================================================" << std::endl;
-  std::cout << "[ ExecutionManager ]:\t\tSTATE TO BE SET : " << state<< std::endl;
-
-  std::set<std::string> allowedAppsSet = getAllowedProcessForState(state);
-  std::set<std::string> activeAppsSet = getActiveProcessForCurrentState();
-
-  std::set<std::string> processToBeKilledSet;
-  std::set<std::string> processToBeStartedSet;
-
-  std::set_difference(activeAppsSet.begin(), activeAppsSet.end(),
-                      allowedAppsSet.begin(), allowedAppsSet.end(),
-                      std::inserter(processToBeKilledSet, processToBeKilledSet.begin()));
-
-  std::cout << "[ ExecutionManager ]:\t\tProcesses to be killed: ";
-  for (auto process : processToBeKilledSet)
-  {
-    std::cout << process << ", ";
-  }
-
-  std::set_difference(allowedAppsSet.begin(), allowedAppsSet.end(),
-                      activeAppsSet.begin(), activeAppsSet.end(),
-                      std::inserter(processToBeStartedSet, processToBeStartedSet.begin()));
-
-  std::cout << std::endl << "[ ExecutionManager ]:\t\tProcesses to be started: ";
-  for (auto process : processToBeStartedSet)
-  {
-    std::cout << process <<  ", ";
-  }
-  std::cout << std::endl;
-
-  allowedAppsSet.clear();
-  activeAppsSet.clear();
-  processToBeKilledSet.clear();
-  processToBeStartedSet.clear();
-
   if (stateIt != m_machineManifestStates.cend() &&
       processId == m_machineStateClientPid)
   {
@@ -304,15 +268,13 @@ ExecutionManager::setMachineState(pid_t processId, std::string state)
 
     startApplicationsForState();
 
-    confirmFromApplication();
+    waitForReports();
 
     std::cout << "Machine state changed successfully to "
               << "\""
               << m_currentState
               << "\""
               << std::endl;
-
-    std::cout << "============================================================================" << std::endl;
 
     return true;
   }
@@ -324,7 +286,7 @@ ExecutionManager::setMachineState(pid_t processId, std::string state)
   return false;
 }
 
-void ExecutionManager::confirmFromApplication()
+void ExecutionManager::waitForReports()
 {
   std::string listOfPid;
   while(!m_stateConfirmToBeReceived.empty())
@@ -341,39 +303,6 @@ void ExecutionManager::confirmFromApplication()
 
     listOfPid.clear();      
   }
-}
-
-std::set<std::string> ExecutionManager::getAllowedProcessForState(std::string state)
-{
-  std::set<std::string> allowedProc;
-
-  std::cout << "[ ExecutionManager ]:\t\tProcesses allowed for this state: ";
-  auto tmp = m_allowedProcessForState[state];
-  
-  for (auto id : tmp)
-  {
-    std::cout << id.processName << ", ";
-
-    allowedProc.insert(id.processName);
-  }
-  std::cout << std::endl;
-
-  return allowedProc;
-}
-
-std::set<std::string> ExecutionManager::getActiveProcessForCurrentState()
-{
-  std::set<std::string> activeProc;
-
-  std::cout << "[ ExecutionManager ]:\t\tActive process: ";
-  for (auto process : m_activeProcesses)
-  {
-    std::cout << process.first <<  ", ";
-    activeProc.insert(process.first);
-  }
-  std::cout << std::endl;
-
-  return activeProc;
 }
 
 } // namespace ExecutionManager

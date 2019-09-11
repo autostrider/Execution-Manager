@@ -52,14 +52,15 @@ void Init::enter()
     std::cout << "[ MachineStateManager ]:\tMachine State Manager started.." << std::endl;
 
     const char* applicationName = "MachineStateManager";
-    constexpr int defaulTimeout = 300000;
+    constexpr int defaulTimeout = 3000000;
+    constexpr int timeForSleep = 5;
 
     StateError result = m_msm.registerMsm(applicationName, defaulTimeout);
 
     if(StateError::K_SUCCESS == result)
     {
         std::cout << "[ MachineStateManager ]:\tSuccessful registration as a MSM." << std::endl;
-        std::this_thread::sleep_for(std::chrono::seconds(5));
+        std::this_thread::sleep_for(std::chrono::seconds(timeForSleep));
     }
     else
     {
@@ -93,20 +94,22 @@ std::unique_ptr<State> Running::handleTransition()
 
 void Running::enter()
 {
-    std::this_thread::sleep_for(std::chrono::seconds(5));
+    constexpr int defaulTimeout = 3000000;
+    constexpr int timeForSleep = 5;
+    std::this_thread::sleep_for(std::chrono::seconds(timeForSleep));
 
     std::cout << "[ MachineStateManager ]:\tSetting machine state to RUNNING..." << std::endl;
-    m_msm.setMachineState("Running", 300000);
+    m_msm.setMachineState("Running", defaulTimeout);
 
-    std::this_thread::sleep_for(std::chrono::seconds(5));
+    std::this_thread::sleep_for(std::chrono::seconds(timeForSleep));
 
     std::cout << "[ MachineStateManager ]:\tSetting machine state to LIVING..." << std::endl;
-    m_msm.setMachineState("Living", 300000);
+    m_msm.setMachineState("Living", defaulTimeout);
 
-    std::this_thread::sleep_for(std::chrono::seconds(5));
+    std::this_thread::sleep_for(std::chrono::seconds(timeForSleep));
 
     std::cout << "[ MachineStateManager ]:\tSetting machine state to SHUTTINGDOWN..." << std::endl;
-    m_msm.setMachineState("Shuttingdown", 300000);
+    m_msm.setMachineState("Shuttingdown", defaulTimeout);
 }
 
 //Application state shutdown

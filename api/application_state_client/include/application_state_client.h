@@ -5,17 +5,23 @@
 
 namespace api {
 
-class ApplicationStateClient
+class StateClient
 {
 public:
-  ApplicationStateClient();
-  virtual ~ApplicationStateClient() = default;
+    StateClient();
+    virtual ~StateClient() = default;
+    using ApplicationState = ::ApplicationStateManagement::ApplicationState;
+    virtual void ReportApplicationState(ApplicationState state){}
 
-  using ApplicationState = ::ApplicationStateManagement::ApplicationState;
+protected:
+    capnp::EzRpcClient client;
+};
 
-  virtual void ReportApplicationState(ApplicationState state);
-private:
-  capnp::EzRpcClient client;
+class ApplicationStateClient : public StateClient
+{
+public:
+  void ReportApplicationState(ApplicationState state) override;
+
 };
 
 } // namespace api

@@ -4,10 +4,9 @@ namespace api {
 namespace {
   const char* executionManagerAddr = "unix:/tmp/execution_management";
 }
-
-ApplicationStateClient::ApplicationStateClient()
-  : client(executionManagerAddr)
-{}
+StateClient::StateClient() : client(executionManagerAddr)
+{
+}
 
 void ApplicationStateClient::ReportApplicationState(ApplicationState state)
 {
@@ -22,5 +21,7 @@ void ApplicationStateClient::ReportApplicationState(ApplicationState state)
   auto promise = request.send();
   promise.wait(waitScope);
 }
+
+
 
 } // namespace api

@@ -24,15 +24,6 @@ Init::Init(AdaptiveApp &app) : State (app, ApplicationState::K_INITIALIZING, "In
 {
 }
 
-std::unique_ptr<State> Init::handleTransition()
-{
-    if (m_app.isTerminating())
-    {
-        return std::make_unique<Terminate>(m_app);
-    }
-    return std::make_unique<Run>(m_app);
-}
-
 void Init::enter()
 {
     m_app.reportApplicationState(getApplicationState());
@@ -47,15 +38,6 @@ Run::Run(AdaptiveApp &app) : State (app, ApplicationState::K_RUNNING, "Running")
 {
 }
 
-std::unique_ptr<State> Run::handleTransition()
-{
-    if (m_app.isTerminating())
-    {
-        return std::make_unique<Terminate>(m_app);
-    }
-    return std::make_unique<Run>(m_app);
-}
-
 void Run::enter()
 {
     m_app.readSensorData();
@@ -66,21 +48,28 @@ Terminate::Terminate(AdaptiveApp &app) : State (app, ApplicationState::K_SHUTTIN
 {
 }
 
-std::unique_ptr<State> Terminate::handleTransition()
-{
-    if (m_app.isTerminating())
-    {
-        std::cout << "Already in terminate state!";
-    }
-    else
-    {
-        std::cout << "terminating state. App is dead(\n";
-    }
-    return std::make_unique<Terminate>(m_app);
-}
-
 void Terminate::enter()
 {
     m_app.reportApplicationState(getApplicationState());
-    throw std::runtime_error("killing app...\n");
+    std::cout << "Killing app...\n";
+}
+
+std::unique_ptr<State> StateFactory::buildState(
+        api::ApplicationStateClient::ApplicationState state,
+                                                AdaptiveApp& app)
+{
+    std::unique_ptr<State> newState{nullptr};
+    switch (state)
+    {
+    case ApplicationState::K_INITIALIZING:
+        newState = std::make_unique<Init>(app);
+        break;
+    case ApplicationState::K_RUNNING:
+        newState = std::make_unique<Run>(app);
+        break;
+    case ApplicationState::K_SHUTTINGDOWN:
+        newState = std::make_unique<Terminate>(app);
+        break;
+    }
+    return newState;
 }

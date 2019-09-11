@@ -6,24 +6,21 @@
 
 using ApplicationState = api::ApplicationStateClient::ApplicationState;
 
-AdaptiveApp::AdaptiveApp(std::atomic<bool> &terminate) : m_sensorData(c_numberOfSamples),
+AdaptiveApp::AdaptiveApp(std::unique_ptr<AStateFactory> factory,
+                         std::unique_ptr<api::StateClient> client) :
+    m_sensorData(c_numberOfSamples),
+    m_factory{std::move(factory)},
     m_currentState{nullptr},
-    m_terminateApp{terminate},
-    m_appClient{nullptr}
+    m_appClient{std::move(client)}
 {
-}
-
-void AdaptiveApp::init(std::unique_ptr<State> initialState, std::unique_ptr<api::ApplicationStateClient> client)
-{
-    m_appClient = std::move(client);
-    m_currentState = std::move(initialState);
+    m_currentState = m_factory->buildState(ApplicationState::K_INITIALIZING, *this);
     m_currentState->enter();
 }
 
-void AdaptiveApp::transitToNextState()
+void AdaptiveApp::transitToNextState(ApplicationState state)
 {
     m_currentState->leave();
-    m_currentState = m_currentState->handleTransition();
+    m_currentState = m_factory->buildState(state, *this);
     m_currentState->enter();
 }
 
@@ -53,11 +50,6 @@ void AdaptiveApp::printSensorData() const
         std::cout << item << " | ";
     }
     std::cout << "\n";
-}
-
-bool AdaptiveApp::isTerminating() const
-{
-    return m_terminateApp;
 }
 
 void AdaptiveApp::reportApplicationState(ApplicationState state)

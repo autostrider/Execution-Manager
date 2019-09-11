@@ -34,7 +34,7 @@ std::map<MachineState, std::vector<ProcessInfo> > ManifestReader::getStatesSuppo
 
   for (auto file: applicationNames)
   {
-    file = conf.corePathToApplicationsFolder + "/" + file + manifestFile;
+    file = conf.pathToApplicationsFolder + "/" + file + manifestFile;
 
     json content = getJsonData(file);
 
@@ -63,7 +63,7 @@ std::map<MachineState, std::vector<ProcessInfo> > ManifestReader::getStatesSuppo
 
 std::vector<MachineState> ManifestReader::getMachineStates()
 {
-  json manifestData = getJsonData(conf.machineManifestPath);
+  json manifestData = getJsonData(conf.machineManifestFilePath);
   MachineManifest manifest = manifestData.get<MachineManifest>();
 
   const auto& availableMachineStates =
@@ -93,10 +93,10 @@ std::vector<std::string> ManifestReader::getListOfApplications()
   DIR* dp = nullptr;
   std::vector<std::string> fileNames;
 
-  if ((dp = opendir(conf.corePathToApplicationsFolder.c_str())) == nullptr)
+  if ((dp = opendir(conf.pathToApplicationsFolder.c_str())) == nullptr)
   {
     throw runtime_error(std::string{"Error opening directory: "}
-                        + conf.corePathToApplicationsFolder
+                        + conf.pathToApplicationsFolder
                         + " "
                         + strerror(errno));
   }

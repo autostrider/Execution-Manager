@@ -13,8 +13,8 @@ using MachineState = std::string;
 
 struct ManifestReaderConf
 {
-  const std::string corePathToApplicationsFolder{"./bin/applications"};
-  const std::string machineManifestPath{ "../applications/ExecutionManager/machine_manifest.json"};
+  const std::string pathToApplicationsFolder{"./bin/applications"};
+  const std::string machineManifestFilePath{ "../applications/ExecutionManager/machine_manifest.json"};
 };
 
 /**

@@ -9,38 +9,84 @@
 using namespace ExecutionManager;
 using nlohmann::json;
 
+struct ManifestReaderTestConf
+{
+  std::vector<std::string> nestedDirs;
+  std::map<std::string, ApplicationManifest> applicationManifests;
+  MachineManifest machineManifest;
+  ManifestReaderConf conf{"./test-data/",
+                          "./test-data/msm/machine_manifest.json"};
+};
 
-class ManifestReaderTests : public ::testing::Test
+class ManifestReaderTests : public ::testing::TestWithParam<ManifestReaderTestConf>
 {
 protected:
   void SetUp() override;
-  void removeManifests();
+  void TearDown() override;
 protected:
-  const ManifestReaderConf testConf{"./test-data/",
-                                    "./test-data/msm/machine_manifest.json"};
-  const std::vector<MachineState> emptyMachineStates{};
+  void writeJson(const json& content, const std::string& path);
+private:
+  void createDirs();
 
-  void writeJson(const std::string& content, const std::string path);
+};
+
+class MachineManifestReadingTests : public ManifestReaderTests
+{
+protected:
+  void SetUp() override;
+
+  const std::vector<MachineState> emptyMachineStates = {};
+  const std::vector<MachineState> availableMachineStates =
+    {"Startup", "Running", "Shutdown"};
 private:
   void createMachineManifest();
-  void createDirs();
+};
+
+class ApplicationManifestReadingTests : public ManifestReaderTests
+{
+protected:
+  void SetUp() override;
+
+  const std::map<MachineState, std::vector<ProcessInfo>> availableAppsForStates =
+  {
+      {"Startup", {
+         ProcessInfo{"msm", "msm", {}},
+         ProcessInfo{"test-aa2", "proc2", {}},
+                   }},
+      {"Running", {
+         ProcessInfo{"test-aa1", "proc1", {}},
+         ProcessInfo{"msm", "msm", {}},
+                  }},
+  };
+  const std::map<MachineState, std::vector<ProcessInfo>> emptyAppsForStates = {};
+private:
   void createApplicationManifests();
 };
+
+void ApplicationManifestReadingTests::SetUp()
+{
+  ManifestReaderTests::SetUp();
+  createApplicationManifests();
+}
+
+void MachineManifestReadingTests::SetUp()
+{
+  ManifestReaderTests::SetUp();
+  createMachineManifest();
+}
 
 void ManifestReaderTests::SetUp()
 {
   createDirs();
-  createMachineManifest();
-  createApplicationManifests();
 }
 
-void ManifestReaderTests::removeManifests()
+void ManifestReaderTests::TearDown()
 {
-    std::string rmTestDir = "rm -rf " + testConf.corePathToApplicationsFolder;
+    std::string rmTestDir = "rm -rf " + GetParam().conf.pathToApplicationsFolder;
     system(rmTestDir.c_str());
 }
 
-void ManifestReaderTests::writeJson(const std::string &content, const std::string path)
+void ManifestReaderTests::writeJson(const json& content, const std::string& path)
 {
   std::ofstream output{path};
   output << content;
@@ -49,65 +95,30 @@ void ManifestReaderTests::writeJson(const std::string &content, const std::strin
 void ManifestReaderTests::createDirs()
 {
     std::string createDir = "mkdir ";
-    std::vector<std::string> nestedDirs =
-      {"msm", "test-aa1", "test-aa2"};
 
-    std::string createCoreDir = createDir +testConf.corePathToApplicationsFolder;
+    std::string createCoreDir = createDir + GetParam().conf.pathToApplicationsFolder;
     system(createCoreDir.c_str());
 
-    for (const auto& dir: nestedDirs)
+    for (const auto& dir: GetParam().nestedDirs)
     {
       std::string createNestedDir = createDir
-                                    + testConf.corePathToApplicationsFolder
+                                    + GetParam().conf.pathToApplicationsFolder
                                     + dir;
 
       system(createNestedDir.c_str());
     }
 }
 
-void ManifestReaderTests::createMachineManifest()
+void MachineManifestReadingTests::createMachineManifest()
 {
-  const std::string machineManifest =
-      R"({"Machine_manifest":{"Machine_manifest_id":"Machine",)"
-      R"("Mode_declaration_group":[{"Function_group_name":"MachineState",)"
-      R"("Mode_declarations":[{"Mode": "Startup"},{"Mode": "Running"},)"
-      R"({"Mode": "Shutdown"}]}]}})";
-
-  writeJson(machineManifest, testConf.machineManifestPath);
+  writeJson(GetParam().machineManifest, GetParam().conf.machineManifestFilePath);
 }
 
-void ManifestReaderTests::createApplicationManifests()
+void ApplicationManifestReadingTests::createApplicationManifests()
 {
-  const std::map<std::string, std::string> applicationManifestsInfo =
-    {
-    {"test-aa1",
-       R"({"Application_manifest":{"Application_manifest_id":"test-aa1",)"
-       R"("Process":[{"Mode_dependent_startup_configs":)"
-       R"([{"Startup_options":[],)"
-       R"("Mode_in_machine_instance_refs":)"
-       R"([{"Function_group":"MachineState","Mode":"Running"}]}],)"
-       R"("Process_name":"proc1"}]}})"
-      },
-      {"test-aa2",
-       R"({"Application_manifest":{"Application_manifest_id":"test-aa2",)"
-       R"("Process":[{"Mode_dependent_startup_configs":)"
-       R"([{"Startup_options":[],)"
-       R"("Mode_in_machine_instance_refs":)"
-       R"([{"Function_group":"MachineState","Mode":"Startup"}]}],)"
-       R"("Process_name":"proc2"}]}})"
-      },
-      {"msm",
-       R"({"Application_manifest":{"Application_manifest_id":"msm",)"
-       R"("Process":[{"Mode_dependent_startup_configs":)"
-       R"([{"Startup_options":[],)"
-       R"("Mode_in_machine_instance_refs":[{"Function_group":)"
-       R"("MachineState","Mode":"Startup"},{"Function_group":)"
-       R"("MachineState","Mode":"Running"}]}],"Process_name":"msm"}]}})"
-      }
-  };
-  for (const auto& appManifest: applicationManifestsInfo)
+  for (const auto& appManifest: GetParam().applicationManifests)
   {
-    std::string path = testConf.corePathToApplicationsFolder
+    std::string path = GetParam().conf.pathToApplicationsFolder
                        + appManifest.first
                        + "/manifest.json";
 
@@ -115,156 +126,251 @@ void ManifestReaderTests::createApplicationManifests()
   }
 }
 
-TEST_F(ManifestReaderTests, ShouldReturnAvailableMachineStates)
+const std::vector<ManifestReaderTestConf> machineManifestTestsConfigs =
 {
-  ManifestReader reader{testConf};
+  ManifestReaderTestConf{
+    {"msm"},
+    {},
+    MachineManifest{
+      MachineManifestInternal{
+        "Machine",
+        {
+          ModeDeclarationGroup{
+            "MachineState",
+            {Mode{"Startup"}, Mode{"Running"}, Mode{"Shutdown"}}
+          }
+        }
+      }
+    }
+  },
+  ManifestReaderTestConf{
+    {"msm"},
+    {},
+    MachineManifest{
+      MachineManifestInternal{
+        "Machine",
+        {
+          ModeDeclarationGroup{
+            "MachineState",
+            {Mode{"Startup"}, Mode{"Running"}, Mode{"Shutdown"}}
+          },
+          ModeDeclarationGroup{
+              "TestGroup",
+            {Mode{"test1"}, Mode{"test2"}}
+          }
+        }
+      }
+    }
+  },
+  ManifestReaderTestConf{
+    {"msm"},
+    {},
+    MachineManifest{
+      MachineManifestInternal{
+        "Machine",
+        { }
+      }
+    }
+  }
+};
+
+INSTANTIATE_TEST_SUITE_P(MachineManifestTests,
+                         MachineManifestReadingTests,
+                         ::testing::ValuesIn(machineManifestTestsConfigs));
+
+TEST_P(MachineManifestReadingTests, ShouldReturnAvailableMachineStatesWhenProvided)
+{
+  ManifestReader reader{GetParam().conf};
 
   auto res = reader.getMachineStates();
 
-  ASSERT_EQ(res,
-            (std::vector<MachineState>{"Startup", "Running", "Shutdown"}));
+  if (GetParam().machineManifest.manifest.modeDeclarationGroups.size())
+  {
+    ASSERT_EQ(res, availableMachineStates);
+  }
+  else
+  {
+    ASSERT_EQ(res, emptyMachineStates);
+  }
 }
 
-TEST_F(ManifestReaderTests, ShouldFaildWhenDirectoryNotExists)
+TEST(ApplicationManifestReadingTestsFail, ShouldFaildWhenDirectoryNotExists)
 {
   ManifestReader reader{ManifestReaderConf{"./not-exists", "manifest"}};
 
   EXPECT_THROW(reader.getStatesSupportedByApplication(), std::runtime_error);
 }
 
-TEST_F(ManifestReaderTests, ShouldDiscardOtherKeysThanMachineStateWhenParse)
+const std::vector<ManifestReaderTestConf> applicationManifestReadintTestConf =
 {
-  std::string machineManifestWithUnsupportedGroup =
-      R"({"Machine_manifest":{"Machine_manifest_id":"Machine",)"
-      R"("Mode_declaration_group":[)"
-      R"({"Function_group_name":"MachineState",)"
-      R"("Mode_declarations":[{"Mode":"Startup"},{"Mode":"Running"},)"
-      R"({"Mode":"Shutdown"}]},{"Function_group_name":"TestGroupName",)"
-      R"("Mode_declarations":[{"Mode":"tes1"},{"Mode":"tes2"}]}]}})";
+  ManifestReaderTestConf{
+    {"test-aa1", "test-aa2", "msm"},
+    {
+      {
+        "test-aa1",
+        ApplicationManifest{
+          ApplicationManifestInternal{
+            "test-aa1",
+            {
+              Process{
+                "proc1",
+                {
+                  ModeDepStartupConfig{
+                    {
+                      MachineInstanceMode{"MachineState", "Running"}
+                    }, {}
+                  }
+                }
+              }
+            }
+          }
+        }
+      },
+      {
+        "test-aa2",
+        ApplicationManifest{
+          ApplicationManifestInternal{
+            "test-aa2",
+            {
+              Process{
+                "proc2",
+                {
+                  ModeDepStartupConfig{
+                    {
+                      MachineInstanceMode{"MachineState", "Startup"}
+                    }, {}
+                  }
+                }
+              }
+            }
+          }
+        }
+      },
+      {
+        "msm",
+        ApplicationManifest{
+          ApplicationManifestInternal{
+            "msm",
+            {
+              Process{
+                "msm",
+                {
+                  ModeDepStartupConfig{
+                    {
+                      MachineInstanceMode{"MachineState", "Startup"},
+                      MachineInstanceMode{"MachineState", "Running"}
+                    }, {}
+                  }
+                }
+              }
+            }
+          }
+        }
+      }
+    },
+    {} // MachineManifest
+  },
+  ManifestReaderTestConf{
+    {"app"},
+    {
+      {
+        "app",
+        ApplicationManifest{
+          ApplicationManifestInternal{
+            "app",
+            {}
+          }
+        }
+      }
+    }, //ApplicationManifest
+    {} // MachineManifest
+  },
+  ManifestReaderTestConf{
+    {"test-aa1", "test-aa2", "msm"},
+    {
+      {
+        "test-aa1",
+        ApplicationManifest{
+          ApplicationManifestInternal{
+            "test-aa1",
+            {
+              Process{
+                "proc1",
+                {
+                  ModeDepStartupConfig{
+                    {
+                      MachineInstanceMode{"MachineState", "Running"},
+                      MachineInstanceMode{"TestMode", "testData"}
+                    }, {}
+                  }
+                }
+              }
+            }
+          }
+        }
+      },
+      {
+        "test-aa2",
+        ApplicationManifest{
+          ApplicationManifestInternal{
+            "test-aa2",
+            {
+              Process{
+                "proc2",
+                {
+                  ModeDepStartupConfig{
+                    {
+                      MachineInstanceMode{"MachineState", "Startup"},
+                      MachineInstanceMode{"TestMode", "testData"}
+                    }, {}
+                  }
+                }
+              }
+            }
+          }
+        }
+      },
+      {
+        "msm",
+        ApplicationManifest{
+          ApplicationManifestInternal{
+            "msm",
+            {
+              Process{
+                "msm",
+                {
+                  ModeDepStartupConfig{
+                    {
+                      MachineInstanceMode{"MachineState", "Startup"},
+                      MachineInstanceMode{"MachineState", "Running"}
+                    }, {}
+                  }
+                }
+              }
+            }
+          }
+        }
+      }
+    },
+    {} // MachineManifest
+  },
+};
 
-  writeJson(machineManifestWithUnsupportedGroup, testConf.machineManifestPath);
-
-  ManifestReader reader{testConf};
-  auto res = reader.getMachineStates();
-
-  ASSERT_EQ(res,
-            (std::vector<MachineState>{"Startup", "Running", "Shutdown"}));
-
-}
-
-TEST_F(ManifestReaderTests, ShouldEmptyReturnWhenNoMachineStateFunctionGroup)
+TEST_P(ApplicationManifestReadingTests,
+       ShouldReturnMapOfApplicationsForStatesWhenProvided)
 {
-  std::string machineManifestWithoutMachineStates =
-      R"({"Machine_manifest":{"Machine_manifest_id":"Machine",)"
-      R"("Mode_declaration_group":[)"
-      R"({"Function_group_name":"TestGroupName",)"
-      R"("Mode_declarations":[{"Mode":"tes1"},{"Mode":"tes2"}]}]}})";
+  const auto& testParam = GetParam();
+  ManifestReader reader{testParam.conf};
 
-  ManifestReaderConf conf{"./test-data", "./test-data/msm/test-conf.json"};
+  auto result = reader.getStatesSupportedByApplication();
 
-  writeJson(machineManifestWithoutMachineStates, conf.machineManifestPath);
-
-
-  ManifestReader reader{conf};
-  auto res = reader.getMachineStates();
-  ASSERT_EQ(res, emptyMachineStates);
-
-}
-
-
-TEST_F(ManifestReaderTests, ShouldEmptyReturnWhenEmptyMachineStates)
-{
-  std::string machineManifestWithoutModeDeclGroups =
-      R"({"Machine_manifest":{"Machine_manifest_id":"Machine",)"
-      R"("Mode_declaration_group":[]}})";
-
-  ManifestReaderConf conf{"./test-data", "./test-data/msm/test-conf.json"};
-
-  writeJson(machineManifestWithoutModeDeclGroups, conf.machineManifestPath);
-
-
-  ManifestReader reader{conf};
-  auto res = reader.getMachineStates();
-  ASSERT_EQ(res, emptyMachineStates);
-
-}
-
-
-TEST_F(ManifestReaderTests, ShouldReturnMapOfApplicationsForStates)
-{
-  ManifestReader reader{testConf};
-  std::map<MachineState, std::vector<ProcessInfo>> expectedResult =
+  if (testParam.applicationManifests.find("app") ==
+      testParam.applicationManifests.cend())
   {
-      {"Startup", {
-         ProcessInfo{"msm", "msm", {}},
-         ProcessInfo{"test-aa2", "proc2", {}},
-                   }},
-      {"Running", {
-         ProcessInfo{"test-aa1", "proc1", {}},
-         ProcessInfo{"msm", "msm", {}},
-                  }},
-  };
-
-  auto result = reader.getStatesSupportedByApplication();
-
-  EXPECT_EQ(result, expectedResult);
-}
-
-TEST_F(ManifestReaderTests, ShouldDiscardRedundantFunctionGroupsWhenProvided)
-{
-  std::string input =
-      R"({"Application_manifest":{"Application_manifest_id":)"
-      R"("app","Process":[{"Mode_dependent_startup_configs":)"
-      R"([{"Startup_options":[],)"
-      R"("Mode_in_machine_instance_refs":)"
-      R"([{"Function_group":"MachineState",)"
-      R"("Mode": "Startup"},{"Function_group": "MachineState","Mode":)"
-      R"("Running"},{"Function_group": "Test", "Mode": "test"}]}],"Process_name":)"
-      R"("app"}]}})";
-  system("mkdir ./test-data/app");
-
-  writeJson(input, "./test-data/app/manifest.json");
-
-  ManifestReader reader{testConf};
-  std::map<MachineState, std::vector<ProcessInfo>> expectedResult =
+    EXPECT_EQ(result, availableAppsForStates);
+  }
+  else
   {
-      {"Startup", {
-         ProcessInfo{"app", "app", {}},
-         ProcessInfo{"msm", "msm", {}},
-         ProcessInfo{"test-aa2", "proc2", {}},
-                   }},
-      {"Running", {
-         ProcessInfo{"app", "app", {}},
-         ProcessInfo{"test-aa1", "proc1", {}},
-         ProcessInfo{"msm", "msm", {}}
-                  }},
-  };
-
-
-  auto result = reader.getStatesSupportedByApplication();
-
-  ASSERT_EQ(result, expectedResult);
-}
-
-TEST_F(ManifestReaderTests, ShouldEmptyMapWhenNoProvided)
-{
-  ManifestReaderConf conf{"./empty-manifest/", ""};
-
-  system(("mkdir -p " + conf.corePathToApplicationsFolder + "/app").c_str());
-
-  std::string input =
-      R"({"Application_manifest":{"Application_manifest_id":)"
-      R"("app","Process":[]}})";
-
-  std::ofstream testOutput{conf.corePathToApplicationsFolder + "/app/manifest.json"};
-  testOutput << input;
-  testOutput.close();
-
-  ManifestReader reader{conf};
-  auto result = reader.getStatesSupportedByApplication();
-
-  ASSERT_EQ(result,
-            (std::map<MachineState, std::vector<ProcessInfo>>{}));
-
-  system(("rm -rf " + conf.corePathToApplicationsFolder).c_str());
+    EXPECT_EQ(result, emptyAppsForStates);
+  }
 }

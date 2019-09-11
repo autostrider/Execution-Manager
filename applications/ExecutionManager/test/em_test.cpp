@@ -356,6 +356,10 @@ const std::vector<ManifestReaderTestConf> applicationManifestReadintTestConf =
   },
 };
 
+INSTANTIATE_TEST_SUITE_P(ApplicationManifestTests,
+                         ApplicationManifestReadingTests,
+                         ::testing::ValuesIn(applicationManifestReadintTestConf));
+
 TEST_P(ApplicationManifestReadingTests,
        ShouldReturnMapOfApplicationsForStatesWhenProvided)
 {

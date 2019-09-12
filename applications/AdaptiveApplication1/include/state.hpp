@@ -11,6 +11,7 @@ public:
     State(AdaptiveApp& app, api::ApplicationStateClient::ApplicationState state, const std::string& stateName);
 
     virtual void enter() = 0;
+    void leave() const override;
     api::ApplicationStateClient::ApplicationState getApplicationState() const;
 
 protected:
@@ -41,12 +42,13 @@ public:
     void enter() override;
 };
 
-class StateFactory : public api::IStateFactory
+
+class StateFactory: public api::IStateFactory
 {
 public:
-    std::unique_ptr<api::IState> makeInit(api::IAdaptiveApp &app) override;
-    std::unique_ptr<api::IState> makeRun(api::IAdaptiveApp &app) override;
-    std::unique_ptr<api::IState> makeTerminate(api::IAdaptiveApp &app) override;
+    std::unique_ptr<api::IState> createInit(api::IAdaptiveApp &app) override;
+    std::unique_ptr<api::IState> createRun(api::IAdaptiveApp &app) override;
+    std::unique_ptr<api::IState> createTerminate(api::IAdaptiveApp &app) override;
 };
 
 #endif // STATE_HPP

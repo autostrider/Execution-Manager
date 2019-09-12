@@ -4,12 +4,15 @@
 
 using ApplicationState = api::ApplicationStateClient::ApplicationState;
 
-State::State(AdaptiveApp &app,
-             api::ApplicationStateClient::ApplicationState state,
-             const std::string &stateName) :
+State::State(AdaptiveApp &app, api::ApplicationStateClient::ApplicationState state, const std::string &stateName) :
     m_app{app}, m_applState{state}, m_stateName{stateName}
 {
     std::cout << "Enter " << m_stateName << " state" << std::endl;
+}
+
+void State::leave() const
+{
+
 }
 
 api::ApplicationStateClient::ApplicationState State::getApplicationState() const
@@ -51,17 +54,17 @@ void Terminate::enter()
     std::cout << "Killing app..." << std::endl;
 }
 
-std::unique_ptr<api::IState> StateFactory::makeInit(api::IAdaptiveApp &app)
+std::unique_ptr<api::IState> StateFactory::createInit(api::IAdaptiveApp &app)
 {
     return std::make_unique<Init>(dynamic_cast<AdaptiveApp&>(app));
 }
 
-std::unique_ptr<api::IState> StateFactory::makeRun(api::IAdaptiveApp &app)
+std::unique_ptr<api::IState> StateFactory::createRun(api::IAdaptiveApp &app)
 {
     return std::make_unique<Run>(dynamic_cast<AdaptiveApp&>(app));
 }
 
-std::unique_ptr<api::IState> StateFactory::makeTerminate(api::IAdaptiveApp &app)
+std::unique_ptr<api::IState> StateFactory::createTerminate(api::IAdaptiveApp &app)
 {
     return std::make_unique<Terminate>(dynamic_cast<AdaptiveApp&>(app));
 }

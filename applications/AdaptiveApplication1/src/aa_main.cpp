@@ -12,7 +12,7 @@ static std::atomic<bool> isTerminating{false};
 
 int main()
 {
-    if (::signal(SIGINT, signalHandler) == SIG_ERR)
+    if (::signal(SIGTERM, signalHandler) == SIG_ERR)
     {
         std::cout << "Error while registering signal" << std::endl;
     }

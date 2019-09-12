@@ -9,8 +9,10 @@
 using testing::Return;
 using testing::ByMove;
 using testing::_;
-/*
+
 using ApplicationState = api::ApplicationStateClient::ApplicationState;
+
+/*
 class AppMock : public AdaptiveApp
 {
 public:

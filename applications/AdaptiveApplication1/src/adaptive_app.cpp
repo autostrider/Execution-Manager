@@ -10,21 +10,21 @@ AdaptiveApp::AdaptiveApp(std::unique_ptr<api::IStateFactory> factory,
     m_sensorData(c_numberOfSamples)
 {
     transitToNextState(
-                std::bind(&api::IStateFactory::makeInit, m_factory.get(), std::placeholders::_1)
+                std::bind(&api::IStateFactory::createInit, m_factory.get(), std::placeholders::_1)
                 );
 }
 
 void AdaptiveApp::run()
 {
     transitToNextState(
-                std::bind(&api::IStateFactory::makeRun, m_factory.get(), std::placeholders::_1)
+                std::bind(&api::IStateFactory::createRun, m_factory.get(), std::placeholders::_1)
                 );
 }
 
 void AdaptiveApp::terminate()
 {
     transitToNextState(
-                std::bind(&api::IStateFactory::makeTerminate, m_factory.get(), std::placeholders::_1)
+                std::bind(&api::IStateFactory::createTerminate, m_factory.get(), std::placeholders::_1)
                 );
 }
 

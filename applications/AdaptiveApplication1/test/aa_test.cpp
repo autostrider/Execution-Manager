@@ -9,7 +9,7 @@
 using testing::Return;
 using testing::ByMove;
 using testing::_;
-
+/*
 class InitMock : public Init
 {
 public:
@@ -100,3 +100,4 @@ TEST(ReportCurrentStateSucces, AppTest)
 
     app.reportApplicationState(api::ApplicationStateClient::ApplicationState::K_RUNNING);
 }
+*/

@@ -4,39 +4,28 @@
 #include <random>
 #include <iostream>
 
-using ApplicationState = api::ApplicationStateClient::ApplicationState;
-
-AdaptiveApp::AdaptiveApp(std::unique_ptr<IStateFactory> factory,
+AdaptiveApp::AdaptiveApp(std::unique_ptr<api::IStateFactory> factory,
                          std::unique_ptr<api::IApplicationStateClientWrapper> client) :
-    m_sensorData(c_numberOfSamples),
-    m_factory{std::move(factory)},
-    m_currentState{nullptr},
-    m_appClient{std::move(client)}
+    api::IAdaptiveApp(std::move(factory), std::move(client)),
+    m_sensorData(c_numberOfSamples)
 {
     transitToNextState(
-                std::bind(&IStateFactory::makeInit, m_factory.get(), std::placeholders::_1)
+                std::bind(&api::IStateFactory::makeInit, m_factory.get(), std::placeholders::_1)
                 );
 }
 
 void AdaptiveApp::run()
 {
     transitToNextState(
-                std::bind(&IStateFactory::makeRun, m_factory.get(), std::placeholders::_1)
+                std::bind(&api::IStateFactory::makeRun, m_factory.get(), std::placeholders::_1)
                 );
 }
 
 void AdaptiveApp::terminate()
 {
     transitToNextState(
-                std::bind(&IStateFactory::makeTerminate, m_factory.get(), std::placeholders::_1)
+                std::bind(&api::IStateFactory::makeTerminate, m_factory.get(), std::placeholders::_1)
                 );
-}
-
-void AdaptiveApp::transitToNextState(FactoryFunc nextState)
-{
-    m_currentState = nextState(*this);
-    m_currentState->enter();
-    m_currentState->leave();
 }
 
 double AdaptiveApp::mean()
@@ -47,7 +36,7 @@ double AdaptiveApp::mean()
 
 void AdaptiveApp::readSensorData()
 {
-    std::cout << "Read data from sensors\n";
+    std::cout << "Read data from sensors" << std::endl;
 
     std::random_device rd{};
     std::mt19937 gen{rd()};
@@ -64,10 +53,5 @@ void AdaptiveApp::printSensorData() const
     for (const auto& item : m_sensorData) {
         std::cout << item << " | ";
     }
-    std::cout << "\n";
-}
-
-void AdaptiveApp::reportApplicationState(ApplicationState state)
-{
-    m_appClient->ReportApplicationState(state);
+    std::cout << std::endl;
 }

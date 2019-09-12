@@ -1,17 +1,11 @@
-#ifndef STATE
-#define STATE
+#ifndef STATE_HPP
+#define STATE_HPP
 
 #include <adaptive_app.hpp>
-#include <application_state_client.h>
+#include <i_state.hpp>
+#include <i_state_factory.hpp>
 
-class IState
-{
-public:
-    virtual ~IState() = default;
-    virtual void enter() = 0;
-    virtual void leave() const;
-};
-class State : public IState
+class State : public api::IState
 {
 public:
     State(AdaptiveApp& app, api::ApplicationStateClient::ApplicationState state, const std::string& stateName);
@@ -47,22 +41,12 @@ public:
     void enter() override;
 };
 
-
-class IStateFactory
+class StateFactory : public api::IStateFactory
 {
 public:
-    virtual std::unique_ptr<IState> makeInit(AdaptiveApp &app) = 0;
-    virtual std::unique_ptr<IState> makeRun(AdaptiveApp &app) = 0;
-    virtual std::unique_ptr<IState> makeTerminate(AdaptiveApp &app) = 0;
-
-    virtual~ IStateFactory() = default;
+    std::unique_ptr<api::IState> makeInit(api::IAdaptiveApp &app) override;
+    std::unique_ptr<api::IState> makeRun(api::IAdaptiveApp &app) override;
+    std::unique_ptr<api::IState> makeTerminate(api::IAdaptiveApp &app) override;
 };
 
-class StateFactory : public IStateFactory
-{
-public:
-    std::unique_ptr<IState> makeInit(AdaptiveApp &app) override;
-    std::unique_ptr<IState> makeRun(AdaptiveApp &app) override;
-    std::unique_ptr<IState> makeTerminate(AdaptiveApp &app) override;
-};
-#endif
+#endif // STATE_HPP

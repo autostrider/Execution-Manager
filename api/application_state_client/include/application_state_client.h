@@ -22,7 +22,6 @@ class IApplicationStateClientWrapper
 {
 public:
     virtual void ReportApplicationState(ApplicationStateManagement::ApplicationState state) = 0;
-   // virtual ~IApplicationStateClientWrapper() = default;
 };
 
 class ApplicationStateClientWrapper : public IApplicationStateClientWrapper

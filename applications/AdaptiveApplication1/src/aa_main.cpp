@@ -5,13 +5,14 @@
 #include <iostream>
 #include <chrono>
 #include <thread>
+#include <atomic>
 
 static void signalHandler(int signo);
 static std::atomic<bool> isTerminating{false};
 
 int main()
 {
-    if (::signal(SIGINT, signalHandler) == SIG_ERR)
+    if (::signal(SIGTERM, signalHandler) == SIG_ERR)
     {
         std::cout << "Error while registering signal\n";
     }

@@ -4,7 +4,7 @@
 // Dummy test case
 TEST(MachineStateManagerTest, test)
 {
-  MachineStateManager::MachineStateManager msm;
+  //MachineStateManager::MachineStateManager msm;
 
   ASSERT_EQ(1, 1);
 }

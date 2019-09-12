@@ -1,6 +1,6 @@
 #include <iostream>
 #include "machine_state_manager.hpp"
-#include <msm_state_machine.hpp>
+#include "msm_state_machine.hpp"
 
 #include <signal.h>
 #include <iostream>
@@ -15,11 +15,11 @@ int main(int argc, char **argv)
 {
     if (::signal(SIGTERM, signalHandler) == SIG_ERR)
     {
-        std::cout << "[ MachineStateMAnager ] :\tError while registering signal" << std::endl;
+        std::cout << "[ MachineStateManager ] :\tError while registering signal" << std::endl;
     }
 
-    MachineStateManager msm(std::make_unique<StateFactory>(),
-                            std::make_unique<api::ApplicationStateClientWrapper>());
+    MachineStateManager::MachineStateManager msm(std::make_unique<MachineStateManager::MsmStateFactory>(),
+                                                 std::make_unique<api::ApplicationStateClientWrapper>());
 
     while (!isTerminating)
     {
@@ -32,6 +32,6 @@ int main(int argc, char **argv)
 
 static void signalHandler(int signo)
 {
-    std::cout << "[ MachineStateMAnager ] :\tReceived signal:" << sys_siglist[signo] << std::endl;
+    std::cout << "[ MachineStateManager ] :\tReceived signal:" << sys_siglist[signo] << std::endl;
     isTerminating = true;
 }

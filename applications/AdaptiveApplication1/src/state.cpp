@@ -10,7 +10,7 @@ State::State(AdaptiveApp &app, api::ApplicationStateClient::ApplicationState sta
     std::cout << "Enter " << m_stateName << " state\n";
 }
 
-void IState::leave() const
+void State::leave() const
 {
 
 }
@@ -54,17 +54,17 @@ void Terminate::enter()
     std::cout << "Killing app...\n";
 }
 
-std::unique_ptr<IState> StateFactory::makeInit(AdaptiveApp &app)
+std::unique_ptr<IState> StateFactory::createInit(AdaptiveApp &app)
 {
     return std::make_unique<Init>(app);
 }
 
-std::unique_ptr<IState> StateFactory::makeRun(AdaptiveApp &app)
+std::unique_ptr<IState> StateFactory::createRun(AdaptiveApp &app)
 {
     return std::make_unique<Run>(app);
 }
 
-std::unique_ptr<IState> StateFactory::makeTerminate(AdaptiveApp &app)
+std::unique_ptr<IState> StateFactory::createTerminate(AdaptiveApp &app)
 {
     return std::make_unique<Terminate>(app);
 }

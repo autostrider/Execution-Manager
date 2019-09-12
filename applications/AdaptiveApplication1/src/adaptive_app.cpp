@@ -14,21 +14,21 @@ AdaptiveApp::AdaptiveApp(std::unique_ptr<IStateFactory> factory,
     m_appClient{std::move(client)}
 {
     transitToNextState(
-                std::bind(&IStateFactory::makeInit, m_factory.get(), std::placeholders::_1)
+                std::bind(&IStateFactory::createInit, m_factory.get(), std::placeholders::_1)
                 );
 }
 
 void AdaptiveApp::run()
 {
     transitToNextState(
-                std::bind(&IStateFactory::makeRun, m_factory.get(), std::placeholders::_1)
+                std::bind(&IStateFactory::createRun, m_factory.get(), std::placeholders::_1)
                 );
 }
 
 void AdaptiveApp::terminate()
 {
     transitToNextState(
-                std::bind(&IStateFactory::makeTerminate, m_factory.get(), std::placeholders::_1)
+                std::bind(&IStateFactory::createTerminate, m_factory.get(), std::placeholders::_1)
                 );
 }
 

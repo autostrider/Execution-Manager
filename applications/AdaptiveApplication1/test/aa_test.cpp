@@ -6,97 +6,51 @@
 #include <adaptive_app.hpp>
 #include <state.hpp>
 
-using testing::Return;
-using testing::ByMove;
-using testing::_;
+using namespace testing;
 
-class InitMock : public Init
+/*
+class IStateFactoryMock : public IStateFactory
 {
 public:
-    InitMock(AdaptiveApp& app) : Init(app){}
-    MOCK_METHOD0(handleTransition, std::unique_ptr<State>());
-    MOCK_METHOD0(enter, void());
-    MOCK_CONST_METHOD0(leave, void());
+    MOCK_METHOD(std::unique_ptr<State>,
+                buildState,
+                (api::ApplicationStateClient::ApplicationState state,
+                                                             AdaptiveApp& app));
 };
 
-class ClientMock : public api::ApplicationStateClient
+class StateClientMock : public api::ApplicationStateClientWrapper
 {
 public:
-    MOCK_METHOD1(ReportApplicationState, void (ApplicationState state));
+    MOCK_METHOD1(ReportApplicationState, void(ApplicationStateManagement::ApplicationState state));
 };
 
-TEST(DeleteApp, AppTest)
+class AppTest : public ::testing::Test
 {
-    std::atomic<bool> term{false};
-    AdaptiveApp* app = new AdaptiveApp(term);
-    delete app;
-}
-TEST(ReadSensorDataSucces, AppTest)
-{
-    std::atomic<bool> term{false};
-    AdaptiveApp app(term);
-    app.readSensorData();
-    ASSERT_NE(app.mean(), 0.0);
-}
+protected:
+    void SetUp() override
+    {
+        //factoryMock = std::make_unique<IStateFactoryMock>();
+        //stateClientMock = std::make_unique<StateClientMock>();
+        //app = AdaptiveApp(std::move(factoryMock),
+         //                  std::move(stateClientMock));
+    }
 
-TEST(TerminateApp, AppTest)
+   std::unique_ptr<StateClientMock> stateClientMock{std::make_unique<StateClientMock>()};
+   std::unique_ptr<IStateFactoryMock> factoryMock{std::make_unique<IStateFactoryMock>()};
+  // AdaptiveApp app{std::move(factoryMock),
+   //                std::move(stateClientMock)};
+};
+/*
+TEST_F(AppTest, AppInInitState)
 {
-    std::atomic<bool> term{false};
-    AdaptiveApp app(term);
-    EXPECT_EQ(app.isTerminating(), term);
-    term = true;
-    EXPECT_EQ(app.isTerminating(), term);
-}
 
-TEST(MeanSucces, AppTest)
-{
-    std::atomic<bool> term{false};
-    AdaptiveApp app(term);
-    app.printSensorData();
-    ASSERT_EQ(app.mean(), 0);
+    EXPECT_CALL(*factoryMock,
+                buildState(api::ApplicationStateClient::ApplicationState::K_INITIALIZING, (_)))
+            .WillOnce(Return(ByMove(std::unique_ptr<Init>())));
+     AdaptiveApp app{std::move(factoryMock),
+                     std::move(stateClientMock)};
+
 }
 
-TEST(InitSucces, AppTest)
-{
-    std::atomic<bool> term{false};
-    AdaptiveApp app(term);
+*/
 
-    auto mock = std::make_unique<InitMock>(app);
-    EXPECT_CALL(*mock, enter());
-    app.init(std::move(mock), nullptr);
-}
-
-TEST(TransitToRunStateSucces, AppTest)
-{
-    std::atomic<bool> term{false};
-    AdaptiveApp app(term);
-
-    auto stateMock = std::make_unique<InitMock>(app);
-    auto clientMock = std::make_unique<ClientMock>();
-
-    EXPECT_CALL(*stateMock, enter());
-    EXPECT_CALL(*stateMock, leave());
-    EXPECT_CALL(*stateMock, handleTransition)
-            .WillOnce(Return(ByMove(std::make_unique<::Run>(app))));
-    EXPECT_CALL(*clientMock, ReportApplicationState(_)).WillRepeatedly(Return());
-
-    app.init(std::move(stateMock), std::move(clientMock));
-
-    app.transitToNextState();
-}
-
-TEST(ReportCurrentStateSucces, AppTest)
-{
-    std::atomic<bool> term{false};
-    AdaptiveApp app(term);
-
-    auto stateMock = std::make_unique<InitMock>(app);
-    auto clientMock = std::make_unique<ClientMock>();
-
-    EXPECT_CALL(*stateMock, enter());
-    EXPECT_CALL(*clientMock, ReportApplicationState(_)).WillRepeatedly(Return());
-
-    app.init(std::move(stateMock), std::move(clientMock));
-
-    app.reportApplicationState(api::ApplicationStateClient::ApplicationState::K_RUNNING);
-}

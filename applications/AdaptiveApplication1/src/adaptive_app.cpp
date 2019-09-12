@@ -6,22 +6,37 @@
 
 using ApplicationState = api::ApplicationStateClient::ApplicationState;
 
-AdaptiveApp::AdaptiveApp(std::unique_ptr<AStateFactory> factory,
-                         std::unique_ptr<api::StateClient> client) :
+AdaptiveApp::AdaptiveApp(std::unique_ptr<IStateFactory> factory,
+                         std::unique_ptr<api::IApplicationStateClientWrapper> client) :
     m_sensorData(c_numberOfSamples),
     m_factory{std::move(factory)},
     m_currentState{nullptr},
     m_appClient{std::move(client)}
 {
-    m_currentState = m_factory->buildState(ApplicationState::K_INITIALIZING, *this);
-    m_currentState->enter();
+    transitToNextState(
+                std::bind(&IStateFactory::makeInit, m_factory.get(), std::placeholders::_1)
+                );
 }
 
-void AdaptiveApp::transitToNextState(ApplicationState state)
+void AdaptiveApp::run()
 {
-    m_currentState->leave();
-    m_currentState = m_factory->buildState(state, *this);
+    transitToNextState(
+                std::bind(&IStateFactory::makeRun, m_factory.get(), std::placeholders::_1)
+                );
+}
+
+void AdaptiveApp::terminate()
+{
+    transitToNextState(
+                std::bind(&IStateFactory::makeTerminate, m_factory.get(), std::placeholders::_1)
+                );
+}
+
+void AdaptiveApp::transitToNextState(FactoryFunc nextState)
+{
+    m_currentState = nextState(*this);
     m_currentState->enter();
+    m_currentState->leave();
 }
 
 double AdaptiveApp::mean()

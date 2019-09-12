@@ -5,24 +5,34 @@
 
 namespace api {
 
-class StateClient
+
+class ApplicationStateClient
 {
 public:
-    StateClient();
-    virtual ~StateClient() = default;
-    using ApplicationState = ::ApplicationStateManagement::ApplicationState;
-    virtual void ReportApplicationState(ApplicationState state){}
+  ApplicationStateClient();
 
-protected:
-    capnp::EzRpcClient client;
+  using ApplicationState = ::ApplicationStateManagement::ApplicationState;
+
+  void ReportApplicationState(ApplicationState state);
+private:
+  capnp::EzRpcClient client;
 };
 
-class ApplicationStateClient : public StateClient
+class IApplicationStateClientWrapper
 {
 public:
-  void ReportApplicationState(ApplicationState state) override;
-
+    virtual void ReportApplicationState(ApplicationStateManagement::ApplicationState state) = 0;
+   // virtual ~IApplicationStateClientWrapper() = default;
 };
 
+class ApplicationStateClientWrapper : public IApplicationStateClientWrapper
+{
+public:
+    void ReportApplicationState(ApplicationStateManagement::ApplicationState state) override;
+private:
+    ApplicationStateClient m_client;
+
+
+};
 } // namespace api
 #endif // APPLICATION_STATE_CLIENT_H

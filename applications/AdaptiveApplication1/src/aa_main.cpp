@@ -18,15 +18,14 @@ int main()
 
 
     AdaptiveApp app(std::make_unique<StateFactory>(),
-                    std::make_unique<api::ApplicationStateClient>() );
+                    std::make_unique<api::ApplicationStateClientWrapper>());
 
     while (!isTerminating)
     {
-        app.transitToNextState(api::ApplicationStateClient::ApplicationState::K_RUNNING);
+        app.run();
         std::this_thread::sleep_for(std::chrono::seconds(5));
     }
-    app.transitToNextState(api::ApplicationStateClient::ApplicationState::K_SHUTTINGDOWN);
-
+    app.terminate();
     return 0;
 }
 

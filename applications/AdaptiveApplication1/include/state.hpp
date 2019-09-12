@@ -4,14 +4,19 @@
 #include <adaptive_app.hpp>
 #include <application_state_client.h>
 
-class State
+class IState
+{
+public:
+    virtual ~IState() = default;
+    virtual void enter() = 0;
+    virtual void leave() const;
+};
+class State : public IState
 {
 public:
     State(AdaptiveApp& app, api::ApplicationStateClient::ApplicationState state, const std::string& stateName);
-    virtual ~State() = default;
 
     virtual void enter() = 0;
-    virtual void leave() const;
     api::ApplicationStateClient::ApplicationState getApplicationState() const;
 
 protected:
@@ -43,18 +48,21 @@ public:
 };
 
 
-class AStateFactory
+class IStateFactory
 {
 public:
-    virtual std::unique_ptr<State> buildState(api::ApplicationStateClient::ApplicationState,
-                                              AdaptiveApp &app) = 0;
-    virtual~ AStateFactory() = default;
+    virtual std::unique_ptr<IState> makeInit(AdaptiveApp &app) = 0;
+    virtual std::unique_ptr<IState> makeRun(AdaptiveApp &app) = 0;
+    virtual std::unique_ptr<IState> makeTerminate(AdaptiveApp &app) = 0;
+
+    virtual~ IStateFactory() = default;
 };
 
-class StateFactory : public AStateFactory
+class StateFactory : public IStateFactory
 {
 public:
-    std::unique_ptr<State> buildState(api::ApplicationStateClient::ApplicationState state,
-                                      AdaptiveApp &app) override;
+    std::unique_ptr<IState> makeInit(AdaptiveApp &app) override;
+    std::unique_ptr<IState> makeRun(AdaptiveApp &app) override;
+    std::unique_ptr<IState> makeTerminate(AdaptiveApp &app) override;
 };
 #endif

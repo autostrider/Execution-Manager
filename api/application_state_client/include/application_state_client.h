@@ -18,20 +18,5 @@ private:
   capnp::EzRpcClient client;
 };
 
-class IApplicationStateClientWrapper
-{
-public:
-    virtual void ReportApplicationState(ApplicationStateManagement::ApplicationState state) = 0;
-};
-
-class ApplicationStateClientWrapper : public IApplicationStateClientWrapper
-{
-public:
-    void ReportApplicationState(ApplicationStateManagement::ApplicationState state) override;
-private:
-    ApplicationStateClient m_client;
-
-
-};
 } // namespace api
 #endif // APPLICATION_STATE_CLIENT_H

@@ -15,9 +15,8 @@ AdaptiveApp::AdaptiveApp(std::unique_ptr<api::IStateFactory> factory,
 
 void AdaptiveApp::init()
 {
-    transitToNextState(
-                std::bind(&api::IStateFactory::createInit, m_factory.get(), std::placeholders::_1)
-                );
+   m_currentState = m_factory->createInit(*this);
+   m_currentState->enter();
 }
 
 void AdaptiveApp::run()
@@ -64,9 +63,9 @@ void AdaptiveApp::printSensorData() const
 
 void AdaptiveApp::transitToNextState(api::IAdaptiveApp::FactoryFunc nextState)
 {
+    m_currentState->leave();
     m_currentState = nextState(*this);
     m_currentState->enter();
-    m_currentState->leave();
 }
 void AdaptiveApp::reportApplicationState(api::ApplicationStateClient::ApplicationState state)
 {

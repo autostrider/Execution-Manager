@@ -36,18 +36,16 @@ protected:
 
    std::unique_ptr<StateClientMock> stateClientMock{std::make_unique<StateClientMock>()};
    std::unique_ptr<IStateFactoryMock> factoryMock{std::make_unique<IStateFactoryMock>()};
+   std::unique_ptr<NiceMock<IStateMock>> stateInitMock = std::make_unique<NiceMock<IStateMock>>();
+   std::unique_ptr<NiceMock<IStateMock>> stateRunMock = std::make_unique<NiceMock<IStateMock>>();
+   std::unique_ptr<NiceMock<IStateMock>> stateTermMock = std::make_unique<NiceMock<IStateMock>>();
 };
 
 TEST_F(AppTest, Should_TransitToInitState)
 {
-
-    std::unique_ptr<IStateMock> stateMock = std::make_unique<IStateMock>();
-    EXPECT_CALL(*stateMock, enter()).WillOnce(Return());
-    EXPECT_CALL(*stateMock, leave()).WillOnce(Return());
-
     EXPECT_CALL(*factoryMock,
                 createInit((_)))
-            .WillOnce(Return(ByMove(std::move(stateMock))));
+            .WillOnce(Return(ByMove(std::move(stateInitMock))));
 
      AdaptiveApp app{std::move(factoryMock),
                      nullptr};
@@ -57,17 +55,9 @@ TEST_F(AppTest, Should_TransitToInitState)
 
 TEST_F(AppTest, Should_TransitToRunState)
 {
-    std::unique_ptr<IStateMock> stateInitMock = std::make_unique<IStateMock>();
-    EXPECT_CALL(*stateInitMock, enter()).WillOnce(Return());
-    EXPECT_CALL(*stateInitMock, leave()).WillOnce(Return());
-
     EXPECT_CALL(*factoryMock,
                 createInit((_)))
             .WillOnce(Return(ByMove(std::move(stateInitMock))));
-
-    std::unique_ptr<IStateMock> stateRunMock = std::make_unique<IStateMock>();
-    EXPECT_CALL(*stateRunMock, enter()).WillOnce(Return());
-    EXPECT_CALL(*stateRunMock, leave()).WillOnce(Return());
 
     EXPECT_CALL(*factoryMock,
                 createRun((_)))
@@ -81,20 +71,20 @@ TEST_F(AppTest, Should_TransitToRunState)
 
 TEST_F(AppTest, Should_TransitToTerminateState)
 {
-    std::unique_ptr<IStateMock> stateTermMock = std::make_unique<IStateMock>();
-    EXPECT_CALL(*stateTermMock, enter()).WillOnce(Return());
-    EXPECT_CALL(*stateTermMock, leave()).WillOnce(Return());
-
+    EXPECT_CALL(*factoryMock,
+                createInit((_)))
+            .WillOnce(Return(ByMove(std::move(stateInitMock))));
     EXPECT_CALL(*factoryMock,
                 createTerminate((_)))
             .WillOnce(Return(ByMove(std::move(stateTermMock))));
 
      AdaptiveApp app{std::move(factoryMock),
                      nullptr};
+     app.init();
      app.terminate();
 }
 
-TEST_F(AppTest, ShouldCalculateMean)
+TEST_F(AppTest, WhenSensorDataRead)
 {
     const double mu = 10;
     const double sigma = 0.5;
@@ -125,7 +115,7 @@ TEST_F(AppTest, Should_ReadSensorData)
     ASSERT_TRUE(result);
 }
 
-TEST_F(AppTest, Should_ReturnZero_NoDataAvailable)
+TEST_F(AppTest, WhenSensorNotDataRead)
 {
     AdaptiveApp app{std::move(factoryMock),
                     nullptr};

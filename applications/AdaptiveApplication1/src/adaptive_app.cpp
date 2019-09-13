@@ -6,9 +6,11 @@
 
 using ApplicationState = api::ApplicationStateClient::ApplicationState;
 
-AdaptiveApp::AdaptiveApp(std::atomic<bool> &terminate) : m_sensorData(c_numberOfSamples),
+AdaptiveApp::AdaptiveApp(std::atomic<bool> &terminate, const std::string appName) 
+  : m_sensorData(c_numberOfSamples),
     m_currentState{std::make_unique<Init>(*this)},
-    m_terminateApp{terminate}
+    m_terminateApp{terminate},
+    m_appName{appName}
 {
     m_currentState->enter();
 }
@@ -28,7 +30,7 @@ double AdaptiveApp::mean()
 
 void AdaptiveApp::readSensorData()
 {
-    std::cout << "Read data from sensors\n";
+    std::cout << "[ " << m_appName << " ]:\tRead data from sensors\n";
 
     std::random_device rd{};
     std::mt19937 gen{rd()};
@@ -45,7 +47,7 @@ void AdaptiveApp::printSensorData() const
     for (const auto& item : m_sensorData) {
         std::cout << item << " | ";
     }
-    std::cout << "\n";
+    std::cout << std::endl;
 }
 
 bool AdaptiveApp::isTerminating() const

@@ -8,14 +8,16 @@
 
 static void signalHandler(int signo);
 static std::atomic<bool> isTerminating{false};
+static const std::string appName{"AdaptiveApplication1"};
 
 int main()
 {
     if (::signal(SIGINT, signalHandler) == SIG_ERR)
     {
-        std::cout << "Error while registering signal\n";
+        std::cout << "[ " << appName << " ]:\tError while registering signal." << std::endl;
     }
-    AdaptiveApp app(isTerminating);
+
+    AdaptiveApp app(isTerminating, appName);
 
     while (true)
     {
@@ -27,6 +29,8 @@ int main()
 
 static void signalHandler(int signo)
 {
-    std::cout << "received signal:" << sys_siglist[signo] << "\n";
+    std::cout << "[ " << appName << " ]:\tReceived signal: " 
+              << sys_siglist[signo] << std::endl;
+              
     isTerminating = true;
 }

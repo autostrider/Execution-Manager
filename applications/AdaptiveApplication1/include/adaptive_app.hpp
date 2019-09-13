@@ -12,7 +12,7 @@ class State;
 class AdaptiveApp
 {
 public:
-    AdaptiveApp(std::atomic<bool>& terminate);
+    AdaptiveApp(std::atomic<bool>& terminate, const std::string appName);
 
     void transitToNextState();
     double mean();
@@ -27,5 +27,6 @@ private:
     std::unique_ptr<State> m_currentState;
     std::atomic<bool>& m_terminateApp;
     api::ApplicationStateClient m_appClient;
+    const std::string m_appName;
 };
 #endif

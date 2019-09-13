@@ -20,6 +20,7 @@ int main()
     AdaptiveApp app(std::make_unique<StateFactory>(),
                     std::make_unique<api::ApplicationStateClientWrapper>());
 
+    app.init();
     while (!isTerminating)
     {
         app.run();

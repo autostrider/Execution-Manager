@@ -14,6 +14,7 @@ public:
                 std::unique_ptr<api::IApplicationStateClientWrapper> client);
     virtual ~AdaptiveApp() = default;
 
+    void init() override;
     void run() override;
     void terminate() override;
 

@@ -1,4 +1,6 @@
 #include "execution_manager_server.hpp"
+#include <iostream>
+#include <string>
 
 namespace ExecutionManagerServer
 {
@@ -8,7 +10,7 @@ ExecutionManagerServer::ExecutionManagerServer
 (ExecutionManager::ExecutionManager& application)
   : m_em(application)
 {
-  cout << "Execution Manager server started..." << endl;
+  std::cout << "Execution Manager server started..." << std::endl;
 }
 
 ::kj::Promise<void>
@@ -26,7 +28,7 @@ ExecutionManagerServer::reportApplicationState(ReportApplicationStateContext con
 ::kj::Promise<void>
 ExecutionManagerServer::register_(RegisterContext context)
 {
-  string newMachineClient = context.getParams().getAppName();
+  std::string newMachineClient = context.getParams().getAppName();
   pid_t applicationPid = context.getParams().getPid();
 
   if (m_em.registerMachineStateClient(applicationPid, newMachineClient))
@@ -56,7 +58,7 @@ ExecutionManagerServer::getMachineState(GetMachineStateContext context)
 ::kj::Promise<void>
 ExecutionManagerServer::setMachineState(SetMachineStateContext context)
 {
-  string state = context.getParams().getState().cStr();
+  std::string state = context.getParams().getState().cStr();
   pid_t applicationPid = context.getParams().getPid();
 
   if (m_em.setMachineState(applicationPid, state))

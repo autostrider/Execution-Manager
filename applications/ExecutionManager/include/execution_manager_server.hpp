@@ -1,7 +1,6 @@
 #ifndef EXECUTION_MANAGER_SERVER_HPP
 #define EXECUTION_MANAGER_SERVER_HPP
 
-#include <string>
 #include <capnp/ez-rpc.h>
 #include <execution_management.capnp.h>
 #include "execution_manager.hpp"

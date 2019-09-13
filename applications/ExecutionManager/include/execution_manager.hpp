@@ -2,24 +2,21 @@
 #define EXECUTION_MANAGER_HPP
 
 #include "imanifest_reader.hpp"
+#include <execution_management.capnp.h>
 #include "manifests.hpp"
 
-#include <chrono>
-#include <csignal>
-#include <cstdint>
-#include <exception>
-#include <functional>
-#include <iostream>
 #include <map>
 #include <memory>
 #include <string>
 #include <vector>
+#include <set>
 
 namespace ExecutionManager
 {
 
 using applicationId = std::string;
 using MachineState = std::string;
+using ProcName = std::string;
 using std::pair;
 
 struct ApplicationManifest;
@@ -50,6 +47,8 @@ public:
 
   bool setMachineState(pid_t processId, std::string state);
 private:
+  using ApplicationState = ::ApplicationStateManagement::ApplicationState;
+  using StateError = ::MachineStateManagement::StateError;
 
   /**
    * @brief Removes unsupported states from availApps
@@ -102,13 +101,13 @@ private:
   /**
    * @brief structure that holds application and required processes.
    */
-  std::map<MachineState, pid_t> m_activeApplications;
+  std::map<ProcName, pid_t> m_activeProcesses;
 
   /**
    * @brief Structure for application that can run in certain state
    * vector consists of applicationId (name) and string param - executable name.
    */
-  std::map<MachineState, std::vector<ProcessInfo>> m_allowedApplicationForState;
+  std::map<MachineState, std::vector<ProcessInfo>> m_allowedProcessesForState;
 
   const static MachineState defaultState;
 
@@ -124,6 +123,10 @@ private:
 
   std::string m_machineStateClientAppName;
   pid_t m_machineStateClientPid {-1};
+
+  std::set<pid_t> m_pidsWaitingForStateConfirm;
+
+  void waitForStateConfirm();
 };
 
 } // namespace ExecutionManager

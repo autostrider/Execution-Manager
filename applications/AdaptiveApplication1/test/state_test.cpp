@@ -6,145 +6,58 @@
 #include <adaptive_app.hpp>
 #include <state.hpp>
 
-using testing::Return;
-using testing::ByMove;
-using testing::_;
+
+using namespace testing;
 
 using ApplicationState = api::ApplicationStateClient::ApplicationState;
 
-/*
-class AppMock : public AdaptiveApp
+class IStateFactoryMock : public api::IStateFactory
 {
 public:
-    AppMock(std::atomic<bool>& term) : AdaptiveApp (term){}
-    virtual ~AppMock() = default;
-
-    MOCK_CONST_METHOD0(isTerminating, bool());
-    MOCK_METHOD1(reportApplicationState, void(ApplicationState state));
-    MOCK_METHOD0(mean, double());
-    MOCK_METHOD0(readSensorData, void());
+    MOCK_METHOD(std::unique_ptr<api::IState>, createInit,(api::IAdaptiveApp &app));
+    MOCK_METHOD(std::unique_ptr<api::IState>, createRun,(api::IAdaptiveApp &app));
+    MOCK_METHOD(std::unique_ptr<api::IState>, createTerminate,(api::IAdaptiveApp &app));
 };
 
-TEST(DeleteState, StateTest)
+class IStateMock : public api::IState
 {
-    std::atomic<bool> term{false};
-    AppMock app(term);
-    State* state = new ::Run(app);
-    delete state;
-}
-TEST(fromInitToRunState, StateTest)
+public:
+    MOCK_METHOD(void, enter,());
+    MOCK_METHOD(void, leave,(), (const));
+};
+
+class StateClientMock : public api::ApplicationStateClientWrapper
 {
-    std::atomic<bool> term{false};
-    AppMock app(term);
-    std::unique_ptr<State> state = std::make_unique<Init>(app);
+public:
+    MOCK_METHOD1(ReportApplicationState, void(ApplicationStateManagement::ApplicationState state));
+};
 
-    EXPECT_CALL(app, isTerminating()).WillOnce(Return(false));
-    ASSERT_EQ(state->getApplicationState(), ApplicationState::K_INITIALIZING);
-
-    state = state->handleTransition();
-
-    ASSERT_EQ(state->getApplicationState(), ApplicationState::K_RUNNING);
-}
-TEST(fromInitToTerminateState, StateTest)
+class IAdaptiveAppMock : public api::IAdaptiveApp
 {
-    std::atomic<bool> term{false};
-    AppMock app(term);
-    std::unique_ptr<State> state = std::make_unique<Init>(app);
+public:
+    MOCK_METHOD(void, run,());
+    MOCK_METHOD(void, terminate,());
 
-    EXPECT_CALL(app, isTerminating()).WillOnce(Return(true));
-    ASSERT_EQ(state->getApplicationState(), ApplicationState::K_INITIALIZING);
+    MOCK_METHOD(void, reportApplicationState,
+                (api::ApplicationStateClient::ApplicationState state));
+};
 
-    state = state->handleTransition();
-
-    ASSERT_EQ(state->getApplicationState(), ApplicationState::K_SHUTTINGDOWN);
-}
-
-TEST(enterInit, StateTest)
+class StateTest : public ::testing::Test
 {
-    std::atomic<bool> term{false};
-    AppMock app(term);
-    std::unique_ptr<State> state = std::make_unique<Init>(app);
+protected:
+    void SetUp() override
+    {
+        stateClientMock = std::make_unique<StateClientMock>();
+        factoryMock = std::make_unique<IStateFactoryMock>();
+    }
+   std::unique_ptr<StateClientMock> stateClientMock{nullptr};
+   std::unique_ptr<IStateFactoryMock> factoryMock{nullptr};
+};
 
-    EXPECT_CALL(app, reportApplicationState(_)).Times(2).WillRepeatedly(Return());
-    state->enter();
-    state->leave();
-}
-
-TEST(enterRun, StateTest)
+class FactoryTest : public ::testing::Test
 {
-    std::atomic<bool> term{false};
-    AppMock app(term);
-    std::unique_ptr<State> state = std::make_unique<::Run>(app);
 
-    EXPECT_CALL(app, readSensorData()).WillOnce(Return());
-    EXPECT_CALL(app, mean()).WillOnce(Return(0.0));
-    state->enter();
-    state->leave();
-}
+protected:
+    IStateFactoryMock factoryMock;
+};
 
-TEST(fromRunToTerminateState, StateTest)
-{
-    std::atomic<bool> term{false};
-    AppMock app(term);
-    std::unique_ptr<State> state = std::make_unique<::Run>(app);
-
-    EXPECT_CALL(app, isTerminating()).WillOnce(Return(true));
-    ASSERT_EQ(state->getApplicationState(), ApplicationState::K_RUNNING);
-
-    state = state->handleTransition();
-
-    ASSERT_EQ(state->getApplicationState(), ApplicationState::K_SHUTTINGDOWN);
-}
-
-TEST(fromRunToRunState, StateTest)
-{
-    std::atomic<bool> term{false};
-    AppMock app(term);
-    std::unique_ptr<State> state = std::make_unique<::Run>(app);
-
-    EXPECT_CALL(app, isTerminating()).WillOnce(Return(false));
-    ASSERT_EQ(state->getApplicationState(), ApplicationState::K_RUNNING);
-
-    state = state->handleTransition();
-
-    ASSERT_EQ(state->getApplicationState(), ApplicationState::K_RUNNING);
-}
-
-TEST(fromTerminateToTerminateStateSignal, StateTest)
-{
-    std::atomic<bool> term{false};
-    AppMock app(term);
-    std::unique_ptr<State> state = std::make_unique<Terminate>(app);
-
-    EXPECT_CALL(app, isTerminating()).WillOnce(Return(true));
-    ASSERT_EQ(state->getApplicationState(), ApplicationState::K_SHUTTINGDOWN);
-
-    state = state->handleTransition();
-
-    ASSERT_EQ(state->getApplicationState(), ApplicationState::K_SHUTTINGDOWN);
-}
-
-TEST(fromTerminateToTerminateState, StateTest)
-{
-    std::atomic<bool> term{false};
-    AppMock app(term);
-    std::unique_ptr<State> state = std::make_unique<Terminate>(app);
-
-    EXPECT_CALL(app, isTerminating()).WillOnce(Return(false));
-    ASSERT_EQ(state->getApplicationState(), ApplicationState::K_SHUTTINGDOWN);
-
-    state = state->handleTransition();
-
-    ASSERT_EQ(state->getApplicationState(), ApplicationState::K_SHUTTINGDOWN);
-}
-
-TEST(enterTerminate, StateTest)
-{
-    std::atomic<bool> term{false};
-    AppMock app(term);
-    std::unique_ptr<State> state = std::make_unique<Terminate>(app);
-
-    EXPECT_CALL(app, reportApplicationState(_)).WillOnce(Return());
-    EXPECT_THROW(state->enter(), std::runtime_error);
-}
-*/

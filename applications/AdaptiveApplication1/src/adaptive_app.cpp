@@ -5,13 +5,13 @@
 #include <iostream>
 
 AdaptiveApp::AdaptiveApp(std::unique_ptr<api::IStateFactory> factory,
-                         std::unique_ptr<api::IApplicationStateClientWrapper> client) :
-    api::IAdaptiveApp(std::move(factory), std::move(client)),
-    m_sensorData(c_numberOfSamples)
+                std::unique_ptr<api::IApplicationStateClientWrapper> client) :
+    m_sensorData(c_numberOfSamples),
+    m_factory{std::move(factory)},
+    m_currentState{m_factory->createInit(*this)},
+    m_appClient{std::move(client)}
 {
-    transitToNextState(
-                std::bind(&api::IStateFactory::createInit, m_factory.get(), std::placeholders::_1)
-                );
+    m_currentState->enter();
 }
 
 void AdaptiveApp::run()
@@ -54,4 +54,15 @@ void AdaptiveApp::printSensorData() const
         std::cout << item << " | ";
     }
     std::cout << std::endl;
+}
+
+void AdaptiveApp::transitToNextState(api::IAdaptiveApp::FactoryFunc nextState)
+{
+    m_currentState->leave();
+    m_currentState = nextState(*this);
+    m_currentState->enter();
+}
+void AdaptiveApp::reportApplicationState(api::ApplicationStateClient::ApplicationState state)
+{
+    m_appClient->ReportApplicationState(state);
 }

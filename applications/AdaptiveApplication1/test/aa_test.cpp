@@ -33,13 +33,9 @@ public:
 class AppTest : public ::testing::Test
 {
 protected:
-    void SetUp() override
-    {
-        stateClientMock = std::make_unique<StateClientMock>();
-        factoryMock = std::make_unique<IStateFactoryMock>();
-    }
-   std::unique_ptr<StateClientMock> stateClientMock{nullptr};
-   std::unique_ptr<IStateFactoryMock> factoryMock{nullptr};
+
+   std::unique_ptr<StateClientMock> stateClientMock{std::make_unique<StateClientMock>()};
+   std::unique_ptr<IStateFactoryMock> factoryMock{std::make_unique<IStateFactoryMock>()};
 };
 
 TEST_F(AppTest, AppInInitState)

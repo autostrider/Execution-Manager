@@ -44,7 +44,7 @@ void Run::enter()
     std::cout << "mean: " << m_app.mean() << std::endl;
 }
 
-ShutDown::ShutDown(AdaptiveApp &app) : State (app, ApplicationState::K_SHUTTINGDOWN, "ShutDown")
+ShutDown::ShutDown(AdaptiveApp &app) : State (app, ApplicationState::K_SHUTTINGDOWN, "Shutdown")
 {
 }
 

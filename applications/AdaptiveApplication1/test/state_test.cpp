@@ -14,16 +14,16 @@ using ApplicationState = api::ApplicationStateClient::ApplicationState;
 class IStateFactoryMock : public api::IStateFactory
 {
 public:
-    MOCK_METHOD(std::unique_ptr<api::IState>, createInit,(api::IAdaptiveApp &app));
-    MOCK_METHOD(std::unique_ptr<api::IState>, createRun,(api::IAdaptiveApp &app));
-    MOCK_METHOD(std::unique_ptr<api::IState>, createShutDown,(api::IAdaptiveApp &app));
+    MOCK_METHOD(std::unique_ptr<api::IState>, createInit, (api::IAdaptiveApp &app));
+    MOCK_METHOD(std::unique_ptr<api::IState>, createRun, (api::IAdaptiveApp &app));
+    MOCK_METHOD(std::unique_ptr<api::IState>, createShutDown, (api::IAdaptiveApp &app));
 };
 
 class IStateMock : public api::IState
 {
 public:
-    MOCK_METHOD(void, enter,());
-    MOCK_METHOD(void, leave,(), (const));
+    MOCK_METHOD(void, enter, ());
+    MOCK_METHOD(void, leave, (), (const));
 };
 
 class StateClientMock : public api::ApplicationStateClientWrapper
@@ -36,7 +36,7 @@ class IAdaptiveAppMock : public AdaptiveApp
 {
 public:
     IAdaptiveAppMock(std::unique_ptr<api::IStateFactory> factory,
-    std::unique_ptr<api::IApplicationStateClientWrapper> client);
+        std::unique_ptr<api::IApplicationStateClientWrapper> client);
 
     MOCK_METHOD(void, init, ());
     MOCK_METHOD(void, run, ());
@@ -49,7 +49,7 @@ public:
 
 IAdaptiveAppMock::IAdaptiveAppMock(std::unique_ptr<api::IStateFactory> factory,
                                    std::unique_ptr<api::IApplicationStateClientWrapper> client) :
-    AdaptiveApp (std::move(factory), std::move(client))
+    AdaptiveApp(std::move(factory), std::move(client))
 {
 
 }

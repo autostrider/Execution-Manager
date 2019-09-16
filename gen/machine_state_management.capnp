@@ -10,13 +10,13 @@ interface MachineStateManagement
     kTimeout @3;
   }
 
-  register @0 (appName :Text)
+  register @0 (pid :Int32, appName :Text)
     -> (result :StateError);
 
-  getMachineState @1 ()
+  getMachineState @1 (pid :Int32)
     -> (state :Text, result :StateError);
 
-  setMachineState @2 (state :Text)
+  setMachineState @2 (pid :Int32, state :Text)
     -> (result :StateError);
 
 }

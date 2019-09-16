@@ -16,7 +16,7 @@ class IStateFactoryMock : public api::IStateFactory
 public:
     MOCK_METHOD(std::unique_ptr<api::IState>, createInit,(api::IAdaptiveApp &app));
     MOCK_METHOD(std::unique_ptr<api::IState>, createRun,(api::IAdaptiveApp &app));
-    MOCK_METHOD(std::unique_ptr<api::IState>, createTerminate,(api::IAdaptiveApp &app));
+    MOCK_METHOD(std::unique_ptr<api::IState>, createShutDown,(api::IAdaptiveApp &app));
 };
 
 class IStateMock : public api::IState
@@ -102,13 +102,13 @@ TEST_F(StateTest, Should_TerminateCallEnter)
 {
     EXPECT_CALL(*appMock, reportApplicationState(_)).WillOnce(Return());
 
-    std::unique_ptr<Terminate> state = std::make_unique<Terminate>(*appMock);
+    std::unique_ptr<ShutDown> state = std::make_unique<ShutDown>(*appMock);
     state->enter();
 }
 
 TEST_F(StateTest, Should_TerminateCallLeave)
 {
-    std::unique_ptr<Terminate> state = std::make_unique<Terminate>(*appMock);
+    std::unique_ptr<ShutDown> state = std::make_unique<ShutDown>(*appMock);
     state->leave();
 }
 
@@ -132,8 +132,8 @@ TEST_F(StateTest, Should_CreateRun)
 
 TEST_F(StateTest, Should_CreateTerminate)
 {
-    std::unique_ptr<api::IState> expectedState = std::make_unique<Terminate>(*appMock);
-    std::unique_ptr<api::IState> createdState = factory.createTerminate(*appMock);
+    std::unique_ptr<api::IState> expectedState = std::make_unique<ShutDown>(*appMock);
+    std::unique_ptr<api::IState> createdState = factory.createShutDown(*appMock);
 
     bool result = std::is_same<decltype (expectedState), decltype (createdState)>::value;
     ASSERT_TRUE(result);

@@ -14,7 +14,7 @@ class IStateFactoryMock : public api::IStateFactory
 public:
     MOCK_METHOD(std::unique_ptr<api::IState>, createInit,(api::IAdaptiveApp &app));
     MOCK_METHOD(std::unique_ptr<api::IState>, createRun,(api::IAdaptiveApp &app));
-    MOCK_METHOD(std::unique_ptr<api::IState>, createTerminate,(api::IAdaptiveApp &app));
+    MOCK_METHOD(std::unique_ptr<api::IState>, createShutDown,(api::IAdaptiveApp &app));
 };
 
 class StateClientMock : public api::ApplicationStateClientWrapper
@@ -75,7 +75,7 @@ TEST_F(AppTest, Should_TransitToTerminateState)
                 createInit((_)))
             .WillOnce(Return(ByMove(std::move(stateInitMock))));
     EXPECT_CALL(*factoryMock,
-                createTerminate((_)))
+                createShutDown((_)))
             .WillOnce(Return(ByMove(std::move(stateTermMock))));
 
      AdaptiveApp app{std::move(factoryMock),
@@ -121,7 +121,7 @@ TEST_F(AppTest, WhenSensorNotDataRead)
     ASSERT_EQ(app.mean(), 0.0);
 }
 
-TEST_F(AppTest, Should_ReportCurrenTState)
+TEST_F(AppTest, Should_ReportCurrentState)
 {
     EXPECT_CALL(*stateClientMock, ReportApplicationState(_)).WillOnce(Return());
 

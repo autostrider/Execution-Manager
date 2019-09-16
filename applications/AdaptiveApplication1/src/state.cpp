@@ -44,11 +44,11 @@ void Run::enter()
     std::cout << "mean: " << m_app.mean() << std::endl;
 }
 
-Terminate::Terminate(AdaptiveApp &app) : State (app, ApplicationState::K_SHUTTINGDOWN, "Terminating")
+ShutDown::ShutDown(AdaptiveApp &app) : State (app, ApplicationState::K_SHUTTINGDOWN, "ShutDown")
 {
 }
 
-void Terminate::enter()
+void ShutDown::enter()
 {
     m_app.reportApplicationState(getApplicationState());
     std::cout << "Killing app..." << std::endl;
@@ -64,7 +64,7 @@ std::unique_ptr<api::IState> StateFactory::createRun(api::IAdaptiveApp &app)
     return std::make_unique<Run>(dynamic_cast<AdaptiveApp&>(app));
 }
 
-std::unique_ptr<api::IState> StateFactory::createTerminate(api::IAdaptiveApp &app)
+std::unique_ptr<api::IState> StateFactory::createShutDown(api::IAdaptiveApp &app)
 {
-    return std::make_unique<Terminate>(dynamic_cast<AdaptiveApp&>(app));
+    return std::make_unique<ShutDown>(dynamic_cast<AdaptiveApp&>(app));
 }

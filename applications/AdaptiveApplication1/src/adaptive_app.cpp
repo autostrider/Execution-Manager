@@ -29,7 +29,7 @@ void AdaptiveApp::run()
 void AdaptiveApp::terminate()
 {
     transitToNextState(
-                std::bind(&api::IStateFactory::createTerminate, m_factory.get(), std::placeholders::_1)
+                std::bind(&api::IStateFactory::createShutDown, m_factory.get(), std::placeholders::_1)
                 );
 }
 

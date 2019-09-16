@@ -35,10 +35,10 @@ public:
     void enter() override;
 };
 
-class Terminate : public State
+class ShutDown : public State
 {
 public:
-    Terminate(AdaptiveApp& app);
+    ShutDown(AdaptiveApp& app);
     void enter() override;
 };
 
@@ -48,7 +48,7 @@ class StateFactory: public api::IStateFactory
 public:
     std::unique_ptr<api::IState> createInit(api::IAdaptiveApp &app) override;
     std::unique_ptr<api::IState> createRun(api::IAdaptiveApp &app) override;
-    std::unique_ptr<api::IState> createTerminate(api::IAdaptiveApp &app) override;
+    std::unique_ptr<api::IState> createShutDown(api::IAdaptiveApp &app) override;
 };
 
 #endif // STATE_HPP

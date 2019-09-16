@@ -13,7 +13,7 @@ class IStateFactory
 public:
     virtual std::unique_ptr<IState> createInit(IAdaptiveApp &app) = 0;
     virtual std::unique_ptr<IState> createRun(IAdaptiveApp &app) = 0;
-    virtual std::unique_ptr<IState> createTerminate(IAdaptiveApp &app) = 0;
+    virtual std::unique_ptr<IState> createShutDown(IAdaptiveApp &app) = 0;
 
     virtual~ IStateFactory() = default;
 };

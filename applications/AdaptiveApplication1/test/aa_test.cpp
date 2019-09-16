@@ -105,11 +105,9 @@ TEST_F(AppTest, Should_ReadSensorData)
     AdaptiveApp app{std::move(factoryMock),
                     nullptr};
 
-    app.printSensorData();
     ASSERT_EQ(app.mean(), 0.0);
 
     app.readSensorData();
-    app.printSensorData();
 
     bool result = ::abs(app.mean() - mu) < sigma;
     ASSERT_TRUE(result);
@@ -120,6 +118,13 @@ TEST_F(AppTest, WhenSensorNotDataRead)
     AdaptiveApp app{std::move(factoryMock),
                     nullptr};
 
-    app.printSensorData();
     ASSERT_EQ(app.mean(), 0.0);
+}
+
+TEST_F(AppTest, Should_ReportCurrenTState)
+{
+    EXPECT_CALL(*stateClientMock, ReportApplicationState(_)).WillOnce(Return());
+
+    AdaptiveApp app{nullptr, std::move(stateClientMock)};
+    app.reportApplicationState(api::ApplicationStateClient::ApplicationState::K_RUNNING);
 }

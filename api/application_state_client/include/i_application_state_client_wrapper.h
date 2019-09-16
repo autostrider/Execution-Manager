@@ -10,6 +10,7 @@ class IApplicationStateClientWrapper
 {
 public:
     virtual void ReportApplicationState(ApplicationStateManagement::ApplicationState state) = 0;
+    virtual ~IApplicationStateClientWrapper() noexcept(false) {}
 };
 
 class ApplicationStateClientWrapper : public IApplicationStateClientWrapper

@@ -21,7 +21,6 @@ public:
 
     double mean();
     void readSensorData();
-    void printSensorData() const;
     void reportApplicationState(api::ApplicationStateClient::ApplicationState state) override;
 
 private:

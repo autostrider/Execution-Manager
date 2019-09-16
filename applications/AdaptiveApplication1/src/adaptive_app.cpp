@@ -53,14 +53,6 @@ void AdaptiveApp::readSensorData()
     }
 }
 
-void AdaptiveApp::printSensorData() const
-{
-    for (const auto& item : m_sensorData) {
-        std::cout << item << " | ";
-    }
-    std::cout << std::endl;
-}
-
 void AdaptiveApp::transitToNextState(api::IAdaptiveApp::FactoryFunc nextState)
 {
     m_currentState->leave();

@@ -19,7 +19,8 @@ namespace {
 }
 
 MachineStateClient::MachineStateClient(string path)
-  : m_client(path),
+:
+    m_client(path),
     m_clientApplication(m_client.getMain<MachineStateManagement>()),
     m_timer(m_client.getIoProvider().getTimer()),
     m_pid(getpid())
@@ -32,12 +33,18 @@ MachineStateClient::Register(string appName, std::uint32_t timeout)
   request.setAppName(appName);
   request.setPid(m_pid);
 
-  auto promise = m_timer.timeoutAfter(timeout * kj::MILLISECONDS, request.send());
+  auto promise =
+    m_timer.timeoutAfter(timeout * kj::MILLISECONDS, request.send());
 
   auto result = promise.then([](auto&& res)
       {
         return res.getResult();
-      }, exceptionLambda).wait(m_client.getWaitScope());
+      }, exceptionLambda)
+    .then([&](auto&& result)
+    {
+      startServer();
+      return result;
+    }).wait(m_client.getWaitScope());
 
   return result;
 }
@@ -46,9 +53,10 @@ MachineStateClient::StateError
 MachineStateClient::GetMachineState(std::uint32_t timeout, string& state)
 {
   auto request = m_clientApplication.getMachineStateRequest();
-  auto promise = m_timer.timeoutAfter(timeout * kj::MILLISECONDS, request.send());
-
   request.setPid(m_pid);
+
+  auto promise =
+    m_timer.timeoutAfter(timeout * kj::MILLISECONDS, request.send());
 
   auto result = promise.then([&state](auto&& res)
     {
@@ -67,15 +75,80 @@ MachineStateClient::SetMachineState(string state, std::uint32_t timeout)
   request.setState(state);
   request.setPid(m_pid);
 
-  auto promise = m_timer.timeoutAfter(timeout * kj::MILLISECONDS, request.send());
+  auto promise =
+    m_timer.timeoutAfter(timeout * kj::MILLISECONDS, request.send());
 
-  auto result = promise
-  .then([](auto&& res)
+  auto result = promise.then([&](auto&& res)
     {
-      return res.getResult();
+      auto _result = res.getResult();
+      if(res.getResult() == StateError::K_SUCCESS)
+      {
+        return waitForConfirm(timeout);
+      }
+      else
+      {
+        return _result;
+      }
     }, exceptionLambda).wait(m_client.getWaitScope());
 
   return result;
+}
+
+MachineStateClient::StateError
+MachineStateClient::waitForConfirm(std::uint32_t timeout)
+{
+  m_promise = std::promise<StateError>();
+  std::future<StateError> future = m_promise.get_future();
+
+  std::future_status status =
+    future.wait_for(std::chrono::milliseconds(timeout));
+
+  if(status == std::future_status::timeout)
+  {
+    return StateError::K_TIMEOUT;
+  }
+
+  return future.get();
+}
+
+void
+MachineStateClient::startServer()
+{
+  m_serverThread = m_client.getIoProvider().newPipeThread(
+    [&](kj::AsyncIoProvider& ioProvider,
+        auto&,
+        kj::WaitScope& waitScope)
+  {
+    capnp::TwoPartyServer server(
+      kj::heap<MachineStateServer>(m_promise));
+
+    auto address = ioProvider.getNetwork()
+        .parseAddress(std::string{"unix:/tmp/machine_management"})
+          .wait(waitScope);
+
+    auto listener = address->listen();
+    auto listenPromise = server.listen(*listener);
+
+    server.drain().wait(waitScope);
+
+    listenPromise.wait(waitScope);
+  });
+}
+
+MachineStateServer::MachineStateServer
+  (std::promise<StateError>& promise)
+: m_promise(promise)
+{}
+
+::kj::Promise<void>
+MachineStateServer::confirmStateTransition
+(ConfirmStateTransitionContext context)
+{
+  auto result = context.getParams().getResult();
+
+  m_promise.set_value(result);
+
+  return kj::READY_NOW;
 }
 
 } // namespace api

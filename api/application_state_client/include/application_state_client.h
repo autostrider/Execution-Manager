@@ -4,6 +4,8 @@
 #include <unistd.h>
 #include <application_state_management.capnp.h>
 #include <capnp/ez-rpc.h>
+#include <capnp/rpc-twoparty.h>
+#include <kj/async-io.h>
 
 namespace api {
 

@@ -3,7 +3,10 @@
 
 int main(int argc, char **argv)
 {
-  MachineStateManager::MachineStateManager msm;
+  const char* socketName = "/tmp/machine_management";
+  ::unlink(socketName);
 
-  return msm.start();
+  MachineStateManager::MachineStateManager msm;
+  msm.start();
+  return EXIT_SUCCESS;
 }

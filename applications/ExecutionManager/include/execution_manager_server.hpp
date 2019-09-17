@@ -3,12 +3,13 @@
 
 #include <string>
 #include <capnp/ez-rpc.h>
+#include <capnp/rpc-twoparty.h>
+#include <kj/async-io.h>
 #include <execution_management.capnp.h>
 #include "execution_manager.hpp"
 
 namespace ExecutionManagerServer
 {
-
 class ExecutionManagerServer : public ExecutionManagement::Server
 {
 public:
@@ -16,7 +17,10 @@ public:
   explicit
   ExecutionManagerServer
     (ExecutionManager::ExecutionManager& application);
+
 private:
+  using ApplicationState = ::ApplicationStateManagement::ApplicationState;
+  using StateError = ::MachineStateManagement::StateError;
 
   ::kj::Promise<void>
   reportApplicationState(ReportApplicationStateContext context) override;
@@ -29,10 +33,8 @@ private:
 
   ::kj::Promise<void>
   setMachineState(SetMachineStateContext context) override;
-private:
 
-  using ApplicationState = ::ApplicationStateManagement::ApplicationState;
-  using StateError = ::MachineStateManagement::StateError;
+private:
 
   ExecutionManager::ExecutionManager& m_em;
 };

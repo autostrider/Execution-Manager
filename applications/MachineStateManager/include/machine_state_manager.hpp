@@ -5,8 +5,14 @@
 #include <memory>
 #include <string>
 #include <sstream>
+#include <thread>
+#include <condition_variable>
+#include <chrono>
 #include <capnp/ez-rpc.h>
+#include <capnp/rpc-twoparty.h>
+#include <kj/async-io.h>
 #include <machine_state_client.h>
+#include <application_state_client.h>
 
 namespace MachineStateManager
 {
@@ -16,13 +22,17 @@ class MachineStateManager
 public:
   MachineStateManager();
   ~MachineStateManager() = default;
-  int32_t start();
+  void start();
 
 private:
   using StateError = api::MachineStateClient::StateError;
 
 private:
-  std::unique_ptr<api::MachineStateClient> machineStateClient;
+  const char* applicationName = "Machine state manager";
+  const int defaultTimeout = 300000;
+
+  api::MachineStateClient m_machineStateClient;
+  api::ApplicationStateClient m_appClient;
 };
 
 } // namespace MachineStateManager

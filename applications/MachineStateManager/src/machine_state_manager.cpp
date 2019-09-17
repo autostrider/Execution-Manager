@@ -16,6 +16,9 @@ MachineStateManager::MachineStateManager()
 
 void MachineStateManager::start()
 {
+  m_appClient.ReportApplicationState
+    (api::ApplicationStateClient::ApplicationState::K_INITIALIZING);
+
   if(m_machineStateClient.Register(applicationName, defaultTimeout) !=
      StateError::K_SUCCESS)
   {
@@ -24,6 +27,8 @@ void MachineStateManager::start()
 
   m_appClient.ReportApplicationState
     (api::ApplicationStateClient::ApplicationState::K_RUNNING);
+
+  std::cout << "Waiting for confirmation..." << std::endl;
 
   m_machineStateClient.waitForConfirm(defaultTimeout);
 

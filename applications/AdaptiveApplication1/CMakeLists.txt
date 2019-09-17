@@ -15,7 +15,7 @@ target_link_libraries(proc1
 )
 
 target_include_directories(proc1
-  PUBLIC 
+  PUBLIC
     ${AA_INCLUDE}
 )
 

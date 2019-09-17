@@ -6,6 +6,7 @@
 
 namespace api {
 
+
 class ApplicationStateClient
 {
 public:

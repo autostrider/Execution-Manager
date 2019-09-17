@@ -1,4 +1,5 @@
 #include "machine_state_manager.hpp"
+#include <constants.hpp>
 
 namespace MachineStateManager {
 
@@ -8,8 +9,7 @@ using StateError = api::MachineStateClient::StateError;
 
 MachineStateManager::MachineStateManager(std::unique_ptr<api::IStateFactory> factory,
                                          std::unique_ptr<api::IApplicationStateClientWrapper> client) :
-        machineStateClient(std::make_unique<MachineStateClient>
-                        ("unix:/tmp/execution_management")),
+        machineStateClient(std::make_unique<MachineStateClient>(SOCKET_NAME)),
         m_factory{std::move(factory)},
         m_currentState{nullptr},
         m_appClient{std::move(client)}
@@ -43,7 +43,7 @@ void MachineStateManager::transitToNextState(api::IAdaptiveApp::FactoryFunc next
     m_currentState->enter();
 }
 
-void MachineStateManager::reportApplicationState(api::ApplicationStateClient::ApplicationState state)
+void MachineStateManager::reportApplicationState(ApplicationState state)
 {
     m_appClient->ReportApplicationState(state);
 }
@@ -53,9 +53,9 @@ void MachineStateManager::setMachineState(std::string state, int timeout)
   machineStateClient->SetMachineState(state, timeout);
 }
 
-StateError MachineStateManager::registerMsm(const char* applicationName, int timeout)
+StateError MachineStateManager::registerMsm(const std::string& applicationName, uint timeout)
 {
-  return machineStateClient->Register(applicationName, timeout);
+  return machineStateClient->Register(applicationName.c_str(), timeout);
 }
 
 } // namespace MachineStateManager

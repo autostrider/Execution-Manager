@@ -9,6 +9,11 @@ add_library(common
     ${COMMON_SRCS}
 )
 
+target_link_libraries(common
+    PUBLIC
+      api::application_state_client
+)
+
 # Specify include directory
 target_include_directories(common
     PUBLIC

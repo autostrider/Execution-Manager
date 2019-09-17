@@ -1,7 +1,7 @@
 #ifndef MSM_STATE_MACHINE_HPP
 #define MSM_STATE_MACHINE_HPP
 
-#include <machine_state_manager.hpp>
+#include "machine_state_manager.hpp"
 #include <i_state.hpp>
 #include <i_state_factory.hpp>
 
@@ -11,9 +11,9 @@ namespace MachineStateManager
 class MsmState : public api::IState
 {
 public:
-    MsmState(MachineStateManager& msm, 
+    explicit MsmState(MachineStateManager& msm, 
              api::ApplicationStateClient::ApplicationState state, 
-             const std::string& stateName);
+             std::string stateName);
 
     virtual void enter() = 0;
     void leave() const override;
@@ -50,9 +50,9 @@ public:
 class MsmStateFactory : public api::IStateFactory
 {
 public:
-    std::unique_ptr<api::IState> createInit(api::IAdaptiveApp &app) override;
-    std::unique_ptr<api::IState> createRun(api::IAdaptiveApp &app) override;
-    std::unique_ptr<api::IState> createShutDown(api::IAdaptiveApp &app) override;
+    std::unique_ptr<api::IState> createInit(api::IAdaptiveApp& app) const override;
+    std::unique_ptr<api::IState> createRun(api::IAdaptiveApp& app) const override;
+    std::unique_ptr<api::IState> createShutDown(api::IAdaptiveApp& app) const override;
 };
 
 } // namespace MachineStateManager

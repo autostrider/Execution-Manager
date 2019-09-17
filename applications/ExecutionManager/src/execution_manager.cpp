@@ -24,8 +24,10 @@ const string ExecutionManager::corePath =
 
 const MachineState ExecutionManager::defaultState {"Startup"};
 
-ExecutionManager::ExecutionManager(std::unique_ptr<IManifestReader> reader)
-  : m_activeApplications{}
+ExecutionManager::ExecutionManager(std::unique_ptr<IManifestReader> reader,
+                                   std::unique_ptr<IApplicationHandler> applicationHandler)
+  : appHandler{std::move(applicationHandler)}
+  , m_activeApplications{}
   , m_allowedApplicationForState{reader->getStatesSupportedByApplication()}
   , m_currentState{defaultState}
   , m_machineManifestStates{reader->getMachineStates()}
@@ -91,7 +93,7 @@ void ExecutionManager::killProcessesForState()
     if (allowedApps == m_allowedApplicationForState.cend() ||
         processToBeKilled(app->first, allowedApps->second))
     {
-      kill(app->second, SIGTERM);
+      appHandler->killApplication(app->second, SIGTERM);
       app = m_activeApplications.erase(app);
     }
     else
@@ -111,69 +113,10 @@ bool ExecutionManager::processToBeKilled(const string& app, const std::vector<Pr
   return (it  == allowedApps.cend());
 };
 
-std::vector<std::string>
-ExecutionManager::getArgumentsList(const ProcessInfo& process) const
-{
-  std::vector<std::string> arguments;
-  arguments.reserve(process.startOptions.size() + 1);
-
-  // insert app name
-  arguments.push_back(process.processName);
-
-  std::transform(process.startOptions.cbegin(),
-                 process.startOptions.cend(),
-                 std::back_inserter(arguments),
-                 [](const StartupOption& option)
-  { return option.makeCommandLineOption(); });
-
-  return arguments;
-}
-
-std::vector<char *>
-ExecutionManager::convertToNullTerminatingArgv(
-    std::vector<std::string> &vectorToConvert)
-{
-  std::vector<char*> outputVector;
-
-  // include terminating sign, that not included in argv
-  outputVector.reserve(vectorToConvert.size() + 1);
-
-  for(auto& str: vectorToConvert)
-  {
-    outputVector.push_back(&str[0]);
-  }
-
-  // terminating sign
-  outputVector.push_back(nullptr);
-
-  return outputVector;
-}
-
 void ExecutionManager::startApplication(const ProcessInfo& process)
 {
-  pid_t processId = fork();
-
-  if (!processId)
-  {
-    // child process
-    const auto processPath = corePath
-                     + process.createRelativePath();
-
-    auto arguments = getArgumentsList(process);
-    auto applicationArguments = convertToNullTerminatingArgv(arguments);
-    int res = execv(processPath.c_str(), applicationArguments.data());
-
-    if (res)
-    {
-      throw runtime_error(string{"Error occured creating process: "}
-                          + process.processName
-                          + " "
-                          + strerror(errno));
-    }
-  } else {
-    // parent process
-    m_activeApplications.insert({process.processName, processId});
-  }
+  pid_t processId = appHandler->startProcess(process);
+  m_activeApplications.insert({process.processName, processId});
 
 }
 

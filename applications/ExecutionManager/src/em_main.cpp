@@ -1,3 +1,4 @@
+#include "application_hander.hpp"
 #include "execution_manager_server.hpp"
 #include "execution_manager.hpp"
 #include "manifest_reader.hpp"
@@ -8,7 +9,8 @@ int main(int argc, char **argv)
 {
   const char* socketName = "/tmp/execution_management";
   auto executionManager = ExecutionManager::ExecutionManager(
-    std::make_unique<ExecutionManager::ManifestReader>()
+    std::make_unique<ExecutionManager::ManifestReader>(),
+    std::make_unique<ExecutionManager::ApplicationHandler>()
   );
 
   try

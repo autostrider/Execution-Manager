@@ -7,7 +7,7 @@ using ApplicationState = api::ApplicationStateClient::ApplicationState;
 State::State(AdaptiveApp &app, api::ApplicationStateClient::ApplicationState state, const std::string &stateName) :
     m_app{app}, m_applState{state}, m_stateName{stateName}
 {
-    std::cout << "Enter " << m_stateName << " state\n";
+    std::cout << "Enter " << m_stateName << " state" << std::endl;
 }
 
 void State::leave() const
@@ -24,15 +24,6 @@ Init::Init(AdaptiveApp &app) : State (app, ApplicationState::K_INITIALIZING, "In
 {
 }
 
-std::unique_ptr<State> Init::handleTransition()
-{
-    if (m_app.isTerminating())
-    {
-        return std::make_unique<Terminate>(m_app);
-    }
-    return std::make_unique<Run>(m_app);
-}
-
 void Init::enter()
 {
     m_app.reportApplicationState(getApplicationState());
@@ -47,41 +38,33 @@ Run::Run(AdaptiveApp &app) : State (app, ApplicationState::K_RUNNING, "Running")
 {
 }
 
-std::unique_ptr<State> Run::handleTransition()
-{
-    if (m_app.isTerminating())
-    {
-        return std::make_unique<Terminate>(m_app);
-    }
-    return std::make_unique<Run>(m_app);
-}
-
 void Run::enter()
 {
     m_app.readSensorData();
-    std::cout << "mean: " << m_app.mean() << "\n";
+    std::cout << "mean: " << m_app.mean() << std::endl;
 }
 
-Terminate::Terminate(AdaptiveApp &app) : State (app, ApplicationState::K_SHUTTINGDOWN, "Terminating")
+ShutDown::ShutDown(AdaptiveApp &app) : State (app, ApplicationState::K_SHUTTINGDOWN, "Shutdown")
 {
 }
 
-std::unique_ptr<State> Terminate::handleTransition()
+void ShutDown::enter()
 {
-    if (m_app.isTerminating())
-    {
-        std::cout << "Already in terminate state!";
-    }
-    else
-    {
-        std::cout << "terminating state. App is dead(\n";
-    }
-    return std::make_unique<Terminate>(m_app);
-}
-
-void Terminate::enter()
-{
-    std::cout << "App is dead...\n";
     m_app.reportApplicationState(getApplicationState());
-    ::exit(EXIT_SUCCESS);
+    std::cout << "Killing app..." << std::endl;
+}
+
+std::unique_ptr<api::IState> StateFactory::createInit(api::IAdaptiveApp &app)
+{
+    return std::make_unique<Init>(dynamic_cast<AdaptiveApp&>(app));
+}
+
+std::unique_ptr<api::IState> StateFactory::createRun(api::IAdaptiveApp &app)
+{
+    return std::make_unique<Run>(dynamic_cast<AdaptiveApp&>(app));
+}
+
+std::unique_ptr<api::IState> StateFactory::createShutDown(api::IAdaptiveApp &app)
+{
+    return std::make_unique<ShutDown>(dynamic_cast<AdaptiveApp&>(app));
 }

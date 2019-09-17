@@ -10,6 +10,7 @@
 
 #include <i_adaptive_app.hpp>
 #include <i_state_factory.hpp>
+#include <i_application_state_client_wrapper.hpp>
 
 namespace MachineStateManager
 {
@@ -20,19 +21,25 @@ public:
   MachineStateManager(std::unique_ptr<api::IStateFactory> factory,
                       std::unique_ptr<api::IApplicationStateClientWrapper> client);
   ~MachineStateManager() = default;
-  //int32_t start();
 
+  void init() override;
   void run() override;
   void terminate() override;
 
   void setMachineState(std::string, int);
   api::MachineStateClient::StateError registerMsm(const char*, int);
-  //void reportApplicationState(api::ApplicationStateClient::ApplicationState);
+  void reportApplicationState(api::ApplicationStateClient::ApplicationState) override;
 
 private:
+  void transitToNextState(IAdaptiveApp::FactoryFunc nextState);
+
   using StateError = api::MachineStateClient::StateError;
 
   std::unique_ptr<api::MachineStateClient> machineStateClient;
+
+  std::unique_ptr<api::IStateFactory> m_factory;
+  std::unique_ptr<api::IState> m_currentState;
+  std::unique_ptr<api::IApplicationStateClientWrapper> m_appClient;
 };
 
 } // namespace MachineStateManager

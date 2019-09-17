@@ -13,6 +13,7 @@ target_link_libraries(${TEST_NAME}_test
   gtest_main
   api::application_state_client
   api::machine_state_client
+  common
 )
 
 target_compile_definitions(${TEST_NAME}_test PUBLIC -DUNIT_TEST)
@@ -36,6 +37,7 @@ target_link_libraries(${COVERAGE_BUILD}
   gtest_main
   api::application_state_client
   api::machine_state_client
+  common
 )
 
 target_compile_definitions(${COVERAGE_BUILD} PUBLIC -DUNIT_TEST)

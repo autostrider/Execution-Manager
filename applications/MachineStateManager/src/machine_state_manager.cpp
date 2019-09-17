@@ -8,13 +8,18 @@ using StateError = api::MachineStateClient::StateError;
 
 MachineStateManager::MachineStateManager(std::unique_ptr<api::IStateFactory> factory,
                                          std::unique_ptr<api::IApplicationStateClientWrapper> client) :
-    api::IAdaptiveApp(std::move(factory), std::move(client)),
-    machineStateClient(std::make_unique<MachineStateClient>
-                        ("unix:/tmp/execution_management"))
+        machineStateClient(std::make_unique<MachineStateClient>
+                        ("unix:/tmp/execution_management")),
+        m_factory{std::move(factory)},
+        m_currentState{nullptr},
+        m_appClient{std::move(client)}
 {
-    transitToNextState(
-                std::bind(&api::IStateFactory::createInit, m_factory.get(), std::placeholders::_1)
-                );
+}
+
+void MachineStateManager::init()
+{
+    m_currentState = m_factory->createInit(*this);
+    m_currentState->enter();
 }
 
 void MachineStateManager::run()
@@ -27,8 +32,20 @@ void MachineStateManager::run()
 void MachineStateManager::terminate()
 {
     transitToNextState(
-                std::bind(&api::IStateFactory::createTerminate, m_factory.get(), std::placeholders::_1)
+                std::bind(&api::IStateFactory::createShutDown, m_factory.get(), std::placeholders::_1)
                 );
+}
+
+void MachineStateManager::transitToNextState(api::IAdaptiveApp::FactoryFunc nextState)
+{
+    m_currentState->leave();
+    m_currentState = nextState(*this);
+    m_currentState->enter();
+}
+
+void MachineStateManager::reportApplicationState(api::ApplicationStateClient::ApplicationState state)
+{
+    m_appClient->ReportApplicationState(state);
 }
 
 void MachineStateManager::setMachineState(std::string state, int timeout)

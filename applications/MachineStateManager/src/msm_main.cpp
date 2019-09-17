@@ -7,6 +7,7 @@
 #include <chrono>
 #include <thread>
 #include <atomic>
+#include "logger.hpp"
 
 static void signalHandler(int signo);
 static std::atomic<bool> isTerminating{false};
@@ -15,11 +16,13 @@ int main(int argc, char **argv)
 {
     if (::signal(SIGTERM, signalHandler) == SIG_ERR)
     {
-        std::cout << "[ MachineStateManager ] :\tError while registering signal" << std::endl;
+        LOG << "Error while registering signal";
     }
 
     MachineStateManager::MachineStateManager msm(std::make_unique<MachineStateManager::MsmStateFactory>(),
                                                  std::make_unique<api::ApplicationStateClientWrapper>());
+
+    msm.init();
 
     while (!isTerminating)
     {
@@ -32,6 +35,6 @@ int main(int argc, char **argv)
 
 static void signalHandler(int signo)
 {
-    std::cout << "[ MachineStateManager ] :\tReceived signal:" << sys_siglist[signo] << std::endl;
+    LOG << "Received signal:" << sys_siglist[signo];
     isTerminating = true;
 }

@@ -16,6 +16,7 @@ public:
              const std::string& stateName);
 
     virtual void enter() = 0;
+    void leave() const override;
     api::ApplicationStateClient::ApplicationState getApplicationState() const;
 
 protected:
@@ -37,15 +38,13 @@ class Run : public MsmState
 public:
     Run(MachineStateManager& msm);
     void enter() override;
-    void leave() const override;
 };
 
-class Terminate : public MsmState
+class ShutDown : public MsmState
 {
 public:
-    Terminate(MachineStateManager& msm);
+    ShutDown(MachineStateManager& msm);
     void enter() override;
-    void leave() const override;
 };
 
 class MsmStateFactory : public api::IStateFactory
@@ -53,7 +52,7 @@ class MsmStateFactory : public api::IStateFactory
 public:
     std::unique_ptr<api::IState> createInit(api::IAdaptiveApp &app) override;
     std::unique_ptr<api::IState> createRun(api::IAdaptiveApp &app) override;
-    std::unique_ptr<api::IState> createTerminate(api::IAdaptiveApp &app) override;
+    std::unique_ptr<api::IState> createShutDown(api::IAdaptiveApp &app) override;
 };
 
 } // namespace MachineStateManager

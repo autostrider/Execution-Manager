@@ -4,22 +4,33 @@
 #include <random>
 #include <iostream>
 
-using ApplicationState = api::ApplicationStateClient::ApplicationState;
-
-AdaptiveApp::AdaptiveApp(std::atomic<bool> &terminate, const std::string appName) 
-  : m_sensorData(c_numberOfSamples),
-    m_currentState{std::make_unique<Init>(*this)},
-    m_terminateApp{terminate},
-    m_appName{appName}
+AdaptiveApp::AdaptiveApp(std::unique_ptr<api::IStateFactory> factory,
+                std::unique_ptr<api::IApplicationStateClientWrapper> client) :
+    m_sensorData(c_numberOfSamples),
+    m_factory{std::move(factory)},
+    m_currentState{nullptr},
+    m_appClient{std::move(client)}
 {
-    m_currentState->enter();
 }
 
-void AdaptiveApp::transitToNextState()
+void AdaptiveApp::init()
 {
-    m_currentState->leave();
-    m_currentState = m_currentState->handleTransition();
-    m_currentState->enter();
+   m_currentState = m_factory->createInit(*this);
+   m_currentState->enter();
+}
+
+void AdaptiveApp::run()
+{
+    transitToNextState(
+                std::bind(&api::IStateFactory::createRun, m_factory.get(), std::placeholders::_1)
+                );
+}
+
+void AdaptiveApp::terminate()
+{
+    transitToNextState(
+                std::bind(&api::IStateFactory::createShutDown, m_factory.get(), std::placeholders::_1)
+                );
 }
 
 double AdaptiveApp::mean()
@@ -30,7 +41,7 @@ double AdaptiveApp::mean()
 
 void AdaptiveApp::readSensorData()
 {
-    std::cout << "[ " << m_appName << " ]:\tRead data from sensors\n";
+    std::cout << "Read data from sensors" << std::endl;
 
     std::random_device rd{};
     std::mt19937 gen{rd()};
@@ -42,21 +53,13 @@ void AdaptiveApp::readSensorData()
     }
 }
 
-void AdaptiveApp::printSensorData() const
+void AdaptiveApp::transitToNextState(api::IAdaptiveApp::FactoryFunc nextState)
 {
-    for (const auto& item : m_sensorData) {
-        std::cout << item << " | ";
-    }
-    std::cout << std::endl;
+    m_currentState->leave();
+    m_currentState = nextState(*this);
+    m_currentState->enter();
 }
-
-bool AdaptiveApp::isTerminating() const
+void AdaptiveApp::reportApplicationState(api::ApplicationStateClient::ApplicationState state)
 {
-    return m_terminateApp;
+    m_appClient->ReportApplicationState(state);
 }
-
-void AdaptiveApp::reportApplicationState(ApplicationState state)
-{
-    m_appClient.ReportApplicationState(state);
-}
-

@@ -10,6 +10,7 @@ namespace ExecutionManager {
 
 using std::runtime_error;
 using nlohmann::json;
+using std::ifstream;
 
 const std::string ManifestReader::machineStateFunctionGroup = "MachineState";
 

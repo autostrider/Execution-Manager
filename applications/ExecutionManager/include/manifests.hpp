@@ -2,10 +2,6 @@
 #define MANIFESTS_HPP
 
 
-#include <cstdint>
-#include <fstream>
-#include <iostream>
-#include <numeric>
 #include <string>
 #include <vector>
 #include <json.hpp>
@@ -18,7 +14,6 @@ namespace ExecutionManager
 {
 
 using nlohmann::json;
-using std::ifstream;
 using MachineState = std::string;
 using ApplicationState = ::ApplicationStateManagement::ApplicationState;
 

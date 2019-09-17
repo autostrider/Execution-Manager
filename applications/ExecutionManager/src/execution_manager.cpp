@@ -1,11 +1,8 @@
 #include "execution_manager.hpp"
 
 #include <json.hpp>
-#include <fstream>
-#include <dirent.h>
-#include <exception>
 #include <thread>
-#include <signal.h>
+#include <csignal>
 #include <iostream>
 #include <unistd.h>
 

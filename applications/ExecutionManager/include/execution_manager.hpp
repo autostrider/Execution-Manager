@@ -4,17 +4,9 @@
 #include "imanifest_reader.hpp"
 #include "manifests.hpp"
 
-#include <chrono>
-#include <csignal>
-#include <cstdint>
-#include <exception>
-#include <functional>
-#include <iostream>
 #include <map>
 #include <memory>
 #include <string>
-#include <thread>
-#include <unistd.h>
 #include <vector>
 
 namespace ExecutionManager
@@ -52,8 +44,6 @@ public:
 
   bool setMachineState(pid_t processId, std::string state);
 private:
-  using ApplicationState = ::ApplicationStateManagement::ApplicationState;
-  using StateError = ::MachineStateManagement::StateError;
 
   /**
    * @brief Removes unsupported states from availApps
@@ -96,7 +86,6 @@ private:
 
   bool processToBeKilled (const std::string& app,
                           const std::vector<ProcessInfo>&);
-private:
 
 private:
   /**

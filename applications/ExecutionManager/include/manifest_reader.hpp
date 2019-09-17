@@ -14,7 +14,7 @@ using MachineState = std::string;
 struct ManifestReaderConf
 {
   const std::string pathToApplicationsFolder{"./bin/applications"};
-  const std::string machineManifestFilePath{ "../applications/ExecutionManager/machine_manifest.json"};
+  const std::string machineManifestFilePath{"../applications/ExecutionManager/machine_manifest.json"};
 };
 
 /**
@@ -24,20 +24,20 @@ struct ManifestReaderConf
 class ManifestReader : public IManifestReader
 {
 public:
-  ManifestReader(const ManifestReaderConf& conf = ManifestReaderConf{});
+  explicit ManifestReader(const ManifestReaderConf& conf = ManifestReaderConf{});
   /**
     * @brief Load data from application manifests and process it.
     * @return Map of applications for each state in Application
     *         manifest.
     */
-   virtual std::map<MachineState, std::vector<ProcessInfo>>
+   std::map<MachineState, std::vector<ProcessInfo>>
    getStatesSupportedByApplication() override;
 
    /**
    * @brief Loading data from Machine Manifest and process it.
    * @return All the machine states available.
    */
-  virtual std::vector<MachineState> getMachineStates() override;
+  std::vector<MachineState> getMachineStates() override;
 
 
   ~ManifestReader() override = default;
@@ -58,7 +58,7 @@ private:
   std::vector<std::string> getListOfApplications();
 
   /**
-   * @brief Config with pathes to machine manfiest and
+   * @brief Config with paths to machine manifest and
    *        folder with applications;
    */
   const ManifestReaderConf conf;

@@ -3,6 +3,7 @@
 #include "gtest/gtest.h"
 #include <iostream>
 #include <string>
+#include <fstream>
 #include <sys/stat.h>
 #include <unistd.h>
 

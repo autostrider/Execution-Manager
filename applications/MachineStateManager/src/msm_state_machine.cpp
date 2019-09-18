@@ -1,9 +1,9 @@
 #include "msm_state_machine.hpp"
+#include <logger.hpp>
 
 #include <chrono>
 #include <thread>
 #include <iostream>
-#include <logger.hpp>
 
 using ApplicationState = api::ApplicationStateClient::ApplicationState;
 using StateError = api::MachineStateClient::StateError;

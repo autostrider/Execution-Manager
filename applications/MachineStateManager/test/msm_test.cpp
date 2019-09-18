@@ -13,9 +13,9 @@ using namespace MachineStateManager;
 class IStateFactoryMock : public api::IStateFactory
 {
 public:
-    MOCK_METHOD(std::unique_ptr<api::IState>, createInit, (api::IAdaptiveApp &msm));
-    MOCK_METHOD(std::unique_ptr<api::IState>, createRun, (api::IAdaptiveApp &msm));
-    MOCK_METHOD(std::unique_ptr<api::IState>, createShutDown, (api::IAdaptiveApp &msm));
+    MOCK_METHOD(std::unique_ptr<api::IState>, createInit, (api::IAdaptiveApp &msm), (const));
+    MOCK_METHOD(std::unique_ptr<api::IState>, createRun, (api::IAdaptiveApp &msm), (const));
+    MOCK_METHOD(std::unique_ptr<api::IState>, createShutDown, (api::IAdaptiveApp &msm), (const));
 };
 
 class StateClientMock : public api::ApplicationStateClientWrapper

@@ -13,11 +13,11 @@ std::string StartupOption::makeCommandLineOption() const
   switch (optionKind) {
     case StartupOptionKindEnum::commandLineShortForm:
       res = "-" + res +
-            (optionArg == "" ? "" : " " + optionArg);
+            (optionArg.empty() ? "" : " " + optionArg);
       break;
     case StartupOptionKindEnum::commandLineLongForm:
       res = "--" + res +
-            (optionArg == "" ? "" : "=" + optionArg);
+            (optionArg.empty() ? "" : "=" + optionArg);
       break;
   case StartupOptionKindEnum::commandLineSimpleForm:
       break;

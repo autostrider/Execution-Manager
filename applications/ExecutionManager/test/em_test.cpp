@@ -105,7 +105,7 @@ protected:
   void SetUp() override;
   void TearDown() override;
 
-  const std::map<MachineState, std::vector<ProcessInfo>>
+  std::map<MachineState, std::vector<ProcessInfo>>
     availableAppsForStates =
       {
           {"Startup", {
@@ -616,7 +616,26 @@ TEST_P(ApplicationManifestReadingTests,
 
   auto result = reader.getStatesSupportedByApplication();
 
-    EXPECT_EQ(result, availableAppsForStates);
+    
+  auto compProcInofs = [](ProcessInfo& proc1, ProcessInfo& proc2){
+                          if (proc1.applicationName < proc2.applicationName)
+                          {
+                            return true;
+                          }
+                          return proc1.processName < proc2.processName;
+                        };
+
+  for (auto& object : availableAppsForStates)
+  {
+    std::sort(object.second.begin(), object.second.end(), compProcInofs);
+  }
+
+  for (auto& object : result)
+  {
+    std::sort(object.second.begin(), object.second.end(), compProcInofs);
+  }
+
+  EXPECT_EQ(result, availableAppsForStates);
 }
 
 TEST_P(EmptyApplicationManifestReadingTests,

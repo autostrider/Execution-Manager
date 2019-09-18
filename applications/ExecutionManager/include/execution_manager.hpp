@@ -87,7 +87,7 @@ private:
   /**
    * @brief Holds interface responsible for starting applications
    */
-  const std::unique_ptr<IApplicationHandler> appHandler;
+  std::unique_ptr<IApplicationHandler> appHandler;
 
   /**
    * @brief structure that holds application and required processes.

@@ -10,6 +10,8 @@ namespace ExecutionManager
 class ApplicationHandler : public IApplicationHandler
 {
 public:
+  explicit ApplicationHandler(std::string path = "./bin/applications/");
+
   pid_t startProcess(const ProcessInfo &process) override;
 
   void killApplication(pid_t processId, int signal) override;

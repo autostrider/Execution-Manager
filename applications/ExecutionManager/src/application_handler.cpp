@@ -35,11 +35,8 @@ pid_t ApplicationHandler::startProcess(const ProcessInfo &process)
                           + " "
                           + strerror(errno));
     }
-    else
-    {
-      return processId;
-    }
   }
+  return processId;
 }
 
 void ApplicationHandler::killApplication(pid_t processId, int signal)

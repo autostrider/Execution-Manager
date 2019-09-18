@@ -1,9 +1,6 @@
 #include "execution_manager.hpp"
 
-#include <json.hpp>
-#include <thread>
 #include <csignal>
-#include <iostream>
 #include <unistd.h>
 
 namespace ExecutionManager

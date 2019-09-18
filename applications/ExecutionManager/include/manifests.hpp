@@ -5,8 +5,6 @@
 #include <string>
 #include <vector>
 #include <json.hpp>
-#include <application_state_management.capnp.h>
-#include <machine_state_management.capnp.h>
 #include <application_state_client.h>
 
 

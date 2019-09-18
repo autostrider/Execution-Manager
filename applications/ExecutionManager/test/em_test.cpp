@@ -4,8 +4,6 @@
 #include <iostream>
 #include <string>
 #include <fstream>
-#include <sys/stat.h>
-#include <unistd.h>
 
 namespace ExecutionManagerTests
 {
@@ -553,7 +551,7 @@ const std::vector<MachineManifestReaderTestConf> machineManifestTestsConfigs =
   machineManifestWithAdditionalFunctionGroup,
 };
 
-const std::vector<ApplicationManifestReaderTestConf> applicationManifestReadintTestConf =
+const std::vector<ApplicationManifestReaderTestConf> applicationManifestReadingTestConf =
 {
   regularApplicationManifestsConf,
   additionalFunctionGroupsApplicationManifest,
@@ -570,7 +568,7 @@ const std::vector<ApplicationManifestReaderTestConf> commandLineOptions =
 
 INSTANTIATE_TEST_SUITE_P(ApplicationManifestTests,
                          ApplicationManifestReadingTests,
-                         ::testing::ValuesIn(applicationManifestReadintTestConf));
+                         ::testing::ValuesIn(applicationManifestReadingTestConf));
 
 INSTANTIATE_TEST_SUITE_P(MachineManifestTests,
                          MachineManifestReadingTests,
@@ -600,7 +598,6 @@ TEST_P(MachineManifestReadingTests,
   ASSERT_EQ(res, availableMachineStates);
 }
 
-
 TEST_P(EmptyMachineManifestReadingTests,
        ShouldReturnEmptyMachineStatesWhenNoProvided)
 {
@@ -621,7 +618,6 @@ TEST_P(ApplicationManifestReadingTests,
 
     EXPECT_EQ(result, availableAppsForStates);
 }
-
 
 TEST_P(EmptyApplicationManifestReadingTests,
        ShouldReturnEmptyAppsForStateWhenNoProvided)
@@ -646,7 +642,6 @@ TEST_P(ApplicationCommandLineOptionsReadingTests,
   ASSERT_EQ(result["Startup"][0].startOptions[0].makeCommandLineOption(),
             *(expectedArg++));
 }
-
 
 TEST(ApplicationManifestReadingTestsFail, ShouldFaildWhenDirectoryNotExists)
 {

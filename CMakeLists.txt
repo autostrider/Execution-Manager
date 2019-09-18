@@ -33,6 +33,7 @@ set(COVERAGE_REPORT_DIR ${CMAKE_CURRENT_BINARY_DIR}/coverage_report)
 add_custom_target(coverage  
   COMMAND em_coverage_build
   COMMAND msm_coverage_build
+  COMMAND adaptiveApp_coverage_build
   COMMAND asc_coverage_build
   COMMAND ${CMAKE_COMMAND} -E make_directory ${COVERAGE_REPORT_DIR}
   COMMAND ${LCOV_PATH} --gcov-tool ${GCOV_PATH} --directory ${CMAKE_BINARY_DIR} --capture --output-file ${COVERAGE_REPORT_DIR}/${COVERAGE_TARGET}.info

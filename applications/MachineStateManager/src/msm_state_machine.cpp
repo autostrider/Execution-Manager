@@ -1,9 +1,9 @@
 #include "msm_state_machine.hpp"
+#include <logger.hpp>
 
 #include <chrono>
 #include <thread>
 #include <iostream>
-#include <logger.hpp>
 
 using ApplicationState = api::ApplicationStateClient::ApplicationState;
 using StateError = api::MachineStateClient::StateError;
@@ -19,7 +19,7 @@ namespace MachineStateManager
 
 MsmState::MsmState(MachineStateManager& msm,
                    ApplicationState state,
-                   std::string stateName) : 
+                   std::string stateName) :
                    m_msm{msm}, 
                    m_msmState{state}, 
                    m_stateName{std::move(stateName)}

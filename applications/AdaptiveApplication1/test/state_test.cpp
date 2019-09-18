@@ -1,11 +1,11 @@
-#include "gtest/gtest.h"
-#include "gmock/gmock.h"
+#include "adaptive_app.hpp"
+#include "state.hpp"
+
 #include <iostream>
 #include <atomic>
 
-#include <adaptive_app.hpp>
-#include <state.hpp>
-
+#include "gtest/gtest.h"
+#include "gmock/gmock.h"
 
 using namespace testing;
 
@@ -14,9 +14,9 @@ using ApplicationState = api::ApplicationStateClient::ApplicationState;
 class IStateFactoryMock : public api::IStateFactory
 {
 public:
-    MOCK_METHOD(std::unique_ptr<api::IState>, createInit, (api::IAdaptiveApp &app),(const));
-    MOCK_METHOD(std::unique_ptr<api::IState>, createRun, (api::IAdaptiveApp &app),(const));
-    MOCK_METHOD(std::unique_ptr<api::IState>, createShutDown, (api::IAdaptiveApp &app),(const));
+    MOCK_METHOD(std::unique_ptr<api::IState>, createInit, (api::IAdaptiveApp& app),(const));
+    MOCK_METHOD(std::unique_ptr<api::IState>, createRun, (api::IAdaptiveApp& app),(const));
+    MOCK_METHOD(std::unique_ptr<api::IState>, createShutDown, (api::IAdaptiveApp& app),(const));
 };
 
 class IStateMock : public api::IState

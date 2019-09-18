@@ -5,7 +5,6 @@
 #include <iostream>
 #include <chrono>
 #include <thread>
-#include <atomic>
 
 static void signalHandler(int signo);
 static std::atomic<bool> isTerminating{false};
@@ -16,7 +15,6 @@ int main()
     {
         std::cout << "Error while registering signal" << std::endl;
     }
-
     AdaptiveApp app(std::make_unique<StateFactory>(),
                     std::make_unique<api::ApplicationStateClientWrapper>());
 

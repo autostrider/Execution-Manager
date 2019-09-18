@@ -3,10 +3,12 @@
 
 #include <i_adaptive_app.hpp>
 #include <i_state_factory.hpp>
-#include <i_application_state_client_wrapper.h>
+#include <i_application_state_client_wrapper.hpp>
+#include <application_state_client.h>
 
 #include <vector>
-
+#include <memory>
+#include <atomic>
 
 class AdaptiveApp : public api::IAdaptiveApp
 {

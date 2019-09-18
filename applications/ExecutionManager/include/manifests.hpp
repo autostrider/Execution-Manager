@@ -7,14 +7,13 @@
 #include <json.hpp>
 #include <application_state_client.h>
 
+
 namespace ExecutionManager
 {
 
 using nlohmann::json;
-using std::ifstream;
 using MachineState = std::string;
 using ApplicationState = ::ApplicationStateManagement::ApplicationState;
-
 
 struct MachineInstanceMode
 {
@@ -49,6 +48,13 @@ struct ProcessInfo
     return applicationName
         + "/processes/"
         + processName;
+  }
+
+  bool operator==(const ProcessInfo& rhs) const
+  {
+    return processName == rhs.processName &&
+           applicationName == rhs.applicationName;
+
   }
 };
 

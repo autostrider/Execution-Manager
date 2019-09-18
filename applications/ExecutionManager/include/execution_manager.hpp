@@ -4,12 +4,6 @@
 #include "imanifest_reader.hpp"
 #include "manifests.hpp"
 
-#include <chrono>
-#include <csignal>
-#include <cstdint>
-#include <exception>
-#include <functional>
-#include <iostream>
 #include <map>
 #include <memory>
 #include <string>
@@ -92,8 +86,8 @@ private:
 
   bool processToBeKilled (const std::string& app,
                           const std::vector<ProcessInfo>&);
-private:
 
+private:
   /**
    * @brief Hardcoded path to folder with adaptive applications.
    */

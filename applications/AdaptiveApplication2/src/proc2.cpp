@@ -9,6 +9,11 @@
 static void signalHandler(int signo);
 static std::atomic<bool> isTerminating{false};
 
+namespace
+{
+    constexpr int timeout = 5;
+}
+
 int main()
 {
     if (::signal(SIGTERM, signalHandler) == SIG_ERR)
@@ -24,7 +29,7 @@ int main()
     while (!isTerminating)
     {
         app2.run();
-        std::this_thread::sleep_for(std::chrono::seconds(5));
+        std::this_thread::sleep_for(std::chrono::seconds(timeout));
     }
     app2.terminate();
     return 0;

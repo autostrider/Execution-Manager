@@ -11,9 +11,9 @@ namespace MachineStateManager
 class MsmState : public api::IState
 {
 public:
-    explicit MsmState(MachineStateManager& msm, 
-                      api::ApplicationStateClient::ApplicationState state, 
-                      std::string stateName);
+    MsmState(MachineStateManager& msm, 
+             api::ApplicationStateClient::ApplicationState state, 
+             std::string stateName);
 
     virtual void enter() = 0;
     void leave() const override;

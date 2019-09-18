@@ -1,13 +1,12 @@
-#include <iostream>
 #include "machine_state_manager.hpp"
 #include "msm_state_machine.hpp"
+#include <logger.hpp>
 
 #include <signal.h>
 #include <iostream>
 #include <chrono>
 #include <thread>
 #include <atomic>
-#include "logger.hpp"
 
 static void signalHandler(int signo);
 static std::atomic<bool> isTerminating{false};

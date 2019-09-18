@@ -1,15 +1,16 @@
-#include <msm_state_machine.hpp>
+#include "msm_state_machine.hpp"
+
 #include <chrono>
 #include <thread>
 #include <iostream>
-#include "logger.hpp"
+#include <logger.hpp>
 
 using ApplicationState = api::ApplicationStateClient::ApplicationState;
 using StateError = api::MachineStateClient::StateError;
 
 namespace
 {
-    constexpr int defaulTimeout = 3000000;
+    constexpr uint defaulTimeout = 3000000;
     constexpr int timeForSleep = 5;
 }
 
@@ -17,15 +18,16 @@ namespace MachineStateManager
 {
 
 MsmState::MsmState(MachineStateManager& msm,
-             api::ApplicationStateClient::ApplicationState state,
-             const std::string &stateName) :
-    m_msm{msm}, m_msmState{state}, m_stateName{stateName}
+                   ApplicationState state,
+                   std::string stateName) : 
+                   m_msm{msm}, 
+                   m_msmState{state}, 
+                   m_stateName{std::move(stateName)}
 {
-        LOG << "Enter " << m_stateName
-            << " state.";
+    LOG << "Enter " << m_stateName << " state.";
 }
 
-api::ApplicationStateClient::ApplicationState MsmState::getApplicationState() const
+ApplicationState MsmState::getApplicationState() const
 {
     return m_msmState;
 }
@@ -41,12 +43,14 @@ Init::Init(MachineStateManager& msm)
 
 void Init::enter()
 {
-    LOG << "Reporting state Initializing...";
+    LOG << "Reporting state "
+        << m_stateName << ".";
+    
     m_msm.reportApplicationState(getApplicationState());
 
-    LOG << "Machine State Manager started..";
+    LOG << "Machine State Manager started...";
 
-    const char* applicationName = "MachineStateManager";
+    std::string applicationName{"MachineStateManager"};
 
     StateError result = m_msm.registerMsm(applicationName, defaulTimeout);
 
@@ -57,14 +61,14 @@ void Init::enter()
     } 
     else
     {
-        LOG << "Unsuccessful registration as a MSM.";
-        LOG << "Terminating..";
+        LOG << "Unsuccessful registration as a MSM. Terminating...";
     }
 }
 
 void Init::leave() const
 {
-    LOG << "Reporting state Running...";
+    LOG << "Reporting state "
+        << m_stateName << ".";
 
     m_msm.reportApplicationState(ApplicationState::K_RUNNING);
 }
@@ -81,9 +85,10 @@ void Run::enter()
     for (auto& state : states)
     {
       std::this_thread::sleep_for(std::chrono::seconds(timeForSleep));
+
       LOG << "Setting machine state to " 
-                << state 
-                << "...";
+          << state 
+          << "...";
 
       m_msm.setMachineState(state, defaulTimeout);     
     }
@@ -99,22 +104,20 @@ void ShutDown::enter()
     LOG << "Reporting state "
         << m_stateName << ".";
 
-    LOG << "In Shutdown state.";
-
     m_msm.reportApplicationState(getApplicationState());
 }
 
-std::unique_ptr<api::IState> MsmStateFactory::createInit(api::IAdaptiveApp &msm)
+std::unique_ptr<api::IState> MsmStateFactory::createInit(api::IAdaptiveApp& msm) const
 {
     return std::make_unique<Init>(dynamic_cast<MachineStateManager&>(msm));
 }
 
-std::unique_ptr<api::IState> MsmStateFactory::createRun(api::IAdaptiveApp &msm)
+std::unique_ptr<api::IState> MsmStateFactory::createRun(api::IAdaptiveApp& msm) const
 {
     return std::make_unique<Run>(dynamic_cast<MachineStateManager&>(msm));
 }
 
-std::unique_ptr<api::IState> MsmStateFactory::createShutDown(api::IAdaptiveApp &msm)
+std::unique_ptr<api::IState> MsmStateFactory::createShutDown(api::IAdaptiveApp& msm) const
 {
     return std::make_unique<ShutDown>(dynamic_cast<MachineStateManager&>(msm));
 }

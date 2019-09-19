@@ -1,6 +1,6 @@
 #include "execution_manager.hpp"
-#include <exception>
-#include <signal.h>
+
+#include <csignal>
 #include <iostream>
 #include <unistd.h>
 
@@ -29,7 +29,7 @@ ExecutionManager::ExecutionManager(std::unique_ptr<IManifestReader> reader,
   : appHandler{std::move(applicationHandler)}
   , m_activeApplications{}
   , m_allowedApplicationForState{reader->getStatesSupportedByApplication()}
-  , m_currentState{defaultState}
+  , m_currentState{}
   , m_machineManifestStates{reader->getMachineStates()}
   , m_machineStateClientAppName{}
 {
@@ -123,6 +123,7 @@ void ExecutionManager::startApplication(const ProcessInfo& process)
 void
 ExecutionManager::reportApplicationState(pid_t processId, AppState state)
 {
+
   std::cout << "State \"" << applicationStateNames[static_cast<uint16_t>(state)]
             << "\" for application with pid "
             << processId
@@ -134,6 +135,7 @@ ExecutionManager::reportApplicationState(pid_t processId, AppState state)
 bool
 ExecutionManager::registerMachineStateClient(pid_t processId, string appName)
 {
+
   if (m_machineStateClientPid == -1 ||
       m_machineStateClientPid == processId)
   {

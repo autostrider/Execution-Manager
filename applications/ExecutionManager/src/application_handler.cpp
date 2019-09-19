@@ -39,9 +39,9 @@ pid_t ApplicationHandler::startProcess(const ProcessInfo &process)
   return processId;
 }
 
-void ApplicationHandler::killApplication(pid_t processId, int signal)
+void ApplicationHandler::killApplication(pid_t processId)
 {
-  kill(processId, signal);
+  kill(processId, SIGTERM);
 }
 
 std::vector<std::string> ApplicationHandler::getArgumentsList(const ProcessInfo &process) const

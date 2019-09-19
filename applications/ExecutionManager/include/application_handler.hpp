@@ -14,7 +14,7 @@ public:
 
   pid_t startProcess(const ProcessInfo &process) override;
 
-  void killApplication(pid_t processId, int signal) override;
+  void killApplication(pid_t processId) override;
 
   ~ApplicationHandler() override = default;
 

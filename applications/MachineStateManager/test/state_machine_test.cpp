@@ -75,7 +75,7 @@ protected:
    MsmStateFactory factory;
 };
 
-TEST_F(MsmStateMachineTest, Should_InitCallEnter)
+TEST_F(MsmStateMachineTest, ShouldInitCallEnter)
 {
     EXPECT_CALL(*msmMock, reportApplicationState(_)).WillOnce(Return());
 
@@ -83,13 +83,13 @@ TEST_F(MsmStateMachineTest, Should_InitCallEnter)
     state->enter();
 }
 
-TEST_F(MsmStateMachineTest, Should_RunCallEnter)
+TEST_F(MsmStateMachineTest, ShouldRunCallEnter)
 {
     std::unique_ptr<::Run> state = std::make_unique<::Run>(*msmMock);
     state->enter();
 }
 
-TEST_F(MsmStateMachineTest, Should_InitCallLeave)
+TEST_F(MsmStateMachineTest, ShouldInitCallLeave)
 {
     EXPECT_CALL(*msmMock, reportApplicationState(_)).WillOnce(Return());
 
@@ -97,7 +97,7 @@ TEST_F(MsmStateMachineTest, Should_InitCallLeave)
     state->leave();
 }
 
-TEST_F(MsmStateMachineTest, Should_TerminateCallEnter)
+TEST_F(MsmStateMachineTest, ShouldTerminateCallEnter)
 {
     EXPECT_CALL(*msmMock, reportApplicationState(_)).WillOnce(Return());
 
@@ -105,13 +105,13 @@ TEST_F(MsmStateMachineTest, Should_TerminateCallEnter)
     state->enter();
 }
 
-TEST_F(MsmStateMachineTest, Should_TerminateCallLeave)
+TEST_F(MsmStateMachineTest, ShouldTerminateCallLeave)
 {
     std::unique_ptr<ShutDown> state = std::make_unique<ShutDown>(*msmMock);
     state->leave();
 }
 
-TEST_F(MsmStateMachineTest, Should_CreateInit)
+TEST_F(MsmStateMachineTest, ShouldCreateInit)
 {
     std::unique_ptr<api::IState> expectedState = std::make_unique<Init>(*msmMock);
     std::unique_ptr<api::IState> createdState = factory.createInit(*msmMock);
@@ -120,7 +120,7 @@ TEST_F(MsmStateMachineTest, Should_CreateInit)
     ASSERT_TRUE(result);
 }
 
-TEST_F(MsmStateMachineTest, Should_CreateRun)
+TEST_F(MsmStateMachineTest, ShouldCreateRun)
 {
     std::unique_ptr<api::IState> expectedState = std::make_unique<::Run>(*msmMock);
     std::unique_ptr<api::IState> createdState = factory.createRun(*msmMock);
@@ -129,7 +129,7 @@ TEST_F(MsmStateMachineTest, Should_CreateRun)
     ASSERT_TRUE(result);
 }
 
-TEST_F(MsmStateMachineTest, Should_CreateTerminate)
+TEST_F(MsmStateMachineTest, ShouldCreateTerminate)
 {
     std::unique_ptr<api::IState> expectedState = std::make_unique<ShutDown>(*msmMock);
     std::unique_ptr<api::IState> createdState = factory.createShutDown(*msmMock);

@@ -39,25 +39,30 @@ protected:
    std::unique_ptr<NiceMock<IStateMock>> stateInitMock = std::make_unique<NiceMock<IStateMock>>();
    std::unique_ptr<NiceMock<IStateMock>> stateRunMock = std::make_unique<NiceMock<IStateMock>>();
    std::unique_ptr<NiceMock<IStateMock>> stateTermMock = std::make_unique<NiceMock<IStateMock>>();
-};
 
-TEST_F(MsmTest, Should_TransitToInitState)
-{
-    EXPECT_CALL(*factoryMock,
-                createInit((_)))
+    void SetUp() override
+    {
+        EXPECT_CALL(*factoryMock, createInit((_)))
             .WillOnce(Return(ByMove(std::move(stateInitMock))));
 
+    }
+};
+
+class ReportingStateTest : public MsmTest
+{
+protected:
+    void SetUp() override {}
+};
+
+TEST_F(MsmTest, ShouldTransitToInitState)
+{
      MachineStateManager::MachineStateManager msm{std::move(factoryMock), nullptr};
      msm.init();
 
 }
 
-TEST_F(MsmTest, Should_TransitToRunState)
+TEST_F(MsmTest, ShouldTransitToRunState)
 {
-    EXPECT_CALL(*factoryMock,
-                createInit((_)))
-            .WillOnce(Return(ByMove(std::move(stateInitMock))));
-
     EXPECT_CALL(*factoryMock,
                 createRun((_)))
             .WillOnce(Return(ByMove(std::move(stateRunMock))));
@@ -68,11 +73,8 @@ TEST_F(MsmTest, Should_TransitToRunState)
      msm.run();
 }
 
-TEST_F(MsmTest, Should_TransitToTerminateState)
+TEST_F(MsmTest, ShouldTransitToTerminateState)
 {
-    EXPECT_CALL(*factoryMock,
-                createInit((_)))
-            .WillOnce(Return(ByMove(std::move(stateInitMock))));
     EXPECT_CALL(*factoryMock,
                 createShutDown((_)))
             .WillOnce(Return(ByMove(std::move(stateTermMock))));
@@ -83,7 +85,7 @@ TEST_F(MsmTest, Should_TransitToTerminateState)
      msm.terminate();
 }
 
-TEST_F(MsmTest, Should_ReportCurrentState)
+TEST_F(ReportingStateTest, ShouldReportCurrentState)
 {
     EXPECT_CALL(*stateClientMock, ReportApplicationState(_)).WillOnce(Return());
 

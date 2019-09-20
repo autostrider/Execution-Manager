@@ -1,9 +1,9 @@
 #ifndef EXECUTION_MANAGER_HPP
 #define EXECUTION_MANAGER_HPP
 
+#include "manifests.hpp"
 #include <i_manifest_reader.hpp>
 #include <i_application_handler.hpp>
-#include "manifests.hpp"
 
 #include <map>
 #include <memory>

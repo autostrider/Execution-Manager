@@ -1,20 +1,18 @@
 #include "application_handler.hpp"
 
 #include <csignal>
-#include <string>
 #include <exception>
 
 namespace ExecutionManager
 {
 
-using std::string;
 using std::runtime_error;
 
 ApplicationHandler::ApplicationHandler(std::string path)
         : corePath{std::move(path)}
 { }
 
-pid_t ApplicationHandler::startProcess(const ProcessInfo &process)
+pid_t ApplicationHandler::startProcess(const ProcessInfo& process)
 {
   pid_t processId = fork();
 
@@ -30,7 +28,7 @@ pid_t ApplicationHandler::startProcess(const ProcessInfo &process)
 
     if (res)
     {
-      throw runtime_error(string{"Error occured creating process: "}
+      throw runtime_error(std::string{"Error occured creating process: "}
                           + process.processName
                           + " "
                           + strerror(errno));
@@ -39,7 +37,7 @@ pid_t ApplicationHandler::startProcess(const ProcessInfo &process)
   return processId;
 }
 
-void ApplicationHandler::killApplication(pid_t processId)
+void ApplicationHandler::killProcess(pid_t processId)
 {
   kill(processId, SIGTERM);
 }
@@ -61,9 +59,9 @@ std::vector<std::string> ApplicationHandler::getArgumentsList(const ProcessInfo 
   return arguments;
 }
 
-std::vector<char *> ApplicationHandler::convertToNullTerminatingArgv(std::vector<std::string> &vectorToConvert) const
+std::vector<char*> ApplicationHandler::convertToNullTerminatingArgv(std::vector<std::string>& vectorToConvert) const
 {
-  std::vector<char *> outputVector;
+  std::vector<char*> outputVector;
 
   // include terminating sign, that not included in argv
   outputVector.reserve(vectorToConvert.size() + 1);

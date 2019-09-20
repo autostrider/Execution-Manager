@@ -4,6 +4,9 @@
 #include "iapplication_handler.hpp"
 #include "manifests.hpp"
 
+#include <vector>
+#include <string>
+
 namespace ExecutionManager
 {
 
@@ -12,9 +15,9 @@ class ApplicationHandler : public IApplicationHandler
 public:
   explicit ApplicationHandler(std::string path = "./bin/applications/");
 
-  pid_t startProcess(const ProcessInfo &process) override;
+  pid_t startProcess(const ProcessInfo& process) override;
 
-  void killApplication(pid_t processId) override;
+  void killProcess(pid_t processId) override;
 
   ~ApplicationHandler() override = default;
 
@@ -34,7 +37,7 @@ private:
    */
     std::vector<char*>
     convertToNullTerminatingArgv(
-            std::vector<std::string> &vectorToConvert) const;
+            std::vector<std::string>& vectorToConvert) const;
 
 private:
     const std::string corePath;

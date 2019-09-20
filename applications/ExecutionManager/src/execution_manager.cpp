@@ -93,7 +93,7 @@ void ExecutionManager::killProcessesForState()
     if (allowedApps == m_allowedApplicationForState.cend() ||
         processToBeKilled(app->first, allowedApps->second))
     {
-      appHandler->killApplication(app->second);
+      appHandler->killProcess(app->second);
       app = m_activeApplications.erase(app);
     }
     else

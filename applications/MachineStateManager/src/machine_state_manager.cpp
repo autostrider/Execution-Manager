@@ -1,7 +1,7 @@
 #include "machine_state_manager.hpp"
 #include <constants.hpp>
 
-namespace MachineStateManager {
+namespace MSM {
 
 using api::MachineStateClient;
 using ApplicationState = api::ApplicationStateClient::ApplicationState;
@@ -58,4 +58,4 @@ StateError MachineStateManager::registerMsm(const std::string& applicationName, 
   return machineStateClient->Register(applicationName.c_str(), timeout);
 }
 
-} // namespace MachineStateManager
+} // namespace MSM

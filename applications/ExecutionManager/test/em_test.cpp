@@ -1,9 +1,11 @@
 #include "manifests.hpp"
 #include "manifest_reader.hpp"
-#include "gtest/gtest.h"
+
 #include <iostream>
 #include <string>
 #include <fstream>
+
+#include "gtest/gtest.h"
 
 namespace ExecutionManagerTests
 {
@@ -113,8 +115,8 @@ protected:
              ProcessInfo{"test-aa2", "proc2", {}},
                        }},
           {"Running", {
-             ProcessInfo{"test-aa1", "proc1", {}},
              ProcessInfo{"msm", "msm", {}},
+             ProcessInfo{"test-aa1", "proc1", {}},
                       }},
       };
   const std::map<MachineState, std::vector<ProcessInfo>> emptyAppsForStates =

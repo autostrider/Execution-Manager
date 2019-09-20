@@ -53,7 +53,7 @@ private:
 
   /**
    * @brief Loads all adaptive applications from corePath.
-   * @return Vector containing names of applications that were found in
+   * @return Set containing names of applications that were found in
    *          corePath.
    */
   std::set<std::string> getListOfApplications();

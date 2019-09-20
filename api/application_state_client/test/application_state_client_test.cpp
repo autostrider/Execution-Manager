@@ -1,10 +1,12 @@
-#include "gtest/gtest.h"
-#include "gmock/gmock.h"
-#include <application_state_client.h>
+#include "application_state_client.h"
+
 #include <capnp/ez-rpc.h>
 #include <execution_management.capnp.h>
 #include <iostream>
 #include <unistd.h>
+
+#include "gtest/gtest.h"
+#include "gmock/gmock.h"
 
 using namespace std;
 
@@ -28,7 +30,6 @@ private:
     reportApplicationState(ReportApplicationStateContext context) override;
 
 private:
-
     Data& m_sharedResource;
 };
 

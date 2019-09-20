@@ -8,7 +8,7 @@
 #include "gmock/gmock.h"
 
 using namespace testing;
-using namespace MachineStateManager;
+using namespace MSM;
 
 using StateError = api::MachineStateClient::StateError;
 

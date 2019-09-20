@@ -18,7 +18,7 @@ int main(int argc, char **argv)
         LOG << "Error while registering signal";
     }
 
-    MachineStateManager::MachineStateManager msm(std::make_unique<MachineStateManager::MsmStateFactory>(),
+    MSM::MachineStateManager msm(std::make_unique<MSM::MsmStateFactory>(),
                                                  std::make_unique<api::ApplicationStateClientWrapper>());
 
     msm.init();

@@ -8,7 +8,7 @@
 #include "gmock/gmock.h"
 
 using namespace testing;
-using namespace MachineStateManager;
+using namespace MSM;
 
 class IStateFactoryMock : public api::IStateFactory
 {
@@ -44,7 +44,6 @@ protected:
     {
         EXPECT_CALL(*factoryMock, createInit((_)))
             .WillOnce(Return(ByMove(std::move(stateInitMock))));
-
     }
 };
 
@@ -56,9 +55,8 @@ protected:
 
 TEST_F(MsmTest, ShouldTransitToInitState)
 {
-     MachineStateManager::MachineStateManager msm{std::move(factoryMock), nullptr};
+     MachineStateManager msm{std::move(factoryMock), nullptr};
      msm.init();
-
 }
 
 TEST_F(MsmTest, ShouldTransitToRunState)
@@ -67,7 +65,7 @@ TEST_F(MsmTest, ShouldTransitToRunState)
                 createRun((_)))
             .WillOnce(Return(ByMove(std::move(stateRunMock))));
 
-     MachineStateManager::MachineStateManager msm{std::move(factoryMock),
+     MachineStateManager msm{std::move(factoryMock),
                      nullptr};
      msm.init();
      msm.run();
@@ -79,7 +77,7 @@ TEST_F(MsmTest, ShouldTransitToTerminateState)
                 createShutDown((_)))
             .WillOnce(Return(ByMove(std::move(stateTermMock))));
 
-     MachineStateManager::MachineStateManager msm{std::move(factoryMock),
+     MachineStateManager msm{std::move(factoryMock),
                      nullptr};
      msm.init();
      msm.terminate();
@@ -89,6 +87,6 @@ TEST_F(ReportingStateTest, ShouldReportCurrentState)
 {
     EXPECT_CALL(*stateClientMock, ReportApplicationState(_)).WillOnce(Return());
 
-    MachineStateManager::MachineStateManager msm{nullptr, std::move(stateClientMock)};
+    MachineStateManager msm{nullptr, std::move(stateClientMock)};
     msm.reportApplicationState(api::ApplicationStateClient::ApplicationState::K_RUNNING);
 }

@@ -14,7 +14,7 @@ namespace
     constexpr int timeForSleep = 5;
 }
 
-namespace MachineStateManager
+namespace MSM
 {
 
 MsmState::MsmState(MachineStateManager& msm,
@@ -122,4 +122,4 @@ std::unique_ptr<api::IState> MsmStateFactory::createShutDown(api::IAdaptiveApp& 
     return std::make_unique<ShutDown>(dynamic_cast<MachineStateManager&>(msm));
 }
 
-} // namespace MachineStateManager
+} // namespace MSM

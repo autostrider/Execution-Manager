@@ -5,7 +5,7 @@
 #include <i_state.hpp>
 #include <i_state_factory.hpp>
 
-namespace MachineStateManager
+namespace MSM
 {
 
 class MsmState : public api::IState
@@ -55,5 +55,5 @@ public:
     std::unique_ptr<api::IState> createShutDown(api::IAdaptiveApp& app) const override;
 };
 
-} // namespace MachineStateManager
+} // namespace MSM
 #endif // MSM_STATE_MACHINE_HPP

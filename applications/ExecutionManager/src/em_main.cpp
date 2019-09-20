@@ -1,3 +1,4 @@
+#include "application_handler.hpp"
 #include "execution_manager_client.hpp"
 #include "execution_manager.hpp"
 #include "execution_manager_server.hpp"
@@ -12,13 +13,19 @@ int main(int argc, char **argv)
   const char* msmAddress = "/tmp/machine_management";
   std::string protocol{"unix:"};
 
+  /*auto executionManager = ExecutionManager::ExecutionManager(
+    std::make_unique<ExecutionManager::ManifestReader>(),
+    std::make_unique<ExecutionManager::ApplicationHandler>()
+  );
+*/
   try
   {
     ::unlink(emAddress);
-    auto io = kj::setupAsyncIo();
+    auto io = kj::setupAsyncIo();   
 
     ExecutionManager::ExecutionManager executionManager
       (std::make_unique<ExecutionManager::ManifestReader>(),
+          std::make_unique<ExecutionManager::ApplicationHandler>(),
        std::make_unique<ExecutionManagerClient::ExecutionManagerClient>
         (protocol + msmAddress, io));
 
@@ -35,6 +42,23 @@ int main(int argc, char **argv)
     server.drain().wait(io.waitScope);
 
     listenPromise.wait(io.waitScope);
+
+/*
+ ::unlink(socketName);
+    capnp::EzRpcServer server(
+      kj::heap<ExecutionManagerServer::ExecutionManagerServer>
+      (executionManager),
+      std::string{"unix:"} + socketName);
+
+    auto &waitScope = server.getWaitScope();
+
+    server.getPort().then([&](capnp::uint port)
+    {
+      executionManager.start();
+    }).wait(waitScope);
+
+    kj::NEVER_DONE.wait(waitScope);
+*/
   }
   catch (const kj::Exception &e)
   {

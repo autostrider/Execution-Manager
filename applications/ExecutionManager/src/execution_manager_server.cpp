@@ -1,5 +1,7 @@
 #include "execution_manager_server.hpp"
 
+#include <iostream>
+
 namespace ExecutionManagerServer
 {
 using namespace std;

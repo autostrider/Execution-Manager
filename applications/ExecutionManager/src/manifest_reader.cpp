@@ -89,10 +89,10 @@ std::vector<MachineState> ManifestReader::getMachineStates()
   return res;
 }
 
-std::vector<std::string> ManifestReader::getListOfApplications()
+std::set<std::string> ManifestReader::getListOfApplications()
 {
   DIR* dp = nullptr;
-  std::vector<std::string> fileNames;
+  std::set<std::string> fileNames;
 
   if ((dp = opendir(conf.pathToApplicationsFolder.c_str())) == nullptr)
   {
@@ -107,7 +107,7 @@ std::vector<std::string> ManifestReader::getListOfApplications()
     if (drnt->d_name != std::string{"."} &&
         drnt->d_name != std::string{".."})
     {
-      fileNames.emplace_back(drnt->d_name);
+      fileNames.emplace(drnt->d_name);
     }
   }
 

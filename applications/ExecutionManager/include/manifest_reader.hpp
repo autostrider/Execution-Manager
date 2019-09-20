@@ -5,6 +5,7 @@
 #include "imanifest_reader.hpp"
 
 #include <string>
+#include <set>
 
 namespace ExecutionManager
 {
@@ -52,10 +53,10 @@ private:
 
   /**
    * @brief Loads all adaptive applications from corePath.
-   * @return Vector containing names of applications that were found in
+   * @return Set containing names of applications that were found in
    *          corePath.
    */
-  std::vector<std::string> getListOfApplications();
+  std::set<std::string> getListOfApplications();
 
   /**
    * @brief Config with paths to machine manifest and

@@ -1,8 +1,9 @@
 #ifndef EXECUTION_MANAGER_HPP
 #define EXECUTION_MANAGER_HPP
 
-#include "imanifest_reader.hpp"
 #include "manifests.hpp"
+#include <i_manifest_reader.hpp>
+#include <i_application_handler.hpp>
 
 #include <map>
 #include <memory>
@@ -28,8 +29,8 @@ enum class AppState : uint16_t
 class ExecutionManager
 {
 public:
-
-  explicit ExecutionManager(std::unique_ptr<IManifestReader> reader);
+  ExecutionManager(std::unique_ptr<IManifestReader> reader,
+                   std::unique_ptr<IApplicationHandler> applicationHandler);
 
   /**
    * @brief Main method of Execution manager.
@@ -49,23 +50,6 @@ private:
    * @brief Removes unsupported states from availApps
    */
   void filterStates();
-
-  /**
-   * @brief Builds vector of command line arguments passed to application.
-   * @param process: process for certain mode dependent startup config.
-   * @return vector of command line arguments for application.
-   */
-  std::vector<std::string> getArgumentsList(const ProcessInfo& process) const;
-
-  /**
-   * @brief Method that converts input std::vector of std::string to
-   *        std::vector<char*> to pass as argv in application.
-   * @param vectorToConvert: vector that will be converted.
-   * @return Vector of char* including `nullptr` that be passed to application.
-   */
-  std::vector<char*>
-  convertToNullTerminatingArgv(
-      std::vector<std::string> &vectorToConvert);
 
   /**
    * @brief Starts given application and stores information
@@ -92,6 +76,11 @@ private:
    * @brief Hardcoded path to folder with adaptive applications.
    */
   const static std::string corePath;
+
+  /**
+   * @brief Holds interface responsible for starting applications
+   */
+  std::unique_ptr<IApplicationHandler> appHandler;
 
   /**
    * @brief structure that holds application and required processes.

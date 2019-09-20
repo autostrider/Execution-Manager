@@ -11,7 +11,7 @@ namespace MSM
 class MsmState : public api::IState
 {
 public:
-    explicit MsmState(MachineStateManager& msm, 
+    MsmState(MachineStateManager& msm, 
              api::ApplicationStateClient::ApplicationState state, 
              std::string stateName);
 

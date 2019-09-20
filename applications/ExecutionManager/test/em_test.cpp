@@ -1,9 +1,11 @@
 #include "manifests.hpp"
 #include "manifest_reader.hpp"
-#include "gtest/gtest.h"
+
 #include <iostream>
 #include <string>
 #include <fstream>
+
+#include "gtest/gtest.h"
 
 namespace ExecutionManagerTests
 {

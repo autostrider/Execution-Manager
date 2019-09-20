@@ -12,7 +12,7 @@
 #include <sstream>
 #include <capnp/ez-rpc.h>
 
-namespace MachineStateManager
+namespace MSM
 {
 
 class MachineStateManager : public api::IAdaptiveApp
@@ -39,6 +39,6 @@ private:
   std::unique_ptr<api::IApplicationStateClientWrapper> m_appClient;
 };
 
-} // namespace MachineStateManager
+} // namespace MSM
 
 #endif // MACHINE_STATE_MANAGER_HPP

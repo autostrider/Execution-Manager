@@ -1,7 +1,8 @@
 #ifndef EXECUTION_MANAGER_APPLICATION_HANDLER_HPP
 #define EXECUTION_MANAGER_APPLICATION_HANDLER_HPP
 
-#include "iapplication_handler.hpp"
+#include <i_application_handler.hpp>
+#include <constants.hpp>
 #include "manifests.hpp"
 
 #include <vector>
@@ -13,7 +14,7 @@ namespace ExecutionManager
 class ApplicationHandler : public IApplicationHandler
 {
 public:
-  explicit ApplicationHandler(std::string path = "./bin/applications/");
+  explicit ApplicationHandler(std::string path = APPLICATIONS_PATH);
 
   pid_t startProcess(const ProcessInfo& process) override;
 

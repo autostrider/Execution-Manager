@@ -1,8 +1,6 @@
 #include "execution_manager.hpp"
 
-#include <csignal>
 #include <iostream>
-#include <unistd.h>
 
 namespace ExecutionManager
 {
@@ -26,12 +24,12 @@ const MachineState ExecutionManager::defaultState {"Startup"};
 
 ExecutionManager::ExecutionManager(std::unique_ptr<IManifestReader> reader,
                                    std::unique_ptr<IApplicationHandler> applicationHandler)
-  : appHandler{std::move(applicationHandler)}
-  , m_activeApplications{}
-  , m_allowedApplicationForState{reader->getStatesSupportedByApplication()}
-  , m_currentState{}
-  , m_machineManifestStates{reader->getMachineStates()}
-  , m_machineStateClientAppName{}
+  : appHandler{std::move(applicationHandler)},
+    m_activeApplications{},
+    m_allowedApplicationForState{reader->getStatesSupportedByApplication()},
+    m_currentState{},
+    m_machineManifestStates{reader->getMachineStates()},
+    m_machineStateClientAppName{}
 {
   filterStates();
 }

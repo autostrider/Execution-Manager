@@ -1,7 +1,6 @@
 #include "manifest_reader.hpp"
 
 #include <dirent.h>
-#include <exception>
 #include <json.hpp>
 #include <fstream>
 #include <algorithm>

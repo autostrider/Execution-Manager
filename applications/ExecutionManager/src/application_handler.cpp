@@ -20,7 +20,7 @@ pid_t ApplicationHandler::startProcess(const ProcessInfo& process)
   {
     // child process
     const auto processPath = corePath
-                             + process.createRelativePath();
+                           + process.createRelativePath();
 
     auto arguments = getArgumentsList(process);
     auto applicationArguments = convertToNullTerminatingArgv(arguments);

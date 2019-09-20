@@ -29,9 +29,8 @@ enum class AppState : uint16_t
 class ExecutionManager
 {
 public:
-
-  explicit ExecutionManager(std::unique_ptr<IManifestReader> reader,
-                            std::unique_ptr<IApplicationHandler> applicationHandler);
+  ExecutionManager(std::unique_ptr<IManifestReader> reader,
+                           std::unique_ptr<IApplicationHandler> applicationHandler);
 
   /**
    * @brief Main method of Execution manager.

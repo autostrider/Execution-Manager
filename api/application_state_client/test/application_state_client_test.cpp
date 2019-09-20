@@ -8,18 +8,17 @@
 
 using namespace std;
 
-namespace 
+namespace ApplicationStateClientTest
 {
+using ApplicationState = ::ApplicationStateManagement::ApplicationState;
 struct Data
 {
-    ::ApplicationStateManagement::ApplicationState m_state;
+    ApplicationState m_state;
     pid_t m_appPid;
 };
 
 class ApplicationStateClientServer : public ::ExecutionManagement::Server
 {
-    using ApplicationState = ::ApplicationStateManagement::ApplicationState;
-
 public:
     explicit
     ApplicationStateClientServer (Data& sharedResource);
@@ -69,8 +68,8 @@ protected:
 TEST_F(ApplicationStateClientTest, ShouldSucceedToReportApplicationState)
 {
 	api::ApplicationStateClient asc; 
-	asc.ReportApplicationState(::ApplicationStateManagement::ApplicationState::K_RUNNING);
+	asc.ReportApplicationState(ApplicationState::K_RUNNING);
 
-	ASSERT_EQ(::ApplicationStateManagement::ApplicationState::K_RUNNING, sharedResource.m_state);
+	ASSERT_EQ(ApplicationState::K_RUNNING, sharedResource.m_state);
 }
 } //namespace

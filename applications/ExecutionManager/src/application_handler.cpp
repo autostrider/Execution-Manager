@@ -2,6 +2,7 @@
 
 #include <csignal>
 #include <exception>
+#include <logger.hpp>
 
 namespace ExecutionManager
 {
@@ -39,6 +40,8 @@ pid_t ApplicationHandler::startProcess(const ProcessInfo& process)
 
 void ApplicationHandler::killProcess(pid_t processId)
 {
+  LOG << "+++++++++++++++++++  Going to kill : " << std::to_string(processId);
+
   kill(processId, SIGTERM);
 }
 

@@ -123,6 +123,12 @@ private:
   std::set<pid_t> m_stateConfirmToBeReceived;
 
   std::unique_ptr<ExecutionManagerClient::ExecutionManagerClient> m_rpcClient;
+
+
+
+std::set<std::string> getAllowedProcessForState(std::string state);
+std::set<std::string> getActiveProcessForCurrentState();
+
 };
 
 } // namespace ExecutionManager

@@ -14,11 +14,13 @@ namespace Logger
     std::string getThreadId();
     std::string getCurrentTime();
     std::string getApplicationName(std::string);
+    std::string getPid();
 }
 
 #define LOG (Logger::LogHelper(), std::cout << Logger::getCurrentTime() \
                                   << " " \
                                   << Logger::getThreadId() \
-                                  << " [ " << Logger::getApplicationName(std::string{__FILE__}) << " ]:\t")
+                                  << " (" << Logger::getPid() << ") " \
+                                  << "[" << Logger::getApplicationName(std::string{__FILE__}) << "] \t")
 
 #endif

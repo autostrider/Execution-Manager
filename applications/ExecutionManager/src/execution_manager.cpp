@@ -31,6 +31,7 @@ ExecutionManager::ExecutionManager(
     m_activeApplications{},
     m_allowedApplicationForState{reader->getStatesSupportedByApplication()},
     m_currentState{},
+    m_pendingState{},
     m_machineManifestStates{reader->getMachineStates()},
     m_machineStateClientAppName{},
     m_rpcClient(std::move(client))
@@ -41,7 +42,6 @@ ExecutionManager::ExecutionManager(
 void ExecutionManager::start()
 {
   setMachineState(m_machineStateClientPid, defaultState);
-  //startApplicationsForState();
 }
 
 void ExecutionManager::filterStates()
@@ -80,7 +80,7 @@ void ExecutionManager::startApplicationsForState()
         }
         catch (const runtime_error& err)
         {
-          LOG << "\t" << err.what() << ".";
+          LOG << err.what() << ".";
         }
       }
     }
@@ -91,17 +91,19 @@ void
 ExecutionManager::confirmState(StateError status)
 {
   m_currentState = m_pendingState;
-  m_pendingState.clear();
 
   m_rpcClient->confirm(StateError::K_SUCCESS);
 
-  LOG  << "\t" << "Machine state changed successfully to "
-       << m_pendingState << ".";
+  LOG  << ">>>>>>>>>>>>>>  Machine state changed successfully to "
+       << m_pendingState << ". <<<<<<<<<<<<<<<<<<";
+
+  m_pendingState.clear();
+
 }
 
 void ExecutionManager::killProcessesForState()
 {
-  auto allowedApps = m_allowedApplicationForState.find(m_currentState);
+  auto allowedApps = m_allowedApplicationForState.find(m_pendingState);
 
   for (auto app = m_activeApplications.cbegin(); app != m_activeApplications.cend();)
   {
@@ -109,6 +111,8 @@ void ExecutionManager::killProcessesForState()
         processToBeKilled(app->first, allowedApps->second))
     {
       appHandler->killProcess(app->second);
+      m_stateConfirmToBeReceived.insert(app->second);
+
       app = m_activeApplications.erase(app);
     }
     else
@@ -135,31 +139,35 @@ void ExecutionManager::startApplication(const ProcessInfo& process)
 
   m_stateConfirmToBeReceived.insert(processId);
   
-  LOG << "\t" << "Adaptive aplication \""
-              << process.applicationName
-              << "\" with pid "
-              << processId
-              << " started.";
+  LOG << "Adaptive aplication \""
+      << process.applicationName
+      << "\" with pid "
+      << processId
+      << " started.";
 }
 
 void
 ExecutionManager::reportApplicationState(pid_t processId, AppState state)
 {
-  LOG << "\t" << "State \"" << applicationStateNames[static_cast<uint16_t>(state)]
+  LOG << "--> State \"" << applicationStateNames[static_cast<uint16_t>(state)]
       << "\" for application with pid "
       << processId
       << " received.";
 
-  if(m_stateConfirmToBeReceived.empty())
+  if (m_stateConfirmToBeReceived.empty())
   {
     return;
   }
 
-  m_stateConfirmToBeReceived.erase(processId);
 
-  if(m_stateConfirmToBeReceived.empty())
+  if ((state == AppState::RUNNING) || (state == AppState::SHUTTINGDOWN))
   {
-   confirmState(StateError::K_SUCCESS);
+    m_stateConfirmToBeReceived.erase(processId);
+
+    if (m_stateConfirmToBeReceived.empty())
+    {
+     confirmState(StateError::K_SUCCESS);
+    }
   }
 }
 
@@ -172,16 +180,16 @@ ExecutionManager::registerMachineStateClient(pid_t processId, string appName)
     m_machineStateClientPid = processId;
     m_machineStateClientAppName = appName;
 
-    LOG << "\t" << "State Machine Client \""
-              << m_machineStateClientAppName
-              << "\" with pid "
-              << m_machineStateClientPid
-              << " registered.";
+    LOG << "State Machine Client \""
+        << m_machineStateClientAppName
+        << "\" with pid "
+        << m_machineStateClientPid
+        << " registered.";
 
     return true;
   }
 
-  LOG << "\t" << "State Machine Client \""
+  LOG << "State Machine Client \""
       << appName
       << "\" registration failed"
       << "\" with pid "
@@ -194,7 +202,7 @@ ExecutionManager::registerMachineStateClient(pid_t processId, string appName)
 MachineState
 ExecutionManager::getMachineState(pid_t processId) const
 {
-  LOG << "\t" << "GetMachineState request received.";
+  LOG << "GetMachineState request received.";
 
   return m_currentState;
 }
@@ -202,18 +210,69 @@ ExecutionManager::getMachineState(pid_t processId) const
 StateError
 ExecutionManager::setMachineState(pid_t processId, string state)
 {
+
+
+  LOG << "=====================================================" ;
+  LOG << "STATE TO BE SET : " << state;
+  LOG << "-----------------------------------------------------";
+
+
+  // ---------------------------------------------------------------------------
+  std::set<std::string> allowedAppsSet = getAllowedProcessForState(state);
+  std::set<std::string> activeAppsSet = getActiveProcessForCurrentState();
+
+  std::set<std::string> processToBeKilledSet;
+  std::set<std::string> processToBeStartedSet;
+  
+
+  std::set_difference(activeAppsSet.begin(), activeAppsSet.end(),
+                      allowedAppsSet.begin(), allowedAppsSet.end(),
+                      std::inserter(processToBeKilledSet, processToBeKilledSet.begin()));
+
+
+  std::string res;
+
+  for (auto proc : processToBeKilledSet)
+  {
+    res += proc + ", ";
+  }
+  LOG << "Processes to be killed : " << res;
+
+  res.clear();
+
+
+  std::set_difference(allowedAppsSet.begin(), allowedAppsSet.end(),
+                      activeAppsSet.begin(), activeAppsSet.end(),
+                      std::inserter(processToBeStartedSet, processToBeStartedSet.begin()));
+
+  for (auto proc : processToBeStartedSet)
+  {
+    res += proc + ", ";
+  }
+  LOG << "Processes to be started : " << res;
+
+  res.clear();
+
+  // --------------------------------------------------------------------------- 
+
+
   auto stateIt = std::find(m_machineManifestStates.cbegin(),
                            m_machineManifestStates.cend(),
                            state);
 
-if(stateIt == m_machineManifestStates.end())
+  if (stateIt == m_machineManifestStates.end())
   {
+      LOG << "==================DONE INVALID STATE : " << state << "============================" ;
+
     return StateError::K_INVALID_STATE;
   }
 
-  if(processId != m_machineStateClientPid &&
-     m_stateConfirmToBeReceived.empty())
+  if (processId != m_machineStateClientPid &&
+      m_stateConfirmToBeReceived.empty())
   {
+
+      LOG << "==================DONE INVALID REQUEST============================" ;
+
     return StateError::K_INVALID_REQUEST;
   }
 
@@ -223,9 +282,27 @@ if(stateIt == m_machineManifestStates.end())
 
   startApplicationsForState();
 
-  if(!m_stateConfirmToBeReceived.empty())
+
+
+// =====================================================================
+std::string listOfPids;
+for (auto pid : m_stateConfirmToBeReceived)
+{
+  listOfPids += std::to_string(pid) + ", "; 
+}
+
+LOG << "Waiting for confirm from applications with pid : " << listOfPids;
+
+
+
+
+
+
+// =====================================================================
+
+  if (!m_stateConfirmToBeReceived.empty())
   {
-    LOG << "\t" << "Machine state change to  \""
+    LOG << "Machine state change to  \""
         << m_pendingState
         << "\" requested.";
   }
@@ -233,9 +310,12 @@ if(stateIt == m_machineManifestStates.end())
   {
     confirmState(StateError::K_SUCCESS);
 
-    LOG << "\t" << "HEREEEE ?????";
+    LOG << "HEREEEE ?????";
 
   }
+
+
+  LOG << "==================DONE============================" ;
 
   return StateError::K_SUCCESS;
 /*
@@ -263,6 +343,34 @@ if(stateIt == m_machineManifestStates.end())
 
   return false;
 */
+}
+
+
+
+std::set<std::string> ExecutionManager::getAllowedProcessForState(std::string state)
+{
+  std::set<std::string> allowedProc;
+
+  auto tmp = m_allowedApplicationForState[state];
+
+  for (auto id : tmp)
+  {
+    allowedProc.insert(id.processName);
+  }
+
+  return allowedProc;
+}
+
+std::set<std::string> ExecutionManager::getActiveProcessForCurrentState()
+{
+  std::set<std::string> activeProc;
+
+  for (auto id : m_activeApplications)
+  {
+    activeProc.insert(id.first);
+  }
+
+  return activeProc;
 }
 
 } // namespace ExecutionManager

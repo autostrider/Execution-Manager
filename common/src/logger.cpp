@@ -5,7 +5,7 @@
 #include <iomanip>
 #include <chrono>
 #include <thread>
-
+#include <unistd.h>
 namespace
 {
     const std::string appPath = std::string{"../applications/"};
@@ -42,4 +42,8 @@ namespace  Logger
         return filePath.erase(filePath.find_first_of('/'), std::string::npos);
     }
     
+    std::string getPid()
+    {        
+        return std::to_string(getpid());
+    }
 }

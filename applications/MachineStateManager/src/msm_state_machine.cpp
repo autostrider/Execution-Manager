@@ -91,6 +91,9 @@ void Run::enter()
           << "...";
 
       m_msm.setMachineState(state, defaulTimeout);     
+    
+      LOG << state << " State set"; 
+
     }
 }
 

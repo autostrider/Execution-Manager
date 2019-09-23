@@ -2,6 +2,7 @@
 #include "execution_manager_server.hpp"
 #include "execution_manager.hpp"
 #include "manifest_reader.hpp"
+#include "os_interface.hpp"
 #include <iostream>
 #include <memory>
 
@@ -9,9 +10,9 @@ int main(int argc, char **argv)
 {
   const char* socketName = "/tmp/execution_management";
   auto executionManager = ExecutionManager::ExecutionManager(
-    std::make_unique<ExecutionManager::ManifestReader>(),
-    std::make_unique<ExecutionManager::ApplicationHandler>()
-  );
+          std::make_unique<ExecutionManager::ManifestReader>(),
+          std::make_unique<ExecutionManager::ApplicationHandler>(
+            std::make_unique<ExecutionManager::OsInterface>()));
 
   try
   {

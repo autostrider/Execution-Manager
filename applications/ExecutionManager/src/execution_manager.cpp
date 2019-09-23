@@ -20,14 +20,14 @@ namespace {
 const string ExecutionManager::corePath =
   string{"./bin/applications/"};
 
-const MachineState ExecutionManager::defaultState {"Startup"};
+const MachineState ExecutionManager::defaultState {"Starting-up"};
 
 ExecutionManager::ExecutionManager(std::unique_ptr<IManifestReader> reader,
                                    std::unique_ptr<IApplicationHandler> applicationHandler)
   : appHandler{std::move(applicationHandler)},
     m_activeApplications{},
     m_allowedApplicationForState{reader->getStatesSupportedByApplication()},
-    m_currentState{},
+    m_currentState{defaultState},
     m_machineManifestStates{reader->getMachineStates()},
     m_machineStateClientAppName{}
 {

@@ -7,7 +7,6 @@
 
 namespace ExecutionManager {
 
-using std::runtime_error;
 using nlohmann::json;
 using std::ifstream;
 
@@ -95,7 +94,7 @@ std::set<std::string> ManifestReader::getListOfApplications()
 
   if ((dp = opendir(conf.pathToApplicationsFolder.c_str())) == nullptr)
   {
-    throw runtime_error(std::string{"Error opening directory: "}
+    throw std::runtime_error(std::string{"Error opening directory: "}
                         + conf.pathToApplicationsFolder
                         + " "
                         + strerror(errno));

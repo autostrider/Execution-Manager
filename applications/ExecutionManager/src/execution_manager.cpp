@@ -5,9 +5,6 @@
 namespace ExecutionManager
 {
 
-using std::runtime_error;
-using std::string;
-
 namespace {
   const char * applicationStateNames[] =
   {
@@ -17,8 +14,8 @@ namespace {
   };
 } // anonymous namespace
 
-const string ExecutionManager::corePath =
-  string{"./bin/applications/"};
+const std::string ExecutionManager::corePath =
+  std::string{"./bin/applications/"};
 
 const MachineState ExecutionManager::defaultState {"Starting-up"};
 
@@ -73,7 +70,7 @@ void ExecutionManager::startApplicationsForState()
         {
           startApplication(executableToStart);
         }
-        catch (const runtime_error& err)
+        catch (const std::runtime_error& err)
         {
           std::cout << err.what() << std::endl;
         }
@@ -101,7 +98,7 @@ void ExecutionManager::killProcessesForState()
   }
 }
 
-bool ExecutionManager::processToBeKilled(const string& app, const std::vector<ProcessInfo>& allowedApps)
+bool ExecutionManager::processToBeKilled(const std::string& app, const std::vector<ProcessInfo>& allowedApps)
 {
   auto it = std::find_if(allowedApps.cbegin(),
                      allowedApps.cend(),
@@ -131,7 +128,7 @@ ExecutionManager::reportApplicationState(pid_t processId, AppState state)
 }
 
 bool
-ExecutionManager::registerMachineStateClient(pid_t processId, string appName)
+ExecutionManager::registerMachineStateClient(pid_t processId, std::string appName)
 {
 
   if (m_machineStateClientPid == -1 ||
@@ -170,7 +167,7 @@ ExecutionManager::getMachineState(pid_t processId) const
 }
 
 bool
-ExecutionManager::setMachineState(pid_t processId, string state)
+ExecutionManager::setMachineState(pid_t processId, std::string state)
 {
   auto stateIt = std::find(m_machineManifestStates.cbegin(),
                                  m_machineManifestStates.cend(),

@@ -1,10 +1,11 @@
-#include "gtest/gtest.h"
-#include "gmock/gmock.h"
+#include "adaptive_app.hpp"
+#include "state.hpp"
+
 #include <iostream>
 #include <atomic>
 
-#include <adaptive_app.hpp>
-#include <state.hpp>
+#include "gtest/gtest.h"
+#include "gmock/gmock.h"
 
 using namespace testing;
 

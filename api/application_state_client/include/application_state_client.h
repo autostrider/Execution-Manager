@@ -1,5 +1,6 @@
 #ifndef APPLICATION_STATE_CLIENT_H
 #define APPLICATION_STATE_CLIENT_H
+
 #include <application_state_management.capnp.h>
 #include <capnp/ez-rpc.h>
 #include <unistd.h>

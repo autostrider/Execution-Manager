@@ -1,7 +1,6 @@
 #ifndef EXECUTION_MANAGER_APPLICATION_HANDLER_HPP
 #define EXECUTION_MANAGER_APPLICATION_HANDLER_HPP
 
-
 #include "manifests.hpp"
 #include <i_application_handler.hpp>
 #include <constants.hpp>

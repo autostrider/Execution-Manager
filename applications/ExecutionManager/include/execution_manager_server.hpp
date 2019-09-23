@@ -1,10 +1,11 @@
 #ifndef EXECUTION_MANAGER_SERVER_HPP
 #define EXECUTION_MANAGER_SERVER_HPP
 
+#include "execution_manager.hpp"
+
 #include <string>
 #include <capnp/ez-rpc.h>
 #include <execution_management.capnp.h>
-#include "execution_manager.hpp"
 
 namespace ExecutionManagerServer
 {

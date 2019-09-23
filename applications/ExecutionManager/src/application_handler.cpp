@@ -6,8 +6,6 @@
 namespace ExecutionManager
 {
 
-using std::runtime_error;
-
 ApplicationHandler::ApplicationHandler(std::string path)
         : corePath{std::move(path)}
 { }
@@ -28,7 +26,7 @@ pid_t ApplicationHandler::startProcess(const ProcessInfo& process)
 
     if (res)
     {
-      throw runtime_error(std::string{"Error occured creating process: "}
+      throw std::runtime_error(std::string{"Error occured creating process: "}
                           + process.processName
                           + " "
                           + strerror(errno));

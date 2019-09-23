@@ -1,19 +1,17 @@
 #ifndef MANIFESTS_HPP
 #define MANIFESTS_HPP
 
+#include <application_state_client.h>
 
 #include <string>
 #include <vector>
 #include <json.hpp>
-#include <application_state_client.h>
-
 
 namespace ExecutionManager
 {
 
 using nlohmann::json;
 using MachineState = std::string;
-using ApplicationState = ::ApplicationStateManagement::ApplicationState;
 
 struct MachineInstanceMode
 {

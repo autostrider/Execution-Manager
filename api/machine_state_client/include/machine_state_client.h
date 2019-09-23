@@ -1,5 +1,6 @@
 #ifndef MACHINE_STATE_CLIENT_H
 #define MACHINE_STATE_CLIENT_H
+
 #include <iostream>
 #include <string>
 #include <sys/types.h>

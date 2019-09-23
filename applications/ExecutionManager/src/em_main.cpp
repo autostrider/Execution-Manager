@@ -1,7 +1,9 @@
+#include "application_handler.hpp"
 #include "execution_manager_client.hpp"
 #include "execution_manager.hpp"
 #include "execution_manager_server.hpp"
 #include "manifest_reader.hpp"
+
 #include <iostream>
 #include <memory>
 #include <capnp/rpc-twoparty.h>
@@ -15,10 +17,11 @@ int main(int argc, char **argv)
   try
   {
     ::unlink(emAddress);
-    auto io = kj::setupAsyncIo();
+    auto io = kj::setupAsyncIo();   
 
     ExecutionManager::ExecutionManager executionManager
       (std::make_unique<ExecutionManager::ManifestReader>(),
+          std::make_unique<ExecutionManager::ApplicationHandler>(),
        std::make_unique<ExecutionManagerClient::ExecutionManagerClient>
         (protocol + msmAddress, io));
 
@@ -35,10 +38,11 @@ int main(int argc, char **argv)
     server.drain().wait(io.waitScope);
 
     listenPromise.wait(io.waitScope);
+
   }
-  catch (const kj::Exception &e)
+  catch (const kj::Exception& exception)
   {
-    std::cerr << e.getDescription().cStr() << std::endl;
+    std::cerr << exception.getDescription().cStr() << std::endl;
   }
 
   return EXIT_SUCCESS;

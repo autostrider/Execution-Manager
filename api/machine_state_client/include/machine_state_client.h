@@ -1,16 +1,12 @@
 #ifndef MACHINE_STATE_CLIENT_H
 #define MACHINE_STATE_CLIENT_H
-#include <iostream>
-#include <string>
-#include <sys/types.h>
-#include <unistd.h>
+
 #include <machine_state_management.capnp.h>
 #include <capnp/ez-rpc.h>
 #include <kj/async-io.h>
 #include <capnp/rpc-twoparty.h>
-#include <chrono>
 #include <future>
-#include <thread>
+#include <string>
 
 namespace api {
 

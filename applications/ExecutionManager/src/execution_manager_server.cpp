@@ -1,14 +1,18 @@
 #include "execution_manager_server.hpp"
 
+#include <iostream>
+
 namespace ExecutionManagerServer
 {
-using namespace std;
+using ApplicationState = ::ApplicationStateManagement::ApplicationState;
+using StateError = ::MachineStateManagement::StateError;
+using std::string;
 
 ExecutionManagerServer::ExecutionManagerServer
 (ExecutionManager::ExecutionManager& application)
   : m_em(application)
 {
-  cout << "Execution Manager server started..." << endl;
+  std::cout << "Execution Manager server started..." << std::endl;
 
   m_em.start();
 }

@@ -1,5 +1,7 @@
 #include "machine_state_client.h"
 
+#include <unistd.h>
+
 using std::string;
 
 namespace api {

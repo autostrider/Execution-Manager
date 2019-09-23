@@ -6,13 +6,16 @@
         "Function_group_name": "MachineState",
         "Mode_declarations": [
           {
-            "Mode": "Startup"
+            "Mode": "Starting-up"
           },
           {
             "Mode": "Running"
           },
           {
-            "Mode": "Shutdown"
+            "Mode": "Living"
+          },
+          {
+            "Mode": "Shuttingdown"
           }
         ]
       }

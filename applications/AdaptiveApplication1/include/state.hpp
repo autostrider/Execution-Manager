@@ -8,7 +8,7 @@
 class State : public api::IState
 {
 public:
-    State(AdaptiveApp& app, api::ApplicationStateClient::ApplicationState state, const std::string& stateName);
+    State(AdaptiveApp& app, api::ApplicationStateClient::ApplicationState state, std::string stateName);
 
     virtual void enter() = 0;
     void leave() const override;
@@ -42,13 +42,12 @@ public:
     void enter() override;
 };
 
-
 class StateFactory: public api::IStateFactory
 {
 public:
-    std::unique_ptr<api::IState> createInit(api::IAdaptiveApp &app) override;
-    std::unique_ptr<api::IState> createRun(api::IAdaptiveApp &app) override;
-    std::unique_ptr<api::IState> createShutDown(api::IAdaptiveApp &app) override;
+    std::unique_ptr<api::IState> createInit(api::IAdaptiveApp& app) const override;
+    std::unique_ptr<api::IState> createRun(api::IAdaptiveApp& app) const override;
+    std::unique_ptr<api::IState> createShutDown(api::IAdaptiveApp& app) const override;
 };
 
 #endif // STATE_HPP

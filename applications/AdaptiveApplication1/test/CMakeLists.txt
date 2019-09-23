@@ -7,7 +7,7 @@ file(GLOB_RECURSE SRCS *.cpp)
 
 add_executable(${TEST_NAME}_test ${SRCS} ${AA1_SRC})
 
-target_include_directories(${TEST_NAME}_test PRIVATE ${AA_INCLUDE})
+target_include_directories(${TEST_NAME}_test PRIVATE ${AA1_INCLUDE})
 target_link_libraries(${TEST_NAME}_test
   gtest
   gtest_main
@@ -29,7 +29,7 @@ set(COVERAGE_BUILD ${TEST_NAME}_coverage_build)
 
 add_executable(${COVERAGE_BUILD} ${SRCS} ${AA1_SRC})
 
-target_include_directories(${COVERAGE_BUILD} PRIVATE ${AA_INCLUDE})
+target_include_directories(${COVERAGE_BUILD} PRIVATE ${AA1_INCLUDE})
 target_link_libraries(${COVERAGE_BUILD}
   gcov
   gtest

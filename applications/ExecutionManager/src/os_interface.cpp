@@ -11,7 +11,7 @@ pid_t OsInterface::fork()
   return ::fork();
 }
 
-int OsInterface::execv(const char *path, char **argv)
+int OsInterface::execv(const char* path, char* argv[])
 {
   return ::execv(path, argv);
 }

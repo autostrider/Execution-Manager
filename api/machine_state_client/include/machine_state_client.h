@@ -33,7 +33,7 @@ class MachineStateClient
 {
 public:
   MachineStateClient(std::string path);
-  ~MachineStateClient() = default;
+  ~MachineStateClient();
 
   // K_SUCCESS
   // K_INVALID_STATE
@@ -56,6 +56,8 @@ private:
   std::promise<StateError> m_promise;
 
   kj::AsyncIoProvider::PipeThread m_serverThread;
+  kj::Own<kj::PromiseFulfiller<void>> m_listenFulfiller;
+  kj::Maybe<const kj::Executor&> m_serverExecutor;
 
   pid_t m_pid;
 };

@@ -42,7 +42,7 @@ pid_t ApplicationHandler::startProcess(const ProcessInfo& process)
 
 void ApplicationHandler::killProcess(pid_t processId)
 {
-  m_syscalls->kill(processId, SIGTERM);
+ m_syscalls->kill(processId, SIGTERM);
 }
 
 std::vector<std::string>

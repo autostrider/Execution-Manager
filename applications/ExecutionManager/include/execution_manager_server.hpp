@@ -3,15 +3,11 @@
 
 #include "execution_manager.hpp"
 
-#include <kj/async-io.h>
-#include <string>
-
 namespace ExecutionManagerServer
 {
 class ExecutionManagerServer : public ExecutionManagement::Server
 {
 public:
-
   explicit
   ExecutionManagerServer
     (ExecutionManager::ExecutionManager& application);
@@ -30,7 +26,6 @@ private:
   setMachineState(SetMachineStateContext context) override;
 
 private:
-
   ExecutionManager::ExecutionManager& m_em;
 };
 

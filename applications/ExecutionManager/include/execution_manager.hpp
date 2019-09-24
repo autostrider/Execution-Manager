@@ -2,11 +2,8 @@
 #define EXECUTION_MANAGER_HPP
 
 #include "execution_manager_client.hpp"
-#include "manifests.hpp"
 #include <i_manifest_reader.hpp>
 #include <i_application_handler.hpp>
-#include <machine_state_management.capnp.h>
-
 #include <map>
 #include <memory>
 #include <string>
@@ -50,8 +47,8 @@ public:
   MachineState getMachineState(pid_t processId) const;
 
   StateError setMachineState(pid_t processId, std::string state);
-private:
 
+private:
   /**
    * @brief Removes unsupported states from availApps
    */
@@ -78,12 +75,8 @@ private:
                           const std::vector<ProcessInfo>&);
 
   void confirmState(StateError status);
-private:
-  /**
-   * @brief Hardcoded path to folder with adaptive applications.
-   */
-  const static std::string corePath;
 
+private:
   /**
    * @brief Holds interface responsible for starting applications
    */

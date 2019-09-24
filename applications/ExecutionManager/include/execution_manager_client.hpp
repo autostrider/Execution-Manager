@@ -15,12 +15,11 @@ using StateError = ::MachineStateManagement::StateError;
 class ExecutionManagerClient
 {
 public:
-  ExecutionManagerClient(std::string msmAddress, kj::AsyncIoContext& context);
+  ExecutionManagerClient(const std::string msmAddress, kj::AsyncIoContext& context);
   void confirm(StateError status);
 
 private:
-
-  std::string m_msmAddress;
+  const std::string m_msmAddress;
   kj::AsyncIoContext& m_ioContext;
 
   kj::AsyncIoProvider::PipeThread m_sendThread;

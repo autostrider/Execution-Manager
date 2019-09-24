@@ -1,10 +1,10 @@
 #include "application_state_client.h"
 #include <constants.hpp>
 
-namespace api 
+namespace api
 {
 ApplicationStateClient::ApplicationStateClient()
-  : m_client(SOCKET_NAME.c_str()),
+  : m_client(IPC_PROTOCOL + EM_SOCKET_NAME),
     m_pid(getpid())
 {}
 

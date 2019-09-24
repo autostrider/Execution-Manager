@@ -4,7 +4,7 @@ namespace ExecutionManagerClient
 {
 
 ExecutionManagerClient::ExecutionManagerClient(
-  std::string msmAddress,
+  const std::string msmAddress,
   kj::AsyncIoContext& context)
 : m_msmAddress(msmAddress),
   m_ioContext(context)

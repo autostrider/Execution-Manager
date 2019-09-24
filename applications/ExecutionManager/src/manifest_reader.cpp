@@ -4,6 +4,7 @@
 #include <json.hpp>
 #include <fstream>
 #include <algorithm>
+#include <logger.hpp>
 
 namespace ExecutionManager {
 
@@ -24,7 +25,10 @@ json ManifestReader::getJsonData(const std::string& manifestPath)
 
 ManifestReader::ManifestReader(const ManifestReaderConf &conf)
   : conf(conf)
-{ }
+{
+  int code = errno;
+  LOG << ":::GET LIST OF APPLICATIONS CONSTRUCTOR: " << code;
+}
 
 std::map<MachineState, std::vector<ProcessInfo> > ManifestReader::getStatesSupportedByApplication()
 {
@@ -36,7 +40,9 @@ std::map<MachineState, std::vector<ProcessInfo> > ManifestReader::getStatesSuppo
   {
     file = conf.pathToApplicationsFolder + "/" + file + manifestFile;
 
+    LOG << "JSON ERRNO " << errno;
     json content = getJsonData(file);
+    LOG << "JSON ERRNO " << errno;
 
     ApplicationManifest manifest = content.get<ApplicationManifest>();
 
@@ -92,7 +98,8 @@ std::set<std::string> ManifestReader::getListOfApplications()
 {
   DIR* dp = nullptr;
   std::set<std::string> fileNames;
-
+  int code = errno;
+  LOG << ":::GET LIST OF APPLICATIONS " << code;
   if ((dp = opendir(conf.pathToApplicationsFolder.c_str())) == nullptr)
   {
     throw runtime_error(std::string{"Error opening directory: "}
@@ -103,6 +110,8 @@ std::set<std::string> ManifestReader::getListOfApplications()
 
   for (struct dirent *drnt = readdir(dp); drnt != nullptr; drnt = readdir(dp))
   {
+    code = errno;
+    LOG << ":::GET LIST OF APPLICATIONS FOR-LOOP: " << code;
     if (drnt->d_name != std::string{"."} &&
         drnt->d_name != std::string{".."})
     {
@@ -111,6 +120,8 @@ std::set<std::string> ManifestReader::getListOfApplications()
   }
 
   closedir(dp);
+  code = errno;
+  LOG << ":::GET LIST OF APPLICATIONS closedir: " << code;
   return fileNames;
 }
 

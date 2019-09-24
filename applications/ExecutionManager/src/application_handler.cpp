@@ -2,6 +2,7 @@
 
 #include <csignal>
 #include <exception>
+#include <sys/wait.h>
 
 namespace ExecutionManager
 {
@@ -43,6 +44,9 @@ pid_t ApplicationHandler::startProcess(const ProcessInfo& process)
 void ApplicationHandler::killProcess(pid_t processId)
 {
   m_syscalls->kill(processId, SIGTERM);
+
+  int status;
+  m_syscalls->waitpid(processId, &status, WNOHANG);
 }
 
 std::vector<std::string>

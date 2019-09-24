@@ -1,7 +1,7 @@
 #include "os_interface.hpp"
 
 #include <unistd.h>
-#include <csignal>
+#include <sys/wait.h>
 
 namespace ExecutionManager
 {
@@ -19,6 +19,11 @@ int OsInterface::execv(const char* path, char* argv[])
 int OsInterface::kill(pid_t procId, int signal)
 {
   return ::kill(procId, signal);
+}
+
+int OsInterface::waitpid(pid_t procId, int *status, int options)
+{
+  return ::waitpid(procId, status, options);
 }
 
 }

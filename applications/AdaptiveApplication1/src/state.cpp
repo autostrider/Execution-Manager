@@ -1,4 +1,5 @@
-#include <state.hpp>
+#include "state.hpp"
+#include <constants.hpp>
 
 #include <iostream>
 
@@ -23,7 +24,7 @@ ApplicationState State::getApplicationState() const
     return m_applState;
 }
 
-Init::Init(AdaptiveApp &app) : State (app, ApplicationState::K_INITIALIZING, "Initializing")
+Init::Init(AdaptiveApp &app) : State (app, ApplicationState::K_INITIALIZING, AA_STATE_INIT)
 {
 }
 
@@ -37,7 +38,7 @@ void Init::leave() const
     m_app.reportApplicationState(ApplicationState::K_RUNNING);
 }
 
-Run::Run(AdaptiveApp &app) : State (app, ApplicationState::K_RUNNING, "Running")
+Run::Run(AdaptiveApp &app) : State (app, ApplicationState::K_RUNNING, AA_STATE_RUNNING)
 {
 }
 
@@ -47,7 +48,7 @@ void Run::enter()
     std::cout << "mean: " << m_app.mean() << std::endl;
 }
 
-ShutDown::ShutDown(AdaptiveApp& app) : State (app, ApplicationState::K_SHUTTINGDOWN, "Shutdown")
+ShutDown::ShutDown(AdaptiveApp& app) : State (app, ApplicationState::K_SHUTTINGDOWN, AA_STATE_SHUTDOWN)
 {
 }
 

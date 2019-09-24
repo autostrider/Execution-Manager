@@ -48,14 +48,19 @@ void MachineStateManager::reportApplicationState(ApplicationState state)
     m_appClient->ReportApplicationState(state);
 }
 
-void MachineStateManager::setMachineState(std::string state, int timeout)
+StateError MachineStateManager::setMachineState(std::string state)
 {
-  machineStateClient->SetMachineState(state, timeout);
+  if (MACHINE_STATE_SHUTTINGDOWN == state)
+  {
+    return machineStateClient->SetMachineState(state, NO_TIMEOUT);
+  }
+
+  return machineStateClient->SetMachineState(state, DEFAULT_RESPONSE_TIMEOUT);
 }
 
-StateError MachineStateManager::registerMsm(const std::string& applicationName, uint timeout)
+StateError MachineStateManager::registerMsm(const std::string& applicationName)
 {
-  return machineStateClient->Register(applicationName.c_str(), timeout);
+  return machineStateClient->Register(applicationName.c_str(), DEFAULT_RESPONSE_TIMEOUT);
 }
 
 } // namespace MSM

@@ -1,9 +1,9 @@
 #include <adaptive_app.hpp>
 #include <state.hpp>
+#include <constants.hpp>
 
 #include <signal.h>
 #include <iostream>
-#include <chrono>
 #include <thread>
 
 static void signalHandler(int signo);
@@ -22,7 +22,7 @@ int main()
     while (!isTerminating)
     {
         app.run();
-        std::this_thread::sleep_for(std::chrono::seconds(5));
+        std::this_thread::sleep_for(FIVE_SECONDS);
     }
     app.terminate();
     return 0;

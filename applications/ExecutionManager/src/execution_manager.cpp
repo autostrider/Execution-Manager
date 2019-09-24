@@ -1,4 +1,5 @@
 #include "execution_manager.hpp"
+#include <constants.hpp>
 
 #include <iostream>
 
@@ -9,25 +10,20 @@ using std::runtime_error;
 using std::string;
 
 namespace {
-  const char * applicationStateNames[] =
-  {
-    "Initializing",
-    "Running",
-    "Shuttingdown"
-  };
+  const std::vector<string> applicationStateNames{AA_STATE_INIT,
+                                                  AA_STATE_RUNNING,
+                                                  AA_STATE_SHUTDOWN};
 } // anonymous namespace
 
 const string ExecutionManager::corePath =
   string{"./bin/applications/"};
-
-const MachineState ExecutionManager::defaultState {"Starting-up"};
 
 ExecutionManager::ExecutionManager(std::unique_ptr<IManifestReader> reader,
                                    std::unique_ptr<IApplicationHandler> applicationHandler)
   : appHandler{std::move(applicationHandler)},
     m_activeApplications{},
     m_allowedApplicationForState{reader->getStatesSupportedByApplication()},
-    m_currentState{defaultState},
+    m_currentState{MACHINE_STATE_STARTUP},
     m_machineManifestStates{reader->getMachineStates()},
     m_machineStateClientAppName{}
 {

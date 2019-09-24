@@ -1,6 +1,7 @@
 #include "machine_state_manager.hpp"
 #include "msm_state_machine.hpp"
 #include <logger.hpp>
+#include <constants.hpp>
 
 #include <signal.h>
 #include <iostream>
@@ -19,14 +20,14 @@ int main(int argc, char **argv)
     }
 
     MSM::MachineStateManager msm(std::make_unique<MSM::MsmStateFactory>(),
-                                                 std::make_unique<api::ApplicationStateClientWrapper>());
+                                 std::make_unique<api::ApplicationStateClientWrapper>());
 
     msm.init();
 
     while (!isTerminating)
     {
         msm.run();
-        std::this_thread::sleep_for(std::chrono::seconds(5));
+        std::this_thread::sleep_for(FIVE_SECONDS);
     }
     msm.terminate();
     return 0;

@@ -1,18 +1,13 @@
 #include <adaptive_app.hpp>
 #include <state.hpp>
+#include <constants.hpp>
 
 #include <signal.h>
 #include <iostream>
-#include <chrono>
 #include <thread>
 
 static void signalHandler(int signo);
 static std::atomic<bool> isTerminating{false};
-
-namespace
-{
-    constexpr int timeout = 5;
-}
 
 int main()
 {
@@ -29,7 +24,7 @@ int main()
     while (!isTerminating)
     {
         app3.run();
-        std::this_thread::sleep_for(std::chrono::seconds(timeout));
+        std::this_thread::sleep_for(FIVE_SECONDS);
     }
     app3.terminate();
     return 0;

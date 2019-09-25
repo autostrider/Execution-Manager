@@ -22,7 +22,8 @@ int main(int argc, char **argv)
     }
 
     MSM::MachineStateManager msm(std::make_unique<MSM::MsmStateFactory>(),
-                                                 std::make_unique<api::ApplicationStateClientWrapper>());
+                                 std::make_unique<api::ApplicationStateClientWrapper>(),
+                                 std::make_unique<api::MachineStateClientWrapper>());
 
     msm.init();
 

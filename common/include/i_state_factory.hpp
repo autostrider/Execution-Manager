@@ -1,9 +1,10 @@
 #ifndef ISTATEFACTORY_HPP
 #define ISTATEFACTORY_HPP
 
-#include<i_state.hpp>
-#include<i_adaptive_app.hpp>
-#include<memory>
+#include "i_state.hpp"
+#include "i_adaptive_app.hpp"
+
+#include <memory>
 
 namespace api
 {

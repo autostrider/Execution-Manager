@@ -1,5 +1,4 @@
 #include "machine_state_manager.hpp"
-#include <constants.hpp>
 
 namespace MSM {
 
@@ -8,11 +7,12 @@ using ApplicationState = api::ApplicationStateClient::ApplicationState;
 using StateError = api::MachineStateClient::StateError;
 
 MachineStateManager::MachineStateManager(std::unique_ptr<api::IStateFactory> factory,
-                                         std::unique_ptr<api::IApplicationStateClientWrapper> client) :
-        machineStateClient(std::make_unique<MachineStateClient>(SOCKET_NAME)),
+                                         std::unique_ptr<api::IApplicationStateClientWrapper> appClient,
+                                         std::unique_ptr<api::IMachineStateClientWrapper> machineClient) :
+        m_machineClient(std::move(machineClient)),
         m_factory{std::move(factory)},
         m_currentState{nullptr},
-        m_appClient{std::move(client)}
+        m_appClient{std::move(appClient)}
 {
 }
 
@@ -50,12 +50,12 @@ void MachineStateManager::reportApplicationState(ApplicationState state)
 
 void MachineStateManager::setMachineState(std::string state, int timeout)
 {
-  machineStateClient->SetMachineState(state, timeout);
+  m_machineClient->SetMachineState(state, timeout);
 }
 
 StateError MachineStateManager::registerMsm(const std::string& applicationName, uint timeout)
 {
-  return machineStateClient->Register(applicationName.c_str(), timeout);
+  return m_machineClient->Register(applicationName.c_str(), timeout);
 }
 
 } // namespace MSM

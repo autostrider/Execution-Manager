@@ -2,6 +2,7 @@
 #define MACHINE_STATE_MANAGER_HPP
 
 #include <machine_state_client.h>
+#include <application_state_client.h>
 #include <i_adaptive_app.hpp>
 #include <i_state_factory.hpp>
 #include <i_application_state_client_wrapper.hpp>
@@ -31,8 +32,9 @@ public:
   void reportApplicationState(api::ApplicationStateClient::ApplicationState) override;
 
 private:
-  void transitToNextState(IAdaptiveApp::FactoryFunc nextState) override;
+  void transitToNextState(api::IAdaptiveApp::FactoryFunc nextState) override;
 
+private:
   std::unique_ptr<api::MachineStateClient> machineStateClient;
   std::unique_ptr<api::IStateFactory> m_factory;
   std::unique_ptr<api::IState> m_currentState;

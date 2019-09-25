@@ -1,6 +1,5 @@
 #include "application_handler.hpp"
 #include "execution_manager_server.hpp"
-#include "execution_manager.hpp"
 #include "manifest_reader.hpp"
 #include "os_interface.hpp"
 #include <iostream>
@@ -8,32 +7,38 @@
 
 int main(int argc, char **argv)
 {
-  const char* socketName = "/tmp/execution_management";
-  auto executionManager = ExecutionManager::ExecutionManager(
-          std::make_unique<ExecutionManager::ManifestReader>(),
-          std::make_unique<ExecutionManager::ApplicationHandler>(
-            std::make_unique<ExecutionManager::OsInterface>()));
-
   try
   {
-    ::unlink(socketName);
-    capnp::EzRpcServer server(
+    ::unlink(EM_SOCKET_NAME.c_str());
+    auto io = kj::setupAsyncIo();
+
+    ExecutionManager::ExecutionManager executionManager
+      (std::make_unique<ExecutionManager::ManifestReader>(),
+          std::make_unique<ExecutionManager::ApplicationHandler>(
+           std::make_unique<ExecutionManager::OsInterface>()
+           ),
+       std::make_unique<ExecutionManagerClient::ExecutionManagerClient>
+        (IPC_PROTOCOL + MSM_SOCKET_NAME, io)
+       );
+
+    capnp::TwoPartyServer server(
       kj::heap<ExecutionManagerServer::ExecutionManagerServer>
-      (executionManager),
-      std::string{"unix:"} + socketName);
+      (executionManager));
 
-    auto &waitScope = server.getWaitScope();
+    auto address = io.provider->getNetwork()
+        .parseAddress(IPC_PROTOCOL + EM_SOCKET_NAME).wait(io.waitScope);
 
-    server.getPort().then([&](capnp::uint port)
-    {
-      executionManager.start();
-    }).wait(waitScope);
+    auto listener = address->listen();
+    auto listenPromise = server.listen(*listener);
 
-    kj::NEVER_DONE.wait(waitScope);
+    server.drain().wait(io.waitScope);
+
+    listenPromise.wait(io.waitScope);
+
   }
-  catch (const kj::Exception &e)
+  catch (const kj::Exception& exception)
   {
-    std::cerr << e.getDescription().cStr() << std::endl;
+    std::cerr << exception.getDescription().cStr() << std::endl;
   }
 
   return EXIT_SUCCESS;

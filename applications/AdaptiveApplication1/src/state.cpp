@@ -2,6 +2,7 @@
 #include <constants.hpp>
 
 #include <iostream>
+#include <logger.hpp>
 
 using ApplicationState = api::ApplicationStateClient::ApplicationState;
 
@@ -12,7 +13,7 @@ State::State(AdaptiveApp& app,
              m_applState{state}, 
              m_stateName{std::move(stateName)}
 {
-    std::cout << "Enter " << m_stateName << " state" << std::endl;
+    LOG << "Enter " << m_stateName << " state.";
 }
 
 void State::leave() const
@@ -45,7 +46,7 @@ Run::Run(AdaptiveApp &app) : State (app, ApplicationState::K_RUNNING, AA_STATE_R
 void Run::enter()
 {
     m_app.readSensorData();
-    std::cout << "mean: " << m_app.mean() << std::endl;
+    LOG << "Mean: " << m_app.mean() << ".";
 }
 
 ShutDown::ShutDown(AdaptiveApp& app) : State (app, ApplicationState::K_SHUTTINGDOWN, AA_STATE_SHUTDOWN)
@@ -55,7 +56,7 @@ ShutDown::ShutDown(AdaptiveApp& app) : State (app, ApplicationState::K_SHUTTINGD
 void ShutDown::enter()
 {
     m_app.reportApplicationState(getApplicationState());
-    std::cout << "Killing app..." << std::endl;
+    LOG << "Killing app...";
 }
 
 std::unique_ptr<api::IState> StateFactory::createInit(api::IAdaptiveApp& app) const

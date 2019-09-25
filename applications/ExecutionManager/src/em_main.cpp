@@ -14,9 +14,12 @@ int main(int argc, char **argv)
 
     ExecutionManager::ExecutionManager executionManager
       (std::make_unique<ExecutionManager::ManifestReader>(),
-          std::make_unique<ExecutionManager::ApplicationHandler>(),
+          std::make_unique<ExecutionManager::ApplicationHandler>(
+           std::make_unique<ExecutionManager::OsInterface>()
+           ),
        std::make_unique<ExecutionManagerClient::ExecutionManagerClient>
-        (IPC_PROTOCOL + MSM_SOCKET_NAME, io));
+        (IPC_PROTOCOL + MSM_SOCKET_NAME, io)
+       );
 
     capnp::TwoPartyServer server(
       kj::heap<ExecutionManagerServer::ExecutionManagerServer>

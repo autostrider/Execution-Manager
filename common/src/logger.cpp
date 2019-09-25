@@ -1,11 +1,11 @@
 #include "logger.hpp"
 
-#include <ctime> 
+#include <ctime>
 #include <sstream>
 #include <iomanip>
 #include <chrono>
 #include <thread>
-
+#include <unistd.h>
 namespace
 {
     const std::string appPath = std::string{"../applications/"};
@@ -13,15 +13,15 @@ namespace
 namespace  Logger
 {
     LogHelper::~LogHelper()
-    { 
+    {
         std::cout << std::endl;
     }
-    
+
     std::string  getThreadId()
     {
         std::stringstream ss;
         ss << std::hex << "0x" << std::this_thread::get_id();
-        
+
         return ss.str();
     }
 
@@ -31,15 +31,14 @@ namespace  Logger
 
         std::stringstream ss;
         ss << std::put_time(std::localtime(&in_time_t), "%X");
-    
+
         return ss.str();
     }
-    
+
     std::string getApplicationName(std::string filePath)
-    {        
+    {
         filePath = filePath.erase(0, appPath.size());
 
         return filePath.erase(filePath.find_first_of('/'), std::string::npos);
     }
-    
 }

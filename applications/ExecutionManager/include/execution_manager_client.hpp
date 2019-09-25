@@ -15,7 +15,7 @@ using StateError = ::MachineStateManagement::StateError;
 class ExecutionManagerClient
 {
 public:
-  ExecutionManagerClient(const std::string msmAddress, kj::AsyncIoContext& context);
+  ExecutionManagerClient(const std::string& msmAddress, kj::AsyncIoContext& context);
   void confirm(StateError status);
 
 private:

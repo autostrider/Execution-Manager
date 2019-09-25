@@ -1,4 +1,5 @@
 #include "machine_state_client.h"
+#include <constants.hpp>
 
 #include <unistd.h>
 
@@ -124,7 +125,7 @@ MachineStateClient::startServer()
       kj::heap<MachineStateServer>(m_promise));
 
     auto address = ioProvider.getNetwork()
-        .parseAddress(std::string{"unix:/tmp/machine_management"})
+        .parseAddress(IPC_PROTOCOL + MSM_SOCKET_NAME)
           .wait(waitScope);
 
     auto listener = address->listen();

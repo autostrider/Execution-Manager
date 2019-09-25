@@ -1,36 +1,32 @@
 #include "application_handler.hpp"
-#include "execution_manager_client.hpp"
-#include "execution_manager.hpp"
 #include "execution_manager_server.hpp"
 #include "manifest_reader.hpp"
-
+#include "os_interface.hpp"
 #include <iostream>
 #include <memory>
-#include <capnp/rpc-twoparty.h>
 
 int main(int argc, char **argv)
 {
-  const char* emAddress = "/tmp/execution_management";
-  const char* msmAddress = "/tmp/machine_management";
-  std::string protocol{"unix:"};
-
   try
   {
-    ::unlink(emAddress);
-    auto io = kj::setupAsyncIo();   
+    ::unlink(EM_SOCKET_NAME.c_str());
+    auto io = kj::setupAsyncIo();
 
     ExecutionManager::ExecutionManager executionManager
       (std::make_unique<ExecutionManager::ManifestReader>(),
-          std::make_unique<ExecutionManager::ApplicationHandler>(),
+          std::make_unique<ExecutionManager::ApplicationHandler>(
+           std::make_unique<ExecutionManager::OsInterface>()
+           ),
        std::make_unique<ExecutionManagerClient::ExecutionManagerClient>
-        (protocol + msmAddress, io));
+        (IPC_PROTOCOL + MSM_SOCKET_NAME, io)
+       );
 
     capnp::TwoPartyServer server(
       kj::heap<ExecutionManagerServer::ExecutionManagerServer>
       (executionManager));
 
     auto address = io.provider->getNetwork()
-        .parseAddress(protocol + emAddress).wait(io.waitScope);
+        .parseAddress(IPC_PROTOCOL + EM_SOCKET_NAME).wait(io.waitScope);
 
     auto listener = address->listen();
     auto listenPromise = server.listen(*listener);

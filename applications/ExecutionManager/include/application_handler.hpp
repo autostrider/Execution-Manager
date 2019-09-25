@@ -4,6 +4,7 @@
 
 #include "manifests.hpp"
 #include <i_application_handler.hpp>
+#include <i_os_interface.hpp>
 #include <constants.hpp>
 
 #include <vector>
@@ -15,7 +16,8 @@ namespace ExecutionManager
 class ApplicationHandler : public IApplicationHandler
 {
 public:
-  explicit ApplicationHandler(std::string path = APPLICATIONS_PATH);
+  explicit ApplicationHandler(std::unique_ptr<IOsInterface> syscalls,
+                              std::string path = APPLICATIONS_PATH);
 
   pid_t startProcess(const ProcessInfo& process) override;
 
@@ -42,7 +44,9 @@ private:
             std::vector<std::string>& vectorToConvert) const;
 
 private:
-    const std::string corePath;
+  const std::string corePath;
+
+  std::unique_ptr<IOsInterface> m_syscalls;
 };
 
 } // namespace ExecutionManager

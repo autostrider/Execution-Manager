@@ -19,7 +19,7 @@ class MachineStateManager : public api::IAdaptiveApp
 {
 public:
   MachineStateManager(std::unique_ptr<api::IStateFactory> factory,
-                      std::unique_ptr<api::IApplicationStateClientWrapper> appClient,
+                      std::unique_ptr<api::IApplicationStateClientWrapper> appStateClient,
                       std::unique_ptr<api::IMachineStateClientWrapper> machineClient);
   ~MachineStateManager() override = default;
 
@@ -35,10 +35,10 @@ private:
   void transitToNextState(api::IAdaptiveApp::FactoryFunc nextState) override;
 
 private:
-  std::unique_ptr<api::IMachineStateClientWrapper> m_machineClient;
+  std::unique_ptr<api::IMachineStateClientWrapper> m_machineStateClient;
   std::unique_ptr<api::IStateFactory> m_factory;
   std::unique_ptr<api::IState> m_currentState;
-  std::unique_ptr<api::IApplicationStateClientWrapper> m_appClient;
+  std::unique_ptr<api::IApplicationStateClientWrapper> m_appStateClient;
 };
 
 } // namespace MSM

@@ -10,7 +10,7 @@ namespace Logger
     {
         ~LogHelper();
     };
-    
+
     std::string getThreadId();
     std::string getCurrentTime();
     std::string getApplicationName(std::string);
@@ -20,7 +20,7 @@ namespace Logger
 #define LOG (Logger::LogHelper(), std::cout << Logger::getCurrentTime() \
                                   << " " \
                                   << Logger::getThreadId() \
-                                  << " (" << Logger::getPid() << ") " \
+                                  << " (" << getpid() << ") " \
                                   << "[" << Logger::getApplicationName(std::string{__FILE__}) << "] \t")
 
 #endif

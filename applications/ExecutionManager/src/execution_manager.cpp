@@ -18,9 +18,6 @@ namespace {
   };
 } // anonymous namespace
 
-const string ExecutionManager::corePath =
-  string{"./bin/applications/"};
-
 const MachineState ExecutionManager::defaultState {"Starting-up"};
 
 ExecutionManager::ExecutionManager(
@@ -92,13 +89,12 @@ ExecutionManager::confirmState(StateError status)
 {
   m_currentState = m_pendingState;
 
-  m_rpcClient->confirm(StateError::K_SUCCESS);
+  m_rpcClient->confirm(status);
 
   LOG  << "Machine state changed successfully to "
        << m_pendingState << ".";
 
   m_pendingState.clear();
-
 }
 
 void ExecutionManager::killProcessesForState()
@@ -122,7 +118,9 @@ void ExecutionManager::killProcessesForState()
   }
 }
 
-bool ExecutionManager::processToBeKilled(const string& app, const std::vector<ProcessInfo>& allowedApps)
+bool ExecutionManager::processToBeKilled(
+  const string& app,
+  const std::vector<ProcessInfo>& allowedApps)
 {
   auto it = std::find_if(allowedApps.cbegin(),
                      allowedApps.cend(),
@@ -138,7 +136,7 @@ void ExecutionManager::startApplication(const ProcessInfo& process)
   m_activeProcesses.insert({process.processName, processId});
 
   m_stateConfirmToBeReceived.insert(processId);
-  
+
   LOG << "Adaptive aplication \""
       << process.applicationName
       << "\" with pid "

@@ -5,7 +5,7 @@ namespace api {
 
 using StateError = MachineStateClient::StateError;
 
-MachineStateClientWrapper::MachineStateClientWrapper() : m_machineClient{SOCKET_NAME}
+MachineStateClientWrapper::MachineStateClientWrapper() : m_machineClient{EM_SOCKET_NAME}
 {}
 
 StateError MachineStateClientWrapper::Register(std::string appName, std::uint32_t timeout)

@@ -1,4 +1,5 @@
 #include "machine_state_client.h"
+#include <constants.hpp>
 
 #include <unistd.h>
 
@@ -21,11 +22,10 @@ namespace {
 }
 
 MachineStateClient::MachineStateClient(string path)
-:
-    m_client(path),
-    m_clientApplication(m_client.getMain<MachineStateManagement>()),
-    m_timer(m_client.getIoProvider().getTimer()),
-    m_pid(getpid())
+: m_client(path),
+  m_clientApplication(m_client.getMain<MachineStateManagement>()),
+  m_timer(m_client.getIoProvider().getTimer()),
+  m_pid(getpid())
 {}
 
 MachineStateClient::StateError
@@ -83,7 +83,7 @@ MachineStateClient::SetMachineState(string state, std::uint32_t timeout)
   auto result = promise.then([&](auto&& res)
     {
       auto _result = res.getResult();
-      if(res.getResult() == StateError::K_SUCCESS)
+      if(_result == StateError::K_SUCCESS)
       {
         return waitForConfirm(timeout);
       }
@@ -125,7 +125,7 @@ MachineStateClient::startServer()
       kj::heap<MachineStateServer>(m_promise));
 
     auto address = ioProvider.getNetwork()
-        .parseAddress(std::string{"unix:/tmp/machine_management"})
+        .parseAddress(IPC_PROTOCOL + MSM_SOCKET_NAME)
           .wait(waitScope);
 
     auto listener = address->listen();

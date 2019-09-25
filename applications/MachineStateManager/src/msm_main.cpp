@@ -1,9 +1,9 @@
 #include "machine_state_manager.hpp"
 #include "msm_state_machine.hpp"
 #include <logger.hpp>
+#include <constants.hpp>
 
 #include <signal.h>
-#include <iostream>
 #include <chrono>
 #include <thread>
 #include <atomic>
@@ -13,8 +13,7 @@ static std::atomic<bool> isTerminating{false};
 
 int main(int argc, char **argv)
 {
-  const char* socketName = "/tmp/machine_management";
-  ::unlink(socketName);
+    ::unlink(MSM_SOCKET_NAME.c_str());
 
     if (::signal(SIGTERM, signalHandler) == SIG_ERR)
     {

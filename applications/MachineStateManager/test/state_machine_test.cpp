@@ -48,10 +48,9 @@ TEST_F(MsmStateMachineTest, ShouldRunCallEnter)
         .Times(3)
         .WillRepeatedly(Return(StateError::K_SUCCESS));
 
-    msmMock = new IMachineStateManagerMock{
-                                                std::move(factoryMock),
-                                                std::move(appStateClientMock),
-                                                std::move(machineStateClientMock)};
+    msmMock = new IMachineStateManagerMock{std::move(factoryMock),
+                                           std::move(appStateClientMock),
+                                           std::move(machineStateClientMock)};
 
     std::unique_ptr<::Run> state = std::make_unique<::Run>(*msmMock);
     state->enter();
@@ -59,10 +58,9 @@ TEST_F(MsmStateMachineTest, ShouldRunCallEnter)
 
 TEST_F(MsmStateMachineTest, ShouldInitCallLeave)
 {
-    msmMock = new IMachineStateManagerMock{
-                                                std::move(factoryMock),
-                                                std::move(appStateClientMock),
-                                                std::move(machineStateClientMock)};
+    msmMock = new IMachineStateManagerMock{std::move(factoryMock),
+                                           std::move(appStateClientMock),
+                                           std::move(machineStateClientMock)};
 
     EXPECT_CALL(*msmMock, reportApplicationState(_)).WillOnce(Return());
 
@@ -72,10 +70,9 @@ TEST_F(MsmStateMachineTest, ShouldInitCallLeave)
 
 TEST_F(MsmStateMachineTest, ShouldTerminateCallEnter)
 {
-    msmMock = new IMachineStateManagerMock{
-                                                std::move(factoryMock),
-                                                std::move(appStateClientMock),
-                                                std::move(machineStateClientMock)};
+    msmMock = new IMachineStateManagerMock{std::move(factoryMock),
+                                           std::move(appStateClientMock),
+                                           std::move(machineStateClientMock)};
 
     EXPECT_CALL(*msmMock, reportApplicationState(_)).WillOnce(Return());
 
@@ -85,10 +82,9 @@ TEST_F(MsmStateMachineTest, ShouldTerminateCallEnter)
 
 TEST_F(MsmStateMachineTest, ShouldTerminateCallLeave)
 {
-    msmMock = new IMachineStateManagerMock{
-                                                std::move(factoryMock),
-                                                std::move(appStateClientMock),
-                                                std::move(machineStateClientMock)};
+    msmMock = new IMachineStateManagerMock{std::move(factoryMock),
+                                           std::move(appStateClientMock),
+                                           std::move(machineStateClientMock)};
 
     std::unique_ptr<ShutDown> state = std::make_unique<ShutDown>(*msmMock);
     state->leave();
@@ -96,10 +92,9 @@ TEST_F(MsmStateMachineTest, ShouldTerminateCallLeave)
 
 TEST_F(MsmStateMachineTest, ShouldCreateInit)
 {
-    msmMock = new IMachineStateManagerMock{
-                                                std::move(factoryMock),
-                                                std::move(appStateClientMock),
-                                                std::move(machineStateClientMock)};
+    msmMock = new IMachineStateManagerMock{std::move(factoryMock),
+                                           std::move(appStateClientMock),
+                                           std::move(machineStateClientMock)};
 
     std::unique_ptr<api::IState> expectedState = std::make_unique<Init>(*msmMock);
     std::unique_ptr<api::IState> createdState = factory.createInit(*msmMock);
@@ -110,10 +105,9 @@ TEST_F(MsmStateMachineTest, ShouldCreateInit)
 
 TEST_F(MsmStateMachineTest, ShouldCreateRun)
 {
-    msmMock = new IMachineStateManagerMock{
-                                                std::move(factoryMock),
-                                                std::move(appStateClientMock),
-                                                std::move(machineStateClientMock)};
+    msmMock = new IMachineStateManagerMock{std::move(factoryMock),
+                                           std::move(appStateClientMock),
+                                           std::move(machineStateClientMock)};
 
     std::unique_ptr<api::IState> expectedState = std::make_unique<::Run>(*msmMock);
     std::unique_ptr<api::IState> createdState = factory.createRun(*msmMock);
@@ -124,10 +118,9 @@ TEST_F(MsmStateMachineTest, ShouldCreateRun)
 
 TEST_F(MsmStateMachineTest, ShouldCreateTerminate)
 {
-    msmMock = new IMachineStateManagerMock{
-                                            std::move(factoryMock),
-                                            std::move(appStateClientMock),
-                                            std::move(machineStateClientMock)};
+    msmMock = new IMachineStateManagerMock{std::move(factoryMock),
+                                           std::move(appStateClientMock),
+                                           std::move(machineStateClientMock)};
 
     std::unique_ptr<api::IState> expectedState = std::make_unique<ShutDown>(*msmMock);
     std::unique_ptr<api::IState> createdState = factory.createShutDown(*msmMock);

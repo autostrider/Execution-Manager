@@ -9,7 +9,7 @@ using StateError = api::MachineStateClient::StateError;
 
 MachineStateManager::MachineStateManager(std::unique_ptr<api::IStateFactory> factory,
                                          std::unique_ptr<api::IApplicationStateClientWrapper> client) :
-        machineStateClient(std::make_unique<MachineStateClient>(SOCKET_NAME)),
+        machineStateClient(std::make_unique<MachineStateClient>(IPC_PROTOCOL + EM_SOCKET_NAME)),
         m_factory{std::move(factory)},
         m_currentState{nullptr},
         m_appClient{std::move(client)}

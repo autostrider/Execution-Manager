@@ -19,4 +19,8 @@ interface MachineStateManagement
   setMachineState @2 (pid :Int32, state :Text)
     -> (result :StateError);
 
+  interface MachineStateManager
+  {
+    confirmStateTransition @0 (result :StateError);
+  }
 }

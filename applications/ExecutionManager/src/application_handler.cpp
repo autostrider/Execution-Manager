@@ -56,8 +56,7 @@ void ApplicationHandler::killProcess(pid_t processId)
   );
 }
 
-std::vector<std::string>
-ApplicationHandler::getArgumentsList(const ProcessInfo &process) const
+std::vector<std::string> ApplicationHandler::getArgumentsList(const ProcessInfo& process) const
 {
   std::vector<std::string> arguments;
   arguments.reserve(process.startOptions.size() + 1);

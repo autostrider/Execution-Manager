@@ -5,6 +5,7 @@
 #include <iostream>
 #include <chrono>
 #include <thread>
+#include <logger.hpp>
 
 static void signalHandler(int signo);
 static std::atomic<bool> isTerminating{false};
@@ -18,7 +19,7 @@ int main()
 {
     if (::signal(SIGTERM, signalHandler) == SIG_ERR)
     {
-        std::cout << "Error while registering signal" << std::endl;
+        LOG << "Error while registering signal" << std::endl;
     }
 
     AdaptiveApp app3(std::make_unique<StateFactory>(),
@@ -37,6 +38,6 @@ int main()
 
 static void signalHandler(int signo)
 {
-    std::cout << "received signal:" << sys_siglist[signo] << std::endl;
+    LOG << "received signal:" << sys_siglist[signo] << std::endl;
     isTerminating = true;
 }

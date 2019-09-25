@@ -1,9 +1,10 @@
 #include "application_handler.hpp"
 
-#include <csignal>
 #include <logger.hpp>
 #include <exception>
 #include <sys/wait.h>
+#include <thread>
+#include <future>
 
 namespace ExecutionManager
 {
@@ -13,20 +14,16 @@ using std::runtime_error;
 ApplicationHandler::ApplicationHandler(std::unique_ptr<IOsInterface> syscalls,
                                        std::string path)
         : corePath{std::move(path)},
-          m_syscalls{std::move(syscalls)}
+          m_syscalls{std::move(syscalls)},
+          m_pidsToWait{}
 { }
 
 pid_t ApplicationHandler::startProcess(const ProcessInfo& process)
 {
-  int code = errno;
-  LOG << ":::::::::: BEFORE START PROCESS 1 ERRNO: " << code;
   pid_t processId = m_syscalls->fork();
-  int res_code = errno;
-  LOG << ":::::::::: AFTER START PROCESS 1 ERRNO: " << res_code;
 
   if (!processId)
   {
-    LOG << processId << " procid fork";
     // child process
     const auto processPath = corePath
                            + process.createRelativePath();
@@ -35,7 +32,6 @@ pid_t ApplicationHandler::startProcess(const ProcessInfo& process)
     auto applicationArguments = convertToNullTerminatingArgv(arguments);
     int res = m_syscalls->execv(processPath.c_str(),
                                 applicationArguments.data());
-    LOG << ":::::::::: START PROCESS 1 ERRNO: " << errno;
 
     if (res)
     {
@@ -44,51 +40,20 @@ pid_t ApplicationHandler::startProcess(const ProcessInfo& process)
                           + " "
                           + strerror(errno));
     }
-  } else
-  {
-    LOG << processId << " procid fork";
   }
   return processId;
 }
 
 void ApplicationHandler::killProcess(pid_t processId)
 {
-  LOG << ":::::::::: kill process 1 ERRNO: " << errno;
-  if (!m_syscalls->kill(processId, SIGTERM))
-  {
-    LOG << ":::::::::: kill process 1 ERRNO: " << errno;
-    switch (errno)
-    {
-      case EINVAL:
-        LOG << "----->>> KILL INVALID SIGNAL RECEIVED";
-        break;
-      case EPERM:
-        LOG << "----->>> KILL PROCESS CAN'T SEND SIGNAL TO TARGET PROCESS";
-        break;
-      case ESRCH:
-        LOG << "----->>> KILL PROCESS DOESN'T EXISTS";
-        break;
-      default:
-        LOG << "--->>> KILL UNKNOWN ERROR";
-    }
-  }
+  m_syscalls->kill(processId, SIGTERM);
 
   int status;
-  if (!m_syscalls->waitpid(processId, &status, WNOHANG))
-  {
-    LOG << ":::::::::: kill process 1 ERRNO: " << errno;
-    switch (errno)
-    {
-      case ECHILD:
-        LOG << "----->>> WAITPID ERRNO ECHILD";
-        break;
-      case EINTR:
-        LOG << "---->>> ERRNO WAITPID EINTR";
-        break;
-      default:
-        LOG << "---->>> UNKNOWN WAITPID ERROR";
-    }
-  }
+//  m_processKillWaiters.emplace_back(
+   std::async(std::launch::async,
+          [this] (pid_t procId, int* status, int options)
+          {m_syscalls->waitpid(procId, status, options);}, processId, &status, 0
+  );
 }
 
 std::vector<std::string>
@@ -128,5 +93,13 @@ ApplicationHandler::convertToNullTerminatingArgv(
 
   return outputVector;
 }
+
+//ApplicationHandler::~ApplicationHandler()
+//{
+//  for (auto& waiter: m_processKillWaiters)
+//  {
+//    if (waiter.joinable()) waiter.join();
+//  }
+//}
 
 } // namespace ExecutionManager

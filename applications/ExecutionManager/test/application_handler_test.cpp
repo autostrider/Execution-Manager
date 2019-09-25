@@ -25,19 +25,6 @@ protected:
     unique_ptr<OSInterfaceMock> m_iosmock = make_unique<OSInterfaceMock>();
 };
 
-TEST_F(ApplicationHandlerTest, ShouldSucceedToStartProcess)
-{
-    const int expectedValue = 1; 
-    
-    ExecutionManager::ProcessInfo pinfo;
-
-    EXPECT_CALL(*m_iosmock, fork()).WillOnce(Return(expectedValue));
-
-	ExecutionManager::ApplicationHandler ah{std::move(m_iosmock)};
-
-    ASSERT_EQ(ah.startProcess(pinfo), expectedValue);
-}
-
 TEST_F(ApplicationHandlerTest, ShouldStartChildProcess)                           
 {
     const int expectedValue = 0;
@@ -87,12 +74,8 @@ TEST_F(ApplicationHandlerTest, ShouldSucceedToGetData)
     ExecutionManager::ProcessInfo pinfo;
     ExecutionManager::StartupOption suoption;
 
-    suoption.optionArg = "abc";
-    suoption.optionKind = ExecutionManager::StartupOptionKindEnum::commandLineLongForm;
-    suoption.optionName = "def";
-    pinfo.applicationName = " ";
-    pinfo.processName = " ";
-    pinfo.startOptions = {suoption};
+    suoption = {ExecutionManager::StartupOptionKindEnum::commandLineLongForm, "abc", "def"};
+    pinfo = {" ", " ", {suoption}};
 
     EXPECT_CALL(*m_iosmock, fork()).WillOnce(Return(childProcessId));
     EXPECT_CALL(*m_iosmock, execv(_,_)).WillOnce(Return(execvRes));  

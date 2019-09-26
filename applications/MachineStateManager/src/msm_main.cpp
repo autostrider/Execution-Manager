@@ -1,8 +1,8 @@
 #include "machine_state_manager.hpp"
 #include "msm_state_machine.hpp"
-
 #include <logger.hpp>
 #include <constants.hpp>
+
 #include <csignal>
 #include <iostream>
 #include <chrono>
@@ -21,9 +21,9 @@ int main(int argc, char **argv)
         LOG << "Error while registering signal";
     }
 
-    MSM::MachineStateManager msm(
-        std::make_unique<MSM::MsmStateFactory>(),
-        std::make_unique<api::ApplicationStateClientWrapper>());
+    MSM::MachineStateManager msm(std::make_unique<MSM::MsmStateFactory>(),
+                                 std::make_unique<api::ApplicationStateClientWrapper>(),
+                                 std::make_unique<api::MachineStateClientWrapper>());
 
     msm.init();
 

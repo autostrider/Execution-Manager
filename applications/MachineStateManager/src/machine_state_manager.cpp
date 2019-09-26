@@ -48,7 +48,7 @@ void MachineStateManager::reportApplicationState(ApplicationState state)
     m_appStateClient->ReportApplicationState(state);
 }
 
-void MachineStateManager::setMachineState(std::string state, int timeout)
+void MachineStateManager::setMachineState(std::string state, uint32_t timeout)
 {
   m_machineStateClient->SetMachineState(state, timeout);
 }

@@ -27,7 +27,7 @@ public:
   void run() override;
   void terminate() override;
 
-  void setMachineState(std::string, int);
+  void setMachineState(std::string, uint32_t);
   api::MachineStateClient::StateError registerMsm(const std::string&, uint);
   void reportApplicationState(api::ApplicationStateClient::ApplicationState) override;
 

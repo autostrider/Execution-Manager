@@ -42,6 +42,21 @@ TEST_F(MsmStateMachineTest, ShouldInitCallEnter)
     state->enter();
 }
 
+TEST_F(MsmStateMachineTest, UnsuccessfulRegistration)
+{
+    EXPECT_CALL(*machineStateClientMock, Register(_,_)).WillOnce(Return(StateError::K_INVALID_STATE));
+    
+    msmMock = new IMachineStateManagerMock{std::move(factoryMock),
+                                           std::move(appStateClientMock),
+                                           std::move(machineStateClientMock)};
+    
+    EXPECT_CALL(*msmMock, reportApplicationState(_)).WillOnce(Return());
+
+    std::unique_ptr<Init> state = std::make_unique<Init>(*msmMock);
+    state->enter();
+}
+
+
 TEST_F(MsmStateMachineTest, ShouldRunCallEnter)
 {
     EXPECT_CALL(*machineStateClientMock, SetMachineState(_,_))

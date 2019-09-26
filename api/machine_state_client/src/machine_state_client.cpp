@@ -2,7 +2,7 @@
 #include <constants.hpp>
 
 #include <unistd.h>
-
+#include <iostream>
 using std::string;
 
 namespace api {

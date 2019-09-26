@@ -1,8 +1,8 @@
 #include "state.hpp"
 #include <constants.hpp>
+#include <logger.hpp>
 
 #include <iostream>
-#include <logger.hpp>
 
 using ApplicationState = api::ApplicationStateClient::ApplicationState;
 

@@ -4,7 +4,6 @@
 #include <constants.hpp>
 
 #include <signal.h>
-#include <iostream>
 #include <chrono>
 #include <thread>
 #include <atomic>

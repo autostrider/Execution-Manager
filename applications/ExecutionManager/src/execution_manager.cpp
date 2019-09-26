@@ -8,12 +8,11 @@ namespace ExecutionManager
 {
 
 using std::runtime_error;
-using std::string;
 
 namespace {
-  const std::vector<string> applicationStateNames{AA_STATE_INIT,
-                                                  AA_STATE_RUNNING,
-                                                  AA_STATE_SHUTDOWN};
+  const std::vector<std::string> applicationStateNames{AA_STATE_INIT,
+                                                       AA_STATE_RUNNING,
+                                                       AA_STATE_SHUTDOWN};
 } // anonymous namespace
 
 ExecutionManager::ExecutionManager(
@@ -115,7 +114,7 @@ void ExecutionManager::killProcessesForState()
 }
 
 bool ExecutionManager::processToBeKilled(
-  const string& app,
+  const std::string& app,
   const std::vector<ProcessInfo>& allowedApps)
 {
   auto it = std::find_if(allowedApps.cbegin(),
@@ -165,7 +164,7 @@ ExecutionManager::reportApplicationState(pid_t processId, AppState state)
 }
 
 bool
-ExecutionManager::registerMachineStateClient(pid_t processId, string appName)
+ExecutionManager::registerMachineStateClient(pid_t processId, std::string appName)
 {
   if (m_machineStateClientPid == -1 ||
       m_machineStateClientPid == processId)
@@ -201,7 +200,7 @@ ExecutionManager::getMachineState(pid_t processId) const
 }
 
 StateError
-ExecutionManager::setMachineState(pid_t processId, string state)
+ExecutionManager::setMachineState(pid_t processId, std::string state)
 {
   auto stateIt = std::find(m_machineManifestStates.cbegin(),
                            m_machineManifestStates.cend(),

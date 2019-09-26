@@ -3,7 +3,6 @@
 #include <constants.hpp>
 
 #include <thread>
-#include <iostream>
 
 using ApplicationState = api::ApplicationStateClient::ApplicationState;
 using StateError = api::MachineStateClient::StateError;

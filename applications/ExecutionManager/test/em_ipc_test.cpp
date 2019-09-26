@@ -1,9 +1,10 @@
 #include "manifest_reader.hpp"
+#include "execution_manager.hpp"
+
+#include <iostream>
+
 #include "gtest/gtest.h"
 #include "gmock/gmock.h"
-#include <iostream>
-#include <string>
-#include "execution_manager.hpp"
 
 using namespace ExecutionManager;
 
@@ -13,9 +14,16 @@ class ManifestReaderMock : public ManifestReader
 {
 public:
   MOCK_METHOD0(getStatesSupportedByApplication,
-    std::map<MachineState, std::vector<ProcessName>>());
+    std::map<MachineState, std::vector<ProcessInfo>>());
 
   MOCK_METHOD0(getMachineStates, std::vector<MachineState>());
+};
+
+class ApplicationHandlerMock : public IApplicationHandler
+{
+public:
+  MOCK_METHOD(pid_t, startProcess, (const ProcessInfo& application));
+  MOCK_METHOD(void, killProcess, (pid_t processId));
 };
 
 class ExecutionManagerIpcTest : public ::testing::Test
@@ -23,11 +31,13 @@ class ExecutionManagerIpcTest : public ::testing::Test
 public:
   void SetUp()
   {
-    auto manifestMock = std::make_unique<ManifestReaderMock>();
-
+    manifestMock = std::make_unique<ManifestReaderMock>();
+    applicationHandler = std::make_unique<ApplicationHandlerMock>();
+    client = std::make_unique<ExecutionManagerClient::ExecutionManagerClient>();
+    
     EXPECT_CALL(*manifestMock, getStatesSupportedByApplication())
       .WillOnce(Return(
-        std::map<MachineState, std::vector<ProcessName>>{}
+        std::map<MachineState, std::vector<ProcessInfo>>{}
       ));
 
     EXPECT_CALL(*manifestMock, getMachineStates())
@@ -35,24 +45,26 @@ public:
         std::vector<MachineState>{"Startup", "Running", "Shutdown"}
       ));
 
-    em =
-      std::make_unique<ExecutionManager::ExecutionManager>
-        (std::move(manifestMock));
+    em = std::make_unique<ExecutionManager::ExecutionManager>(std::move(manifestMock),
+                                                              std::move(applicationHandler),
+                                                              std::move(client));
   }
 
   void TearDown()
   {
     em.reset();
   }
-
+  
+  std::unique_ptr<ManifestReaderMock> manifestMock{nullptr};
+  std::unique_ptr<IApplicationHandler> applicationHandler{nullptr};
+  std::unique_ptr<ExecutionManagerClient::ExecutionManagerClient> client{nullptr};
   std::unique_ptr<ExecutionManager::ExecutionManager> em;
 
   const pid_t defaultProcessId {666};
   const std::string defaultMsmName{"TestMSM"};
 };
 
-TEST_F(ExecutionManagerIpcTest,
-       ShouldSucceedWhenEmptyMsc)
+TEST_F(ExecutionManagerIpcTest, ShouldSucceedWhenEmptyMsc)
 {
   auto result =
     em->registerMachineStateClient(defaultProcessId, defaultMsmName);
@@ -60,8 +72,7 @@ TEST_F(ExecutionManagerIpcTest,
   EXPECT_TRUE(result);
 }
 
-TEST_F(ExecutionManagerIpcTest,
-       ShouldSucceedWhenSameMsc)
+TEST_F(ExecutionManagerIpcTest, ShouldSucceedWhenSameMsc)
 {
   em->registerMachineStateClient(defaultProcessId, defaultMsmName);
   auto result =
@@ -70,8 +81,7 @@ TEST_F(ExecutionManagerIpcTest,
   EXPECT_TRUE(result);
 }
 
-TEST_F(ExecutionManagerIpcTest,
-       ShouldFailWhenEmptyNewMsc)
+TEST_F(ExecutionManagerIpcTest, ShouldFailWhenEmptyNewMsc)
 {
   const std::string emptyString = "";
   auto result = em->registerMachineStateClient(defaultProcessId, emptyString);
@@ -79,8 +89,7 @@ TEST_F(ExecutionManagerIpcTest,
   EXPECT_FALSE(result);
 }
 
-TEST_F(ExecutionManagerIpcTest,
-       ShouldFailToRegisterWhenAlredyRegistered)
+TEST_F(ExecutionManagerIpcTest, ShouldFailToRegisterWhenAlredyRegistered)
 {
   const pid_t anotherProcessId = 999;
 
@@ -91,8 +100,7 @@ TEST_F(ExecutionManagerIpcTest,
   EXPECT_FALSE(result);
 }
 
-TEST_F(ExecutionManagerIpcTest,
-       ShouldSucceedToGetMachineState)
+TEST_F(ExecutionManagerIpcTest, ShouldSucceedToGetMachineState)
 {
   const std::string machineState = "Running";
 
@@ -104,8 +112,7 @@ TEST_F(ExecutionManagerIpcTest,
   EXPECT_EQ(result, machineState);
 }
 
-TEST_F(ExecutionManagerIpcTest,
-       ShouldSucceedToSetMachineState)
+TEST_F(ExecutionManagerIpcTest, ShouldSucceedToSetMachineState)
 {
   const std::string machineState = "Running";
 
@@ -116,19 +123,17 @@ TEST_F(ExecutionManagerIpcTest,
   EXPECT_EQ(em->getMachineState(defaultProcessId), machineState);
 }
 
-TEST_F(ExecutionManagerIpcTest,
-       ShouldFailToSetInvalidMachineState)
+TEST_F(ExecutionManagerIpcTest, ShouldFailToSetInvalidMachineState)
 {
   const std::string machineState = "WrongMachineState";
 
   em->registerMachineStateClient(defaultProcessId, defaultMsmName);
   auto result = em->setMachineState(defaultProcessId, machineState);
 
-  EXPECT_FALSE(result);
+  EXPECT_NE(result, StateError::K_SUCCESS);
 }
 
-TEST_F(ExecutionManagerIpcTest,
-       ShouldFailToSetSameMachineState)
+TEST_F(ExecutionManagerIpcTest, ShouldFailToSetSameMachineState)
 {
   const std::string machineState = "Running";
 
@@ -136,12 +141,11 @@ TEST_F(ExecutionManagerIpcTest,
   em->setMachineState(defaultProcessId, machineState);
   auto result = em->setMachineState(defaultProcessId, machineState);
 
-  EXPECT_FALSE(result);
+  EXPECT_NE(result, StateError::K_SUCCESS);
   EXPECT_EQ(em->getMachineState(defaultProcessId), machineState);
 }
 
-TEST_F(ExecutionManagerIpcTest,
-       ShouldSucceedToReportApplicationState)
+TEST_F(ExecutionManagerIpcTest, ShouldSucceedToReportApplicationState)
 {
   const AppState applicationState = AppState::RUNNING;
 

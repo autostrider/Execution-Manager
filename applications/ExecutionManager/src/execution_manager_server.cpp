@@ -1,18 +1,26 @@
 #include "execution_manager_server.hpp"
+#include <kj/async-io.h>
+#include <string>
+#include <iostream>
 
 namespace ExecutionManagerServer
 {
-using namespace std;
+using ApplicationState = ::ApplicationStateManagement::ApplicationState;
+using StateError = ::MachineStateManagement::StateError;
+using std::string;
 
 ExecutionManagerServer::ExecutionManagerServer
 (ExecutionManager::ExecutionManager& application)
   : m_em(application)
 {
-  cout << "Execution Manager server started..." << endl;
+  std::cout << "Execution Manager server started..." << std::endl;
+
+  m_em.start();
 }
 
 ::kj::Promise<void>
-ExecutionManagerServer::reportApplicationState(ReportApplicationStateContext context)
+ExecutionManagerServer::reportApplicationState
+  (ReportApplicationStateContext context)
 {
   ApplicationState state = context.getParams().getState();
   pid_t applicationPid = context.getParams().getPid();
@@ -59,12 +67,7 @@ ExecutionManagerServer::setMachineState(SetMachineStateContext context)
   string state = context.getParams().getState().cStr();
   pid_t applicationPid = context.getParams().getPid();
 
-  if (m_em.setMachineState(applicationPid, state))
-  {
-    context.getResults().setResult(StateError::K_SUCCESS);
-  }
-
-  context.getResults().setResult(StateError::K_INVALID_STATE);
+  m_em.setMachineState(applicationPid, state);
 
   return kj::READY_NOW;
 }

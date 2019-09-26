@@ -1,30 +1,22 @@
 #ifndef EXECUTION_MANAGER_HPP
 #define EXECUTION_MANAGER_HPP
 
-#include "imanifest_reader.hpp"
-#include "manifests.hpp"
-
-#include <chrono>
-#include <csignal>
-#include <cstdint>
-#include <dirent.h>
-#include <exception>
-#include <fstream>
-#include <functional>
-#include <iostream>
-#include <json.hpp>
+#include "execution_manager_client.hpp"
+#include <i_manifest_reader.hpp>
+#include <i_application_handler.hpp>
 #include <map>
 #include <memory>
 #include <string>
-#include <thread>
-#include <unistd.h>
 #include <vector>
+#include <set>
 
 namespace ExecutionManager
 {
 
 using applicationId = std::string;
 using MachineState = std::string;
+using ProcName = std::string;
+using StateError = ::MachineStateManagement::StateError;
 using std::pair;
 
 struct ApplicationManifest;
@@ -39,8 +31,9 @@ enum class AppState : uint16_t
 class ExecutionManager
 {
 public:
-
-  explicit ExecutionManager(std::unique_ptr<IManifestReader> reader);
+  ExecutionManager(std::unique_ptr<IManifestReader> reader,
+                   std::unique_ptr<IApplicationHandler> applicationHandler,
+                   std::unique_ptr<ExecutionManagerClient::ExecutionManagerClient> client);
 
   /**
    * @brief Main method of Execution manager.
@@ -53,9 +46,9 @@ public:
 
   MachineState getMachineState(pid_t processId) const;
 
-  bool setMachineState(pid_t processId, std::string state);
-private:
+  StateError setMachineState(pid_t processId, std::string state);
 
+private:
   /**
    * @brief Removes unsupported states from availApps
    */
@@ -66,7 +59,7 @@ private:
    *        about it in activeApplications.
    * @param process: Application to start.
    */
-  void startApplication(const ProcessName& process);
+  void startApplication(const ProcessInfo& process);
 
   /**
    * @brief starts all application that support current state.
@@ -79,24 +72,26 @@ private:
   void killProcessesForState();
 
   bool processToBeKilled (const std::string& app,
-                          const std::vector<ProcessName>&);
-private:
+                          const std::vector<ProcessInfo>&);
 
+  void confirmState(StateError status);
+
+private:
   /**
-   * @brief Hardcoded path to folder with adaptive applications.
+   * @brief Holds interface responsible for starting applications
    */
-  const static std::string corePath;
+  std::unique_ptr<IApplicationHandler> appHandler;
 
   /**
    * @brief structure that holds application and required processes.
    */
-  std::map<MachineState, pid_t> m_activeApplications;
+  std::map<ProcName, pid_t> m_activeProcesses;
 
   /**
    * @brief Structure for application that can run in certain state
    * vector consists of applicationId (name) and string param - executable name.
    */
-  std::map<MachineState, std::vector<ProcessName>> m_allowedApplicationForState;
+  std::map<MachineState, std::vector<ProcessInfo>> m_allowedProcessesForState;
 
   const static MachineState defaultState;
 
@@ -104,6 +99,12 @@ private:
    * brief Current machine state.
    */
   MachineState m_currentState;
+
+  /**
+   * brief Pending machine state.
+   */
+  MachineState m_pendingState;
+
   /**
    * @brief Vector that holds state transitions.
    */
@@ -111,6 +112,10 @@ private:
 
   std::string m_machineStateClientAppName;
   pid_t m_machineStateClientPid {-1};
+
+  std::set<pid_t> m_stateConfirmToBeReceived;
+
+  std::unique_ptr<ExecutionManagerClient::ExecutionManagerClient> m_rpcClient;
 };
 
 } // namespace ExecutionManager

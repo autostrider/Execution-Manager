@@ -21,7 +21,7 @@ public:
     * @return Map of applications for each state in Application
     *         manifest.
     */
-  virtual std::map<MachineState, std::vector<ProcessName>>
+  virtual std::map<MachineState, std::vector<ProcessInfo>>
   getStatesSupportedByApplication() = 0;
 
   /**

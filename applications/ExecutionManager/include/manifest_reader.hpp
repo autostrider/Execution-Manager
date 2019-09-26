@@ -2,16 +2,22 @@
 #define MANIFEST_HANDLER_HPP
 
 #include "manifests.hpp"
-#include "imanifest_reader.hpp"
+#include <i_manifest_reader.hpp>
 
 #include <string>
-#include <map>
-#include <vector>
+#include <set>
 
 namespace ExecutionManager
 {
 
 using MachineState = std::string;
+
+struct ManifestReaderConf
+{
+  const std::string pathToApplicationsFolder{"./bin/applications"};
+  const std::string machineManifestFilePath{"../applications/ExecutionManager/machine_manifest.json"};
+};
+
 /**
  * @brief Class, responsible for reading manifests from filesystem and
  * processing manifest data.
@@ -19,20 +25,25 @@ using MachineState = std::string;
 class ManifestReader : public IManifestReader
 {
 public:
+  explicit ManifestReader(const ManifestReaderConf& conf = ManifestReaderConf{});
   /**
     * @brief Load data from application manifests and process it.
     * @return Map of applications for each state in Application
     *         manifest.
     */
-   virtual std::map<MachineState, std::vector<ProcessName>>
+   std::map<MachineState, std::vector<ProcessInfo>>
    getStatesSupportedByApplication() override;
 
    /**
    * @brief Loading data from Machine Manifest and process it.
    * @return All the machine states available.
    */
-  virtual std::vector<MachineState> getMachineStates() override;
+  std::vector<MachineState> getMachineStates() override;
 
+
+  ~ManifestReader() override = default;
+
+private:
   /**
    * @brief Load json from file.
    * @param manifestPath: path to file.
@@ -40,21 +51,18 @@ public:
    */
   json getJsonData(const std::string &manifestPath);
 
-  ~ManifestReader() override = default;
-
-private:
-
   /**
    * @brief Loads all adaptive applications from corePath.
-   * @return Vector containing names of applications that were found in
+   * @return Set containing names of applications that were found in
    *          corePath.
    */
-  std::vector<std::string> getListOfApplications();
+  std::set<std::string> getListOfApplications();
 
   /**
-   * @brief Hardcoded path to folder with adaptive applications.
+   * @brief Config with paths to machine manifest and
+   *        folder with applications;
    */
-  const static std::string corePath;
+  const ManifestReaderConf conf;
 
   const static std::string machineStateFunctionGroup;
 };

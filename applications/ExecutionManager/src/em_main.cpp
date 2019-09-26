@@ -1,36 +1,44 @@
+#include "application_handler.hpp"
 #include "execution_manager_server.hpp"
-#include "execution_manager.hpp"
 #include "manifest_reader.hpp"
-
+#include "os_interface.hpp"
 #include <iostream>
 #include <memory>
-#include <thread>
 
 int main(int argc, char **argv)
 {
-  auto executionManager = ExecutionManager::ExecutionManager(
-    std::make_unique<ExecutionManager::ManifestReader>()
-  );
-
   try
   {
-    capnp::EzRpcServer server(
+    ::unlink(EM_SOCKET_NAME.c_str());
+    auto io = kj::setupAsyncIo();
+
+    ExecutionManager::ExecutionManager executionManager
+      (std::make_unique<ExecutionManager::ManifestReader>(),
+          std::make_unique<ExecutionManager::ApplicationHandler>(
+           std::make_unique<ExecutionManager::OsInterface>()
+           ),
+       std::make_unique<ExecutionManagerClient::ExecutionManagerClient>
+        (IPC_PROTOCOL + MSM_SOCKET_NAME, io)
+       );
+
+    capnp::TwoPartyServer server(
       kj::heap<ExecutionManagerServer::ExecutionManagerServer>
-      (executionManager),
-      "unix:/tmp/execution_management");
+      (executionManager));
 
-    std::thread([&]()
-    {
-      executionManager.start();
-    }).detach();
+    auto address = io.provider->getNetwork()
+        .parseAddress(IPC_PROTOCOL + EM_SOCKET_NAME).wait(io.waitScope);
 
-    auto &waitScope = server.getWaitScope();
+    auto listener = address->listen();
+    auto listenPromise = server.listen(*listener);
 
-    kj::NEVER_DONE.wait(waitScope);
+    server.drain().wait(io.waitScope);
+
+    listenPromise.wait(io.waitScope);
+
   }
-  catch (const kj::Exception &e)
+  catch (const kj::Exception& exception)
   {
-    std::cerr << e.getDescription().cStr() << std::endl;
+    std::cerr << exception.getDescription().cStr() << std::endl;
   }
 
   return EXIT_SUCCESS;

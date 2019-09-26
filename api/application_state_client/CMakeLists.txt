@@ -20,6 +20,7 @@ target_link_libraries(application_state_client
     PUBLIC
       gen::application_state_management
       CapnProto::capnp-rpc
+      common
 )
 # Specify include directory
 target_include_directories(application_state_client
@@ -27,3 +28,5 @@ target_include_directories(application_state_client
       $<BUILD_INTERFACE:${CMAKE_CURRENT_SOURCE_DIR}/include>
       $<INSTALL_INTERFACE:${CMAKE_CURRENT_SOURCE_DIR}/include>
 )
+
+add_subdirectory(test)

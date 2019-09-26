@@ -11,7 +11,8 @@ using namespace testing;
 
 namespace ApplicationHandlerTest
 {  
-class ApplicationHandlerTest : public ::testing::Test 
+class ApplicationHandlerTest :
+  public ::testing::TestWithParam<ExecutionManager::StartupOptionKindEnum>
 {
 protected:
     unique_ptr<OSInterfaceMock> m_iosmock = make_unique<OSInterfaceMock>();
@@ -19,35 +20,16 @@ protected:
 
 TEST_F(ApplicationHandlerTest, ShouldStartChildProcess)                           
 {
-    const int execvRes = 0;
-    const int childProcessId = 0;
+  const int expectedValue = 0;
+  const int childProcessId = 0;
 
-    ExecutionManager::StartupOption suoption =
-      {ExecutionManager::StartupOptionKindEnum::commandLineSimpleForm,
-       "abc", "def"};
-    ExecutionManager::ProcessInfo pinfo =
-      {" ", " ", {suoption}};
+  ExecutionManager::ProcessInfo pinfo;
 
-    EXPECT_CALL(*m_iosmock, fork()).WillOnce(Return(childProcessId));
-    EXPECT_CALL(*m_iosmock, execv(_, _))
-      .Times(1)
-      .WillOnce(DoAll(Invoke([&](const char* procName,  char** listOfArguments)
-                             {
-                               std::string fullProcName = APPLICATIONS_PATH + pinfo.createRelativePath();
+  EXPECT_CALL(*m_iosmock, fork()).WillOnce(Return(childProcessId));
+  EXPECT_CALL(*m_iosmock, execv(_,_)).WillOnce(Return(expectedValue));
 
-                               ASSERT_STREQ(fullProcName.c_str(), procName);
-                               ASSERT_STREQ(pinfo.processName.c_str(), listOfArguments[0]);
-
-                               const std::string cmdOption = suoption.optionName;
-
-                               ASSERT_STREQ(cmdOption.c_str(), listOfArguments[1]);
-                               ASSERT_EQ(nullptr, listOfArguments[2]);
-                             }),
-                      Return(execvRes)));
-
-	  ExecutionManager::ApplicationHandler ah{std::move(m_iosmock)};
-
-    ASSERT_EQ(ah.startProcess(pinfo), execvRes);
+  ExecutionManager::ApplicationHandler ah{std::move(m_iosmock)};
+  ASSERT_EQ(ah.startProcess(pinfo), expectedValue);
 }
 
 TEST_F(ApplicationHandlerTest, ShouldThrowExeptionIfFailedToCreateProcess)                              
@@ -81,11 +63,15 @@ TEST_F(ApplicationHandlerTest, ShouldSucceedToGetData)
     const int execvRes = 0;
     const int childProcessId = 0;
 
-  ExecutionManager::StartupOption suoption =
-    {ExecutionManager::StartupOptionKindEnum::commandLineLongForm,
-     "abc", "def"};
+  std::vector<ExecutionManager::StartupOption> suoptions =
+    { {ExecutionManager::StartupOptionKindEnum::commandLineLongForm,
+     "abc", "def"},
+      {ExecutionManager::StartupOptionKindEnum::commandLineShortForm,
+        "abc", "def"},
+      {ExecutionManager::StartupOptionKindEnum::commandLineSimpleForm,
+        "abc", "def"}};
   ExecutionManager::ProcessInfo pinfo =
-    {" ", " ", {suoption}};
+    {" ", " ", suoptions};
 
     EXPECT_CALL(*m_iosmock, fork()).WillOnce(Return(childProcessId));
     EXPECT_CALL(*m_iosmock, execv(_, _))
@@ -97,10 +83,17 @@ TEST_F(ApplicationHandlerTest, ShouldSucceedToGetData)
                                ASSERT_STREQ(fullProcName.c_str(), procName);
                                ASSERT_STREQ(pinfo.processName.c_str(), listOfArguments[0]);
 
-                               const std::string cmdOption = "--" + suoption.optionName + "=" + suoption.optionArg;
+                               for (auto suoption = suoptions.cbegin();
+                                    suoption != suoptions.cend();
+                                    suoption++)
+                               {
+                                 const std::string cmdOption = suoption->makeCommandLineOption();
 
-                               ASSERT_STREQ(cmdOption.c_str(), listOfArguments[1]);
-                               ASSERT_EQ(nullptr, listOfArguments[2]);
+                                 ASSERT_STREQ(cmdOption.c_str(),
+                                   listOfArguments[1 + (suoption - suoptions.cbegin())]);
+                               }
+                               ASSERT_EQ(nullptr,
+                                        listOfArguments[1 + suoptions.size()]);
                              }),
                       Return(execvRes)));
 

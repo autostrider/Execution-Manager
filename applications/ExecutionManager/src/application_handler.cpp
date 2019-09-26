@@ -1,8 +1,7 @@
 #include "application_handler.hpp"
 
-#include <logger.hpp>
+#include <csignal>
 #include <exception>
-#include <sys/wait.h>
 
 namespace ExecutionManager
 {

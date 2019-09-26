@@ -92,6 +92,7 @@ std::set<std::string> ManifestReader::getListOfApplications()
 {
   DIR* dp = nullptr;
   std::set<std::string> fileNames;
+
   if ((dp = opendir(conf.pathToApplicationsFolder.c_str())) == nullptr)
   {
     throw runtime_error(std::string{"Error opening directory: "}

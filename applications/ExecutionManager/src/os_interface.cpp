@@ -18,7 +18,7 @@ int OsInterface::execv(const char* path, char* argv[])
 
 int OsInterface::kill(pid_t procId, int signal)
 {
-  return::kill(procId, signal);
+  return ::kill(procId, signal);
 }
 
 }

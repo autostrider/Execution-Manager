@@ -90,13 +90,13 @@ TEST_F(ExecutionManagerIpcTest, ShouldSucceedWhenSameMsc)
   EXPECT_TRUE(result);
 }
 
-//TEST_F(ExecutionManagerIpcTest, ShouldFailWhenEmptyNewMsc)
-//{
-//  const pid_t procId = -1;
-//  auto result = em->registerMachineStateClient(defaultProcessId, " ");
-//
-//  EXPECT_FALSE(result);
-//}
+TEST_F(ExecutionManagerIpcTest, ShouldFailWhenEmptyNewMsc)
+{
+  const std::string emptyName = "";
+  auto result = em->registerMachineStateClient(defaultProcessId, emptyName);
+
+  EXPECT_FALSE(result);
+}
 
 TEST_F(ExecutionManagerIpcTest, ShouldFailToRegisterWhenAlredyRegistered)
 {
@@ -121,7 +121,7 @@ TEST_F(ExecutionManagerIpcTest, ShouldSucceedToGetMachineState)
   EXPECT_EQ(result, machineState);
 }
 
-// can't convert result to bool
+
 TEST_F(ExecutionManagerIpcTest, ShouldSucceedToSetMachineState)
 {
   const std::string machineState = "Running";
@@ -143,17 +143,17 @@ TEST_F(ExecutionManagerIpcTest, ShouldFailToSetInvalidMachineState)
   EXPECT_NE(result, StateError::K_SUCCESS);
 }
 
-//TEST_F(ExecutionManagerIpcTest, ShouldFailToSetSameMachineState)
-//{
-//  const std::string machineState = "Running";
-//
-//  em->registerMachineStateClient(defaultProcessId, defaultMsmName);
-//  em->setMachineState(defaultProcessId, machineState);
-//  auto result = em->setMachineState(defaultProcessId, machineState);
-//
-//  EXPECT_NE(result, StateError::K_SUCCESS);
-//  EXPECT_EQ(em->getMachineState(defaultProcessId), machineState);
-//}
+TEST_F(ExecutionManagerIpcTest, ShouldFailToSetSameMachineState)
+{
+  const std::string machineState = "Running";
+
+  em->registerMachineStateClient(defaultProcessId, defaultMsmName);
+  em->setMachineState(defaultProcessId, machineState);
+  auto result = em->setMachineState(defaultProcessId, machineState);
+
+  EXPECT_NE(result, StateError::K_SUCCESS);
+  EXPECT_EQ(em->getMachineState(defaultProcessId), machineState);
+}
 
 TEST_F(ExecutionManagerIpcTest, ShouldSucceedToReportApplicationState)
 {

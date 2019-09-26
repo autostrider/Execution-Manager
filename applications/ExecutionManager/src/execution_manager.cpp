@@ -171,8 +171,9 @@ ExecutionManager::reportApplicationState(pid_t processId, AppState state)
 bool
 ExecutionManager::registerMachineStateClient(pid_t processId, string appName)
 {
-  if (m_machineStateClientPid == -1 ||
-      m_machineStateClientPid == processId)
+  if ((m_machineStateClientPid == -1 ||
+      m_machineStateClientPid == processId) &&
+      appName != "")
   {
     m_machineStateClientPid = processId;
     m_machineStateClientAppName = appName;
@@ -220,6 +221,11 @@ ExecutionManager::setMachineState(pid_t processId, string state)
       m_stateConfirmToBeReceived.empty())
   {
     return StateError::K_INVALID_REQUEST;
+  }
+
+  if (state == m_currentState)
+  {
+    return StateError::K_INVALID_STATE;
   }
 
   m_pendingState = state;

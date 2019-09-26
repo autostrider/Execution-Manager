@@ -23,7 +23,7 @@ const MachineState ExecutionManager::defaultState {"Starting-up"};
 ExecutionManager::ExecutionManager(
   std::unique_ptr<IManifestReader> reader,
   std::unique_ptr<IApplicationHandler> applicationHandler,
-  std::unique_ptr<ExecutionManagerClient::ExecutionManagerClient> client)
+  std::unique_ptr<ExecutionManagerClient::IExecutionManagerClient> client)
   : appHandler{std::move(applicationHandler)},
     m_activeProcesses{},
     m_allowedProcessesForState{reader->getStatesSupportedByApplication()},

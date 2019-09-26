@@ -1,7 +1,7 @@
 #ifndef EXECUTION_MANAGER_HPP
 #define EXECUTION_MANAGER_HPP
 
-#include "execution_manager_client.hpp"
+#include <i_execution_manager_client.hpp>
 #include <i_manifest_reader.hpp>
 #include <i_application_handler.hpp>
 #include <map>
@@ -33,7 +33,7 @@ class ExecutionManager
 public:
   ExecutionManager(std::unique_ptr<IManifestReader> reader,
                    std::unique_ptr<IApplicationHandler> applicationHandler,
-                   std::unique_ptr<ExecutionManagerClient::ExecutionManagerClient> client);
+                   std::unique_ptr<ExecutionManagerClient::IExecutionManagerClient> client);
 
   /**
    * @brief Main method of Execution manager.
@@ -115,7 +115,7 @@ private:
 
   std::set<pid_t> m_stateConfirmToBeReceived;
 
-  std::unique_ptr<ExecutionManagerClient::ExecutionManagerClient> m_rpcClient;
+  std::unique_ptr<ExecutionManagerClient::IExecutionManagerClient> m_rpcClient;
 };
 
 } // namespace ExecutionManager

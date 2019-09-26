@@ -1,6 +1,7 @@
 #include "application_handler.hpp"
 #include "execution_manager_server.hpp"
 #include "manifest_reader.hpp"
+#include "execution_manager_client.hpp"
 #include "os_interface.hpp"
 #include <iostream>
 #include <memory>

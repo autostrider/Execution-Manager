@@ -14,8 +14,7 @@ using std::runtime_error;
 ApplicationHandler::ApplicationHandler(std::unique_ptr<IOsInterface> syscalls,
                                        std::string path)
         : corePath{std::move(path)},
-          m_syscalls{std::move(syscalls)},
-          m_pidsToWait{}
+          m_syscalls{std::move(syscalls)}
 { }
 
 pid_t ApplicationHandler::startProcess(const ProcessInfo& process)
@@ -47,13 +46,6 @@ pid_t ApplicationHandler::startProcess(const ProcessInfo& process)
 void ApplicationHandler::killProcess(pid_t processId)
 {
   m_syscalls->kill(processId, SIGTERM);
-
-  int status;
-//  m_processKillWaiters.emplace_back(
-   std::async(std::launch::async,
-          [this] (pid_t procId, int* status, int options)
-          {m_syscalls->waitpid(procId, status, options);}, processId, &status, 0
-  );
 }
 
 std::vector<std::string> ApplicationHandler::getArgumentsList(const ProcessInfo& process) const
@@ -92,13 +84,5 @@ ApplicationHandler::convertToNullTerminatingArgv(
 
   return outputVector;
 }
-
-//ApplicationHandler::~ApplicationHandler()
-//{
-//  for (auto& waiter: m_processKillWaiters)
-//  {
-//    if (waiter.joinable()) waiter.join();
-//  }
-//}
 
 } // namespace ExecutionManager

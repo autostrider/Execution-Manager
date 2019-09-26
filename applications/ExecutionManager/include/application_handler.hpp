@@ -49,13 +49,6 @@ private:
   const std::string corePath;
 
   std::unique_ptr<IOsInterface> m_syscalls;
-
-  std::thread m_waiter;
-
-  std::mutex m_pidsToWaitMutex;
-  std::vector<pid_t> m_pidsToWait;
-
-//  std::vector<std::thread> m_processKillWaiters;
 };
 
 } // namespace ExecutionManager

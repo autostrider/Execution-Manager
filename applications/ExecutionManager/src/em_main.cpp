@@ -2,16 +2,17 @@
 #include "execution_manager_server.hpp"
 #include "manifest_reader.hpp"
 #include "os_interface.hpp"
+
+#include <logger.hpp>
 #include <iostream>
 #include <memory>
 #include <csignal>
-#include <logger.hpp>
 
 
 int main(int argc, char **argv)
 {
-  if (signal(SIGCHLD, SIG_IGN) == SIG_ERR) {
-    LOG << "SIGCHILD was ignored";
+  if (::signal(SIGCHLD, SIG_IGN) == SIG_ERR) {
+    LOG << "SIGCHILD was ignored.";
   }
   try
   {

@@ -1,11 +1,11 @@
 #include <adaptive_app.hpp>
 #include <state.hpp>
+#include <logger.hpp>
 
-#include <signal.h>
+#include <csignal>
 #include <iostream>
 #include <chrono>
 #include <thread>
-#include <logger.hpp>
 
 static void signalHandler(int signo);
 static std::atomic<bool> isTerminating{false};

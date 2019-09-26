@@ -1,7 +1,7 @@
 #include <adaptive_app.hpp>
 #include <state.hpp>
 
-#include <signal.h>
+#include <csignal>
 #include <iostream>
 #include <chrono>
 #include <thread>
@@ -19,7 +19,7 @@ int main()
 {
     if (::signal(SIGTERM, signalHandler) == SIG_ERR)
     {
-        LOG << "Error while registering signal" << std::endl;
+        LOG << "Error while registering signal.";
     }
 
     AdaptiveApp app2(std::make_unique<StateFactory>(),
@@ -38,6 +38,6 @@ int main()
 
 static void signalHandler(int signo)
 {
-    LOG << "received signal:" << sys_siglist[signo] << std::endl;
+    LOG << "received signal:" << sys_siglist[signo] << ".";
     isTerminating = true;
 }

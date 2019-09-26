@@ -1,8 +1,9 @@
 #include "machine_state_manager.hpp"
 #include "msm_state_machine.hpp"
+
 #include <logger.hpp>
 #include <constants.hpp>
-#include <signal.h>
+#include <csignal>
 #include <iostream>
 #include <chrono>
 #include <thread>

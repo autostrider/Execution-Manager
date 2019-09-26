@@ -2,8 +2,8 @@
 #include "msm_state_machine.hpp"
 #include <logger.hpp>
 #include <constants.hpp>
+
 #include <signal.h>
-#include <iostream>
 #include <chrono>
 #include <thread>
 #include <atomic>
@@ -20,9 +20,9 @@ int main(int argc, char **argv)
         LOG << "Error while registering signal";
     }
 
-    MSM::MachineStateManager msm(
-        std::make_unique<MSM::MsmStateFactory>(),
-        std::make_unique<api::ApplicationStateClientWrapper>());
+    MSM::MachineStateManager msm(std::make_unique<MSM::MsmStateFactory>(),
+                                 std::make_unique<api::ApplicationStateClientWrapper>(),
+                                 std::make_unique<api::MachineStateClientWrapper>());
 
     msm.init();
 

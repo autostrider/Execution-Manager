@@ -12,6 +12,8 @@ add_library(common
 target_link_libraries(common
     PUBLIC
       api::application_state_client
+      api::machine_state_client
+      gmock
 )
 
 # Specify include directory
@@ -19,4 +21,5 @@ target_include_directories(common
     PUBLIC
       $<BUILD_INTERFACE:${CMAKE_CURRENT_SOURCE_DIR}/include>
       $<INSTALL_INTERFACE:${CMAKE_CURRENT_SOURCE_DIR}/include>
+      ${MSM_INCLUDE}
 )

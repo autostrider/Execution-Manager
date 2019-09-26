@@ -2,7 +2,6 @@
 #define MSM_STATE_MACHINE_HPP
 
 #include "machine_state_manager.hpp"
-#include <i_state.hpp>
 #include <i_state_factory.hpp>
 
 namespace MSM

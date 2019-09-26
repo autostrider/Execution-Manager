@@ -3,8 +3,6 @@
 #include <logger.hpp>
 #include <exception>
 #include <sys/wait.h>
-#include <thread>
-#include <future>
 
 namespace ExecutionManager
 {

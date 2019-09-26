@@ -24,8 +24,7 @@ json ManifestReader::getJsonData(const std::string& manifestPath)
 
 ManifestReader::ManifestReader(const ManifestReaderConf &conf)
   : conf(conf)
-{
-}
+{ }
 
 std::map<MachineState, std::vector<ProcessInfo> > ManifestReader::getStatesSupportedByApplication()
 {

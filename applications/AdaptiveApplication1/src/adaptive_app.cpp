@@ -41,7 +41,7 @@ double AdaptiveApp::mean()
 
 void AdaptiveApp::readSensorData()
 {
-    std::cout << "[app]: Read data from sensors, proc: " << getpid() << std::endl;
+    std::cout << "Read data from sensors" << std::endl;
 
     std::random_device rd{};
     std::mt19937 gen{rd()};

@@ -8,9 +8,7 @@
 #include <constants.hpp>
 
 #include <vector>
-#include <thread>
 #include <string>
-#include <mutex>
 
 namespace ExecutionManager
 {

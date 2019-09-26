@@ -8,11 +8,12 @@ using ApplicationState = api::ApplicationStateClient::ApplicationState;
 using StateError = api::MachineStateClient::StateError;
 
 MachineStateManager::MachineStateManager(std::unique_ptr<api::IStateFactory> factory,
-                                         std::unique_ptr<api::IApplicationStateClientWrapper> client) :
-        machineStateClient(std::make_unique<MachineStateClient>(IPC_PROTOCOL + EM_SOCKET_NAME)),
+                                         std::unique_ptr<api::IApplicationStateClientWrapper> appStateClient,
+                                         std::unique_ptr<api::IMachineStateClientWrapper> machineClient) :
+        m_machineStateClient(std::move(machineClient)),
         m_factory{std::move(factory)},
         m_currentState{nullptr},
-        m_appClient{std::move(client)}
+        m_appStateClient{std::move(appStateClient)}
 {
 }
 
@@ -45,22 +46,22 @@ void MachineStateManager::transitToNextState(api::IAdaptiveApp::FactoryFunc next
 
 void MachineStateManager::reportApplicationState(ApplicationState state)
 {
-    m_appClient->ReportApplicationState(state);
+    m_appStateClient->ReportApplicationState(state);
 }
 
-StateError MachineStateManager::setMachineState(std::string state)
+StateError MachineStateManager::setMachineState(const std::string& state)
 {
   if (MACHINE_STATE_SHUTTINGDOWN == state)
   {
-    return machineStateClient->SetMachineState(state, NO_TIMEOUT);
+    return m_machineStateClient->SetMachineState(state, NO_TIMEOUT);
   }
 
-  return machineStateClient->SetMachineState(state, DEFAULT_RESPONSE_TIMEOUT);
+  return m_machineStateClient->SetMachineState(state, DEFAULT_RESPONSE_TIMEOUT);
 }
 
 StateError MachineStateManager::registerMsm(const std::string& applicationName)
 {
-  return machineStateClient->Register(applicationName.c_str(), DEFAULT_RESPONSE_TIMEOUT);
+  return m_machineStateClient->Register(applicationName.c_str(), DEFAULT_RESPONSE_TIMEOUT);
 }
 
 } // namespace MSM

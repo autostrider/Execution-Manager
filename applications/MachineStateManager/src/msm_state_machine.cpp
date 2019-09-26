@@ -81,21 +81,21 @@ void Run::enter()
 
     for (auto& state : states)
     {
-      std::this_thread::sleep_for(FIVE_SECONDS);
+        std::this_thread::sleep_for(FIVE_SECONDS);
 
-      LOG << "Setting machine state to " 
-          << state 
-          << "...";
+        LOG << "Setting machine state to " 
+            << state 
+            << "...";
 
-      result = m_msm.setMachineState(state);
+        result = m_msm.setMachineState(state);
 
-      if (StateError::K_SUCCESS != result)
-      {
-          if (!((StateError::K_TIMEOUT == result) && (MACHINE_STATE_SHUTTINGDOWN == state)))
-          {         
-            LOG << "Failed to set machine state " << state << ".";
-          }
-      }
+        if (StateError::K_SUCCESS != result)
+        {
+            if (!((StateError::K_TIMEOUT == result) && (MACHINE_STATE_SHUTTINGDOWN == state)))
+            {         
+                LOG << "Failed to set machine state " << state << ".";
+            }
+        }
     }
 }
 

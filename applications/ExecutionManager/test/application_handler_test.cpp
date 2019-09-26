@@ -19,17 +19,35 @@ protected:
 
 TEST_F(ApplicationHandlerTest, ShouldStartChildProcess)                           
 {
-    const int expectedValue = 0;
+    const int execvRes = 0;
     const int childProcessId = 0;
 
-    ExecutionManager::ProcessInfo pinfo;
+    ExecutionManager::StartupOption suoption =
+      {ExecutionManager::StartupOptionKindEnum::commandLineSimpleForm,
+       "abc", "def"};
+    ExecutionManager::ProcessInfo pinfo =
+      {" ", " ", {suoption}};
 
     EXPECT_CALL(*m_iosmock, fork()).WillOnce(Return(childProcessId));
-    EXPECT_CALL(*m_iosmock, execv(_,_)).WillOnce(Return(expectedValue)); 
+    EXPECT_CALL(*m_iosmock, execv(_, _))
+      .Times(1)
+      .WillOnce(DoAll(Invoke([&](const char* procName,  char** listOfArguments)
+                             {
+                               std::string fullProcName = APPLICATIONS_PATH + pinfo.createRelativePath();
 
-	ExecutionManager::ApplicationHandler ah{std::move(m_iosmock)};     
+                               ASSERT_STREQ(fullProcName.c_str(), procName);
+                               ASSERT_STREQ(pinfo.processName.c_str(), listOfArguments[0]);
 
-    ASSERT_EQ(ah.startProcess(pinfo), expectedValue);
+                               const std::string cmdOption = suoption.optionName;
+
+                               ASSERT_STREQ(cmdOption.c_str(), listOfArguments[1]);
+                               ASSERT_EQ(nullptr, listOfArguments[2]);
+                             }),
+                      Return(execvRes)));
+
+	  ExecutionManager::ApplicationHandler ah{std::move(m_iosmock)};
+
+    ASSERT_EQ(ah.startProcess(pinfo), execvRes);
 }
 
 TEST_F(ApplicationHandlerTest, ShouldThrowExeptionIfFailedToCreateProcess)                              
@@ -40,7 +58,7 @@ TEST_F(ApplicationHandlerTest, ShouldThrowExeptionIfFailedToCreateProcess)
     ExecutionManager::ProcessInfo pinfo;
 
     EXPECT_CALL(*m_iosmock, fork()).WillOnce(Return(childProcessId));
-    EXPECT_CALL(*m_iosmock, execv(_,_)).WillOnce(Return(execvRes)); 
+    EXPECT_CALL(*m_iosmock, execv(_,_)).WillOnce(Return(execvRes));
 
 	ExecutionManager::ApplicationHandler ah{std::move(m_iosmock)};
 
@@ -63,16 +81,30 @@ TEST_F(ApplicationHandlerTest, ShouldSucceedToGetData)
     const int execvRes = 0;
     const int childProcessId = 0;
 
-    ExecutionManager::ProcessInfo pinfo;
-    ExecutionManager::StartupOption suoption;
-
-    suoption = {ExecutionManager::StartupOptionKindEnum::commandLineLongForm, "abc", "def"};
-    pinfo = {" ", " ", {suoption}};
+  ExecutionManager::StartupOption suoption =
+    {ExecutionManager::StartupOptionKindEnum::commandLineLongForm,
+     "abc", "def"};
+  ExecutionManager::ProcessInfo pinfo =
+    {" ", " ", {suoption}};
 
     EXPECT_CALL(*m_iosmock, fork()).WillOnce(Return(childProcessId));
-    EXPECT_CALL(*m_iosmock, execv(_,_)).WillOnce(Return(execvRes));  
-	
-    ExecutionManager::ApplicationHandler ah{std::move(m_iosmock)};         
+    EXPECT_CALL(*m_iosmock, execv(_, _))
+      .Times(1)
+      .WillOnce(DoAll(Invoke([&](const char* procName,  char** listOfArguments)
+                             {
+                               std::string fullProcName = APPLICATIONS_PATH + pinfo.createRelativePath();
+
+                               ASSERT_STREQ(fullProcName.c_str(), procName);
+                               ASSERT_STREQ(pinfo.processName.c_str(), listOfArguments[0]);
+
+                               const std::string cmdOption = "--" + suoption.optionName + "=" + suoption.optionArg;
+
+                               ASSERT_STREQ(cmdOption.c_str(), listOfArguments[1]);
+                               ASSERT_EQ(nullptr, listOfArguments[2]);
+                             }),
+                      Return(execvRes)));
+
+  ExecutionManager::ApplicationHandler ah{std::move(m_iosmock)};
     ASSERT_EQ(ah.startProcess(pinfo), childProcessId);
 }
 }

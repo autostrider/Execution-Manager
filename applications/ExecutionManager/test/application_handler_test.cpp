@@ -1,4 +1,5 @@
 #include "application_handler.hpp"
+#include "mocks.hpp"
 
 #include <memory>
 
@@ -10,16 +11,6 @@ using namespace testing;
 
 namespace ApplicationHandlerTest
 {  
-class OSInterfaceMock : public IOsInterface
-{
-public:
-    OSInterfaceMock(){};
-
-    MOCK_METHOD(pid_t, fork, ());
-    MOCK_METHOD(int, execv, (const char* path, char* argv[]));
-    MOCK_METHOD(int, kill, (pid_t procId, int signal));
-};
-
 class ApplicationHandlerTest : public ::testing::Test 
 {
 protected:

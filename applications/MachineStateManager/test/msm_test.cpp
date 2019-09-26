@@ -1,47 +1,32 @@
 #include "machine_state_manager.hpp"
-#include "msm_state_machine.hpp"
-
-#include <atomic>
-#include <iostream>
+#include <mocks.hpp>
 
 #include "gtest/gtest.h"
-#include "gmock/gmock.h"
 
-using namespace testing;
 using namespace MSM;
-/*
-class IStateFactoryMock : public api::IStateFactory
-{
-public:
-    MOCK_METHOD(std::unique_ptr<api::IState>, createInit, (api::IAdaptiveApp &msm), (const));
-    MOCK_METHOD(std::unique_ptr<api::IState>, createRun, (api::IAdaptiveApp &msm), (const));
-    MOCK_METHOD(std::unique_ptr<api::IState>, createShutDown, (api::IAdaptiveApp &msm), (const));
-};
-
-class StateClientMock : public api::ApplicationStateClientWrapper
-{
-public:
-    MOCK_METHOD(void, ReportApplicationState, (ApplicationStateManagement::ApplicationState state));
-};
-
-class IStateMock : public api::IState
-{
-public:
-    MOCK_METHOD(void, enter, ());
-    MOCK_METHOD(void, leave, (), (const));
-};
+using namespace testing;
 
 class MsmTest : public ::testing::Test
 {
 protected:
-   std::unique_ptr<StateClientMock> stateClientMock{std::make_unique<StateClientMock>()};
-   std::unique_ptr<IStateFactoryMock> factoryMock{std::make_unique<IStateFactoryMock>()};
-   std::unique_ptr<NiceMock<IStateMock>> stateInitMock = std::make_unique<NiceMock<IStateMock>>();
-   std::unique_ptr<NiceMock<IStateMock>> stateRunMock = std::make_unique<NiceMock<IStateMock>>();
-   std::unique_ptr<NiceMock<IStateMock>> stateTermMock = std::make_unique<NiceMock<IStateMock>>();
+   std::unique_ptr<IStateFactoryMock> factoryMock{nullptr};
+   std::unique_ptr<AppStateClientMock> appStateClientMock{nullptr};
+   std::unique_ptr<MachineStateClientMock> machineStateClientMock{nullptr};
+   
+   std::unique_ptr<NiceMock<IStateMock>> stateInitMock{nullptr};
+   std::unique_ptr<NiceMock<IStateMock>> stateRunMock{nullptr};
+   std::unique_ptr<NiceMock<IStateMock>> stateTermMock{nullptr};
 
     void SetUp() override
     {
+        appStateClientMock = std::make_unique<AppStateClientMock>();
+        factoryMock = std::make_unique<IStateFactoryMock>();
+        machineStateClientMock = std::make_unique<MachineStateClientMock>();
+
+        stateInitMock = std::make_unique<NiceMock<IStateMock>>();
+        stateRunMock = std::make_unique<NiceMock<IStateMock>>();
+        stateTermMock = std::make_unique<NiceMock<IStateMock>>();
+
         EXPECT_CALL(*factoryMock, createInit((_)))
             .WillOnce(Return(ByMove(std::move(stateInitMock))));
     }
@@ -50,12 +35,15 @@ protected:
 class ReportingStateTest : public MsmTest
 {
 protected:
-    void SetUp() override {}
+    void SetUp() override
+    {
+        appStateClientMock = std::make_unique<AppStateClientMock>();
+    }
 };
 
 TEST_F(MsmTest, ShouldTransitToInitState)
 {
-     MachineStateManager msm{std::move(factoryMock), nullptr};
+     MachineStateManager msm{std::move(factoryMock), nullptr, nullptr};
      msm.init();
 }
 
@@ -65,8 +53,7 @@ TEST_F(MsmTest, ShouldTransitToRunState)
                 createRun((_)))
             .WillOnce(Return(ByMove(std::move(stateRunMock))));
 
-     MachineStateManager msm{std::move(factoryMock),
-                     nullptr};
+     MachineStateManager msm{std::move(factoryMock), nullptr, nullptr};
      msm.init();
      msm.run();
 }
@@ -77,17 +64,15 @@ TEST_F(MsmTest, ShouldTransitToTerminateState)
                 createShutDown((_)))
             .WillOnce(Return(ByMove(std::move(stateTermMock))));
 
-     MachineStateManager msm{std::move(factoryMock),
-                     nullptr};
+     MachineStateManager msm{std::move(factoryMock), nullptr, nullptr};
      msm.init();
      msm.terminate();
 }
 
 TEST_F(ReportingStateTest, ShouldReportCurrentState)
 {
-    EXPECT_CALL(*stateClientMock, ReportApplicationState(_)).WillOnce(Return());
+    EXPECT_CALL(*appStateClientMock, ReportApplicationState(_)).WillOnce(Return());
 
-    MachineStateManager msm{nullptr, std::move(stateClientMock)};
+    MachineStateManager msm{nullptr, std::move(appStateClientMock), nullptr};
     msm.reportApplicationState(api::ApplicationStateClient::ApplicationState::K_RUNNING);
 }
-*/

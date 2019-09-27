@@ -1,11 +1,10 @@
 #include <adaptive_app.hpp>
 #include <state.hpp>
+#include <constants.hpp>
+#include <logger.hpp>
 
 #include <signal.h>
-#include <iostream>
-#include <chrono>
 #include <thread>
-#include <logger.hpp>
 
 static void signalHandler(int signo);
 static std::atomic<bool> isTerminating{false};
@@ -23,7 +22,7 @@ int main()
     while (!isTerminating)
     {
         app.run();
-        std::this_thread::sleep_for(std::chrono::seconds(5));
+        std::this_thread::sleep_for(FIVE_SECONDS);
     }
     app.terminate();
     return 0;
@@ -31,6 +30,6 @@ int main()
 
 static void signalHandler(int signo)
 {
-    LOG << "Received signal:" << sys_siglist[signo] << ".";
+    LOG << "[aa_main] Received signal: " << sys_siglist[signo] << ".";
     isTerminating = true;
 }

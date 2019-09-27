@@ -13,7 +13,7 @@ void
 ExecutionManagerClient::confirm(StateError status)
 {
   m_sendThread = m_ioContext.provider->newPipeThread(
-    [&](kj::AsyncIoProvider& ioProvider,
+    [&, status](kj::AsyncIoProvider& ioProvider,
         auto&,
         kj::WaitScope& waitScope)
   {

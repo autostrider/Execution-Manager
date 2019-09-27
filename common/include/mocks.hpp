@@ -2,6 +2,7 @@
 #define MOCKS_HPP
 
 #include "machine_state_manager.hpp"
+#include "i_os_interface.hpp"
 
 #include "gmock/gmock.h"
 
@@ -56,6 +57,16 @@ public:
     MOCK_METHOD(StateError, GetMachineState, (std::uint32_t timeout, std::string& state));
     MOCK_METHOD(StateError, SetMachineState, (std::string state, std::uint32_t timeout));
     MOCK_METHOD(StateError, waitForConfirm, (std::uint32_t timeout));
+};
+
+class OSInterfaceMock : public IOsInterface
+{
+public:
+    OSInterfaceMock(){};
+
+    MOCK_METHOD(pid_t, fork, ());
+    MOCK_METHOD(int, execv, (const char* path, char* argv[]));
+    MOCK_METHOD(int, kill, (pid_t procId, int signal));
 };
 
 #endif

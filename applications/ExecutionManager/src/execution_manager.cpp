@@ -1,4 +1,5 @@
 #include "execution_manager.hpp"
+#include <constants.hpp>
 
 #include <iostream>
 #include <logger.hpp>
@@ -7,18 +8,12 @@ namespace ExecutionManager
 {
 
 using std::runtime_error;
-using std::string;
 
 namespace {
-  const char * applicationStateNames[] =
-  {
-    "Initializing",
-    "Running",
-    "Shuttingdown"
-  };
+  const std::vector<std::string> applicationStateNames{AA_STATE_INIT,
+                                                       AA_STATE_RUNNING,
+                                                       AA_STATE_SHUTDOWN};
 } // anonymous namespace
-
-const MachineState ExecutionManager::defaultState {"Starting-up"};
 
 ExecutionManager::ExecutionManager(
   std::unique_ptr<IManifestReader> reader,
@@ -38,7 +33,7 @@ ExecutionManager::ExecutionManager(
 
 void ExecutionManager::start()
 {
-  setMachineState(m_machineStateClientPid, defaultState);
+  setMachineState(m_machineStateClientPid, MACHINE_STATE_STARTUP);
 }
 
 void ExecutionManager::filterStates()
@@ -119,7 +114,7 @@ void ExecutionManager::killProcessesForState()
 }
 
 bool ExecutionManager::processToBeKilled(
-  const string& app,
+  const std::string& app,
   const std::vector<ProcessInfo>& allowedApps)
 {
   auto it = std::find_if(allowedApps.cbegin(),
@@ -169,7 +164,7 @@ ExecutionManager::reportApplicationState(pid_t processId, AppState state)
 }
 
 bool
-ExecutionManager::registerMachineStateClient(pid_t processId, string appName)
+ExecutionManager::registerMachineStateClient(pid_t processId, std::string appName)
 {
   if (m_machineStateClientPid == -1 ||
       m_machineStateClientPid == processId)
@@ -205,7 +200,7 @@ ExecutionManager::getMachineState(pid_t processId) const
 }
 
 StateError
-ExecutionManager::setMachineState(pid_t processId, string state)
+ExecutionManager::setMachineState(pid_t processId, std::string state)
 {
   auto stateIt = std::find(m_machineManifestStates.cbegin(),
                            m_machineManifestStates.cend(),

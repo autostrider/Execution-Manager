@@ -1,4 +1,5 @@
 #include "machine_state_manager.hpp"
+#include <constants.hpp>
 
 namespace MSM {
 
@@ -48,14 +49,19 @@ void MachineStateManager::reportApplicationState(ApplicationState state)
     m_appStateClient->ReportApplicationState(state);
 }
 
-void MachineStateManager::setMachineState(std::string state, uint32_t timeout)
+StateError MachineStateManager::setMachineState(const std::string& state)
 {
-  m_machineStateClient->SetMachineState(state, timeout);
+  if (MACHINE_STATE_SHUTTINGDOWN == state)
+  {
+    return m_machineStateClient->SetMachineState(state, NO_TIMEOUT);
+  }
+
+  return m_machineStateClient->SetMachineState(state, DEFAULT_RESPONSE_TIMEOUT);
 }
 
-StateError MachineStateManager::registerMsm(const std::string& applicationName, uint timeout)
+StateError MachineStateManager::registerMsm(const std::string& applicationName)
 {
-  return m_machineStateClient->Register(applicationName.c_str(), timeout);
+  return m_machineStateClient->Register(applicationName.c_str(), DEFAULT_RESPONSE_TIMEOUT);
 }
 
 } // namespace MSM

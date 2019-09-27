@@ -1,39 +1,12 @@
 #include "execution_manager.hpp"
 
-#include <i_manifest_reader.hpp>
-#include <i_execution_manager_client.hpp>
+#include <mocks.hpp>
 
 #include <iostream>
-
-#include "gtest/gtest.h"
-#include "gmock/gmock.h"
 
 using namespace ExecutionManager;
 
 using ::testing::Return;
-
-class ManifestReaderMock : public IManifestReader
-{
-public:
-  MOCK_METHOD0(getStatesSupportedByApplication,
-    std::map<MachineState, std::vector<ProcessInfo>>());
-
-  MOCK_METHOD0(getMachineStates, std::vector<MachineState>());
-};
-
-class ExecutionManagerClientMock :
-  public ExecutionManagerClient::IExecutionManagerClient
-{
-public:
-  MOCK_METHOD(void, confirm, (StateError status));
-};
-
-class ApplicationHandlerMock : public IApplicationHandler
-{
-public:
-  MOCK_METHOD(pid_t, startProcess, (const ProcessInfo& application));
-  MOCK_METHOD(void, killProcess, (pid_t processId));
-};
 
 class ExecutionManagerIpcTest : public ::testing::Test
 {

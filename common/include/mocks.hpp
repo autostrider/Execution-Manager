@@ -2,10 +2,15 @@
 #define MOCKS_HPP
 
 #include "machine_state_manager.hpp"
+#include "i_manifest_reader.hpp"
+#include "i_application_handler.hpp"
+#include "i_execution_manager_client.hpp"
+#include<manifests.hpp>
 
 #include "gmock/gmock.h"
 
 using namespace MSM;
+using namespace ExecutionManager;
 
 using StateError = api::MachineStateClient::StateError;
 
@@ -56,6 +61,29 @@ public:
     MOCK_METHOD(StateError, GetMachineState, (std::uint32_t timeout, std::string& state));
     MOCK_METHOD(StateError, SetMachineState, (std::string state, std::uint32_t timeout));
     MOCK_METHOD(StateError, waitForConfirm, (std::uint32_t timeout));
+};
+
+class ManifestReaderMock : public IManifestReader
+{
+public:
+  MOCK_METHOD0(getStatesSupportedByApplication,
+    std::map<MachineState, std::vector<ProcessInfo>>());
+
+  MOCK_METHOD0(getMachineStates, std::vector<MachineState>());
+};
+
+class ExecutionManagerClientMock :
+  public ExecutionManagerClient::IExecutionManagerClient
+{
+public:
+  MOCK_METHOD(void, confirm, (StateError status));
+};
+
+class ApplicationHandlerMock : public IApplicationHandler
+{
+public:
+  MOCK_METHOD(pid_t, startProcess, (const ProcessInfo& application));
+  MOCK_METHOD(void, killProcess, (pid_t processId));
 };
 
 #endif

@@ -13,7 +13,6 @@ public:
   pid_t fork() override;
   int execv(const char* path, char* argv[]) override;
   int kill(pid_t procId, int signal) override;
-
   ~OsInterface() override = default;
 };
 

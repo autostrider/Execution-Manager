@@ -1,17 +1,11 @@
 #include "msm_state_machine.hpp"
 #include <logger.hpp>
+#include <constants.hpp>
 
-#include <chrono>
 #include <thread>
 
 using ApplicationState = api::ApplicationStateClient::ApplicationState;
 using StateError = api::MachineStateClient::StateError;
-
-namespace
-{
-    constexpr uint defaulTimeout = 3000000;
-    constexpr int timeForSleep = 5;
-}
 
 namespace MSM
 {
@@ -36,7 +30,7 @@ void MsmState::leave() const
 }
 
 Init::Init(MachineStateManager& msm) 
-    : MsmState (msm, ApplicationState::K_INITIALIZING, "Initializing")
+    : MsmState (msm, ApplicationState::K_INITIALIZING, AA_STATE_INIT)
 {
 }
 
@@ -51,12 +45,12 @@ void Init::enter()
 
     std::string applicationName{"MachineStateManager"};
 
-    StateError result = m_msm.registerMsm(applicationName, defaulTimeout);
+    StateError result = m_msm.registerMsm(applicationName);
 
     if (StateError::K_SUCCESS == result)
     {
         LOG << "Successful registration as a MSM.";
-        std::this_thread::sleep_for(std::chrono::seconds(timeForSleep));
+        std::this_thread::sleep_for(FIVE_SECONDS);
     } 
     else
     {
@@ -73,28 +67,40 @@ void Init::leave() const
 }
 
 Run::Run(MachineStateManager& msm) 
-    : MsmState (msm, ApplicationState::K_RUNNING, "Running")
+    : MsmState (msm, ApplicationState::K_RUNNING, AA_STATE_RUNNING)
 {
 }
 
 void Run::enter()
 {
-    const std::vector<std::string> states{"Running", "Living", "Shuttingdown"};
+    const std::vector<std::string> states{MACHINE_STATE_RUNNING,
+                                          MACHINE_STATE_LIVING,
+                                          MACHINE_STATE_SHUTTINGDOWN};
   
+    StateError result;
+
     for (auto& state : states)
     {
-      std::this_thread::sleep_for(std::chrono::seconds(timeForSleep));
+        std::this_thread::sleep_for(FIVE_SECONDS);
 
-      LOG << "Setting machine state to " 
-          << state 
-          << "...";
+        LOG << "Setting machine state to " 
+            << state 
+            << "...";
 
-      m_msm.setMachineState(state, defaulTimeout);     
+        result = m_msm.setMachineState(state);
+
+        if (StateError::K_SUCCESS != result)
+        {
+            if (!((StateError::K_TIMEOUT == result) && (MACHINE_STATE_SHUTTINGDOWN == state)))
+            {         
+                LOG << "Failed to set machine state " << state << ".";
+            }
+        }
     }
 }
 
 ShutDown::ShutDown(MachineStateManager& msm) 
-    : MsmState (msm, ApplicationState::K_SHUTTINGDOWN, "Terminating")
+    : MsmState (msm, ApplicationState::K_SHUTTINGDOWN, AA_STATE_SHUTDOWN)
 {
 }
 

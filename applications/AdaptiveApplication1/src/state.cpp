@@ -1,7 +1,8 @@
-#include <state.hpp>
+#include "state.hpp"
+#include <constants.hpp>
+#include <logger.hpp>
 
 #include <iostream>
-#include <logger.hpp>
 
 using ApplicationState = api::ApplicationStateClient::ApplicationState;
 
@@ -24,7 +25,7 @@ ApplicationState State::getApplicationState() const
     return m_applState;
 }
 
-Init::Init(AdaptiveApp &app) : State (app, ApplicationState::K_INITIALIZING, "Initializing")
+Init::Init(AdaptiveApp &app) : State (app, ApplicationState::K_INITIALIZING, AA_STATE_INIT)
 {
 }
 
@@ -38,7 +39,7 @@ void Init::leave() const
     m_app.reportApplicationState(ApplicationState::K_RUNNING);
 }
 
-Run::Run(AdaptiveApp &app) : State (app, ApplicationState::K_RUNNING, "Running")
+Run::Run(AdaptiveApp &app) : State (app, ApplicationState::K_RUNNING, AA_STATE_RUNNING)
 {
 }
 
@@ -48,7 +49,7 @@ void Run::enter()
     LOG << "Mean: " << m_app.mean() << ".";
 }
 
-ShutDown::ShutDown(AdaptiveApp& app) : State (app, ApplicationState::K_SHUTTINGDOWN, "Shutdown")
+ShutDown::ShutDown(AdaptiveApp& app) : State (app, ApplicationState::K_SHUTTINGDOWN, AA_STATE_SHUTDOWN)
 {
 }
 

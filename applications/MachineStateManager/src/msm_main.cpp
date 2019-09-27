@@ -3,8 +3,7 @@
 #include <logger.hpp>
 #include <constants.hpp>
 
-#include <signal.h>
-#include <chrono>
+#include <csignal>
 #include <thread>
 #include <atomic>
 
@@ -29,7 +28,7 @@ int main(int argc, char **argv)
     while (!isTerminating)
     {
         msm.run();
-        std::this_thread::sleep_for(std::chrono::seconds(5));
+        std::this_thread::sleep_for(FIVE_SECONDS);
     }
     msm.terminate();
     return 0;

@@ -13,7 +13,7 @@ int main()
 {
     if (::signal(SIGTERM, signalHandler) == SIG_ERR)
     {
-        LOG << "[Proc2] Error while registering signal.";
+        LOG << "[proc2] Error while registering signal.";
     }
 
     AdaptiveApp app2(std::make_unique<StateFactory>(),

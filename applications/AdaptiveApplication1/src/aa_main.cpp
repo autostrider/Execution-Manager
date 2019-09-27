@@ -13,7 +13,7 @@ int main()
 {
     if (::signal(SIGTERM, signalHandler) == SIG_ERR)
     {
-        LOG << "Error while registering signal.";
+        LOG << "[aa_main] Error while registering signal.";
     }
     AdaptiveApp app(std::make_unique<StateFactory>(),
                     std::make_unique<api::ApplicationStateClientWrapper>());

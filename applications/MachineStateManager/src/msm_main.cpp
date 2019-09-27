@@ -4,8 +4,6 @@
 #include <constants.hpp>
 
 #include <csignal>
-#include <iostream>
-#include <chrono>
 #include <thread>
 #include <atomic>
 

@@ -3,8 +3,7 @@
 #include <logger.hpp>
 #include <constants.hpp>
 
-#include <signal.h>
-#include <chrono>
+#include <csignal>
 #include <thread>
 #include <atomic>
 

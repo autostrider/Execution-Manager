@@ -2,11 +2,17 @@
 #include "execution_manager_server.hpp"
 #include "manifest_reader.hpp"
 #include "os_interface.hpp"
-#include <iostream>
+#include <logger.hpp>
+
 #include <memory>
+#include <csignal>
+
 
 int main(int argc, char **argv)
 {
+  if (::signal(SIGCHLD, SIG_IGN) == SIG_ERR) {
+    LOG << "SIGCHILD was ignored.";
+  }
   try
   {
     ::unlink(EM_SOCKET_NAME.c_str());

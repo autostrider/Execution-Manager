@@ -164,11 +164,12 @@ ExecutionManager::reportApplicationState(pid_t processId, AppState state)
 }
 
 bool
-ExecutionManager::registerMachineStateClient(pid_t processId, std::string appName)
+ExecutionManager::registerMachineStateClient(pid_t processId,
+                                             std::string appName)
 {
   if ((m_machineStateClientPid == -1 ||
       m_machineStateClientPid == processId) &&
-      appName != "")
+      !appName.empty())
   {
     m_machineStateClientPid = processId;
     m_machineStateClientAppName = appName;

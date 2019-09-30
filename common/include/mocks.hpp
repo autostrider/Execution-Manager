@@ -5,6 +5,7 @@
 #include "i_manifest_reader.hpp"
 #include "i_application_handler.hpp"
 #include "i_execution_manager_client.hpp"
+#include "i_os_interface.hpp"
 
 #include "gmock/gmock.h"
 
@@ -83,6 +84,16 @@ class ApplicationHandlerMock : public IApplicationHandler
 public:
   MOCK_METHOD(pid_t, startProcess, (const ProcessInfo& application));
   MOCK_METHOD(void, killProcess, (pid_t processId));
+};
+
+class OSInterfaceMock : public IOsInterface
+{
+public:
+    OSInterfaceMock(){};
+
+    MOCK_METHOD(pid_t, fork, ());
+    MOCK_METHOD(int, execv, (const char* path, char* argv[]));
+    MOCK_METHOD(int, kill, (pid_t procId, int signal));
 };
 
 #endif

@@ -1,5 +1,4 @@
 #include "execution_manager.hpp"
-
 #include <mocks.hpp>
 
 #include <iostream>
@@ -29,7 +28,6 @@ public:
   static const std::string startMachineState;
   static const std::string runMachineState;
   static const std::string driveMachineState;
-
 
   static constexpr int app1PId = 0;
   static constexpr int app2PId = 1;
@@ -87,7 +85,7 @@ TEST_F(ExecutionManagerIpcTest, FirstRegistrationShouldSucceed)
   EXPECT_TRUE(result);
 }
 
-TEST_F(ExecutionManagerIpcTest, ShouldSucceedWhenSameMsc)
+TEST_F(ExecutionManagerIpcTest, ShouldSucceededWhenSameMsc)
 {
   em->registerMachineStateClient(defaultProcessId, defaultMsmName);
   auto result =
@@ -96,7 +94,7 @@ TEST_F(ExecutionManagerIpcTest, ShouldSucceedWhenSameMsc)
   EXPECT_TRUE(result);
 }
 
-TEST_F(ExecutionManagerIpcTest, ShouldFailWhenEmptyNewMsc)
+TEST_F(ExecutionManagerIpcTest, ShouldFailWhenEmptyNewMsm)
 {
   const std::string emptyName;
   auto result = em->registerMachineStateClient(defaultProcessId, emptyName);
@@ -104,7 +102,7 @@ TEST_F(ExecutionManagerIpcTest, ShouldFailWhenEmptyNewMsc)
   EXPECT_FALSE(result);
 }
 
-TEST_F(ExecutionManagerIpcTest, ShouldFailToRegisterWhenAlredyRegistered)
+TEST_F(ExecutionManagerIpcTest, ShouldFailToRegisterWhenAlreadyRegistered)
 {
   const pid_t anotherProcessId = 999;
 
@@ -165,7 +163,6 @@ TEST_F(ExecutionManagerIpcTest,
   em->reportApplicationState(IpcManifestReaderTest::app2PId,
                              AppState::RUNNING);
 
-
   auto result = em->setMachineState(defaultProcessId,
     IpcManifestReaderTest::driveMachineState);
 
@@ -179,8 +176,7 @@ TEST_F(ExecutionManagerIpcTest,
 
 TEST_F(ExecutionManagerIpcTest, ShouldFailToSetInvalidMachineState)
 {
-  const std::string machineState = "WrongMachineState";
-
+  const std::string machineState{"WrongMachineState"};
 
   auto result = em->setMachineState(defaultProcessId, machineState);
 
@@ -189,10 +185,8 @@ TEST_F(ExecutionManagerIpcTest, ShouldFailToSetInvalidMachineState)
 
 TEST_F(ExecutionManagerIpcTest, ShouldFailToSetSameMachineState)
 {
-  const std::string machineState = "Running";
-
   em->registerMachineStateClient(defaultProcessId, defaultMsmName);
-  em->setMachineState(defaultProcessId, machineState);
+  em->setMachineState(defaultProcessId, IpcManifestReaderTest::runMachineState);
 
   em->reportApplicationState(IpcManifestReaderTest::app1PId,
                              AppState::RUNNING);
@@ -200,10 +194,12 @@ TEST_F(ExecutionManagerIpcTest, ShouldFailToSetSameMachineState)
   em->reportApplicationState(IpcManifestReaderTest::app2PId,
                              AppState::RUNNING);
 
-  auto result = em->setMachineState(defaultProcessId, machineState);
+  auto result = em->setMachineState(defaultProcessId,
+    IpcManifestReaderTest::runMachineState);
 
   EXPECT_NE(result, StateError::K_SUCCESS);
-  EXPECT_EQ(em->getMachineState(defaultProcessId), machineState);
+  EXPECT_EQ(em->getMachineState(defaultProcessId),
+    IpcManifestReaderTest::runMachineState);
 }
 
 TEST_F(ExecutionManagerIpcTest, ShouldSucceedToReportApplicationState)

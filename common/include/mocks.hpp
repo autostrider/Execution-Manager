@@ -5,7 +5,6 @@
 #include "i_manifest_reader.hpp"
 #include "i_application_handler.hpp"
 #include "i_execution_manager_client.hpp"
-#include<manifests.hpp>
 
 #include "gmock/gmock.h"
 

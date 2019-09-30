@@ -290,6 +290,7 @@ ExecutionManager::setMachineState(pid_t processId, string state)
   }
   else
   {
+    std::cout << "GWEYGGGHHHHHH" << std::endl;
     confirmState(StateError::K_SUCCESS);
   }
 

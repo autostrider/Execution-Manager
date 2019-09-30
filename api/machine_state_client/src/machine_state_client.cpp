@@ -1,5 +1,8 @@
 #include "machine_state_client.h"
 
+#include <thread>
+#include <chrono>
+
 using std::string;
 
 namespace api {
@@ -23,18 +26,31 @@ MachineStateClient::MachineStateClient(string path)
     m_client(path),
     m_clientApplication(m_client.getMain<MachineStateManagement>()),
     m_timer(m_client.getIoProvider().getTimer()),
-    m_pid(getpid())
+    m_pid(getpid()),
+    m_promise(std::promise<StateError>())
 {}
 
 MachineStateClient::~MachineStateClient()
 {
-  if(m_serverExecutor != nullptr)
+  if(m_listenFulfiller.get() == nullptr)
   {
-    KJ_ASSERT_NONNULL(m_serverExecutor).executeSync([&]()
-    {
-      m_listenFulfiller->fulfill();
-    });
+    return;
   }
+
+  const kj::Executor* exec;
+  {
+    auto lock = m_serverExecutor.lockExclusive();
+    lock.wait([&](kj::Maybe<const kj::Executor&> value)
+    {
+      return value != nullptr;
+    });
+    exec = &KJ_ASSERT_NONNULL(*lock);
+  }
+
+  exec->executeSync([&]()
+  {
+    m_listenFulfiller->fulfill();
+  });
 }
 
 MachineStateClient::StateError
@@ -47,13 +63,14 @@ MachineStateClient::Register(string appName, std::uint32_t timeout)
   auto promise =
     m_timer.timeoutAfter(timeout * kj::MILLISECONDS, request.send());
 
+  m_serverThread = startServer();
+
   auto result = promise.then([](auto&& res)
       {
         return res.getResult();
       }, exceptionLambda)
     .then([&](auto&& result)
     {
-      startServer();
       return result;
     }).wait(m_client.getWaitScope());
 
@@ -108,7 +125,6 @@ MachineStateClient::SetMachineState(string state, std::uint32_t timeout)
 MachineStateClient::StateError
 MachineStateClient::waitForConfirm(std::uint32_t timeout)
 {
-  m_promise = std::promise<StateError>();
   std::future<StateError> future = m_promise.get_future();
 
   std::future_status status =
@@ -119,39 +135,46 @@ MachineStateClient::waitForConfirm(std::uint32_t timeout)
     return StateError::K_TIMEOUT;
   }
 
-  return future.get();
+  auto val = future.get();
+
+  m_promise = std::promise<StateError>();
+  return val;
 }
 
-void
+kj::Own<kj::Thread>
 MachineStateClient::startServer()
 {
-  if(m_serverExecutor != nullptr)
-  {
-    return;
-  }
+  std::promise<void> startUpPromise;
 
-  m_serverThread = m_client.getIoProvider().newPipeThread(
-    [&](kj::AsyncIoProvider& ioProvider,
-        auto&,
-        kj::WaitScope& waitScope)
+  auto sThread = kj::heap<kj::Thread>([&]() noexcept
   {
+    auto ioContext = kj::setupAsyncIo();
+
     capnp::TwoPartyServer server(
       kj::heap<MachineStateServer>(m_promise));
-    auto address = ioProvider.getNetwork()
+    auto address = ioContext.provider->getNetwork()
         .parseAddress(std::string{"unix:/tmp/machine_management"})
-          .wait(waitScope);
+          .wait(ioContext.waitScope);
 
     auto listener = address->listen();
     auto listenPromise = server.listen(*listener);
+
+    *m_serverExecutor.lockExclusive() = kj::getCurrentThreadExecutor();
 
     auto exitPaf = kj::newPromiseAndFulfiller<void>();
     auto exitPromise = listenPromise.exclusiveJoin(kj::mv(exitPaf.promise));
 
     m_listenFulfiller = kj::mv(exitPaf.fulfiller);
-    m_serverExecutor = kj::getCurrentThreadExecutor();
 
-    exitPromise.wait(waitScope);
+    startUpPromise.set_value();
+    exitPromise.wait(ioContext.waitScope);
+
+    std::this_thread::sleep_for(std::chrono::milliseconds(10));
   });
+
+  startUpPromise.get_future().wait();
+
+  return sThread;
 }
 
 MachineStateServer::MachineStateServer
@@ -164,7 +187,6 @@ MachineStateServer::confirmStateTransition
 (ConfirmStateTransitionContext context)
 {
   auto result = context.getParams().getResult();
-  std::cout << "confirmStateTransition" << static_cast<uint16_t>(result) << std::endl;
 
   m_promise.set_value(result);
 

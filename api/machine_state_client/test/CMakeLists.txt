@@ -5,8 +5,9 @@ set(TEST_NAME machine_state_client)
 
 file(GLOB_RECURSE SRCS *.cpp)
 
-add_executable(${TEST_NAME}_test ${SRCS})
+add_executable(${TEST_NAME}_test ${SRCS} ${MSC_SRC})
 
+# target_include_directories(${TEST_NAME}_test PRIVATE ${EM_INCLUDE})
 target_link_libraries(${TEST_NAME}_test
   gmock
   gtest
@@ -28,7 +29,7 @@ add_custom_target(${TEST_NAME}_test_run
 # =============================================
 set(COVERAGE_BUILD ${TEST_NAME}_coverage_build)
 
-add_executable(${COVERAGE_BUILD} ${SRCS})
+add_executable(${COVERAGE_BUILD} ${SRCS} ${MSC_SRC})
 
 target_link_libraries(${COVERAGE_BUILD}
   gcov

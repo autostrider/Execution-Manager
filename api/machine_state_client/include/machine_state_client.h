@@ -1,16 +1,14 @@
 #ifndef MACHINE_STATE_CLIENT_H
 #define MACHINE_STATE_CLIENT_H
-#include <iostream>
-#include <string>
-#include <sys/types.h>
-#include <unistd.h>
+
 #include <machine_state_management.capnp.h>
 #include <capnp/ez-rpc.h>
 #include <kj/async-io.h>
 #include <capnp/rpc-twoparty.h>
-#include <chrono>
+#include <string>
+#include <sys/types.h>
+#include <unistd.h>
 #include <future>
-#include <thread>
 
 namespace api {
 
@@ -46,20 +44,19 @@ public:
   StateError SetMachineState(std::string state, std::uint32_t timeout);
   StateError waitForConfirm(std::uint32_t timeout);
 private:
-  void startServer();
+  kj::Own<kj::Thread> startServer();
 
 private:
   capnp::EzRpcClient m_client;
   MachineStateManagement::Client m_clientApplication;
   kj::Timer& m_timer;
 
-  std::promise<StateError> m_promise;
-
-  kj::AsyncIoProvider::PipeThread m_serverThread;
+  kj::Own<kj::Thread> m_serverThread;
   kj::Own<kj::PromiseFulfiller<void>> m_listenFulfiller;
-  kj::Maybe<const kj::Executor&> m_serverExecutor;
+  kj::MutexGuarded<kj::Maybe<const kj::Executor&>> m_serverExecutor;
 
   pid_t m_pid;
+  std::promise<StateError> m_promise;
 };
 
 }

@@ -1,9 +1,7 @@
-#include "gtest/gtest.h"
 #include <execution_management.capnp.h>
 #include <machine_state_client.h>
-#include <unistd.h>
-#include <iostream>
-#include <string>
+#include "gtest/gtest.h"
+
 #include <thread>
 
 using api::MachineStateClient;
@@ -43,7 +41,7 @@ private:
 
     if(m_data.isTimeouted)
     {
-      std::this_thread::sleep_for(std::chrono::milliseconds(1000));
+      std::this_thread::sleep_for(std::chrono::milliseconds(m_defaultDelay));
     }
 
     return kj::READY_NOW;
@@ -60,7 +58,7 @@ private:
 
     if(m_data.isTimeouted)
     {
-      std::this_thread::sleep_for(std::chrono::milliseconds(1000));
+      std::this_thread::sleep_for(std::chrono::milliseconds(m_defaultDelay));
     }
 
     return kj::READY_NOW;
@@ -79,7 +77,7 @@ private:
 
     if(m_data.isTimeouted)
     {
-      std::this_thread::sleep_for(std::chrono::milliseconds(1000));
+      std::this_thread::sleep_for(std::chrono::milliseconds(m_defaultDelay));
     }
 
     return kj::READY_NOW;
@@ -98,20 +96,24 @@ private:
       auto connection = address->connect().wait(ioContext.waitScope);
 
       capnp::TwoPartyClient client(*connection);
-
       auto capability = client.bootstrap()
         .castAs<MachineStateManagement::MachineStateManager>();
 
       auto request = capability.confirmStateTransitionRequest();
+
       request.setResult(status);
 
       request.send().ignoreResult().wait(ioContext.waitScope);
+
     }).join();
   }
 private:
 
   TestData& m_data;
+  static const uint32_t m_defaultDelay;
 };
+
+const uint32_t ExecutionManagementTestServer::m_defaultDelay = 800;
 
 class MachineStateClientTest
 : public ::testing::Test
@@ -125,11 +127,15 @@ public:
 
   void SetUp()
   {
+    unlink("/tmp/machine_management");
+    unlink("/tmp/msc_test");
+
+    std::promise<void> sPromise;
+
     serverThread = std::thread([&]()
     {
       auto ioContext = kj::setupAsyncIo();
 
-      std::cout << "Server thread enter" << std::endl;
       capnp::TwoPartyServer server(
         kj::heap<ExecutionManagementTestServer>(testData));
 
@@ -147,39 +153,33 @@ public:
 
       *executor.lockExclusive() = kj::getCurrentThreadExecutor();
 
+
+      sPromise.set_value();
       exitPromise.wait(ioContext.waitScope);
+
+      std::this_thread::sleep_for(std::chrono::milliseconds(20));
     });
 
-    std::this_thread::sleep_for(std::chrono::milliseconds(50));
+    sPromise.get_future().wait();
 
     msc = std::make_unique<MachineStateClient>(em_address);
-
-    std::cout << "SetUp exit" << std::endl;
   }
 
   void TearDown()
   {
-    std::this_thread::sleep_for(std::chrono::milliseconds(50));
-
     const kj::Executor* exec;
     {
       auto lock = executor.lockExclusive();
-      lock.wait([&](kj::Maybe<const kj::Executor&> value)
-      {
-        return value != nullptr;
-      });
       exec = &KJ_ASSERT_NONNULL(*lock);
     }
 
-    std::cout << "Before execute" << std::endl;
     exec->executeSync([&]()
     {
       listenFulfiller->fulfill();
     });
 
-    *executor.lockExclusive() = nullptr;
     serverThread.join();
-    msc.reset();
+    msc.reset(nullptr);
 
     testData.pid = -1;
     testData.appName = "";
@@ -233,7 +233,6 @@ TEST_F(MachineStateClientTest, ShouldSucceedToGetMachineState)
 TEST_F(MachineStateClientTest, ShouldSucceedToSetMachineState)
 {
   msc->Register(applicationName, defaultTimeout);
-  std::this_thread::sleep_for(std::chrono::milliseconds(50));
   std::string state = "TestMachineState";
   const auto result = msc->SetMachineState(state, defaultTimeout);
 
@@ -266,6 +265,7 @@ TEST_F(MachineStateClientTest, ShouldTimeoutOnGettingMachineState)
 
 TEST_F(MachineStateClientTest, ShouldTimeoutOnSettingMachineState)
 {
+  msc->Register(applicationName, defaultTimeout);
   testData.isTimeouted = true;
   const auto result = msc->SetMachineState("TestMachineState", defaultTimeout);
 

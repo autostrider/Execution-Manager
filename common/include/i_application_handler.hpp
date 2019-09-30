@@ -4,10 +4,11 @@
 #include "manifests.hpp"
 
 #include <vector>
+#include <set>
 
 namespace ExecutionManager {
 
-class IApplicationHandler {
+class IProcessHandler {
 public:
     /**
      * @brief Starts new process with params and returns its' pid
@@ -24,9 +25,19 @@ public:
      */
     virtual void killProcess(pid_t processId) = 0;
 
-    virtual ~IApplicationHandler() = default;
+    virtual ~IProcessHandler() = default;
 };
 
+class IApplicationHandler
+{
+public:
+    virtual void filterStates(std::vector<MachineState>&) = 0;
+    virtual void startApplication(const ProcessInfo& process, std::set<pid_t>&) = 0;
+    virtual void startApplicationsForState(std::set<pid_t>& stateConfirmToBeReceived, MachineState&) = 0;
+    virtual void killProcessesForState(std::set<pid_t>&, MachineState&) = 0;
+    virtual ~IApplicationHandler() = default;
+
+};
 } // namespace ExecutionManager
 
 #endif // IAPPLICATION_HANDLER_HPP

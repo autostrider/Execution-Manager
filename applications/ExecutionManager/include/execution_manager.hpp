@@ -52,46 +52,48 @@ private:
   /**
    * @brief Removes unsupported states from availApps
    */
-  void filterStates();
+  //void filterStates();
 
   /**
    * @brief Starts given application and stores information
    *        about it in activeApplications.
    * @param process: Application to start.
    */
-  void startApplication(const ProcessInfo& process);
+  //void startApplication(const ProcessInfo& process);
 
   /**
    * @brief starts all application that support current state.
    */
-  void startApplicationsForState();
+  //void startApplicationsForState();
 
   /**
    * @brief kill all processes that doesn't support current state.
    */
-  void killProcessesForState();
+  //void killProcessesForState();
 
-  bool processToBeKilled (const std::string& app,
-                          const std::vector<ProcessInfo>&);
+  //bool processToBeKilled (const std::string& app,
+   //                       const std::vector<ProcessInfo>&);
 
   void confirmState(StateError status);
 
 private:
+
+  std::unique_ptr<IApplicationHandler> m_appHandler;
   /**
    * @brief Holds interface responsible for starting applications
    */
-  std::unique_ptr<IApplicationHandler> appHandler;
+ // std::unique_ptr<IProcessHandler> appHandler;
 
   /**
    * @brief structure that holds application and required processes.
    */
-  std::map<ProcName, pid_t> m_activeProcesses;
+ // std::map<ProcName, pid_t> m_activeProcesses;
 
   /**
    * @brief Structure for application that can run in certain state
    * vector consists of applicationId (name) and string param - executable name.
    */
-  std::map<MachineState, std::vector<ProcessInfo>> m_allowedProcessesForState;
+ // std::map<MachineState, std::vector<ProcessInfo>> m_allowedProcessesForState;
 
   const static MachineState defaultState;
 

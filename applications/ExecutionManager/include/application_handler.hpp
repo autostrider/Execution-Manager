@@ -4,26 +4,28 @@
 
 #include "manifests.hpp"
 #include <i_application_handler.hpp>
+#include <i_manifest_reader.hpp>
 #include <i_os_interface.hpp>
 #include <constants.hpp>
 
 #include <vector>
 #include <string>
+#include <map>
 
 namespace ExecutionManager
 {
-
-class ApplicationHandler : public IApplicationHandler
+using ProcName = std::string;
+class ProcessHandler : public IProcessHandler
 {
 public:
-  explicit ApplicationHandler(std::unique_ptr<IOsInterface> syscalls,
+  explicit ProcessHandler(std::unique_ptr<IOsInterface> syscalls,
                               std::string path = APPLICATIONS_PATH);
 
   pid_t startProcess(const ProcessInfo& process) override;
 
   void killProcess(pid_t processId) override;
 
-  ~ApplicationHandler() override = default;
+  ~ProcessHandler() override = default;
 
 private:
     /**
@@ -49,5 +51,27 @@ private:
   std::unique_ptr<IOsInterface> m_syscalls;
 };
 
+
+class ApplicationHandler : public IApplicationHandler
+{
+public:
+    ApplicationHandler(std::unique_ptr<IProcessHandler> processHandler, std::map<MachineState, std::vector<ProcessInfo>>);
+
+    void filterStates(std::vector<MachineState>& machineManifestStates) override;
+    void startApplication(const ProcessInfo& process, std::set<pid_t>&) override;
+    void startApplicationsForState(std::set<pid_t>& stateConfirmToBeReceived, MachineState& m_pendingState) override;
+    void killProcessesForState(std::set<pid_t>& stateConfirmToBeReceived, MachineState& pendingState) override;
+
+private:
+    /**
+     * @brief structure that holds application and required processes.
+     */
+    std::unique_ptr<IProcessHandler> m_ProcessHandler;
+    std::map<MachineState, std::vector<ProcessInfo>> m_allowedProcessesForState;
+    std::map<ProcName, pid_t> m_activeProcesses;
+
+    bool processToBeKilled (const std::string& app,
+                            const std::vector<ProcessInfo>& allowedApps);
+};
 } // namespace ExecutionManager
 #endif //EXECUTION_MANAGER_APPLICATION_HANDLER_HPP

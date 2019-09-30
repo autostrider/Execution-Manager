@@ -24,23 +24,24 @@ ExecutionManager::ExecutionManager(
   std::unique_ptr<IManifestReader> reader,
   std::unique_ptr<IApplicationHandler> applicationHandler,
   std::unique_ptr<ExecutionManagerClient::ExecutionManagerClient> client)
-  : appHandler{std::move(applicationHandler)},
-    m_activeProcesses{},
-    m_allowedProcessesForState{reader->getStatesSupportedByApplication()},
+  : m_appHandler{std::move(applicationHandler)},
+   // m_activeProcesses{},
+   // m_allowedProcessesForState{reader->getStatesSupportedByApplication()},
     m_currentState{},
     m_pendingState{},
     m_machineManifestStates{reader->getMachineStates()},
     m_machineStateClientAppName{},
     m_rpcClient(std::move(client))
 {
-  filterStates();
+  //filterStates();
+    m_appHandler->filterStates(m_machineManifestStates);
 }
 
 void ExecutionManager::start()
 {
   setMachineState(m_machineStateClientPid, defaultState);
 }
-
+/*
 void ExecutionManager::filterStates()
 {
   for (auto app = m_activeProcesses.begin();
@@ -83,7 +84,7 @@ void ExecutionManager::startApplicationsForState()
     }
   }
 }
-
+*/
 void
 ExecutionManager::confirmState(StateError status)
 {
@@ -96,7 +97,7 @@ ExecutionManager::confirmState(StateError status)
 
   m_pendingState.clear();
 }
-
+/*
 void ExecutionManager::killProcessesForState()
 {
   auto allowedApps = m_allowedProcessesForState.find(m_pendingState);
@@ -143,7 +144,7 @@ void ExecutionManager::startApplication(const ProcessInfo& process)
       << processId
       << " started.";
 }
-
+*/
 void
 ExecutionManager::reportApplicationState(pid_t processId, AppState state)
 {
@@ -224,9 +225,9 @@ ExecutionManager::setMachineState(pid_t processId, string state)
 
   m_pendingState = state;
 
-  killProcessesForState();
+  m_appHandler->killProcessesForState(m_stateConfirmToBeReceived, m_pendingState);
 
-  startApplicationsForState();
+  m_appHandler->startApplicationsForState(m_stateConfirmToBeReceived, m_pendingState);
 
   if (!m_stateConfirmToBeReceived.empty())
   {

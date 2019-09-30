@@ -12,11 +12,19 @@ int main(int argc, char **argv)
     ::unlink(EM_SOCKET_NAME.c_str());
     auto io = kj::setupAsyncIo();
 
+    auto reader = std::make_unique<ExecutionManager::ManifestReader>();
+    std::unique_ptr<ExecutionManager::IApplicationHandler> appHandler =
+            std::make_unique<ExecutionManager::ApplicationHandler>
+            (
+                std::make_unique<ExecutionManager::ProcessHandler>(
+                    std::make_unique<ExecutionManager::OsInterface>()
+                    ),
+                reader->getStatesSupportedByApplication()
+            );
+
     ExecutionManager::ExecutionManager executionManager
-      (std::make_unique<ExecutionManager::ManifestReader>(),
-          std::make_unique<ExecutionManager::ApplicationHandler>(
-           std::make_unique<ExecutionManager::OsInterface>()
-           ),
+      (std::move(reader),
+          std::move(appHandler),
        std::make_unique<ExecutionManagerClient::ExecutionManagerClient>
         (IPC_PROTOCOL + MSM_SOCKET_NAME, io)
        );

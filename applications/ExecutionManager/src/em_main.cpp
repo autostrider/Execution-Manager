@@ -7,7 +7,7 @@
 
 #include <memory>
 #include <csignal>
-
+#include <capnp/rpc-twoparty.h>
 
 int main(int argc, char **argv)
 {

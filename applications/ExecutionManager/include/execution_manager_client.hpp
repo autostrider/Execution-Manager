@@ -3,8 +3,6 @@
 
 #include <i_execution_manager_client.hpp>
 #include <string>
-#include <capnp/ez-rpc.h>
-#include <capnp/rpc-twoparty.h>
 #include <kj/async-io.h>
 
 namespace ExecutionManagerClient

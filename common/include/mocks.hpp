@@ -66,10 +66,10 @@ public:
 class ManifestReaderMock : public IManifestReader
 {
 public:
-  MOCK_METHOD0(getStatesSupportedByApplication,
-    std::map<MachineState, std::vector<ProcessInfo>>());
+  MOCK_METHOD((std::map<MachineState, std::vector<ProcessInfo>>),
+    getStatesSupportedByApplication, (), (override));
 
-  MOCK_METHOD0(getMachineStates, std::vector<MachineState>());
+  MOCK_METHOD(std::vector<MachineState>, getMachineStates, ());
 };
 
 class ExecutionManagerClientMock :

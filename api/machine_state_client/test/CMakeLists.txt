@@ -7,7 +7,6 @@ file(GLOB_RECURSE SRCS *.cpp)
 
 add_executable(${TEST_NAME}_test ${SRCS} ${MSC_SRC})
 
-# target_include_directories(${TEST_NAME}_test PRIVATE ${EM_INCLUDE})
 target_link_libraries(${TEST_NAME}_test
   gmock
   gtest

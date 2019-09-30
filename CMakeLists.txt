@@ -34,6 +34,7 @@ set(COVERAGE_REPORT_DIR ${CMAKE_CURRENT_BINARY_DIR}/coverage_report)
 add_custom_target(coverage
   COMMAND em_coverage_build
   COMMAND msm_coverage_build
+  COMMAND machine_state_client_coverage_build
   COMMAND adaptiveApp_coverage_build
   COMMAND asc_coverage_build
   COMMAND ${CMAKE_COMMAND} -E make_directory ${COVERAGE_REPORT_DIR}

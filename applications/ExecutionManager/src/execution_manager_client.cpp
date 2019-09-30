@@ -3,8 +3,7 @@
 namespace ExecutionManagerClient
 {
 
-ExecutionManagerClient::ExecutionManagerClient(
-  std::string msmAddress,
+ExecutionManagerClient::ExecutionManagerClient(const std::string& msmAddress,
   kj::AsyncIoContext& context)
 : m_msmAddress(msmAddress),
   m_ioContext(context)
@@ -14,7 +13,7 @@ void
 ExecutionManagerClient::confirm(StateError status)
 {
   m_sendThread = m_ioContext.provider->newPipeThread(
-    [&](kj::AsyncIoProvider& ioProvider,
+    [&, status](kj::AsyncIoProvider& ioProvider,
         auto&,
         kj::WaitScope& waitScope)
   {

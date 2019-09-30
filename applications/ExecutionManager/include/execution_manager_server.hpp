@@ -1,11 +1,6 @@
 #ifndef EXECUTION_MANAGER_SERVER_HPP
 #define EXECUTION_MANAGER_SERVER_HPP
 
-#include <string>
-#include <capnp/ez-rpc.h>
-#include <capnp/rpc-twoparty.h>
-#include <kj/async-io.h>
-#include <execution_management.capnp.h>
 #include "execution_manager.hpp"
 
 namespace ExecutionManagerServer
@@ -13,15 +8,11 @@ namespace ExecutionManagerServer
 class ExecutionManagerServer : public ExecutionManagement::Server
 {
 public:
-
   explicit
   ExecutionManagerServer
     (ExecutionManager::ExecutionManager& application);
 
 private:
-  using ApplicationState = ::ApplicationStateManagement::ApplicationState;
-  using StateError = ::MachineStateManagement::StateError;
-
   ::kj::Promise<void>
   reportApplicationState(ReportApplicationStateContext context) override;
 
@@ -35,7 +26,6 @@ private:
   setMachineState(SetMachineStateContext context) override;
 
 private:
-
   ExecutionManager::ExecutionManager& m_em;
 };
 

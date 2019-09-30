@@ -1,5 +1,6 @@
 #include <adaptive_app.hpp>
 #include <state.hpp>
+#include <logger.hpp>
 
 #include <random>
 #include <iostream>
@@ -41,7 +42,7 @@ double AdaptiveApp::mean()
 
 void AdaptiveApp::readSensorData()
 {
-    std::cout << "Read data from sensors" << std::endl;
+    LOG << "Read data from sensors.";
 
     std::random_device rd{};
     std::mt19937 gen{rd()};

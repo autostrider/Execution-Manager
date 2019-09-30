@@ -19,6 +19,7 @@ target_link_libraries(em
       gen::execution_management
       api::application_state_client
       CapnProto::capnp-rpc
+      common
 )
 
 target_include_directories(em

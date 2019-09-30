@@ -11,8 +11,10 @@ target_include_directories(${TEST_NAME}_test PRIVATE ${MSM_INCLUDE})
 target_link_libraries(${TEST_NAME}_test
   gtest
   gtest_main
+  gmock
   api::application_state_client
   api::machine_state_client
+  common
 )
 
 target_compile_definitions(${TEST_NAME}_test PUBLIC -DUNIT_TEST)
@@ -34,8 +36,10 @@ target_link_libraries(${COVERAGE_BUILD}
   gcov
   gtest
   gtest_main
+  gmock
   api::application_state_client
   api::machine_state_client
+  common
 )
 
 target_compile_definitions(${COVERAGE_BUILD} PUBLIC -DUNIT_TEST)

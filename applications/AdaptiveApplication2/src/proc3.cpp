@@ -1,23 +1,37 @@
-#include <iostream>
-#include <signal.h>
-#include <chrono>
+#include <adaptive_app.hpp>
+#include <state.hpp>
+#include <constants.hpp>
+#include <logger.hpp>
+
+#include <csignal>
 #include <thread>
 
-void signal_handler(int n)
-{
-    std::cout << "=============Bye from proc3============" << std::endl;
-    exit(EXIT_SUCCESS);
-}
+static void signalHandler(int signo);
+static std::atomic<bool> isTerminating{false};
 
 int main()
 {
-    signal(SIGTERM, signal_handler);
-	std::cout << "app2\tproc3\n";
-    while (1)
+    if (::signal(SIGTERM, signalHandler) == SIG_ERR)
     {
-        std::cout << "proc3" <<std::endl;
-        std::this_thread::sleep_for(std::chrono::seconds(1));
+        LOG << "[proc3] Error while registering signal.";
     }
 
-	return 0;
+    AdaptiveApp app3(std::make_unique<StateFactory>(),
+                     std::make_unique<api::ApplicationStateClientWrapper>());
+
+    app3.init();
+
+    while (!isTerminating)
+    {
+        app3.run();
+        std::this_thread::sleep_for(FIVE_SECONDS);
+    }
+    app3.terminate();
+    return 0;
+}
+
+static void signalHandler(int signo)
+{
+    LOG << "[proc3] Received signal: " << sys_siglist[signo] << ".";
+    isTerminating = true;
 }

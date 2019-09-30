@@ -1,4 +1,7 @@
 #include "machine_state_client.h"
+#include <constants.hpp>
+
+#include <unistd.h>
 
 #include <thread>
 #include <chrono>
@@ -109,7 +112,7 @@ MachineStateClient::SetMachineState(string state, std::uint32_t timeout)
   auto result = promise.then([&](auto&& res)
     {
       auto _result = res.getResult();
-      if(res.getResult() == StateError::K_SUCCESS)
+      if(_result == StateError::K_SUCCESS)
       {
         return waitForConfirm(timeout);
       }
@@ -153,7 +156,7 @@ MachineStateClient::startServer()
     capnp::TwoPartyServer server(
       kj::heap<MachineStateServer>(m_promise));
     auto address = ioContext.provider->getNetwork()
-        .parseAddress(std::string{"unix:/tmp/machine_management"})
+        .parseAddress(IPC_PROTOCOL + MSM_SOCKET_NAME)
           .wait(ioContext.waitScope);
 
     auto listener = address->listen();

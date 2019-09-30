@@ -1,7 +1,6 @@
 #include "manifest_reader.hpp"
 
 #include <dirent.h>
-#include <exception>
 #include <json.hpp>
 #include <fstream>
 #include <algorithm>
@@ -10,8 +9,7 @@ namespace ExecutionManager {
 
 using std::runtime_error;
 using nlohmann::json;
-
-const std::string ManifestReader::corePath = "./bin/applications/";
+using std::ifstream;
 
 const std::string ManifestReader::machineStateFunctionGroup = "MachineState";
 
@@ -24,6 +22,10 @@ json ManifestReader::getJsonData(const std::string& manifestPath)
   return manifestData;
 }
 
+ManifestReader::ManifestReader(const ManifestReaderConf &conf)
+  : conf(conf)
+{ }
+
 std::map<MachineState, std::vector<ProcessInfo> > ManifestReader::getStatesSupportedByApplication()
 {
   const auto& applicationNames = getListOfApplications();
@@ -32,7 +34,7 @@ std::map<MachineState, std::vector<ProcessInfo> > ManifestReader::getStatesSuppo
 
   for (auto file: applicationNames)
   {
-    file = corePath + file + manifestFile;
+    file = conf.pathToApplicationsFolder + "/" + file + manifestFile;
 
     json content = getJsonData(file);
 
@@ -46,8 +48,6 @@ std::map<MachineState, std::vector<ProcessInfo> > ManifestReader::getStatesSuppo
         {
           if (mode.functionGroup == machineStateFunctionGroup)
           {
-
-
             res[mode.mode]
               .push_back({manifest.manifest.manifestId,
                           process.name,
@@ -63,20 +63,23 @@ std::map<MachineState, std::vector<ProcessInfo> > ManifestReader::getStatesSuppo
 
 std::vector<MachineState> ManifestReader::getMachineStates()
 {
-  static const std::string manifestPath =
-      "../applications/ExecutionManager/machine_manifest.json";
-
-  json manifestData = getJsonData(manifestPath);
-
+  json manifestData = getJsonData(conf.machineManifestFilePath);
   MachineManifest manifest = manifestData.get<MachineManifest>();
 
-  std::vector<MachineState> res;
   const auto& availableMachineStates =
       std::find_if(manifest.manifest.modeDeclarationGroups.cbegin(),
                    manifest.manifest.modeDeclarationGroups.cend(),
                    [=](const ModeDeclarationGroup& group)
   { return group.functionGroupName == machineStateFunctionGroup; });
 
+  // check whether this function group existed in manifest
+  if (manifest.manifest.modeDeclarationGroups.cend() == availableMachineStates)
+  {
+    return {};
+  }
+
+  std::vector<MachineState> res;
+  res.reserve(availableMachineStates->modeDeclarations.size());
   std::transform(availableMachineStates->modeDeclarations.cbegin(),
                  availableMachineStates->modeDeclarations.cend(),
                  std::back_inserter(res),
@@ -85,15 +88,15 @@ std::vector<MachineState> ManifestReader::getMachineStates()
   return res;
 }
 
-std::vector<std::string> ManifestReader::getListOfApplications()
+std::set<std::string> ManifestReader::getListOfApplications()
 {
   DIR* dp = nullptr;
-  std::vector<std::string> fileNames;
+  std::set<std::string> fileNames;
 
-  if ((dp = opendir(corePath.c_str())) == nullptr)
+  if ((dp = opendir(conf.pathToApplicationsFolder.c_str())) == nullptr)
   {
     throw runtime_error(std::string{"Error opening directory: "}
-                        + corePath
+                        + conf.pathToApplicationsFolder
                         + " "
                         + strerror(errno));
   }
@@ -103,7 +106,7 @@ std::vector<std::string> ManifestReader::getListOfApplications()
     if (drnt->d_name != std::string{"."} &&
         drnt->d_name != std::string{".."})
     {
-      fileNames.emplace_back(drnt->d_name);
+      fileNames.emplace(drnt->d_name);
     }
   }
 

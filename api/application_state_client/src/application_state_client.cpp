@@ -1,12 +1,10 @@
 #include "application_state_client.h"
+#include <constants.hpp>
 
-namespace api {
-namespace {
-  const char* executionManagerAddr = "unix:/tmp/execution_management";
-}
-
+namespace api
+{
 ApplicationStateClient::ApplicationStateClient()
-  : m_client(executionManagerAddr),
+  : m_client(IPC_PROTOCOL + EM_SOCKET_NAME),
     m_pid(getpid())
 {}
 

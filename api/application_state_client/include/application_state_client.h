@@ -1,11 +1,8 @@
 #ifndef APPLICATION_STATE_CLIENT_H
 #define APPLICATION_STATE_CLIENT_H
-#include <sys/types.h>
-#include <unistd.h>
 #include <application_state_management.capnp.h>
 #include <capnp/ez-rpc.h>
-#include <capnp/rpc-twoparty.h>
-#include <kj/async-io.h>
+#include <unistd.h>
 
 namespace api {
 

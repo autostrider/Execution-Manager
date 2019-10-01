@@ -1,5 +1,8 @@
 #include "machine_state_manager.hpp"
-#include <mocks.hpp>
+#include <mocks/app_state_client_mock.hpp>
+#include <mocks/machine_state_client_mock.hpp>
+#include <mocks/i_state_factory_mock.hpp>
+#include <mocks/i_state_mock.hpp>
 
 #include "gtest/gtest.h"
 

@@ -1,5 +1,9 @@
 #include "execution_manager.hpp"
-#include <mocks.hpp>
+#include <mocks/app_state_client_mock.hpp>
+#include <mocks/application_handler_mock.hpp>
+#include <mocks/execution_manager_client_mock.hpp>
+#include <mocks/manifest_reader_mock.hpp>
+#include <mocks/os_interface_mock.hpp>
 
 #include <iostream>
 
@@ -7,53 +11,14 @@ using namespace ExecutionManager;
 
 using ::testing::Return;
 
-class IpcManifestReaderTest : public IManifestReader
-{
-public:
-  std::map<MachineState, std::vector<ProcessInfo>>
-  getStatesSupportedByApplication() override
-  {
-    return
-    {
-      {"Start", {{"app1", "app1", {}}} },
-      {"Running", {{"app1", "app1", {}}, {"app2", "app2", {}}} },
-      {"Drive", {{"app2", "app2", {}}} },
-    };
-  }
-  std::vector<MachineState> getMachineStates() override
-  {
-    return {"Start", "Running", "Drive"};
-  }
-
-  static const std::string startMachineState;
-  static const std::string runMachineState;
-  static const std::string driveMachineState;
-
-  static constexpr int app1PId = 0;
-  static constexpr int app2PId = 1;
-};
-
-const std::string IpcManifestReaderTest::startMachineState = "Start";
-const std::string IpcManifestReaderTest::runMachineState = "Running";
-const std::string IpcManifestReaderTest::driveMachineState = "Drive";
-
-class IpcApplicationHandlerTest : public IApplicationHandler
-{
-public:
-  pid_t startProcess(const ProcessInfo &application) override { return pId++; }
-  void killProcess(pid_t processId) override {}
-private:
-  int pId{0};
-};
-
 class ExecutionManagerIpcTest : public ::testing::Test
 {
 public:
   void SetUp() override
   {
-    manifestMock = std::make_unique<IpcManifestReaderTest>();
-    applicationHandler = std::make_unique<IpcApplicationHandlerTest>();
-    client = std::make_unique<ExecutionManagerClientMock>();
+    manifestMock = std::make_unique<::testing::NiceMock<ManifestReaderMock>>();
+    applicationHandler = std::make_unique<::testing::NiceMock<ApplicationHandlerMock>>();
+    client = std::make_unique<::testing::NiceMock<ExecutionManagerClientMock>>();
 
     em = std::make_unique<ExecutionManager::ExecutionManager>(
           std::move(manifestMock),
@@ -117,61 +82,39 @@ TEST_F(ExecutionManagerIpcTest, ShouldSucceedToGetMachineState)
 {
   em->registerMachineStateClient(defaultProcessId, defaultMsmName);
   em->setMachineState(defaultProcessId,
-    IpcManifestReaderTest::runMachineState);
-
-  em->reportApplicationState(IpcManifestReaderTest::app1PId,
-    AppState::RUNNING);
-
-  em->reportApplicationState(IpcManifestReaderTest::app2PId,
-    AppState::RUNNING);
+    "run");
 
   auto result = em->getMachineState(defaultProcessId);
 
   EXPECT_EQ(result,
-    IpcManifestReaderTest::runMachineState);
+    "run");
 }
 
 TEST_F(ExecutionManagerIpcTest,
   ShouldSucceedToStartApplicationAndChangeMachineState)
 {
   em->setMachineState(defaultProcessId,
-    IpcManifestReaderTest::startMachineState);
-
-  em->reportApplicationState(IpcManifestReaderTest::app1PId,
-                             AppState::RUNNING);
+    "start");
 
   auto result = em->setMachineState(defaultProcessId,
-    IpcManifestReaderTest::runMachineState);
-
-  em->reportApplicationState(IpcManifestReaderTest::app2PId,
-                             AppState::RUNNING);
+    "run");
 
   EXPECT_EQ(result, StateError::K_SUCCESS);
   EXPECT_EQ(em->getMachineState(defaultProcessId),
-    IpcManifestReaderTest::runMachineState);
+    "run");
 }
 
 TEST_F(ExecutionManagerIpcTest,
        ShouldSucceedToKillApplicationAndChangeMachineState)
 {
   em->setMachineState(defaultProcessId,
-    IpcManifestReaderTest::runMachineState);
-
-  em->reportApplicationState(IpcManifestReaderTest::app1PId,
-                             AppState::RUNNING);
-
-  em->reportApplicationState(IpcManifestReaderTest::app2PId,
-                             AppState::RUNNING);
+    "run");
 
   auto result = em->setMachineState(defaultProcessId,
-    IpcManifestReaderTest::driveMachineState);
-
-  em->reportApplicationState(IpcManifestReaderTest::app1PId,
-                             AppState::SHUTTINGDOWN);
-
+    "drive");
   EXPECT_EQ(result, StateError::K_SUCCESS);
   EXPECT_EQ(em->getMachineState(defaultProcessId),
-    IpcManifestReaderTest::driveMachineState);
+    "drive");
 }
 
 TEST_F(ExecutionManagerIpcTest, ShouldFailToSetInvalidMachineState)
@@ -186,20 +129,14 @@ TEST_F(ExecutionManagerIpcTest, ShouldFailToSetInvalidMachineState)
 TEST_F(ExecutionManagerIpcTest, ShouldFailToSetSameMachineState)
 {
   em->registerMachineStateClient(defaultProcessId, defaultMsmName);
-  em->setMachineState(defaultProcessId, IpcManifestReaderTest::runMachineState);
-
-  em->reportApplicationState(IpcManifestReaderTest::app1PId,
-                             AppState::RUNNING);
-
-  em->reportApplicationState(IpcManifestReaderTest::app2PId,
-                             AppState::RUNNING);
+  em->setMachineState(defaultProcessId, "start");
 
   auto result = em->setMachineState(defaultProcessId,
-    IpcManifestReaderTest::runMachineState);
+    "start");
 
   EXPECT_NE(result, StateError::K_SUCCESS);
   EXPECT_EQ(em->getMachineState(defaultProcessId),
-    IpcManifestReaderTest::runMachineState);
+    "start");
 }
 
 TEST_F(ExecutionManagerIpcTest, ShouldSucceedToReportApplicationState)

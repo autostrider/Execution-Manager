@@ -1,4 +1,4 @@
-#include "mocks.hpp"
+#include "mocks/i_machine_state_manager_mock.hpp"
 
 IMachineStateManagerMock::IMachineStateManagerMock(std::unique_ptr<api::IStateFactory> factory,
                                                    std::unique_ptr<api::IApplicationStateClientWrapper> appClient,

@@ -1,8 +1,6 @@
 #include "msm_registrer.hpp"
 #include <logger.hpp>
 
-#include <unistd.h>
-
 namespace ExecutionManager
 {
 
@@ -11,7 +9,7 @@ MsmRegistrer::MsmRegistrer()
     m_msmAppName{""}
 { }
 
-bool MsmRegistrer::registerMsm(pid_t processId, const std::string& appName)
+bool MsmRegistrer::registerMsm(const pid_t& processId, const std::string& appName)
 {
    if ((m_msmPId == -1 ||
       m_msmPId == processId) &&

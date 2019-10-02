@@ -16,6 +16,7 @@ constexpr std::chrono::seconds FIVE_SECONDS{5};
 static const std::string AA_STATE_INIT{"Initializing"};
 static const std::string AA_STATE_RUNNING{"Running"};
 static const std::string AA_STATE_SHUTDOWN{"Shutdown"};
+static const std::string AA_STATE_SUSPEND{"Suspend"};
 
 static const std::string MACHINE_STATE_STARTUP{"Starting-up"};
 static const std::string MACHINE_STATE_RUNNING{"Running"};

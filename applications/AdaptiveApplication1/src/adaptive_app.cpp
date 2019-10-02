@@ -34,6 +34,13 @@ void AdaptiveApp::terminate()
                 );
 }
 
+void AdaptiveApp::suspend()
+{
+    transitToNextState(
+                std::bind(&api::IStateFactory::createSuspend, m_factory.get(), std::placeholders::_1)
+                );
+}
+
 double AdaptiveApp::mean()
 {
     double sum = std::accumulate(m_sensorData.cbegin(), m_sensorData.cend(), 0.0);

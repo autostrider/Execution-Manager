@@ -9,34 +9,59 @@
 #include <atomic>
 
 static void signalHandler(int signo);
-static std::atomic<bool> isTerminating{false};
+using ApplicationState = api::ApplicationStateClient::ApplicationState;
+
+static std::atomic<ApplicationState> state{ApplicationState::K_RUNNING};
 
 int main(int argc, char **argv)
 {
     ::unlink(MSM_SOCKET_NAME.c_str());
 
-    if (::signal(SIGTERM, signalHandler) == SIG_ERR)
+    if (::signal(SIGTERM, signalHandler) == SIG_ERR
+            ||
+        ::signal(SIGINT, signalHandler) == SIG_ERR)
     {
-        LOG << "Error while registering signal";
+        LOG << "Error while registering signal.";
     }
-
     MSM::MachineStateManager msm(std::make_unique<MSM::MsmStateFactory>(),
                                  std::make_unique<api::ApplicationStateClientWrapper>(),
                                  std::make_unique<api::MachineStateClientWrapper>());
 
     msm.init();
 
-    while (!isTerminating)
+    while (ApplicationState::K_RUNNING == state)
     {
         msm.run();
         std::this_thread::sleep_for(FIVE_SECONDS);
     }
-    msm.terminate();
+    switch (state)
+    {
+    case ApplicationState::K_SHUTTINGDOWN:
+        msm.terminate();
+        break;
+    case ApplicationState::K_SUSPEND:
+        msm.suspend();
+        break;
+    default:
+        break;
+    }
+
     return 0;
 }
 
 static void signalHandler(int signo)
 {
     LOG << "Received signal:" << sys_siglist[signo];
-    isTerminating = true;
+    switch (signo)
+    {
+    case SIGTERM:
+        state = ApplicationState::K_SHUTTINGDOWN;
+        break;
+    case SIGINT:
+        state = ApplicationState::K_SUSPEND;
+        break;
+    default:
+        LOG << "Received unsupported signal";
+
+    }
 }

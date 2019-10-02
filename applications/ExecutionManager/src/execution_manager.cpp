@@ -18,14 +18,15 @@ namespace {
 ExecutionManager::ExecutionManager(
   std::unique_ptr<IManifestReader> reader,
   std::unique_ptr<IApplicationHandler> applicationHandler,
-  std::unique_ptr<ExecutionManagerClient::IExecutionManagerClient> client)
+  std::unique_ptr<ExecutionManagerClient::IExecutionManagerClient> client,
+  MsmRegistrer registrer)
   : appHandler{std::move(applicationHandler)},
     m_activeProcesses{},
     m_allowedProcessesForState{reader->getStatesSupportedByApplication()},
     m_currentState{},
     m_pendingState{},
     m_machineManifestStates{reader->getMachineStates()},
-    m_machineStateClientAppName{},
+    m_registrer{registrer},
     m_rpcClient(std::move(client))
 {
   filterStates();
@@ -33,7 +34,7 @@ ExecutionManager::ExecutionManager(
 
 void ExecutionManager::start()
 {
-  setMachineState(m_machineStateClientPid, MACHINE_STATE_STARTUP);
+  setMachineState(m_registrer.msmPid(), MACHINE_STATE_STARTUP);
 }
 
 void ExecutionManager::filterStates()
@@ -167,30 +168,7 @@ bool
 ExecutionManager::registerMachineStateClient(pid_t processId,
                                              std::string appName)
 {
-  if ((m_machineStateClientPid == -1 ||
-      m_machineStateClientPid == processId) &&
-      !appName.empty())
-  {
-    m_machineStateClientPid = processId;
-    m_machineStateClientAppName = appName;
-
-    LOG << "State Machine Client \""
-        << m_machineStateClientAppName
-        << "\" with pid "
-        << m_machineStateClientPid
-        << " registered.";
-
-    return true;
-  }
-
-  LOG << "State Machine Client \""
-      << appName
-      << "\" registration failed"
-      << "\" with pid "
-      << processId
-      << " registration failed.";
-
-  return false;
+  return m_registrer.registerMsm(processId, appName);
 }
 
 MachineState
@@ -213,7 +191,7 @@ ExecutionManager::setMachineState(pid_t processId, std::string state)
     return StateError::K_INVALID_STATE;
   }
 
-  if (processId != m_machineStateClientPid &&
+  if (!m_registrer.checkMsm(processId) &&
       m_stateConfirmToBeReceived.empty())
   {
     return StateError::K_INVALID_REQUEST;

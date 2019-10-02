@@ -37,7 +37,7 @@ protected:
   void setupInjectors()
   {
     manifestMock = std::make_unique<NiceMock<ManifestReaderMock>>();
-    applicationHandler = std::make_unique<NiceMock<ApplicationHandlerMock>>();
+    applicationHandler = std::make_unique<StrictMock<ApplicationHandlerMock>>();
     client = std::make_unique<NiceMock<ExecutionManagerClientMock>>();
   }
 

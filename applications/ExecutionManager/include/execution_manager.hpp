@@ -1,9 +1,11 @@
 #ifndef EXECUTION_MANAGER_HPP
 #define EXECUTION_MANAGER_HPP
 
+#include "msm_registrer.hpp"
 #include <i_execution_manager_client.hpp>
 #include <i_manifest_reader.hpp>
 #include <i_application_handler.hpp>
+
 #include <map>
 #include <memory>
 #include <string>
@@ -33,7 +35,8 @@ class ExecutionManager
 public:
   ExecutionManager(std::unique_ptr<IManifestReader> reader,
                    std::unique_ptr<IApplicationHandler> applicationHandler,
-                   std::unique_ptr<ExecutionManagerClient::IExecutionManagerClient> client);
+                   std::unique_ptr<ExecutionManagerClient::IExecutionManagerClient> client,
+                   MsmRegistrer msmRegistrer = MsmRegistrer{});
 
   /**
    * @brief Main method of Execution manager.
@@ -110,8 +113,7 @@ private:
    */
   std::vector<MachineState> m_machineManifestStates;
 
-  std::string m_machineStateClientAppName;
-  pid_t m_machineStateClientPid {-1};
+  MsmRegistrer m_registrer;
 
   std::set<pid_t> m_stateConfirmToBeReceived;
 

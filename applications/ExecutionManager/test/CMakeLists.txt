@@ -10,6 +10,7 @@ add_executable(${TEST_NAME}_test ${SRCS} ${EM_SRC})
 target_include_directories(${TEST_NAME}_test PRIVATE ${EM_INCLUDE})
 target_link_libraries(${TEST_NAME}_test
   gtest
+  gmock
   gtest_main
   nlohmann_json::nlohmann_json
   api::application_state_client
@@ -36,6 +37,7 @@ target_include_directories(${COVERAGE_BUILD} PRIVATE ${EM_INCLUDE})
 target_link_libraries(${COVERAGE_BUILD}
   gcov
   gtest
+  gmock
   gtest_main
   nlohmann_json::nlohmann_json
   api::application_state_client

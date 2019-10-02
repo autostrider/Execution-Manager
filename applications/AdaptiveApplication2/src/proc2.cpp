@@ -3,7 +3,7 @@
 #include <constants.hpp>
 #include <logger.hpp>
 
-#include <signal.h>
+#include <csignal>
 #include <thread>
 
 static void signalHandler(int signo);
@@ -17,7 +17,7 @@ int main()
             ||
         ::signal(SIGINT, signalHandler) == SIG_ERR)
     {
-        LOG << "Error while registering signal.";
+        LOG << "[proc2] Error while registering signal.";
     }
     AdaptiveApp app2(std::make_unique<StateFactory>(),
                     std::make_unique<api::ApplicationStateClientWrapper>());
@@ -45,7 +45,7 @@ int main()
 
 static void signalHandler(int signo)
 {
-    LOG << "[aa_main] Received signal: " << sys_siglist[signo] << ".";
+    LOG << "[proc2] Received signal: " << sys_siglist[signo] << ".";
     switch (signo)
     {
     case SIGTERM:

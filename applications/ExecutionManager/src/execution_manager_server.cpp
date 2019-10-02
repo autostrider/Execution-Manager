@@ -1,4 +1,5 @@
 #include "execution_manager_server.hpp"
+#include "msm_registrer.hpp"
 #include <kj/async-io.h>
 #include <string>
 #include <iostream>
@@ -15,7 +16,7 @@ ExecutionManagerServer::ExecutionManagerServer
 {
   std::cout << "Execution Manager server started..." << std::endl;
 
-  m_em.start();
+  m_em.start(ExecutionManager::MsmRegister{});
 }
 
 ::kj::Promise<void>

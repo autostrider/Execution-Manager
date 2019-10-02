@@ -4,12 +4,12 @@
 namespace ExecutionManager
 {
 
-MsmRegistrer::MsmRegistrer()
+MsmRegister::MsmRegister()
   : m_msmPId{-1},
     m_msmAppName{""}
 { }
 
-bool MsmRegistrer::registerMsm(const pid_t& processId, const std::string& appName)
+bool MsmRegister::registerMsm(const pid_t& processId, const std::string& appName)
 {
    if ((m_msmPId == -1 ||
       m_msmPId == processId) &&
@@ -37,12 +37,12 @@ bool MsmRegistrer::registerMsm(const pid_t& processId, const std::string& appNam
   return false;
 }
 
-bool MsmRegistrer::checkMsm(pid_t processId) const
+bool MsmRegister::checkMsm(pid_t processId) const
 {
   return processId == m_msmPId;
 }
 
-pid_t MsmRegistrer::msmPid() const
+pid_t MsmRegister::msmPid() const
 {
   return m_msmPId;
 }

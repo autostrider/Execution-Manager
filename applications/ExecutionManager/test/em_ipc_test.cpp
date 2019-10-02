@@ -11,61 +11,54 @@
 
 using namespace ExecutionManager;
 
-using ::testing::_;
-using ::testing::Return;
-using ::testing::NiceMock;
-using ::testing::StrictMock;
+using namespace ::testing;
 
 class ExecutionManagerIpcTest : public ::testing::Test
 {
 protected:
   void SetUp() override
   {
-    setupInjectors();
     setupManifestData({testState}, {{testState, emptyAvailableApps}});
-    initEm();
+    em = initEm();
   }
 
-  void initEm()
+  std::unique_ptr<ExecutionManager::ExecutionManager> initEm()
   {
-     em = std::make_unique<ExecutionManager::ExecutionManager>(
+    return std::make_unique<ExecutionManager::ExecutionManager>(
           std::move(manifestMock),
           std::move(applicationHandler),
           std::move(client));
   }
 
-  void setupInjectors()
-  {
-    manifestMock = std::make_unique<NiceMock<ManifestReaderMock>>();
-    applicationHandler = std::make_unique<StrictMock<ApplicationHandlerMock>>();
-    client = std::make_unique<NiceMock<ExecutionManagerClientMock>>();
-  }
-
-  void setupManifestData(std::vector<MachineState> machineStates, 
+  void setupManifestData(std::vector<MachineState> machineStates,
     std::map<MachineState, std::vector<ProcessInfo>> appsForState)
   {
     ON_CALL(*manifestMock, getMachineStates())
       .WillByDefault(Return(machineStates));
 
-     EXPECT_CALL(*manifestMock, getStatesSupportedByApplication())
-      .WillOnce(Return(appsForState));
+    ON_CALL(*manifestMock, getStatesSupportedByApplication())
+      .WillByDefault(Return(appsForState));
   }
 
   void TearDown() override
   {
     em.reset();
   }
-  
-  std::vector<ProcessInfo> emptyAvailableApps;
-  std::vector<StartupOption> emptyOptions;
-  std::unique_ptr<ManifestReaderMock> manifestMock;
-  std::unique_ptr<ApplicationHandlerMock> applicationHandler;
-  std::unique_ptr<ExecutionManagerClient::IExecutionManagerClient> client;
+
+  std::unique_ptr<ManifestReaderMock> manifestMock =
+    std::make_unique<NiceMock<ManifestReaderMock>>();
+  std::unique_ptr<ApplicationHandlerMock> applicationHandler =
+    std::make_unique<StrictMock<ApplicationHandlerMock>>();
+  std::unique_ptr<ExecutionManagerClient::IExecutionManagerClient> client =
+    std::make_unique<NiceMock<ExecutionManagerClientMock>>();
   std::unique_ptr<ExecutionManager::ExecutionManager> em;
 
   const pid_t defaultProcessId {666};
+  const std::string wrongMachineState{"WrongMachineState"};
   const std::string defaultMsmName{"TestMSM"};
   const std::string testState{"TestState"};
+  const std::vector<ProcessInfo> emptyAvailableApps;
+  const std::vector<StartupOption> emptyOptions;
 };
 
 class IpcStateTransitionsTest : public ExecutionManagerIpcTest
@@ -73,23 +66,18 @@ class IpcStateTransitionsTest : public ExecutionManagerIpcTest
 protected:
   void SetUp() override
   {
-    std::vector<ProcessInfo> availableApp = {
-      ProcessInfo{"app", "app", emptyOptions}
-    };
-    std::vector<MachineState> availableStates = {firstState, secondState};
-    
-    setupInjectors();
+    std::vector<MachineState> availableStates =
+      {firstState, secondState};
+
     setupManifestData(availableStates, {
-      {firstState, emptyAvailableApps}, 
-      {secondState, availableApp}});
+      {firstState, emptyAvailableApps},
+      {secondState, {app}}});
   }
 
-  static const std::string firstState;
-  static const std::string secondState;
+  const std::string firstState{"First"};
+  const std::string secondState{"Second"};
+  const ProcessInfo app{ "app", "app", emptyOptions};
 };
-
-const std::string IpcStateTransitionsTest::firstState = "First";
-const std::string IpcStateTransitionsTest::secondState = "Second";
 
 TEST_F(ExecutionManagerIpcTest, FirstRegistrationShouldSucceed)
 {
@@ -116,7 +104,7 @@ TEST_F(ExecutionManagerIpcTest, ShouldFailWhenEmptyNewMsm)
   EXPECT_FALSE(result);
 }
 
-TEST_F(ExecutionManagerIpcTest, 
+TEST_F(ExecutionManagerIpcTest,
   ShouldDiscardOtherRegisterWhenAlreadyRegistered)
 {
   const pid_t anotherProcessId = 999;
@@ -127,8 +115,6 @@ TEST_F(ExecutionManagerIpcTest,
 
   EXPECT_FALSE(result);
 }
-
-////////////////////////////////////////////////
 
 TEST_F(ExecutionManagerIpcTest,
   ShouldSucceedToGetMachineState)
@@ -152,9 +138,7 @@ TEST_F(ExecutionManagerIpcTest, ShouldReturnEmptyStateWhenNoSetStateOccured)
 
 TEST_F(ExecutionManagerIpcTest, ShouldFailToSetInvalidMachineState)
 {
-  const std::string machineState{"WrongMachineState"};
-
-  auto result = em->setMachineState(defaultProcessId, machineState);
+  auto result = em->setMachineState(defaultProcessId, wrongMachineState);
 
   EXPECT_NE(result, StateError::K_SUCCESS);
 }
@@ -176,12 +160,12 @@ TEST_F(IpcStateTransitionsTest,
     ShouldStartAndKillApplicationForStateTransitions)
 {
   const pid_t appId = 1;
-  EXPECT_CALL(*applicationHandler, startProcess(_))
+  EXPECT_CALL(*applicationHandler, startProcess(app))
     .WillOnce(Return(appId));
-  
+
   EXPECT_CALL(*applicationHandler, killProcess(appId));
 
-  initEm();
+  em = initEm();
 
   em->registerMachineStateClient(defaultProcessId, defaultMsmName);
   em->setMachineState(defaultProcessId, secondState);

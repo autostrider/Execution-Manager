@@ -6,10 +6,10 @@
 namespace ExecutionManager
 {
 
-class MsmRegistrer
+class MsmRegister
 {
 public:
-  MsmRegistrer();
+  MsmRegister();
   bool registerMsm(const pid_t& processId, const std::string& appName);
   bool checkMsm(pid_t processId) const;
   pid_t msmPid() const;

@@ -1,5 +1,5 @@
-#ifndef ISTATEFACTORYMOCK
-#define ISTATEFACTORYMOCK
+#ifndef ISTATEFACTORYMOCK_HPP
+#define ISTATEFACTORYMOCK_HPP
 
 #include "i_state_factory.hpp"
 
@@ -14,4 +14,4 @@ public:
     MOCK_METHOD(std::unique_ptr<api::IState>, createShutDown, (api::IAdaptiveApp& msm), (const));
 };
 
-#endif
+#endif // ISTATEFACTORYMOCK_HPP

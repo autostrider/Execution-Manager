@@ -1,5 +1,5 @@
-#ifndef IMACHINESTATEMANAGERMOCK
-#define IMACHINESTATEMANAGERMOCK
+#ifndef IMACHINESTATEMANAGERMOCK_HPP
+#define IMACHINESTATEMANAGERMOCK_HPP
 
 #include "machine_state_manager.hpp"
 
@@ -23,4 +23,4 @@ public:
     MOCK_METHOD(void, transitToNextState, (IMachineStateManagerMock::FactoryFunc nextState));
 };
 
-#endif
+#endif // IMACHINESTATEMANAGERMOCK_HPP

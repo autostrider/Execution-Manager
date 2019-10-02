@@ -2,12 +2,12 @@
 
 #include "gtest/gtest.h"
 
-using ExecutionManager::MsmRegistrer;
+using ExecutionManager::MsmRegister;
 
 class MsmRegistrerTest : public ::testing::Test
 {
 protected:
-  MsmRegistrer registrer;
+  MsmRegister registrer;
   const std::string msmName{"msmName"};
   const int correctPid{2};
   const int failPid{3};
@@ -18,6 +18,7 @@ TEST_F(MsmRegistrerTest, ShouldSuccessToRegisterFirstMsm)
   bool result = registrer.registerMsm(correctPid, msmName);
 
   ASSERT_TRUE(result);
+  ASSERT_EQ(correctPid, registrer.msmPid());
 }
 
 TEST_F(MsmRegistrerTest, ShouldDiscardOtherPidsWhenAlreadyRegistered)

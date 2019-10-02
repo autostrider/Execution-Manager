@@ -35,13 +35,12 @@ class ExecutionManager
 public:
   ExecutionManager(std::unique_ptr<IManifestReader> reader,
                    std::unique_ptr<IApplicationHandler> applicationHandler,
-                   std::unique_ptr<ExecutionManagerClient::IExecutionManagerClient> client,
-                   MsmRegistrer msmRegistrer = MsmRegistrer{});
+                   std::unique_ptr<ExecutionManagerClient::IExecutionManagerClient> client);
 
   /**
    * @brief Main method of Execution manager.
    */
-  void start();
+  void start(const MsmRegister& msmRegistrer);
 
   void reportApplicationState(pid_t processId, AppState state);
 
@@ -113,7 +112,7 @@ private:
    */
   std::vector<MachineState> m_machineManifestStates;
 
-  MsmRegistrer m_registrer;
+  MsmRegister m_registrer;
 
   std::set<pid_t> m_stateConfirmToBeReceived;
 

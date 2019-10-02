@@ -1,5 +1,5 @@
-#ifndef MACHINESTATECLIENTMOCK
-#define MACHINESTATECLIENTMOCK
+#ifndef MACHINESTATECLIENTMOCK_HPP
+#define MACHINESTATECLIENTMOCK_HPP
 
 #include "i_machine_state_client_wrapper.hpp"
 
@@ -17,4 +17,4 @@ public:
     MOCK_METHOD(StateError, waitForConfirm, (std::uint32_t timeout));
 };
 
-#endif
+#endif // MACHINESTATECLIENTMOCK_HPP

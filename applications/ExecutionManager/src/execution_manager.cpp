@@ -18,22 +18,21 @@ namespace {
 ExecutionManager::ExecutionManager(
   std::unique_ptr<IManifestReader> reader,
   std::unique_ptr<IApplicationHandler> applicationHandler,
-  std::unique_ptr<ExecutionManagerClient::IExecutionManagerClient> client,
-  MsmRegistrer registrer)
+  std::unique_ptr<ExecutionManagerClient::IExecutionManagerClient> client)
   : appHandler{std::move(applicationHandler)},
     m_activeProcesses{},
     m_allowedProcessesForState{reader->getStatesSupportedByApplication()},
     m_currentState{},
     m_pendingState{},
     m_machineManifestStates{reader->getMachineStates()},
-    m_registrer{registrer},
     m_rpcClient(std::move(client))
 {
   filterStates();
 }
 
-void ExecutionManager::start()
+void ExecutionManager::start(const MsmRegister& msmRegistrer)
 {
+  m_registrer = msmRegistrer;
   setMachineState(m_registrer.msmPid(), MACHINE_STATE_STARTUP);
 }
 

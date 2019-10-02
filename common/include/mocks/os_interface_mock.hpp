@@ -1,5 +1,5 @@
-#ifndef OSINTERFACEMOCK
-#define OSINTERFACEMOCK
+#ifndef OSINTERFACEMOCK_HPP
+#define OSINTERFACEMOCK_HPP
 
 #include "i_os_interface.hpp"
 
@@ -15,4 +15,4 @@ public:
     MOCK_METHOD(int, kill, (pid_t procId, int signal));
 };
 
-#endif // OSINTERFACEMOCK
+#endif // OSINTERFACEMOCK_HPP

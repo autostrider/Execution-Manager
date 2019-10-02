@@ -19,7 +19,7 @@ int main(int argc, char **argv)
             ||
         ::signal(SIGINT, signalHandler) == SIG_ERR)
     {
-        LOG << "Error while registering signal.";
+        LOG << "[msm] Error while registering signal.";
     }
     MSM::MachineStateManager msm(std::make_unique<MSM::MsmStateFactory>(),
                                  std::make_unique<api::ApplicationStateClientWrapper>(),

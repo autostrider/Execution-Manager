@@ -3,13 +3,12 @@
 #include <constants.hpp>
 #include <logger.hpp>
 
-#include <csignal>
 #include <thread>
 
 static void signalHandler(int signo);
 using ApplicationState = api::ApplicationStateClient::ApplicationState;
 
-static std::atomic<ApplicationState> state{ApplicationState::K_RUNNING};
+static std::atomic<ApplicationState> state{ApplicationState::K_INITIALIZING};
 
 int main()
 {
@@ -22,40 +21,29 @@ int main()
     AdaptiveApp app(std::make_unique<StateFactory>(),
                     std::make_unique<api::ApplicationStateClientWrapper>());
 
-    app.init();
+    const std::map<ApplicationState, StateHandler> dispatchMap
+    {
+        {ApplicationState::K_INITIALIZING, std::bind(&api::IAdaptiveApp::init, &app)},
+        {ApplicationState::K_RUNNING, std::bind(&api::IAdaptiveApp::run, &app)},
+        {ApplicationState::K_SHUTTINGDOWN, std::bind(&api::IAdaptiveApp::terminate, &app)},
+        {ApplicationState::K_SUSPEND, std::bind(&api::IAdaptiveApp::suspend, &app)}
+    };
+
+    dispatchMap.at(state)();
+    state = ApplicationState::K_RUNNING;
+
     while (ApplicationState::K_RUNNING == state)
     {
-        app.run();
+        dispatchMap.at(state)();
         std::this_thread::sleep_for(FIVE_SECONDS);
     }
-    switch (state)
-    {
-    case ApplicationState::K_SHUTTINGDOWN:
-        app.terminate();
-        break;
-    case ApplicationState::K_SUSPEND:
-        app.suspend();
-        break;
-    default:
-        break;
-    }
 
+    dispatchMap.at(state)();
     return 0;
 }
 
 static void signalHandler(int signo)
 {
     LOG << "[aa_main] Received signal: " << sys_siglist[signo] << ".";
-    switch (signo)
-    {
-    case SIGTERM:
-        state = ApplicationState::K_SHUTTINGDOWN;
-        break;
-    case SIGINT:
-        state = ApplicationState::K_SUSPEND;
-        break;
-    default:
-        LOG << "Received unsupported signal";
-
-    }
+    state = mapSignalToState.at(signo);
 }

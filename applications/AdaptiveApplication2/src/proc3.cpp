@@ -3,13 +3,12 @@
 #include <constants.hpp>
 #include <logger.hpp>
 
-#include <csignal>
 #include <thread>
 
 static void signalHandler(int signo);
 using ApplicationState = api::ApplicationStateClient::ApplicationState;
 
-static std::atomic<ApplicationState> state{ApplicationState::K_RUNNING};
+static std::atomic<ApplicationState> state{ApplicationState::K_INITIALIZING};
 
 int main()
 {
@@ -17,46 +16,35 @@ int main()
             ||
         ::signal(SIGINT, signalHandler) == SIG_ERR)
     {
-        LOG << "[proc3] Error while registering signal.";
+        LOG << "Error while registering signal.";
     }
     AdaptiveApp app3(std::make_unique<StateFactory>(),
                     std::make_unique<api::ApplicationStateClientWrapper>());
 
-    app3.init();
+    const std::map<ApplicationState, StateHandler> dispatchMap
+    {
+        {ApplicationState::K_INITIALIZING, std::bind(&api::IAdaptiveApp::init, &app3)},
+        {ApplicationState::K_RUNNING, std::bind(&api::IAdaptiveApp::run, &app3)},
+        {ApplicationState::K_SHUTTINGDOWN, std::bind(&api::IAdaptiveApp::terminate, &app3)},
+        {ApplicationState::K_SUSPEND, std::bind(&api::IAdaptiveApp::suspend, &app3)}
+    };
+
+    dispatchMap.at(state)();
+    state = ApplicationState::K_RUNNING;
+
     while (ApplicationState::K_RUNNING == state)
     {
-        app3.run();
+        dispatchMap.at(state)();
         std::this_thread::sleep_for(FIVE_SECONDS);
     }
-    switch (state)
-    {
-    case ApplicationState::K_SHUTTINGDOWN:
-        app3.terminate();
-        break;
-    case ApplicationState::K_SUSPEND:
-        app3.suspend();
-        break;
-    default:
-        break;
-    }
+
+    dispatchMap.at(state)();
 
     return 0;
 }
 
 static void signalHandler(int signo)
 {
-    LOG << "[proc3] Received signal: " << sys_siglist[signo] << ".";
-    switch (signo)
-    {
-    case SIGTERM:
-        state = ApplicationState::K_SHUTTINGDOWN;
-        break;
-    case SIGINT:
-        state = ApplicationState::K_SUSPEND;
-        break;
-    default:
-        LOG << "Received unsupported signal";
-
-    }
-
+    LOG << "[aa_main] Received signal: " << sys_siglist[signo] << ".";
+    state = mapSignalToState.at(signo);
 }

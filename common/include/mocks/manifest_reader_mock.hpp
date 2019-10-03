@@ -1,5 +1,5 @@
-#ifndef MANIFESTREADERMOCK_HPP
-#define MANIFESTREADERMOCK_HPP
+#ifndef MANIFEST_READER_MOCK_HPP
+#define MANIFEST_READER_MOCK_HPP
 
 #include "i_manifest_reader.hpp"
 
@@ -16,4 +16,4 @@ public:
   MOCK_METHOD(std::vector<MachineState>, getMachineStates, ());
 };
 
-#endif // MANIFESTREADERMOCK_HPP
+#endif // MANIFEST_READER_MOCK_HPP

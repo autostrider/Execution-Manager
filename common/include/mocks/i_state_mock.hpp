@@ -1,5 +1,5 @@
-#ifndef ISTATEMOCK_HPP
-#define ISTATEMOCK_HPP
+#ifndef I_STATE_MOCK_HPP
+#define I_STATE_MOCK_HPP
 
 #include "i_state.hpp"
 
@@ -13,4 +13,4 @@ public:
     MOCK_METHOD(void, leave, (), (const));
 };
 
-#endif // ISTATEMOCK_HPP
+#endif // I_STATE_MOCK_HPP

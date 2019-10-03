@@ -1,5 +1,5 @@
-#ifndef APPLICATIONHANDLERMOCK_HPP
-#define APPLICATIONHANDLERMOCK_HPP
+#ifndef APPLICATION_HANDLER_MOCK_HPP
+#define APPLICATION_HANDLER_MOCK_HPP
 
 #include "i_application_handler.hpp"
 
@@ -12,4 +12,4 @@ public:
   MOCK_METHOD(void, killProcess, (pid_t processId));
 };
 
-#endif // APPLICATIONHANDLERMOCK_HPP
+#endif // APPLICATION_HANDLER_MOCK_HPP

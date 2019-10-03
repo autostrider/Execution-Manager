@@ -40,11 +40,6 @@ protected:
       .WillByDefault(Return(appsForState));
   }
 
-  void TearDown() override
-  {
-    em.reset();
-  }
-
   std::unique_ptr<ManifestReaderMock> manifestMock =
     std::make_unique<NiceMock<ManifestReaderMock>>();
   std::unique_ptr<ApplicationHandlerMock> applicationHandler =
@@ -76,24 +71,23 @@ protected:
 
   const std::string firstState{"First"};
   const std::string secondState{"Second"};
-  const ProcessInfo app{ "app", "app", emptyOptions};
+  const ProcessInfo app{"app", "app", emptyOptions};
 };
 
 TEST_F(ExecutionManagerIpcTest, FirstRegistrationShouldSucceed)
 {
-  bool result =
-    em->registerMachineStateClient(defaultProcessId, defaultMsmName);
-
-  EXPECT_TRUE(result);
+  EXPECT_TRUE(
+    em->registerMachineStateClient(defaultProcessId, defaultMsmName)
+  );
 }
 
 TEST_F(ExecutionManagerIpcTest, ShouldSucceededWhenSameMsc)
 {
   em->registerMachineStateClient(defaultProcessId, defaultMsmName);
-  auto result =
-    em->registerMachineStateClient(defaultProcessId, defaultMsmName);
 
-  EXPECT_TRUE(result);
+  EXPECT_TRUE(
+    em->registerMachineStateClient(defaultProcessId, defaultMsmName)
+  );
 }
 
 TEST_F(ExecutionManagerIpcTest, ShouldFailWhenEmptyNewMsm)
@@ -101,7 +95,9 @@ TEST_F(ExecutionManagerIpcTest, ShouldFailWhenEmptyNewMsm)
   const std::string emptyName;
   auto result = em->registerMachineStateClient(defaultProcessId, emptyName);
 
-  EXPECT_FALSE(result);
+  EXPECT_FALSE(
+    em->registerMachineStateClient(defaultProcessId, emptyName)
+  );
 }
 
 TEST_F(ExecutionManagerIpcTest,
@@ -110,20 +106,21 @@ TEST_F(ExecutionManagerIpcTest,
   const pid_t anotherProcessId = 999;
 
   em->registerMachineStateClient(defaultProcessId, defaultMsmName);
-  auto result =
-    em->registerMachineStateClient(122, defaultMsmName);
 
-  EXPECT_FALSE(result);
+  EXPECT_FALSE(
+    em->registerMachineStateClient(122, defaultMsmName)
+  );
 }
 
 TEST_F(ExecutionManagerIpcTest,
   ShouldSucceedToGetMachineState)
 {
   em->registerMachineStateClient(defaultProcessId, defaultMsmName);
-  auto result = em->setMachineState(defaultProcessId,
-    testState);
 
-  EXPECT_EQ(result, StateError::K_SUCCESS);
+  EXPECT_EQ(
+    em->setMachineState(defaultProcessId, testState),
+    StateError::K_SUCCESS
+  );
   EXPECT_EQ(em->getMachineState(defaultProcessId),
     testState);
 }
@@ -131,16 +128,21 @@ TEST_F(ExecutionManagerIpcTest,
 TEST_F(ExecutionManagerIpcTest, ShouldReturnEmptyStateWhenNoSetStateOccured)
 {
   const std::string emptyState{""};
-  auto result = em->getMachineState(defaultProcessId);
 
-  ASSERT_EQ(emptyState, result);
+  ASSERT_EQ(
+    emptyState,
+    em->getMachineState(defaultProcessId)
+  );
 }
 
 TEST_F(ExecutionManagerIpcTest, ShouldFailToSetInvalidMachineState)
 {
-  auto result = em->setMachineState(defaultProcessId, wrongMachineState);
+  em->registerMachineStateClient(defaultProcessId, defaultMsmName);
 
-  EXPECT_NE(result, StateError::K_SUCCESS);
+  EXPECT_NE(
+    em->setMachineState(defaultProcessId, wrongMachineState),
+    StateError::K_SUCCESS
+  );
 }
 
 TEST_F(ExecutionManagerIpcTest, ShouldFailToSetSameMachineState)
@@ -151,7 +153,10 @@ TEST_F(ExecutionManagerIpcTest, ShouldFailToSetSameMachineState)
   auto result = em->setMachineState(defaultProcessId,
     testState);
 
-  EXPECT_NE(result, StateError::K_SUCCESS);
+  EXPECT_NE(
+    em->setMachineState(defaultProcessId, testState),
+    StateError::K_SUCCESS);
+
   EXPECT_EQ(em->getMachineState(defaultProcessId),
     testState);
 }
@@ -171,12 +176,16 @@ TEST_F(IpcStateTransitionsTest,
   em->setMachineState(defaultProcessId, secondState);
   em->reportApplicationState(appId, AppState::RUNNING);
 
-  auto result = em->getMachineState(defaultProcessId);
-  ASSERT_EQ(result, secondState);
+  ASSERT_EQ(
+    em->getMachineState(defaultProcessId),
+    secondState
+  );
 
   em->setMachineState(defaultProcessId, firstState);
   em->reportApplicationState(appId, AppState::SHUTTINGDOWN);
 
-  result = em->getMachineState(defaultProcessId);
-  ASSERT_EQ(result, firstState);
+  ASSERT_EQ(
+    em->getMachineState(defaultProcessId),
+    firstState
+  );
 }

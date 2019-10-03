@@ -1,5 +1,5 @@
-#ifndef EXECUTIONMANAGERCLIENTMOCK_HPP
-#define EXECUTIONMANAGERCLIENTMOCK_HPP
+#ifndef EXECUTION_MANAGER_CLIENT_MOCK_HPP
+#define EXECUTION_MANAGER_CLIENT_MOCK_HPP
 
 #include "i_execution_manager_client.hpp"
 
@@ -14,4 +14,4 @@ public:
   MOCK_METHOD(void, confirm, (StateError status));
 };
 
-#endif // EXECUTIONMANAGERCLIENTMOCK_HPP
+#endif // EXECUTION_MANAGER_CLIENT_MOCK_HPP

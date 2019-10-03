@@ -1,5 +1,5 @@
-#ifndef APPSTATECLIENTMOCK_HPP
-#define APPSTATECLIENTMOCK_HPP
+#ifndef APP_STATE_CLIENT_MOCK_HPP
+#define APP_STATE_CLIENT_MOCK_HPP
 
 #include "i_application_state_client_wrapper.hpp"
 
@@ -12,4 +12,4 @@ public:
     MOCK_METHOD(void, ReportApplicationState, (ApplicationStateManagement::ApplicationState state));
 };
 
-#endif // APPSTATECLIENTMOCK_HPP
+#endif // APP_STATE_CLIENT_MOCK_HPP

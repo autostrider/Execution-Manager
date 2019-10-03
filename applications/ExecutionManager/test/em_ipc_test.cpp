@@ -74,54 +74,14 @@ protected:
   const ProcessInfo app{"app", "app", emptyOptions};
 };
 
-TEST_F(ExecutionManagerIpcTest, FirstRegistrationShouldSucceed)
-{
-  EXPECT_TRUE(
-    em->registerMachineStateClient(defaultProcessId, defaultMsmName)
-  );
-}
-
-TEST_F(ExecutionManagerIpcTest, ShouldSucceededWhenSameMsc)
-{
-  em->registerMachineStateClient(defaultProcessId, defaultMsmName);
-
-  EXPECT_TRUE(
-    em->registerMachineStateClient(defaultProcessId, defaultMsmName)
-  );
-}
-
-TEST_F(ExecutionManagerIpcTest, ShouldFailWhenEmptyNewMsm)
-{
-  const std::string emptyName;
-  auto result = em->registerMachineStateClient(defaultProcessId, emptyName);
-
-  EXPECT_FALSE(
-    em->registerMachineStateClient(defaultProcessId, emptyName)
-  );
-}
-
-TEST_F(ExecutionManagerIpcTest,
-  ShouldDiscardOtherRegisterWhenAlreadyRegistered)
-{
-  const pid_t anotherProcessId = 999;
-
-  em->registerMachineStateClient(defaultProcessId, defaultMsmName);
-
-  EXPECT_FALSE(
-    em->registerMachineStateClient(122, defaultMsmName)
-  );
-}
-
 TEST_F(ExecutionManagerIpcTest,
   ShouldSucceedToGetMachineState)
 {
-  em->registerMachineStateClient(defaultProcessId, defaultMsmName);
-
   EXPECT_EQ(
-    em->setMachineState(defaultProcessId, testState),
+    em->setMachineState(testState),
     StateError::K_SUCCESS
   );
-  EXPECT_EQ(em->getMachineState(defaultProcessId),
+  EXPECT_EQ(em->getMachineState(),
     testState);
 }
 
@@ -131,33 +91,32 @@ TEST_F(ExecutionManagerIpcTest, ShouldReturnEmptyStateWhenNoSetStateOccured)
 
   ASSERT_EQ(
     emptyState,
-    em->getMachineState(defaultProcessId)
+    em->getMachineState()
   );
 }
 
 TEST_F(ExecutionManagerIpcTest, ShouldFailToSetInvalidMachineState)
 {
-  em->registerMachineStateClient(defaultProcessId, defaultMsmName);
+
 
   EXPECT_NE(
-    em->setMachineState(defaultProcessId, wrongMachineState),
+    em->setMachineState(wrongMachineState),
     StateError::K_SUCCESS
   );
 }
 
 TEST_F(ExecutionManagerIpcTest, ShouldFailToSetSameMachineState)
 {
-  em->registerMachineStateClient(defaultProcessId, defaultMsmName);
-  em->setMachineState(defaultProcessId, testState);
 
-  auto result = em->setMachineState(defaultProcessId,
-    testState);
+  em->setMachineState(testState);
+
+  auto result = em->setMachineState(testState);
 
   EXPECT_NE(
-    em->setMachineState(defaultProcessId, testState),
+    em->setMachineState(testState),
     StateError::K_SUCCESS);
 
-  EXPECT_EQ(em->getMachineState(defaultProcessId),
+  EXPECT_EQ(em->getMachineState(),
     testState);
 }
 
@@ -172,20 +131,20 @@ TEST_F(IpcStateTransitionsTest,
 
   em = initEm();
 
-  em->registerMachineStateClient(defaultProcessId, defaultMsmName);
-  em->setMachineState(defaultProcessId, secondState);
+
+  em->setMachineState(secondState);
   em->reportApplicationState(appId, AppState::RUNNING);
 
   ASSERT_EQ(
-    em->getMachineState(defaultProcessId),
+    em->getMachineState(),
     secondState
   );
 
-  em->setMachineState(defaultProcessId, firstState);
+  em->setMachineState(firstState);
   em->reportApplicationState(appId, AppState::SHUTTINGDOWN);
 
   ASSERT_EQ(
-    em->getMachineState(defaultProcessId),
+    em->getMachineState(),
     firstState
   );
 }

@@ -1,23 +1,22 @@
-#ifndef MSMREGISTRER
-#define MSMREGISTRER
+#ifndef MSM_HANDLER_HPP
+#define MSM_HANDLER_HPP
 
 #include <string>
 
 namespace ExecutionManager
 {
 
-class MsmRegister
+class MsmHandler
 {
 public:
-  MsmRegister();
+  MsmHandler();
   bool registerMsm(const pid_t& processId, const std::string& appName);
   bool checkMsm(pid_t processId) const;
   pid_t msmPid() const;
 private:
   pid_t m_msmPId;
-  std::string m_msmAppName;
 };
 
 } // namespace ExecutionManager
 
-#endif // MSMREGISTRER
+#endif // MSM_HANDLER_HPP

@@ -1,7 +1,7 @@
 #ifndef EXECUTION_MANAGER_HPP
 #define EXECUTION_MANAGER_HPP
 
-#include "msm_registrer.hpp"
+#include "msm_handler.hpp"
 #include <i_execution_manager_client.hpp>
 #include <i_manifest_reader.hpp>
 #include <i_application_handler.hpp>
@@ -40,15 +40,13 @@ public:
   /**
    * @brief Main method of Execution manager.
    */
-  void start(const MsmRegister& msmRegistrer);
+  void start();
 
   void reportApplicationState(pid_t processId, AppState state);
 
-  bool registerMachineStateClient(pid_t processId, std::string appName);
+  MachineState getMachineState() const;
 
-  MachineState getMachineState(pid_t processId) const;
-
-  StateError setMachineState(pid_t processId, std::string state);
+  StateError setMachineState(std::string state);
 
 private:
   /**
@@ -112,7 +110,7 @@ private:
    */
   std::vector<MachineState> m_machineManifestStates;
 
-  MsmRegister m_registrer;
+  MsmHandler m_registrer;
 
   std::set<pid_t> m_stateConfirmToBeReceived;
 

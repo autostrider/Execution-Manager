@@ -1,25 +1,23 @@
-#include "msm_registrer.hpp"
+#include "msm_handler.hpp"
 #include <logger.hpp>
 
 namespace ExecutionManager
 {
 
-MsmRegister::MsmRegister()
-  : m_msmPId{-1},
-    m_msmAppName{""}
+MsmHandler::MsmHandler()
+  : m_msmPId{-1}
 { }
 
-bool MsmRegister::registerMsm(const pid_t& processId, const std::string& appName)
+bool MsmHandler::registerMsm(const pid_t& processId, const std::string& appName)
 {
    if ((m_msmPId == -1 ||
       m_msmPId == processId) &&
       !appName.empty())
   {
     m_msmPId = processId;
-    m_msmAppName = appName;
 
     LOG << "State Machine Client \""
-        << m_msmAppName
+        << appName
         << "\" with pid "
         << m_msmPId
         << " registered.";
@@ -37,12 +35,12 @@ bool MsmRegister::registerMsm(const pid_t& processId, const std::string& appName
   return false;
 }
 
-bool MsmRegister::checkMsm(pid_t processId) const
+bool MsmHandler::checkMsm(pid_t processId) const
 {
   return processId == m_msmPId;
 }
 
-pid_t MsmRegister::msmPid() const
+pid_t MsmHandler::msmPid() const
 {
   return m_msmPId;
 }

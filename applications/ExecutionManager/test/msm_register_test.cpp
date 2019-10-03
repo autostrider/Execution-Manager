@@ -1,13 +1,13 @@
-#include "msm_registrer.hpp"
+#include "msm_handler.hpp"
 
 #include "gtest/gtest.h"
 
-using ExecutionManager::MsmRegister;
+using ExecutionManager::MsmHandler;
 
 class MsmRegistrerTest : public ::testing::Test
 {
 protected:
-  MsmRegister registrer;
+  MsmHandler registrer;
   const std::string msmName{"msmName"};
   const int correctPid{2};
   const int invalidPid{3};

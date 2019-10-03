@@ -2,6 +2,7 @@
 #include "execution_manager_server.hpp"
 #include "manifest_reader.hpp"
 #include "execution_manager_client.hpp"
+#include "msm_handler.hpp"
 #include "os_interface.hpp"
 #include <logger.hpp>
 
@@ -30,7 +31,7 @@ int main(int argc, char **argv)
 
     capnp::TwoPartyServer server(
       kj::heap<ExecutionManagerServer::ExecutionManagerServer>
-      (executionManager));
+      (executionManager, ExecutionManager::MsmHandler{}));
 
     auto address = io.provider->getNetwork()
         .parseAddress(IPC_PROTOCOL + EM_SOCKET_NAME).wait(io.waitScope);

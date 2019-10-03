@@ -30,10 +30,9 @@ ExecutionManager::ExecutionManager(
   filterStates();
 }
 
-void ExecutionManager::start(const MsmRegister& msmRegistrer)
+void ExecutionManager::start()
 {
-  m_registrer = msmRegistrer;
-  setMachineState(m_registrer.msmPid(), MACHINE_STATE_STARTUP);
+  setMachineState(MACHINE_STATE_STARTUP);
 }
 
 void ExecutionManager::filterStates()
@@ -163,15 +162,8 @@ ExecutionManager::reportApplicationState(pid_t processId, AppState state)
   }
 }
 
-bool
-ExecutionManager::registerMachineStateClient(pid_t processId,
-                                             std::string appName)
-{
-  return m_registrer.registerMsm(processId, appName);
-}
-
 MachineState
-ExecutionManager::getMachineState(pid_t processId) const
+ExecutionManager::getMachineState() const
 {
   LOG << "GetMachineState request received.";
 
@@ -179,7 +171,7 @@ ExecutionManager::getMachineState(pid_t processId) const
 }
 
 StateError
-ExecutionManager::setMachineState(pid_t processId, std::string state)
+ExecutionManager::setMachineState(std::string state)
 {
   auto stateIt = std::find(m_machineManifestStates.cbegin(),
                            m_machineManifestStates.cend(),
@@ -189,14 +181,11 @@ ExecutionManager::setMachineState(pid_t processId, std::string state)
   {
     return StateError::K_INVALID_STATE;
   }
-
-  if (!m_registrer.checkMsm(processId) &&
-      m_stateConfirmToBeReceived.empty())
-  {
-    return StateError::K_INVALID_REQUEST;
-  }
-
-  if (state == m_currentState)
+  // else if (m_stateConfirmToBeReceived.empty())
+  // {
+  //   return StateError::K_INVALID_REQUEST;
+  // }
+  else if (state == m_currentState)
   {
     return StateError::K_INVALID_STATE;
   }

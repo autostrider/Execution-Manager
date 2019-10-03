@@ -13,6 +13,7 @@ class IExecutionManagerClient
 {
 public:
   virtual void confirm(StateError status) = 0;
+  virtual ~IExecutionManagerClient() noexcept(false) {};
 };
 
 }

@@ -19,7 +19,11 @@ protected:
   void SetUp() override
   {
     setupManifestData({testState}, {{testState, emptyAvailableApps}});
-    em = initEm();
+  }
+
+  void TearDown() override
+  {
+    em.reset();
   }
 
   std::unique_ptr<ExecutionManager::ExecutionManager> initEm()
@@ -44,8 +48,8 @@ protected:
     std::make_unique<NiceMock<ManifestReaderMock>>();
   std::unique_ptr<ApplicationHandlerMock> applicationHandler =
     std::make_unique<StrictMock<ApplicationHandlerMock>>();
-  std::unique_ptr<ExecutionManagerClient::IExecutionManagerClient> client =
-    std::make_unique<NiceMock<ExecutionManagerClientMock>>();
+  std::unique_ptr<ExecutionManagerClientMock> client =
+    std::make_unique<StrictMock<ExecutionManagerClientMock>>();
   std::unique_ptr<ExecutionManager::ExecutionManager> em;
 
   const pid_t defaultProcessId {666};
@@ -65,18 +69,23 @@ protected:
       {firstState, secondState};
 
     setupManifestData(availableStates, {
-      {firstState, emptyAvailableApps},
-      {secondState, {app}}});
+      {firstState, {additionalApp}},
+      {secondState, {app, additionalApp}}});
+
+    EXPECT_CALL(*client, confirm(StateError::K_SUCCESS)).Times(2);
   }
 
   const std::string firstState{"First"};
   const std::string secondState{"Second"};
   const ProcessInfo app{"app", "app", emptyOptions};
+  const ProcessInfo additionalApp{"addApp", "addApp", emptyOptions};
 };
 
 TEST_F(ExecutionManagerIpcTest,
   ShouldSucceedToGetMachineState)
 {
+  EXPECT_CALL(*client, confirm(StateError::K_SUCCESS));
+  em = initEm();
   EXPECT_EQ(
     em->setMachineState(testState),
     StateError::K_SUCCESS
@@ -89,6 +98,7 @@ TEST_F(ExecutionManagerIpcTest, ShouldReturnEmptyStateWhenNoSetStateOccured)
 {
   const std::string emptyState{""};
 
+  em = initEm();
   ASSERT_EQ(
     emptyState,
     em->getMachineState()
@@ -97,8 +107,7 @@ TEST_F(ExecutionManagerIpcTest, ShouldReturnEmptyStateWhenNoSetStateOccured)
 
 TEST_F(ExecutionManagerIpcTest, ShouldFailToSetInvalidMachineState)
 {
-
-
+  em = initEm();
   EXPECT_NE(
     em->setMachineState(wrongMachineState),
     StateError::K_SUCCESS
@@ -107,7 +116,8 @@ TEST_F(ExecutionManagerIpcTest, ShouldFailToSetInvalidMachineState)
 
 TEST_F(ExecutionManagerIpcTest, ShouldFailToSetSameMachineState)
 {
-
+  EXPECT_CALL(*client, confirm(StateError::K_SUCCESS));
+  em = initEm();
   em->setMachineState(testState);
 
   auto result = em->setMachineState(testState);
@@ -124,8 +134,12 @@ TEST_F(IpcStateTransitionsTest,
     ShouldStartAndKillApplicationForStateTransitions)
 {
   const pid_t appId = 1;
+  const pid_t additionalAppId = 2;
   EXPECT_CALL(*applicationHandler, startProcess(app))
     .WillOnce(Return(appId));
+
+  EXPECT_CALL(*applicationHandler, startProcess(additionalApp))
+    .WillOnce(Return(additionalAppId));
 
   EXPECT_CALL(*applicationHandler, killProcess(appId));
 
@@ -134,6 +148,7 @@ TEST_F(IpcStateTransitionsTest,
 
   em->setMachineState(secondState);
   em->reportApplicationState(appId, AppState::RUNNING);
+  em->reportApplicationState(additionalAppId, AppState::RUNNING);
 
   ASSERT_EQ(
     em->getMachineState(),

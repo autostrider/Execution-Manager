@@ -14,6 +14,7 @@ public:
   ExecutionManagerClient(const std::string& msmAddress, kj::AsyncIoContext& context);
   void confirm(StateError status);
 
+  ~ExecutionManagerClient() override = default;
 private:
   const std::string m_msmAddress;
   kj::AsyncIoContext& m_ioContext;

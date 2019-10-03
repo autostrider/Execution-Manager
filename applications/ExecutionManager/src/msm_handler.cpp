@@ -8,7 +8,7 @@ MsmHandler::MsmHandler()
   : m_msmPId{-1}
 { }
 
-bool MsmHandler::registerMsm(const pid_t& processId, const std::string& appName)
+bool MsmHandler::registerMsm(pid_t processId, const std::string& appName)
 {
    if ((m_msmPId == -1 ||
       m_msmPId == processId) &&

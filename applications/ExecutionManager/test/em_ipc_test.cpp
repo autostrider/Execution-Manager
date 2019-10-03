@@ -30,8 +30,8 @@ protected:
           std::move(client));
   }
 
-  void setupManifestData(std::vector<MachineState> machineStates,
-    std::map<MachineState, std::vector<ProcessInfo>> appsForState)
+  void setupManifestData(const std::vector<MachineState>& machineStates,
+    const std::map<MachineState, std::vector<ProcessInfo>>& appsForState)
   {
     ON_CALL(*manifestMock, getMachineStates())
       .WillByDefault(Return(machineStates));

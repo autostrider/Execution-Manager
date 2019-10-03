@@ -1,7 +1,6 @@
 #ifndef EXECUTION_MANAGER_HPP
 #define EXECUTION_MANAGER_HPP
 
-#include "msm_handler.hpp"
 #include <i_execution_manager_client.hpp>
 #include <i_manifest_reader.hpp>
 #include <i_application_handler.hpp>
@@ -109,8 +108,6 @@ private:
    * @brief Vector that holds state transitions.
    */
   std::vector<MachineState> m_machineManifestStates;
-
-  MsmHandler m_registrer;
 
   std::set<pid_t> m_stateConfirmToBeReceived;
 

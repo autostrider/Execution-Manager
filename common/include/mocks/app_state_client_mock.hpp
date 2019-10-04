@@ -5,11 +5,17 @@
 
 #include "gmock/gmock.h"
 
-class AppStateClientMock : public api::IApplicationStateClientWrapper
+namespace api
+{
+
+class AppStateClientMock : public IApplicationStateClientWrapper
 {
 public:
     AppStateClientMock() = default;
-    MOCK_METHOD(void, ReportApplicationState, (ApplicationStateManagement::ApplicationState state));
+    MOCK_METHOD(void, ReportApplicationState,
+        (ApplicationStateManagement::ApplicationState state));
 };
+
+} // namespace api
 
 #endif // APP_STATE_CLIENT_MOCK_HPP

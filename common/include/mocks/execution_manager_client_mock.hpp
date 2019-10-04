@@ -5,13 +5,18 @@
 
 #include "gmock/gmock.h"
 
+namespace ExecutionManagerClient
+{
+
 using StateError = ::MachineStateManagement::StateError;
 
 class ExecutionManagerClientMock :
-  public ExecutionManagerClient::IExecutionManagerClient
+  public IExecutionManagerClient
 {
 public:
   MOCK_METHOD(void, confirm, (StateError status));
 };
+
+} // namespace ExecutionManagerClient
 
 #endif // EXECUTION_MANAGER_CLIENT_MOCK_HPP

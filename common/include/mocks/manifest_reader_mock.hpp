@@ -5,7 +5,8 @@
 
 #include "gmock/gmock.h"
 
-using namespace ExecutionManager;
+namespace ExecutionManager
+{
 
 class ManifestReaderMock : public IManifestReader
 {
@@ -16,4 +17,5 @@ public:
   MOCK_METHOD(std::vector<MachineState>, getMachineStates, ());
 };
 
+} // namespace ExecutionManager
 #endif // MANIFEST_READER_MOCK_HPP

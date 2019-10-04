@@ -5,7 +5,9 @@
 
 #include "gmock/gmock.h"
 
-using namespace MSM;
+namespace MSM
+{
+
 using StateError = api::MachineStateClient::StateError;
 
 class IMachineStateManagerMock : public MachineStateManager
@@ -22,5 +24,7 @@ public:
     MOCK_METHOD(void, reportApplicationState, (api::ApplicationStateClient::ApplicationState state));
     MOCK_METHOD(void, transitToNextState, (IMachineStateManagerMock::FactoryFunc nextState));
 };
+
+} // namespace MSM
 
 #endif // I_MACHINE_STATE_MANAGER_MOCK_HPP

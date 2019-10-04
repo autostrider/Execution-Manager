@@ -5,12 +5,17 @@
 
 #include "gmock/gmock.h"
 
-class IStateMock : public api::IState
+namespace api
+{
+
+class IStateMock : public IState
 {
 public:
-    IStateMock() = default;
+    // IStateMock() = default;
     MOCK_METHOD(void, enter, ());
     MOCK_METHOD(void, leave, (), (const));
 };
+
+} // namespace api
 
 #endif // I_STATE_MOCK_HPP

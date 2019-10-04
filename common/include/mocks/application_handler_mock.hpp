@@ -5,11 +5,16 @@
 
 #include "gmock/gmock.h"
 
-class ApplicationHandlerMock : public ExecutionManager::IApplicationHandler
+namespace ExecutionManager
+{
+
+class ApplicationHandlerMock : public IApplicationHandler
 {
 public:
-  MOCK_METHOD(pid_t, startProcess, (const ExecutionManager::ProcessInfo& application));
+  MOCK_METHOD(pid_t, startProcess, (const ProcessInfo& application));
   MOCK_METHOD(void, killProcess, (pid_t processId));
 };
+
+} // namespace ExecutionManager
 
 #endif // APPLICATION_HANDLER_MOCK_HPP

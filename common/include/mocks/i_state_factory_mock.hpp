@@ -5,13 +5,18 @@
 
 #include "gmock/gmock.h"
 
-class IStateFactoryMock : public api::IStateFactory
+namespace api
+{
+
+class IStateFactoryMock : public IStateFactory
 {
 public:
     IStateFactoryMock() = default;
-    MOCK_METHOD(std::unique_ptr<api::IState>, createInit, (api::IAdaptiveApp& msm), (const));
-    MOCK_METHOD(std::unique_ptr<api::IState>, createRun, (api::IAdaptiveApp& msm), (const));
-    MOCK_METHOD(std::unique_ptr<api::IState>, createShutDown, (api::IAdaptiveApp& msm), (const));
+    MOCK_METHOD(std::unique_ptr<IState>, createInit, (IAdaptiveApp& msm), (const));
+    MOCK_METHOD(std::unique_ptr<IState>, createRun, (IAdaptiveApp& msm), (const));
+    MOCK_METHOD(std::unique_ptr<IState>, createShutDown, (IAdaptiveApp& msm), (const));
 };
+
+} // namespace api
 
 #endif // I_STATE_FACTORY_MOCK_HPP

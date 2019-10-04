@@ -21,11 +21,6 @@ protected:
     setupManifestData({testState}, {{testState, emptyAvailableApps}});
   }
 
-  void TearDown() override
-  {
-    em.reset();
-  }
-
   std::unique_ptr<ExecutionManager::ExecutionManager> initEm()
   {
     return std::make_unique<ExecutionManager::ExecutionManager>(
@@ -48,8 +43,8 @@ protected:
     std::make_unique<NiceMock<ManifestReaderMock>>();
   std::unique_ptr<ApplicationHandlerMock> applicationHandler =
     std::make_unique<StrictMock<ApplicationHandlerMock>>();
-  std::unique_ptr<ExecutionManagerClientMock> client =
-    std::make_unique<StrictMock<ExecutionManagerClientMock>>();
+  std::unique_ptr<ExecutionManagerClient::ExecutionManagerClientMock> client =
+    std::make_unique<StrictMock<ExecutionManagerClient::ExecutionManagerClientMock>>();
   std::unique_ptr<ExecutionManager::ExecutionManager> em;
 
   const pid_t defaultProcessId {666};

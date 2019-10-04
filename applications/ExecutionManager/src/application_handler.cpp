@@ -8,15 +8,13 @@ namespace ExecutionManager
 
 using std::runtime_error;
 
-ApplicationHandler::ApplicationHandler(std::unique_ptr<IOsInterface> syscalls,
-                                       std::string path)
-        : corePath{std::move(path)},
-          m_syscalls{std::move(syscalls)}
+ApplicationHandler::ApplicationHandler(std::string path)
+        : corePath{std::move(path)}
 { }
 
 pid_t ApplicationHandler::startProcess(const ProcessInfo& process)
 {
-  pid_t processId = m_syscalls->fork();
+  pid_t processId = fork();
 
   if (!processId)
   {
@@ -26,8 +24,7 @@ pid_t ApplicationHandler::startProcess(const ProcessInfo& process)
 
     auto arguments = getArgumentsList(process);
     auto applicationArguments = convertToNullTerminatingArgv(arguments);
-    int res = m_syscalls->execv(processPath.c_str(),
-                                applicationArguments.data());
+    int res = execv(processPath.c_str(), applicationArguments.data());
 
     if (res)
     {
@@ -42,7 +39,7 @@ pid_t ApplicationHandler::startProcess(const ProcessInfo& process)
 
 void ApplicationHandler::killProcess(pid_t processId)
 {
- m_syscalls->kill(processId, SIGTERM);
+ kill(processId, SIGTERM);
 }
 
 void ApplicationHandler::suspend(pid_t processId)
@@ -67,9 +64,7 @@ std::vector<std::string> ApplicationHandler::getArgumentsList(const ProcessInfo&
   return arguments;
 }
 
-std::vector<char*>
-ApplicationHandler::convertToNullTerminatingArgv(
-  std::vector<std::string>& vectorToConvert) const
+std::vector<char*> ApplicationHandler::convertToNullTerminatingArgv(std::vector<std::string>& vectorToConvert) const
 {
   std::vector<char*> outputVector;
 

@@ -8,6 +8,7 @@
 
 using namespace MSM;
 using namespace testing;
+using namespace api;
 
 class MsmStateMachineTest : public ::testing::Test
 {
@@ -23,7 +24,7 @@ protected:
     {
         delete msmMock;
     }
-    
+
    std::unique_ptr<AppStateClientMock> appStateClientMock{nullptr};
    std::unique_ptr<IStateFactoryMock> factoryMock{nullptr};
    std::unique_ptr<MachineStateClientMock> machineStateClientMock{nullptr};
@@ -34,11 +35,11 @@ protected:
 TEST_F(MsmStateMachineTest, ShouldInitCallEnter)
 {
     EXPECT_CALL(*machineStateClientMock, Register(_,_)).WillOnce(Return(StateError::K_SUCCESS));
-    
+
     msmMock = new IMachineStateManagerMock{std::move(factoryMock),
                                            std::move(appStateClientMock),
                                            std::move(machineStateClientMock)};
-    
+
     EXPECT_CALL(*msmMock, reportApplicationState(_)).WillOnce(Return());
 
     std::unique_ptr<Init> state = std::make_unique<Init>(*msmMock);
@@ -48,11 +49,11 @@ TEST_F(MsmStateMachineTest, ShouldInitCallEnter)
 TEST_F(MsmStateMachineTest, UnsuccessfulRegistration)
 {
     EXPECT_CALL(*machineStateClientMock, Register(_,_)).WillOnce(Return(StateError::K_INVALID_STATE));
-    
+
     msmMock = new IMachineStateManagerMock{std::move(factoryMock),
                                            std::move(appStateClientMock),
                                            std::move(machineStateClientMock)};
-    
+
     EXPECT_CALL(*msmMock, reportApplicationState(_)).WillOnce(Return());
 
     std::unique_ptr<Init> state = std::make_unique<Init>(*msmMock);

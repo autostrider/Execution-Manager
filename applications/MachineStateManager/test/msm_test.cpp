@@ -8,6 +8,7 @@
 
 using namespace MSM;
 using namespace testing;
+using namespace api;
 
 class MsmTest : public ::testing::Test
 {
@@ -15,7 +16,7 @@ protected:
    std::unique_ptr<IStateFactoryMock> factoryMock{nullptr};
    std::unique_ptr<AppStateClientMock> appStateClientMock{nullptr};
    std::unique_ptr<MachineStateClientMock> machineStateClientMock{nullptr};
-   
+
    std::unique_ptr<NiceMock<IStateMock>> stateInitMock{nullptr};
    std::unique_ptr<NiceMock<IStateMock>> stateRunMock{nullptr};
    std::unique_ptr<NiceMock<IStateMock>> stateTermMock{nullptr};

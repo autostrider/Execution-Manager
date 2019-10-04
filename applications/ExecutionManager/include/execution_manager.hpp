@@ -2,12 +2,12 @@
 #define EXECUTION_MANAGER_HPP
 
 #include "execution_manager_client.hpp"
-#include <i_application_handler.hpp>
 #include <i_manifest_reader.hpp>
+#include <i_application_handler.hpp>
+#include <map>
 #include <memory>
 #include <string>
 #include <vector>
-#include <map>
 #include <set>
 
 namespace ExecutionManager
@@ -25,8 +25,7 @@ enum class AppState : uint16_t
 {
   INITIALIZING,
   RUNNING,
-  SHUTTINGDOWN,
-  SUSPEND
+  SHUTTINGDOWN
 };
 
 class ExecutionManager
@@ -76,6 +75,8 @@ private:
                           const std::vector<ProcessInfo>&);
 
   void confirmState(StateError status);
+
+  void suspend();
 
 private:
   /**

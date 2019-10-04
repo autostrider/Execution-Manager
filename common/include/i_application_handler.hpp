@@ -22,7 +22,9 @@ public:
      * @param processId: id of the process
      * @param signal: signal to be sent
      */
-    virtual void killProcess(pid_t processId) = 0;
+    virtual int killProcess(pid_t processId) = 0;
+
+    virtual void suspend(pid_t processId) = 0;
 
     virtual ~IApplicationHandler() = default;
 };

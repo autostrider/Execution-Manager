@@ -1,5 +1,4 @@
 #include "execution_manager.hpp"
-#include <constants.hpp>
 
 #include <iostream>
 #include <logger.hpp>
@@ -8,13 +7,18 @@ namespace ExecutionManager
 {
 
 using std::runtime_error;
+using std::string;
 
 namespace {
-  const std::vector<std::string> applicationStateNames{AA_STATE_INIT,
-                                                       AA_STATE_RUNNING,
-                                                       AA_STATE_SHUTDOWN,
-                                                       AA_STATE_SUSPEND};
+  const char * applicationStateNames[] =
+  {
+    "Initializing",
+    "Running",
+    "Shuttingdown"
+  };
 } // anonymous namespace
+
+const MachineState ExecutionManager::defaultState {"Starting-up"};
 
 ExecutionManager::ExecutionManager(
   std::unique_ptr<IManifestReader> reader,
@@ -34,7 +38,7 @@ ExecutionManager::ExecutionManager(
 
 void ExecutionManager::start()
 {
-  setMachineState(m_machineStateClientPid, MACHINE_STATE_STARTUP);
+  setMachineState(m_machineStateClientPid, defaultState);
 }
 
 void ExecutionManager::filterStates()
@@ -115,7 +119,7 @@ void ExecutionManager::killProcessesForState()
 }
 
 bool ExecutionManager::processToBeKilled(
-  const std::string& app,
+  const string& app,
   const std::vector<ProcessInfo>& allowedApps)
 {
   auto it = std::find_if(allowedApps.cbegin(),
@@ -165,7 +169,7 @@ ExecutionManager::reportApplicationState(pid_t processId, AppState state)
 }
 
 bool
-ExecutionManager::registerMachineStateClient(pid_t processId, std::string appName)
+ExecutionManager::registerMachineStateClient(pid_t processId, string appName)
 {
   if (m_machineStateClientPid == -1 ||
       m_machineStateClientPid == processId)
@@ -201,7 +205,7 @@ ExecutionManager::getMachineState(pid_t processId) const
 }
 
 StateError
-ExecutionManager::setMachineState(pid_t processId, std::string state)
+ExecutionManager::setMachineState(pid_t processId, string state)
 {
   auto stateIt = std::find(m_machineManifestStates.cbegin(),
                            m_machineManifestStates.cend(),
@@ -220,9 +224,17 @@ ExecutionManager::setMachineState(pid_t processId, std::string state)
 
   m_pendingState = state;
 
-  killProcessesForState();
+  if(m_pendingState == "AA_STATE_SUSPEND")
+  {
+    suspend();
+  }
+  else
+  {
+    killProcessesForState();
 
-  startApplicationsForState();
+    startApplicationsForState();
+  }
+  
 
   if (!m_stateConfirmToBeReceived.empty())
   {
@@ -236,6 +248,16 @@ ExecutionManager::setMachineState(pid_t processId, std::string state)
   }
 
   return StateError::K_SUCCESS;
+}
+
+void 
+ExecutionManager::suspend()
+{
+  for (auto app = m_activeProcesses.cbegin(); app != m_activeProcesses.cend(); app++)
+  {
+    appHandler->suspend(app->second);
+    m_stateConfirmToBeReceived.insert(app->second);
+  } 
 }
 
 } // namespace ExecutionManager

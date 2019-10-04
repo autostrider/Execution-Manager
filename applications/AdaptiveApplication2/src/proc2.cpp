@@ -3,35 +3,47 @@
 #include <constants.hpp>
 #include <logger.hpp>
 
-#include <csignal>
 #include <thread>
 
 static void signalHandler(int signo);
-static std::atomic<bool> isTerminating{false};
+using ApplicationState = api::ApplicationStateClient::ApplicationState;
+
+static std::atomic<ApplicationState> state{ApplicationState::K_INITIALIZING};
 
 int main()
 {
-    if (::signal(SIGTERM, signalHandler) == SIG_ERR)
+    if (::signal(SIGTERM, signalHandler) == SIG_ERR
+            ||
+        ::signal(SIGINT, signalHandler) == SIG_ERR)
     {
         LOG << "[proc2] Error while registering signal.";
     }
-
     AdaptiveApp app2(std::make_unique<StateFactory>(),
-                     std::make_unique<api::ApplicationStateClientWrapper>());
+                    std::make_unique<api::ApplicationStateClientWrapper>());
 
-    app2.init();
-
-    while (!isTerminating)
+    const std::map<ApplicationState, StateHandler> dispatchMap
     {
-        app2.run();
+        {ApplicationState::K_INITIALIZING, std::bind(&api::IAdaptiveApp::init, &app2)},
+        {ApplicationState::K_RUNNING, std::bind(&api::IAdaptiveApp::run, &app2)},
+        {ApplicationState::K_SHUTTINGDOWN, std::bind(&api::IAdaptiveApp::terminate, &app2)},
+        {ApplicationState::K_SUSPEND, std::bind(&api::IAdaptiveApp::suspend, &app2)}
+    };
+
+    dispatchMap.at(state)();
+    state = ApplicationState::K_RUNNING;
+
+    while (ApplicationState::K_RUNNING == state)
+    {
+        dispatchMap.at(state)();
         std::this_thread::sleep_for(FIVE_SECONDS);
     }
-    app2.terminate();
+
+    dispatchMap.at(state)();
     return 0;
 }
 
 static void signalHandler(int signo)
 {
     LOG << "[proc2] Received signal: " << sys_siglist[signo] << ".";
-    isTerminating = true;
+    state = mapSignalToState.at(signo);
 }

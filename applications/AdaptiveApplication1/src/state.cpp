@@ -59,6 +59,16 @@ void ShutDown::enter()
     LOG << "Killing app...";
 }
 
+Suspend::Suspend(AdaptiveApp &app) : State(app, ApplicationState::K_SUSPEND, AA_STATE_SUSPEND)
+{
+
+}
+
+void Suspend::enter()
+{
+    m_app.reportApplicationState(getApplicationState());
+}
+
 std::unique_ptr<api::IState> StateFactory::createInit(api::IAdaptiveApp& app) const
 {
     return std::make_unique<Init>(dynamic_cast<AdaptiveApp&>(app));
@@ -73,3 +83,9 @@ std::unique_ptr<api::IState> StateFactory::createShutDown(api::IAdaptiveApp& app
 {
     return std::make_unique<ShutDown>(dynamic_cast<AdaptiveApp&>(app));
 }
+
+std::unique_ptr<api::IState> StateFactory::createSuspend(api::IAdaptiveApp &app) const
+{
+    return std::make_unique<Suspend>(dynamic_cast<AdaptiveApp&>(app));
+}
+

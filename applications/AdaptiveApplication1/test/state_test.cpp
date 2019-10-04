@@ -17,6 +17,7 @@ public:
     MOCK_METHOD(std::unique_ptr<api::IState>, createInit, (api::IAdaptiveApp& app),(const));
     MOCK_METHOD(std::unique_ptr<api::IState>, createRun, (api::IAdaptiveApp& app),(const));
     MOCK_METHOD(std::unique_ptr<api::IState>, createShutDown, (api::IAdaptiveApp& app),(const));
+    MOCK_METHOD(std::unique_ptr<api::IState>, createSuspend, (api::IAdaptiveApp& app), (const));
 };
 
 class IStateMock : public api::IState

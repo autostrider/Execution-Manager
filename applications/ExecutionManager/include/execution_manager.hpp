@@ -76,6 +76,8 @@ private:
 
   void confirmState(StateError status);
 
+  void suspend();
+
 private:
   /**
    * @brief Holds interface responsible for starting applications

@@ -9,6 +9,7 @@
 #include <memory>
 #include <string>
 #include <vector>
+#include <map>
 #include <set>
 
 namespace ExecutionManager
@@ -26,7 +27,8 @@ enum class AppState : uint16_t
 {
   INITIALIZING,
   RUNNING,
-  SHUTTINGDOWN
+  SHUTTINGDOWN,
+  SUSPEND
 };
 
 class ExecutionManager

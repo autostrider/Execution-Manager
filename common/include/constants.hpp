@@ -1,8 +1,14 @@
 #ifndef CONSTANTS
 #define CONSTANTS
 
+#include <application_state_client.h>
+
+#include <functional>
+#include <csignal>
 #include <string>
 #include <chrono>
+#include <map>
+
 
 static const std::string IPC_PROTOCOL{"unix:"};
 static const std::string EM_SOCKET_NAME{"/tmp/execution_management"};
@@ -16,12 +22,18 @@ constexpr std::chrono::seconds FIVE_SECONDS{5};
 static const std::string AA_STATE_INIT{"Initializing"};
 static const std::string AA_STATE_RUNNING{"Running"};
 static const std::string AA_STATE_SHUTDOWN{"Shutdown"};
+static const std::string AA_STATE_SUSPEND{"Suspend"};
 
 static const std::string MACHINE_STATE_STARTUP{"Starting-up"};
 static const std::string MACHINE_STATE_RUNNING{"Running"};
 static const std::string MACHINE_STATE_LIVING{"Living"};
 static const std::string MACHINE_STATE_SHUTTINGDOWN{"Shuttingdown"};
 
+using StateHandler = std::function<void()>;
 
-
+const std::map<int, api::ApplicationStateClient::ApplicationState> mapSignalToState
+{
+    {SIGTERM, api::ApplicationStateClient::ApplicationState::K_SHUTTINGDOWN},
+    {SIGINT, api::ApplicationStateClient::ApplicationState::K_SUSPEND}
+};
 #endif // CONSTANTS

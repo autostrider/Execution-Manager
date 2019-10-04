@@ -15,18 +15,19 @@ class AdaptiveApp : public api::IAdaptiveApp
 public:
     AdaptiveApp(std::unique_ptr<api::IStateFactory> factory,
                 std::unique_ptr<api::IApplicationStateClientWrapper> client);
-    virtual ~AdaptiveApp() = default;
+    virtual ~AdaptiveApp() override = default;
 
     void init() override;
     void run() override;
     void terminate() override;
+    void suspend() override;
 
     double mean();
     void readSensorData();
     void reportApplicationState(api::ApplicationStateClient::ApplicationState state) override;
 
 private:
-    void transitToNextState(IAdaptiveApp::FactoryFunc nextState);
+    void transitToNextState(IAdaptiveApp::FactoryFunc nextState) override;
 
     const size_t c_numberOfSamples = 50;
     std::vector<double> m_sensorData;

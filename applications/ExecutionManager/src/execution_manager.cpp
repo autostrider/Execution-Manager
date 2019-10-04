@@ -12,7 +12,8 @@ using std::runtime_error;
 namespace {
   const std::vector<std::string> applicationStateNames{AA_STATE_INIT,
                                                        AA_STATE_RUNNING,
-                                                       AA_STATE_SHUTDOWN};
+                                                       AA_STATE_SHUTDOWN,
+                                                       AA_STATE_SUSPEND};
 } // anonymous namespace
 
 ExecutionManager::ExecutionManager(
@@ -219,7 +220,7 @@ ExecutionManager::setMachineState(pid_t processId, std::string state)
 
   m_pendingState = state;
 
- if(m_pendingState == "AA_STATE_SUSPEND")
+ if(m_pendingState == AA_STATE_SUSPEND)
   {
     suspend();
   }

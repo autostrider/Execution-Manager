@@ -1,9 +1,13 @@
 #ifndef KVS_TYPE_H
 #define KVS_TYPE_H
 
+// #include <keyvaluestorage.h>
 #include <stdint.h>
 #include <string>
+#include <iostream>
 #include <vector>
+#include <algorithm>
+#include <functional>
 
 namespace api {
 
@@ -83,12 +87,50 @@ public:
   bool IsSignedInteger () const noexcept;
   bool IsUnsignedInteger () const noexcept;
 
-  template <class Array>
-  void StoreArray (const Array& array) noexcept(false);
-  template <class T>
-  std::vector<T> GetArray () noexcept(false);
+  template <template <class ...> class Array>
+  auto StoreArray(const Array<KvsType>& array) noexcept(false) ->
+    decltype(std::begin(std::declval<Array<KvsType>>()),
+             std::end(std::declval<Array<KvsType>>()),
+             void())
+  {
+    std::for_each(std::begin(array), std::end(array),
+      std::bind(&KvsType::AddArrayItem, this, std::placeholders::_1));
+  }
 
-  void AddArrayItem (const KvsType& kvs) noexcept(false);
+  template <class Array>
+  auto StoreArray (const Array& array) noexcept(false) ->
+    decltype(std::begin(std::declval<Array>()),
+             std::end(std::declval<Array>()),
+             void())
+  {
+    std::transform(
+      std::begin(array),
+      std::end(array),
+      std::back_inserter(_array),
+    [](const auto& value)
+    {
+      return KvsType(value);
+    });
+  }
+
+  // template <class T>
+  // std::vector<T> GetArray () noexcept(false)
+  // {
+  //   std::vector<KvsType> other;
+
+  //   std::transform(
+  //     std::begin(_array),
+  //     std::end(_array),
+  //     std::back_inserter(other),
+  //   [](const auto& value)
+  //   {
+  //     return KvsType(value);
+  //   });
+
+  //   return std::move(other);
+  // }
+
+  void AddArrayItem(const KvsType& kvs) noexcept(false);
 
 private:
   Type m_type;
@@ -108,6 +150,7 @@ private:
       void* data;
       size_t len;
     } _data;
+    std::vector<KvsType> _array;
   };
 };
 

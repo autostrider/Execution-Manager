@@ -10,13 +10,22 @@ KeyValueStorage::KeyValueStorage(const std::string& database) noexcept(false)
 
   if(!stream.is_open())
   {
-    throw std::runtime_error("File can't be opened");
+    return;
   }
 
   std::stringstream iss;
   for(std::string line; std::getline(stream, line); iss << line) {}
 
-  m_json = nlohmann::json::parse(iss.rdbuf()->str());
+  auto rawString = iss.rdbuf()->str();
+
+  try
+  {
+    m_json = std::move(nlohmann::json::parse(rawString));
+  }
+  catch(...)
+  {
+    m_json.clear();
+  }
 }
 
 KeyValueStorage::KeyValueStorage(KeyValueStorage&& other)
@@ -56,7 +65,46 @@ KeyValueStorage::HasKey(const std::string& key) const noexcept
 KvsType
 KeyValueStorage::GetValue(const std::string& key) const noexcept
 {
-  return KvsType();
+  if(!m_json.count(key))
+  {
+    return KvsType();
+  }
+
+  auto kvObject = m_json[key];
+
+  auto type = static_cast<KvsType::Type>(kvObject["type"]);
+
+  switch(type)
+  {
+    case KvsType::Type::kSInt8:
+      return KvsType(kvObject[jsonValueDenotation].get<int8_t>());
+    case KvsType::Type::kSInt16:
+      return KvsType(kvObject[jsonValueDenotation].get<int16_t>());
+    case KvsType::Type::kSInt32:
+      return KvsType(kvObject[jsonValueDenotation].get<int32_t>());
+    case KvsType::Type::kUInt8:
+      return KvsType(kvObject[jsonValueDenotation].get<uint8_t>());
+    case KvsType::Type::kUInt16:
+      return KvsType(kvObject[jsonValueDenotation].get<uint16_t>());
+    case KvsType::Type::kUInt32:
+      return KvsType(kvObject[jsonValueDenotation].get<uint32_t>());
+    case KvsType::Type::kSInt64:
+      return KvsType(kvObject[jsonValueDenotation].get<int64_t>());
+    case KvsType::Type::kUInt64:
+      return KvsType(kvObject[jsonValueDenotation].get<uint64_t>());
+    case KvsType::Type::kFloat:
+      return KvsType(kvObject[jsonValueDenotation].get<float>());
+    case KvsType::Type::kDouble:
+      return KvsType(kvObject[jsonValueDenotation].get<double>());
+    case KvsType::Type::kString:
+      return KvsType(kvObject[jsonValueDenotation].get<std::string>());
+    case KvsType::Type::kBoolean:
+      return KvsType(kvObject[jsonValueDenotation].get<bool>());
+    default:
+    {
+      return KvsType();
+    }
+  }
 }
 
 KvsType
@@ -69,51 +117,58 @@ void
 KeyValueStorage::SetValue(const std::string& key, const KvsType& value)
   noexcept(false)
 {
-  // m_json.emplace(key, value.);
-  switch(value.GetType())
+  auto type = value.GetType();
+  nlohmann::json kvObject = {{jsonTypeDenotation, static_cast<uint16_t>(type)}};
+
+  switch(type)
   {
     case KvsType::Type::kSInt8:
     case KvsType::Type::kSInt16:
     case KvsType::Type::kSInt32:
     {
-      m_json.emplace(key, value.GetSInt());
+      kvObject.emplace(jsonValueDenotation, value.GetSInt());
       break;
     }
     case KvsType::Type::kUInt8:
     case KvsType::Type::kUInt16:
     case KvsType::Type::kUInt32:
     {
-      m_json.emplace(key, value.GetUInt());
+      kvObject.emplace(jsonValueDenotation, value.GetUInt());
       break;
     }
     case KvsType::Type::kSInt64:
     {
-      m_json.emplace(key, value.GetSInt64());
+      kvObject.emplace(jsonValueDenotation, value.GetSInt64());
       break;
     }
     case KvsType::Type::kUInt64:
     {
-      m_json.emplace(key, value.GetUInt64());
+      kvObject.emplace(jsonValueDenotation, value.GetUInt64());
       break;
     }
     case KvsType::Type::kFloat:
     {
-      m_json.emplace(key, value.GetFloat());
+      kvObject.emplace(jsonValueDenotation, value.GetFloat());
       break;
     }
     case KvsType::Type::kDouble:
     {
-      m_json.emplace(key, value.GetDouble());
+      kvObject.emplace(jsonValueDenotation, value.GetDouble());
       break;
     }
     case KvsType::Type::kString:
     {
-      m_json.emplace(key, value.GetString());
+      kvObject.emplace(jsonValueDenotation, value.GetString());
       break;
     }
     case KvsType::Type::kBoolean:
     {
-      m_json.emplace(key, value.GetBool());
+      kvObject.emplace(jsonValueDenotation, value.GetBool());
+      break;
+    }
+    case KvsType::Type::kBinary:
+    {
+      kvObject.emplace(jsonValueDenotation, value.GetBool());
       break;
     }
     default:
@@ -121,6 +176,8 @@ KeyValueStorage::SetValue(const std::string& key, const KvsType& value)
       throw std::logic_error("Logic error");
     }
   }
+
+  m_json[key] = std::move(kvObject);
 }
 
 void

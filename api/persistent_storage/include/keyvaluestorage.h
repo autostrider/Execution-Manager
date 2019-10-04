@@ -9,11 +9,13 @@
 
 namespace api {
 
+// class KvsType;
+
 class KeyValueStorageBase
 {
 public:
-  // KeyValueStorageBase (const KeyValueStorageBase&) = delete;
-  // KeyValueStorageBase& operator= (const KeyValueStorageBase&) = delete;
+  KeyValueStorageBase (const KeyValueStorageBase&) = delete;
+  KeyValueStorageBase& operator= (const KeyValueStorageBase&) = delete;
 
   // KeyValueStorageBase (KeyValueStorageBase&& other);
   // KeyValueStorageBase& operator= (KeyValueStorageBase&& right);
@@ -68,6 +70,9 @@ private:
   std::string m_filename;
 
   nlohmann::json m_json;
+
+  const std::string jsonTypeDenotation{"type"};
+  const std::string jsonValueDenotation{"value"};
 };
 
 } // namespace api

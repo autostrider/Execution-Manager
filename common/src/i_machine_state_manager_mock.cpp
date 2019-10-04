@@ -11,4 +11,4 @@ IMachineStateManagerMock::IMachineStateManagerMock(std::unique_ptr<api::IStateFa
                           std::move(machineClient))
 {}
 
-}
+} // namespace MSM

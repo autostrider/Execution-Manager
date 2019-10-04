@@ -11,7 +11,6 @@ namespace api
 class IStateMock : public IState
 {
 public:
-    // IStateMock() = default;
     MOCK_METHOD(void, enter, ());
     MOCK_METHOD(void, leave, (), (const));
 };

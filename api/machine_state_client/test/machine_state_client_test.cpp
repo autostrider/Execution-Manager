@@ -1,5 +1,6 @@
 #include <execution_management.capnp.h>
 #include <machine_state_client.h>
+#include <constants.hpp>
 #include "gtest/gtest.h"
 
 #include <thread>
@@ -126,8 +127,8 @@ public:
 
   void SetUp()
   {
-    unlink(MSM_SOCKET_NAME);
-    unlink(MSM_TEST);
+    unlink(MSM_SOCKET_NAME.c_str());
+    unlink(MSM_TEST.c_str());
 
     std::promise<void> sPromise;
 
@@ -190,8 +191,8 @@ public:
 
     testData.isTimeouted = false;
 
-    unlink(MSM_SOCKET_NAME);
-    unlink(MSM_TEST);
+    unlink(MSM_SOCKET_NAME.c_str());
+    unlink(MSM_TEST.c_str());
   }
 
   std::thread serverThread;

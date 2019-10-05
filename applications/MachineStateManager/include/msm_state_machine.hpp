@@ -46,12 +46,19 @@ public:
     void enter() override;
 };
 
+class Suspend : public MsmState
+{
+public:
+    Suspend(MachineStateManager& msm);
+    void enter() override;
+};
 class MsmStateFactory : public api::IStateFactory
 {
 public:
-    std::unique_ptr<api::IState> createInit(api::IAdaptiveApp& app) const override;
-    std::unique_ptr<api::IState> createRun(api::IAdaptiveApp& app) const override;
-    std::unique_ptr<api::IState> createShutDown(api::IAdaptiveApp& app) const override;
+    std::unique_ptr<api::IState> createInit(api::IAdaptiveApp& msm) const override;
+    std::unique_ptr<api::IState> createRun(api::IAdaptiveApp& msm) const override;
+    std::unique_ptr<api::IState> createShutDown(api::IAdaptiveApp& msm) const override;
+    std::unique_ptr<api::IState> createSuspend(api::IAdaptiveApp& msm) const override;
 };
 
 } // namespace MSM

@@ -12,7 +12,8 @@ using std::runtime_error;
 namespace {
   const std::vector<std::string> applicationStateNames{AA_STATE_INIT,
                                                        AA_STATE_RUNNING,
-                                                       AA_STATE_SHUTDOWN};
+                                                       AA_STATE_SHUTDOWN,
+                                                       AA_STATE_SUSPEND};
 } // anonymous namespace
 
 ExecutionManager::ExecutionManager(

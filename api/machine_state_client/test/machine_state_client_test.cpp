@@ -108,7 +108,6 @@ private:
     }).join();
   }
 private:
-
   TestData& m_data;
   static const uint32_t m_defaultDelay;
 };
@@ -127,14 +126,15 @@ public:
 
   void SetUp()
   {
-    unlink("/tmp/machine_management");
-    unlink("/tmp/msc_test");
+    unlink(MSM_SOCKET_NAME);
+    unlink(MSM_TEST);
 
     std::promise<void> sPromise;
 
     serverThread = std::thread([&]()
     {
       auto ioContext = kj::setupAsyncIo();
+      const int timeout = 20;
 
       capnp::TwoPartyServer server(
         kj::heap<ExecutionManagementTestServer>(testData));
@@ -153,11 +153,10 @@ public:
 
       *executor.lockExclusive() = kj::getCurrentThreadExecutor();
 
-
       sPromise.set_value();
       exitPromise.wait(ioContext.waitScope);
 
-      std::this_thread::sleep_for(std::chrono::milliseconds(20));
+      std::this_thread::sleep_for(std::chrono::milliseconds(timeout));
     });
 
     sPromise.get_future().wait();
@@ -191,8 +190,8 @@ public:
 
     testData.isTimeouted = false;
 
-    unlink("/tmp/machine_management");
-    unlink("/tmp/msc_test");
+    unlink(MSM_SOCKET_NAME);
+    unlink(MSM_TEST);
   }
 
   std::thread serverThread;
@@ -205,7 +204,7 @@ public:
   TestData testData;
   kj::Own<kj::PromiseFulfiller<void>> listenFulfiller;
   kj::MutexGuarded<kj::Maybe<const kj::Executor&>> executor;
-  const std::string em_address{"unix:/tmp/msc_test"};
+  const std::string em_address{MSM_TEST};
 };
 
 TEST_F(MachineStateClientTest, ShouldSucceedToRegister)

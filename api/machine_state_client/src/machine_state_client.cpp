@@ -24,8 +24,7 @@ namespace {
     };
 }
 
-MachineStateClient::MachineStateClient(string path)
-:
+MachineStateClient::MachineStateClient(string path):
     m_client(path),
     m_clientApplication(m_client.getMain<MachineStateManagement>()),
     m_timer(m_client.getIoProvider().getTimer()),
@@ -152,6 +151,7 @@ MachineStateClient::startServer()
   auto sThread = kj::heap<kj::Thread>([&]() noexcept
   {
     auto ioContext = kj::setupAsyncIo();
+    const int timeout = 10;
 
     capnp::TwoPartyServer server(
       kj::heap<MachineStateServer>(m_promise));
@@ -172,7 +172,7 @@ MachineStateClient::startServer()
     startUpPromise.set_value();
     exitPromise.wait(ioContext.waitScope);
 
-    std::this_thread::sleep_for(std::chrono::milliseconds(10));
+    std::this_thread::sleep_for(std::chrono::milliseconds(timeout));
   });
 
   startUpPromise.get_future().wait();

@@ -13,7 +13,7 @@ using namespace ExecutionManager;
 
 using namespace ::testing;
 
-class ExecutionManagerIpcTest : public ::testing::Test
+class ExecutionManagerTest : public ::testing::Test
 {
 protected:
   std::unique_ptr<ExecutionManager::ExecutionManager> initEm(
@@ -64,7 +64,7 @@ protected:
   const ProcessInfo additionalApp{"addApp", "addApp", emptyOptions};
 };
 
-TEST_F(ExecutionManagerIpcTest,
+TEST_F(ExecutionManagerTest,
   ShouldSucceedToGetMachineState)
 {
   EXPECT_CALL(*client, confirm(StateError::K_SUCCESS));
@@ -77,7 +77,7 @@ TEST_F(ExecutionManagerIpcTest,
     testState);
 }
 
-TEST_F(ExecutionManagerIpcTest, ShouldReturnEmptyStateWhenNoSetStateOccured)
+TEST_F(ExecutionManagerTest, ShouldReturnEmptyStateWhenNoSetStateOccured)
 {
   const std::string emptyState{""};
 
@@ -88,7 +88,7 @@ TEST_F(ExecutionManagerIpcTest, ShouldReturnEmptyStateWhenNoSetStateOccured)
   );
 }
 
-TEST_F(ExecutionManagerIpcTest, ShouldFailToSetInvalidMachineState)
+TEST_F(ExecutionManagerTest, ShouldFailToSetInvalidMachineState)
 {
   const auto& em = initEm({testState}, {{testState, emptyAvailableApps}});
   EXPECT_NE(
@@ -97,7 +97,7 @@ TEST_F(ExecutionManagerIpcTest, ShouldFailToSetInvalidMachineState)
   );
 }
 
-TEST_F(ExecutionManagerIpcTest, ShouldFailToSetSameMachineState)
+TEST_F(ExecutionManagerTest, ShouldFailToSetSameMachineState)
 {
   EXPECT_CALL(*client, confirm(StateError::K_SUCCESS));
   const auto& em = initEm({testState}, {{testState, emptyAvailableApps}});
@@ -113,7 +113,7 @@ TEST_F(ExecutionManagerIpcTest, ShouldFailToSetSameMachineState)
     testState);
 }
 
-TEST_F(ExecutionManagerIpcTest, ShouldTransitToNextStateWhenNoAppInBoth)
+TEST_F(ExecutionManagerTest, ShouldTransitToNextStateWhenNoAppInBoth)
 {
   const auto& em = initEm(transitionStates, {});
 
@@ -128,7 +128,7 @@ TEST_F(ExecutionManagerIpcTest, ShouldTransitToNextStateWhenNoAppInBoth)
   );
 }
 
-TEST_F(ExecutionManagerIpcTest, ShouldStartAppAndTransitToNextState)
+TEST_F(ExecutionManagerTest, ShouldStartAppAndTransitToNextState)
 {
   const auto& em = initEm(transitionStates,
     {{firstState, {}}, {secondState, {app}}});
@@ -147,7 +147,7 @@ TEST_F(ExecutionManagerIpcTest, ShouldStartAppAndTransitToNextState)
   );
 }
 
-TEST_F(ExecutionManagerIpcTest, ShouldKillAppAndTransitToNextState)
+TEST_F(ExecutionManagerTest, ShouldKillAppAndTransitToNextState)
 {
   const auto& em = initEm(transitionStates,
     {{firstState, {app}}, {secondState, emptyAvailableApps}});
@@ -167,7 +167,7 @@ TEST_F(ExecutionManagerIpcTest, ShouldKillAppAndTransitToNextState)
   );
 }
 
-TEST_F(ExecutionManagerIpcTest,
+TEST_F(ExecutionManagerTest,
   ShouldKillOneAppStartAnotherAndTransitToNextState)
 {
   const auto& em = initEm(transitionStates,
@@ -191,7 +191,7 @@ TEST_F(ExecutionManagerIpcTest,
   );
 }
 
-TEST_F(ExecutionManagerIpcTest, ShouldNotKillAppToTransitState)
+TEST_F(ExecutionManagerTest, ShouldNotKillAppToTransitState)
 {
   const auto& em = initEm(transitionStates,
     {{firstState, {app}}, {secondState, {app}}});
@@ -210,7 +210,7 @@ TEST_F(ExecutionManagerIpcTest, ShouldNotKillAppToTransitState)
   );
 }
 
-TEST_F(ExecutionManagerIpcTest, ShouldKillTwoAppsToTransitToNextState)
+TEST_F(ExecutionManagerTest, ShouldKillTwoAppsToTransitToNextState)
 {
   const auto& em = initEm(transitionStates,
     {{firstState, {app, additionalApp}}, {secondState, emptyAvailableApps}});

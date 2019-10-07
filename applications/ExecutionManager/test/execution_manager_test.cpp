@@ -45,6 +45,11 @@ protected:
   std::unique_ptr<ExecutionManagerClient::ExecutionManagerClientMock> client =
     std::make_unique<StrictMock<ExecutionManagerClient::ExecutionManagerClientMock>>();
 
+  const int appId{1};
+  const int additionalAppId{2};
+  ExecutionManagerClient::ExecutionManagerClientMock* pClient =
+    client.get();
+  ApplicationHandlerMock* pAppHandler = applicationHandler.get();
   const pid_t defaultProcessId {666};
   const std::string wrongMachineState{"WrongMachineState"};
   const std::string defaultMsmName{"TestMSM"};
@@ -58,27 +63,6 @@ protected:
   const ProcessInfo app{"app", "app", emptyOptions};
   const ProcessInfo additionalApp{"addApp", "addApp", emptyOptions};
 };
-
-// class IpcStateTransitionsTest : public ExecutionManagerIpcTest
-// {
-// protected:
-//   void SetUp() override
-//   {
-//     std::vector<MachineState> availableStates =
-//       {firstState, secondState};
-
-//     setupManifestData(availableStates, {
-//       {firstState, {additionalApp}},
-//       {secondState, {app, additionalApp}}});
-
-//     EXPECT_CALL(*client, confirm(StateError::K_SUCCESS)).Times(2);
-//   }
-
-//   const std::string firstState{"First"};
-//   const std::string secondState{"Second"};
-//   const ProcessInfo app{"app", "app", emptyOptions};
-//   const ProcessInfo additionalApp{"addApp", "addApp", emptyOptions};
-// };
 
 TEST_F(ExecutionManagerIpcTest,
   ShouldSucceedToGetMachineState)
@@ -131,8 +115,6 @@ TEST_F(ExecutionManagerIpcTest, ShouldFailToSetSameMachineState)
 
 TEST_F(ExecutionManagerIpcTest, ShouldTransitToNextStateWhenNoAppInBoth)
 {
-  const auto pClient = client.get();
-  const auto pAppHandler = applicationHandler.get();
   const auto& em = initEm(transitionStates, {});
 
   EXPECT_CALL(*pClient, confirm(StateError::K_SUCCESS));
@@ -148,9 +130,6 @@ TEST_F(ExecutionManagerIpcTest, ShouldTransitToNextStateWhenNoAppInBoth)
 
 TEST_F(ExecutionManagerIpcTest, ShouldStartAppAndTransitToNextState)
 {
-  constexpr int appId{1};
-  const auto pClient = client.get();
-  const auto pAppHandler = applicationHandler.get();
   const auto& em = initEm(transitionStates,
     {{firstState, {}}, {secondState, {app}}});
 
@@ -170,11 +149,8 @@ TEST_F(ExecutionManagerIpcTest, ShouldStartAppAndTransitToNextState)
 
 TEST_F(ExecutionManagerIpcTest, ShouldKillAppAndTransitToNextState)
 {
-  constexpr int appId{1};
-  const auto pClient = client.get();
-  const auto pAppHandler = applicationHandler.get();
   const auto& em = initEm(transitionStates,
-    {{firstState, {app}}, {secondState, {}}});
+    {{firstState, {app}}, {secondState, emptyAvailableApps}});
 
   EXPECT_CALL(*pClient, confirm(StateError::K_SUCCESS));
   EXPECT_CALL(*pAppHandler, startProcess(app)).WillOnce(Return(appId));
@@ -192,12 +168,8 @@ TEST_F(ExecutionManagerIpcTest, ShouldKillAppAndTransitToNextState)
 }
 
 TEST_F(ExecutionManagerIpcTest,
-  ShouldKillOneAppKillAnotherAndTransitToNextState)
+  ShouldKillOneAppStartAnotherAndTransitToNextState)
 {
-  constexpr int appId{1};
-  constexpr int additionalAppId{2};
-  const auto pClient = client.get();
-  const auto pAppHandler = applicationHandler.get();
   const auto& em = initEm(transitionStates,
     {{firstState, {app}}, {secondState, {additionalApp}}});
 
@@ -221,9 +193,6 @@ TEST_F(ExecutionManagerIpcTest,
 
 TEST_F(ExecutionManagerIpcTest, ShouldNotKillAppToTransitState)
 {
-  constexpr int appId{1};
-  const auto pClient = client.get();
-  const auto pAppHandler = applicationHandler.get();
   const auto& em = initEm(transitionStates,
     {{firstState, {app}}, {secondState, {app}}});
 
@@ -234,6 +203,33 @@ TEST_F(ExecutionManagerIpcTest, ShouldNotKillAppToTransitState)
 
   EXPECT_CALL(*pClient, confirm(StateError::K_SUCCESS));
   em->setMachineState(secondState);
+
+  ASSERT_EQ(
+    em->getMachineState(),
+    secondState
+  );
+}
+
+TEST_F(ExecutionManagerIpcTest, ShouldKillTwoAppsToTransitToNextState)
+{
+  const auto& em = initEm(transitionStates,
+    {{firstState, {app, additionalApp}}, {secondState, emptyAvailableApps}});
+
+  EXPECT_CALL(*pClient, confirm(StateError::K_SUCCESS));
+  EXPECT_CALL(*pAppHandler, startProcess(app)).WillOnce(Return(appId));
+  EXPECT_CALL(*pAppHandler, startProcess(additionalApp))
+    .WillOnce(Return(additionalAppId));
+
+  em->setMachineState(firstState);
+  em->reportApplicationState(appId, AppState::RUNNING);
+  em->reportApplicationState(additionalAppId, AppState::RUNNING);
+
+  EXPECT_CALL(*pAppHandler, killProcess(appId));
+  EXPECT_CALL(*pAppHandler, killProcess(additionalAppId));
+  EXPECT_CALL(*pClient, confirm(StateError::K_SUCCESS));
+  em->setMachineState(secondState);
+  em->reportApplicationState(appId, AppState::SHUTTINGDOWN);
+  em->reportApplicationState(additionalAppId, AppState::SHUTTINGDOWN);
 
   ASSERT_EQ(
     em->getMachineState(),

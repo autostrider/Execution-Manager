@@ -97,6 +97,13 @@ TEST_F(ExecutionManagerTest, ShouldFailToSetInvalidMachineState)
   );
 }
 
+TEST_F(ExecutionManagerTest, ShouldConfirmWhenNoRegisterOccured)
+{
+  const auto& em = initEm({testState}, {{testState, {app}}});
+
+  em->reportApplicationState(appId, AppState::RUNNING);
+}
+
 TEST_F(ExecutionManagerTest, ShouldFailToSetSameMachineState)
 {
   EXPECT_CALL(*client, confirm(StateError::K_SUCCESS));

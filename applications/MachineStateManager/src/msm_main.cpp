@@ -44,7 +44,7 @@ int main(int argc, char **argv)
 
     dispatchMap.at(state)();
 
-    return 0;
+    ::exit(EXIT_SUCCESS);
 }
 
 static void signalHandler(int signo)

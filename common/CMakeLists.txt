@@ -5,7 +5,7 @@ file(GLOB_RECURSE COMMON_SRCS *.cpp)
 
 # Create major target
 add_library(common
-  STATIC 
+  STATIC
     ${COMMON_SRCS}
 )
 
@@ -13,6 +13,7 @@ target_link_libraries(common
     PUBLIC
       api::application_state_client
       api::machine_state_client
+      api::component_client
       gmock
 )
 

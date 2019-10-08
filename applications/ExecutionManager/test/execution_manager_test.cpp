@@ -47,8 +47,7 @@ protected:
 
   const int appId{1};
   const int additionalAppId{2};
-  ExecutionManagerClient::ExecutionManagerClientMock* pClient =
-    client.get();
+  ExecutionManagerClient::ExecutionManagerClientMock* pClient = client.get();
   ApplicationHandlerMock* pAppHandler = applicationHandler.get();
   const pid_t defaultProcessId {666};
   const std::string wrongMachineState{"WrongMachineState"};
@@ -97,7 +96,7 @@ TEST_F(ExecutionManagerTest, ShouldFailToSetInvalidMachineState)
   );
 }
 
-TEST_F(ExecutionManagerTest, ShouldConfirmWhenNoRegisterOccured)
+TEST_F(ExecutionManagerTest, ShouldSuccessfullyReportWhenNoSetStateOccured)
 {
   const auto& em = initEm({testState}, {{testState, {app}}});
 

@@ -181,15 +181,7 @@ public:
     serverThread.join();
     msc.reset(nullptr);
 
-    testData.pid = -1;
-    testData.appName = "";
-    testData.state = "";
-
-    testData.registerCallCount = 0;
-    testData.getMachineStateCallCount = 0;
-    testData.setMachineStateCallCount = 0;
-
-    testData.isTimeouted = false;
+    testData = {-1, "", "", 0, 0, 0, false};
 
     unlink(MSM_SOCKET_NAME.c_str());
     unlink(MSM_TEST.c_str());
@@ -205,7 +197,7 @@ public:
   TestData testData;
   kj::Own<kj::PromiseFulfiller<void>> listenFulfiller;
   kj::MutexGuarded<kj::Maybe<const kj::Executor&>> executor;
-  const std::string em_address{MSM_TEST};
+  const std::string em_address{IPC_PROTOCOL + MSM_TEST};
 };
 
 TEST_F(MachineStateClientTest, ShouldSucceedToRegister)

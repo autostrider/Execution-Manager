@@ -1,23 +1,20 @@
 #ifndef EXECUTION_MANAGER_CLIENT_HPP
 #define EXECUTION_MANAGER_CLIENT_HPP
 
+#include <i_execution_manager_client.hpp>
 #include <string>
-#include <capnp/ez-rpc.h>
-#include <capnp/rpc-twoparty.h>
 #include <kj/async-io.h>
-#include <execution_management.capnp.h>
 
 namespace ExecutionManagerClient
 {
 
-using StateError = ::MachineStateManagement::StateError;
-
-class ExecutionManagerClient
+class ExecutionManagerClient : public IExecutionManagerClient
 {
 public:
   ExecutionManagerClient(const std::string& msmAddress, kj::AsyncIoContext& context);
   void confirm(StateError status);
 
+  ~ExecutionManagerClient() override = default;
 private:
   const std::string m_msmAddress;
   kj::AsyncIoContext& m_ioContext;

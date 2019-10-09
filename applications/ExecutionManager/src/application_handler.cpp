@@ -45,11 +45,6 @@ void ApplicationHandler::killProcess(pid_t processId)
  m_syscalls->kill(processId, SIGTERM);
 }
 
-void ApplicationHandler::suspend(pid_t processId)
-{
- m_syscalls->kill(processId, SIGINT);
-}
-
 std::vector<std::string> ApplicationHandler::getArgumentsList(const ProcessInfo& process) const
 {
   std::vector<std::string> arguments;

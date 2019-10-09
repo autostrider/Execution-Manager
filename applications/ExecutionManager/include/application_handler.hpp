@@ -23,8 +23,6 @@ public:
 
   void killProcess(pid_t processId) override;
 
-  void suspend(pid_t processId) override;
-
   ~ApplicationHandler() override = default;
 
 private:

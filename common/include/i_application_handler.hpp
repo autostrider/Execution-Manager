@@ -24,8 +24,6 @@ public:
      */
     virtual void killProcess(pid_t processId) = 0;
 
-    virtual void suspend(pid_t processId) = 0;
-
     virtual ~IApplicationHandler() = default;
 };
 

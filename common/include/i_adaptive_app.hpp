@@ -20,7 +20,6 @@ public:
     virtual void init() = 0;
     virtual void run() = 0;
     virtual void terminate() = 0;
-    virtual void suspend() = 0;
     virtual void reportApplicationState(api::ApplicationStateClient::ApplicationState state) = 0;
 
 protected:

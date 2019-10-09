@@ -14,7 +14,6 @@ public:
     MOCK_METHOD(std::unique_ptr<api::IState>, createInit, (api::IAdaptiveApp& app), (const));
     MOCK_METHOD(std::unique_ptr<api::IState>, createRun, (api::IAdaptiveApp& app), (const));
     MOCK_METHOD(std::unique_ptr<api::IState>, createShutDown, (api::IAdaptiveApp& app), (const));
-    MOCK_METHOD(std::unique_ptr<api::IState>, createSuspend, (api::IAdaptiveApp& app), (const));
 };
 
 class StateClientMock : public api::ApplicationStateClientWrapper
@@ -47,7 +46,7 @@ TEST_F(AppTest, Should_TransitToInitState)
             .WillOnce(Return(ByMove(std::move(stateInitMock))));
 
      AdaptiveApp app{std::move(factoryMock),
-                     nullptr};
+                     nullptr, nullptr};
      app.init();
 
 }
@@ -63,7 +62,7 @@ TEST_F(AppTest, Should_TransitToRunState)
             .WillOnce(Return(ByMove(std::move(stateRunMock))));
 
      AdaptiveApp app{std::move(factoryMock),
-                     nullptr};
+                     nullptr, nullptr};
      app.init();
      app.run();
 }
@@ -78,7 +77,7 @@ TEST_F(AppTest, Should_TransitToTerminateState)
             .WillOnce(Return(ByMove(std::move(stateTermMock))));
 
      AdaptiveApp app{std::move(factoryMock),
-                     nullptr};
+                     nullptr, nullptr};
      app.init();
      app.terminate();
 }
@@ -89,7 +88,7 @@ TEST_F(AppTest, WhenSensorDataRead)
     const double sigma = 0.5;
 
     AdaptiveApp app{std::move(factoryMock),
-                    nullptr};
+                    nullptr, nullptr};
 
     app.readSensorData();
     bool result = ::abs(app.mean() - mu) < sigma;
@@ -102,7 +101,7 @@ TEST_F(AppTest, Should_ReadSensorData)
     const double sigma = 0.5;
 
     AdaptiveApp app{std::move(factoryMock),
-                    nullptr};
+                    nullptr, nullptr};
 
     ASSERT_EQ(app.mean(), 0.0);
 
@@ -115,7 +114,7 @@ TEST_F(AppTest, Should_ReadSensorData)
 TEST_F(AppTest, WhenSensorNotDataRead)
 {
     AdaptiveApp app{std::move(factoryMock),
-                    nullptr};
+                    nullptr, nullptr};
 
     ASSERT_EQ(app.mean(), 0.0);
 }
@@ -124,6 +123,6 @@ TEST_F(AppTest, Should_ReportCurrentState)
 {
     EXPECT_CALL(*stateClientMock, ReportApplicationState(_)).WillOnce(Return());
 
-    AdaptiveApp app{nullptr, std::move(stateClientMock)};
+    AdaptiveApp app{nullptr, std::move(stateClientMock), nullptr};
     app.reportApplicationState(api::ApplicationStateClient::ApplicationState::K_RUNNING);
 }

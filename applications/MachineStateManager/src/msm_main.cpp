@@ -15,9 +15,7 @@ int main(int argc, char **argv)
 {
     ::unlink(MSM_SOCKET_NAME.c_str());
 
-    if (::signal(SIGTERM, signalHandler) == SIG_ERR
-            ||
-        ::signal(SIGINT, signalHandler) == SIG_ERR)
+    if (::signal(SIGTERM, signalHandler) == SIG_ERR)
     {
         LOG << "[msm] Error while registering signal.";
     }
@@ -29,8 +27,7 @@ int main(int argc, char **argv)
     {
         {ApplicationState::K_INITIALIZING, std::bind(&api::IAdaptiveApp::init, &msm)},
         {ApplicationState::K_RUNNING, std::bind(&api::IAdaptiveApp::run, &msm)},
-        {ApplicationState::K_SHUTTINGDOWN, std::bind(&api::IAdaptiveApp::terminate, &msm)},
-        {ApplicationState::K_SUSPEND, std::bind(&api::IAdaptiveApp::suspend, &msm)}
+        {ApplicationState::K_SHUTTINGDOWN, std::bind(&api::IAdaptiveApp::terminate, &msm)}
     };
 
     dispatchMap.at(state)();

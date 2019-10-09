@@ -36,4 +36,17 @@ const std::map<int, api::ApplicationStateClient::ApplicationState> mapSignalToSt
     {SIGTERM, api::ApplicationStateClient::ApplicationState::K_SHUTTINGDOWN},
     {SIGINT, api::ApplicationStateClient::ApplicationState::K_SUSPEND}
 };
+
+enum class SystemCtlAction
+{
+  START,
+  STOP
+};
+
+static const std::string systemCtl{"systemctl"};
+const std::map<SystemCtlAction, std::string> systemctlActions
+{
+  {SystemCtlAction::START, "start"},
+  {SystemCtlAction::STOP, "stop"}
+};
 #endif // CONSTANTS

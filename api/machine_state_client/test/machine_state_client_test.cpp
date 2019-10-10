@@ -119,9 +119,6 @@ class MachineStateClientTest
 : public ::testing::Test
 {
 public:
-  MachineStateClientTest() : msc{em_address}
-  {}
-
   ~MachineStateClientTest() noexcept
   {}
 
@@ -178,7 +175,7 @@ public:
 
     serverThread.join();
 
-    testData = {-1, "", "", 0, 0, 0, false};
+    testData = TestData{-1, "", "", 0, 0, 0, false};
 
     unlink(MSM_SOCKET_NAME.c_str());
     unlink(MSM_TEST.c_str());
@@ -194,7 +191,7 @@ public:
   kj::MutexGuarded<kj::Maybe<const kj::Executor&>> executor;
   const std::string em_address{IPC_PROTOCOL + MSM_TEST};
 
-  MachineStateClient msc;
+  MachineStateClient msc{em_address};
 };
 
 TEST_F(MachineStateClientTest, ShouldSucceedToRegister)

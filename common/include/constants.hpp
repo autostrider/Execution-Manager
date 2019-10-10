@@ -44,6 +44,7 @@ enum class SystemCtlAction
 };
 
 static const std::string systemCtl{"systemctl"};
+static const std::string SERVICE_EXTENSION{".service"};
 const std::map<SystemCtlAction, std::string> systemctlActions
 {
   {SystemCtlAction::START, "start"},

@@ -12,6 +12,7 @@ static std::atomic<ApplicationState> state{ApplicationState::K_INITIALIZING};
 
 int main()
 {
+        LOG << "group id: " << getpgid(0);
     if (::signal(SIGTERM, signalHandler) == SIG_ERR
             ||
         ::signal(SIGINT, signalHandler) == SIG_ERR)
@@ -20,6 +21,7 @@ int main()
     }
     AdaptiveApp app3(std::make_unique<StateFactory>(),
                     std::make_unique<api::ApplicationStateClientWrapper>());
+    
 
     const std::map<ApplicationState, StateHandler> dispatchMap
     {

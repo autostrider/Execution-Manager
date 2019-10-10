@@ -12,12 +12,15 @@ static std::atomic<ApplicationState> state{ApplicationState::K_INITIALIZING};
 
 int main()
 {
+        LOG << "group id: " << getpgid(0);
     if (::signal(SIGTERM, signalHandler) == SIG_ERR
             ||
         ::signal(SIGINT, signalHandler) == SIG_ERR)
     {
         LOG << "[proc2] Error while registering signal.";
     }
+    
+
     AdaptiveApp app2(std::make_unique<StateFactory>(),
                     std::make_unique<api::ApplicationStateClientWrapper>());
 

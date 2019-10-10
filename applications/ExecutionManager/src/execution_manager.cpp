@@ -101,7 +101,7 @@ void ExecutionManager::killProcessesForState()
     if (allowedApps == m_allowedProcessesForState.cend() ||
         processToBeKilled(app->first, allowedApps->second))
     {
-      appHandler->killProcess(app->second);
+      appHandler->killProcess(app->first);
       m_stateConfirmToBeReceived.insert(app->second);
 
       app = m_activeProcesses.erase(app);
@@ -127,7 +127,7 @@ bool ExecutionManager::processToBeKilled(
 
 void ExecutionManager::startApplication(const ProcessInfo& process)
 {
-  pid_t processId = appHandler->startProcess(process);
+  pid_t processId = appHandler->startProcess(process.processName);
   m_activeProcesses.insert({process.processName, processId});
 
   m_stateConfirmToBeReceived.insert(processId);

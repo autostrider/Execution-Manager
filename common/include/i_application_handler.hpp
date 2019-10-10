@@ -15,14 +15,14 @@ public:
      * @param arguments: list of arguments (without nullptr)
      * @return pid of process
      */
-    virtual pid_t startProcess(const ProcessInfo& application) = 0;
+    virtual pid_t startProcess(const std::string& application) = 0;
 
     /**
      * @brief Send SIGTERM to application with provided pid
      * @param processId: id of the process
      * @param signal: signal to be sent
      */
-    virtual void killProcess(pid_t processId) = 0;
+    virtual void killProcess(const std::string& processId) = 0;
 
     virtual ~IApplicationHandler() = default;
 };

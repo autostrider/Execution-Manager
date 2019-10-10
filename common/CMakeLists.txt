@@ -14,6 +14,7 @@ target_link_libraries(common
       api::application_state_client
       api::machine_state_client
       api::component_client
+      nlohmann_json::nlohmann_json
       gmock
 )
 
@@ -23,4 +24,5 @@ target_include_directories(common
       $<BUILD_INTERFACE:${CMAKE_CURRENT_SOURCE_DIR}/include>
       $<INSTALL_INTERFACE:${CMAKE_CURRENT_SOURCE_DIR}/include>
       ${MSM_INCLUDE}
+      ${EM_INCLUDE}
 )

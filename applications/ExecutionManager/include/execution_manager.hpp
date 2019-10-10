@@ -1,9 +1,11 @@
 #ifndef EXECUTION_MANAGER_HPP
 #define EXECUTION_MANAGER_HPP
 
-#include "execution_manager_client.hpp"
-#include <i_application_handler.hpp>
+#include <i_execution_manager_client.hpp>
 #include <i_manifest_reader.hpp>
+#include <i_application_handler.hpp>
+
+#include <map>
 #include <memory>
 #include <string>
 #include <vector>
@@ -34,7 +36,7 @@ class ExecutionManager
 public:
   ExecutionManager(std::unique_ptr<IManifestReader> reader,
                    std::unique_ptr<IApplicationHandler> applicationHandler,
-                   std::unique_ptr<ExecutionManagerClient::ExecutionManagerClient> client);
+                   std::unique_ptr<ExecutionManagerClient::IExecutionManagerClient> client);
 
   /**
    * @brief Main method of Execution manager.
@@ -43,11 +45,9 @@ public:
 
   void reportApplicationState(pid_t processId, AppState state);
 
-  bool registerMachineStateClient(pid_t processId, std::string appName);
+  MachineState getMachineState() const;
 
-  MachineState getMachineState(pid_t processId) const;
-
-  StateError setMachineState(pid_t processId, std::string state);
+  StateError setMachineState(std::string state);
 
 private:
   /**
@@ -111,12 +111,9 @@ private:
    */
   std::vector<MachineState> m_machineManifestStates;
 
-  std::string m_machineStateClientAppName;
-  pid_t m_machineStateClientPid {-1};
-
   std::set<pid_t> m_stateConfirmToBeReceived;
 
-  std::unique_ptr<ExecutionManagerClient::ExecutionManagerClient> m_rpcClient;
+  std::unique_ptr<ExecutionManagerClient::IExecutionManagerClient> m_rpcClient;
 };
 
 } // namespace ExecutionManager

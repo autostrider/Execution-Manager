@@ -25,6 +25,8 @@ class ComponentClientWrapper : public IComponentClientWrapper
 public:
     ComponentClientWrapper() noexcept;
 
+    ~ComponentClientWrapper() noexcept;
+
     ComponentClientReturnType SetStateUpdateHandler
     (std::function<void(ComponentState const&)> f) noexcept override;
 

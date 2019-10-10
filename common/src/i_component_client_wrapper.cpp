@@ -8,6 +8,9 @@ ComponentClientWrapper::ComponentClientWrapper() noexcept
   : m_client{IPC_PROTOCOL + MSM_SOCKET_NAME, StateUpdateMode::kPoll}
 {}
 
+ComponentClientWrapper::~ComponentClientWrapper() noexcept
+{}
+
 ComponentClientReturnType
 ComponentClientWrapper::SetStateUpdateHandler
 (std::function<void(ComponentState const&)> f) noexcept

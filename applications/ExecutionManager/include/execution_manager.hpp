@@ -51,10 +51,10 @@ public:
 
   StateError setMachineState(pid_t processId, std::string state);
 
-  ComponentState getComponentState(pid_t processId) const;
+  ComponentState getComponentState(std::string component) const;
 
   void confirmComponentState
-  (pid_t processId, std::string state, ComponentClientReturnType status);
+  (std::string component, std::string state, ComponentClientReturnType status);
 
 private:
   /**

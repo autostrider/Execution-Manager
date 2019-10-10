@@ -15,8 +15,10 @@ namespace ExecutionManager
 
 using applicationId = std::string;
 using MachineState = std::string;
+using ComponentState = std::string;
 using ProcName = std::string;
 using StateError = ::MachineStateManagement::StateError;
+using ComponentClientReturnType = ::StateManagement::ComponentClientReturnType;
 using std::pair;
 
 struct ApplicationManifest;
@@ -48,6 +50,11 @@ public:
   MachineState getMachineState(pid_t processId) const;
 
   StateError setMachineState(pid_t processId, std::string state);
+
+  ComponentState getComponentState(pid_t processId) const;
+
+  void confirmComponentState
+  (pid_t processId, std::string state, ComponentClientReturnType status);
 
 private:
   /**

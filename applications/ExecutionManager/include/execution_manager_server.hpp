@@ -25,6 +25,12 @@ private:
   ::kj::Promise<void>
   setMachineState(SetMachineStateContext context) override;
 
+  ::kj::Promise<void>
+  getComponentState(GetComponentStateContext context) override;
+
+  ::kj::Promise<void>
+  confirmComponentState(ConfirmComponentStateContext context) override;
+
 private:
   ExecutionManager::ExecutionManager& m_em;
 };

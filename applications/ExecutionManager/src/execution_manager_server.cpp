@@ -72,4 +72,17 @@ ExecutionManagerServer::setMachineState(SetMachineStateContext context)
   return kj::READY_NOW;
 }
 
+::kj::Promise<void>
+ExecutionManagerServer::getComponentState(GetComponentStateContext context)
+{
+  return kj::READY_NOW;
+}
+
+::kj::Promise<void>
+ExecutionManagerServer::confirmComponentState
+(ConfirmComponentStateContext context)
+{
+  return kj::READY_NOW;
+}
+
 } //namespace ExecutionManagerServer

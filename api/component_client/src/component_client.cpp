@@ -10,14 +10,14 @@ ComponentClientReturnType
 ComponentClient::SetStateUpdateHandler
 (std::function<void(ComponentState const&)> f) noexcept
 {
-  return ComponentClientReturnType::kSuccess;
+  return ComponentClientReturnType::K_SUCCESS;
 }
 
 ComponentClientReturnType
 ComponentClient::GetComponentState
 (ComponentState& state) noexcept
 {
-  return ComponentClientReturnType::kSuccess;
+  return ComponentClientReturnType::K_SUCCESS;
 }
 
 void

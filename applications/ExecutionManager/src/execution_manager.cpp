@@ -238,4 +238,15 @@ ExecutionManager::setMachineState(pid_t processId, std::string state)
   return StateError::K_SUCCESS;
 }
 
+ComponentState ExecutionManager::getComponentState(pid_t processId) const
+{
+  return "";
+}
+
+void ExecutionManager::confirmComponentState
+(pid_t processId, std::string state, ComponentClientReturnType status)
+{
+
+}
+
 } // namespace ExecutionManager

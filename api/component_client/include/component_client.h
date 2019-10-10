@@ -1,6 +1,8 @@
 #ifndef COMPONENT_CLIENT_H
 #define COMPONENT_CLIENT_H
 
+#include <component_state_management.capnp.h>
+#include <capnp/ez-rpc.h>
 #include <functional>
 #include <string>
 
@@ -8,14 +10,7 @@ namespace api {
 
 using ComponentState = std::string;
 
-enum class ComponentClientReturnType : uint8_t
-{
-  kSuccess = 0,
-  kGeneralError,
-  kPending,
-  kInvalid,
-  kUnchanged = 6
-};
+using ComponentClientReturnType = StateManagement::ComponentClientReturnType;
 
 enum class StateUpdateMode : uint8_t
 {

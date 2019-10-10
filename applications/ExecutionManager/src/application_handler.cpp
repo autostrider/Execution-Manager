@@ -33,29 +33,34 @@ ApplicationHandler::execProcess(const std::string &processName,
 
   if (!process)
   {
+    LOG << "current errno: " << strerror(errno);
     std::vector<std::string> arguments =
     {
       systemCtl,
       systemctlActions.at(action),
       processName + SERVICE_EXTENSION
     };
-    for (const auto& arg: arguments)
-    {
-      LOG << arg;
-    }
-//     auto applicationArgs = convertToNullTerminatingArgv(arguments);
-//     int res = m_syscalls->execv(systemCtl.c_str(),
-//                                 applicationArgs.data());
-// 
-//     if (res)
-//     {
-//       throw runtime_error(std::string{"Error occured creating process: "}
-//                           + processName
-//                           + " "
-//                           + strerror(errno));
-//     }
-//      system((std::string{"systemctl "} + systemctlActions.at(action) + " " + processName + SERVICE_EXTENSION).c_str());
-        execl("systemctl", "systemctl", systemctlActions.at(action).c_str(), (processName + SERVICE_EXTENSION).c_str(), nullptr);
+     auto applicationArgs = convertToNullTerminatingArgv(arguments);
+     std::string cmd;
+     
+     for (const auto& item: arguments)
+     {
+         cmd.append(item);
+         cmd.append(" ");
+     }
+     
+     LOG << "cmd: " << cmd;
+     int res = execvp(systemCtl.c_str(),
+                      applicationArgs.data());
+
+     if (res)
+     {
+       throw runtime_error(std::string{"Error occured creating process: "}
+                           + processName
+                           + " "
+                           + strerror(errno));
+     }
+    
   }
 
   return process;

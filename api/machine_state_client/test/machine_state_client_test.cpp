@@ -119,7 +119,7 @@ class MachineStateClientTest
 : public ::testing::Test
 {
 public:
-  MachineStateClientTest()
+  MachineStateClientTest() : msc{em_address}
   {}
 
   ~MachineStateClientTest() noexcept
@@ -161,8 +161,6 @@ public:
     });
 
     sPromise.get_future().wait();
-
-    msc = std::make_unique<MachineStateClient>(em_address);
   }
 
   void TearDown()
@@ -179,7 +177,6 @@ public:
     });
 
     serverThread.join();
-    msc.reset(nullptr);
 
     testData = {-1, "", "", 0, 0, 0, false};
 
@@ -192,17 +189,17 @@ public:
   const std::string applicationName{"TestMSC"};
   const uint32_t defaultTimeout{666};
 
-  std::unique_ptr<MachineStateClient> msc;
-
   TestData testData;
   kj::Own<kj::PromiseFulfiller<void>> listenFulfiller;
   kj::MutexGuarded<kj::Maybe<const kj::Executor&>> executor;
   const std::string em_address{IPC_PROTOCOL + MSM_TEST};
+
+  MachineStateClient msc;
 };
 
 TEST_F(MachineStateClientTest, ShouldSucceedToRegister)
 {
-  const auto result = msc->Register(applicationName, defaultTimeout);
+  const auto result = msc.Register(applicationName, defaultTimeout);
 
   EXPECT_EQ(result, MachineStateClient::StateError::K_SUCCESS);
   EXPECT_EQ(testData.registerCallCount, 1);
@@ -214,7 +211,7 @@ TEST_F(MachineStateClientTest, ShouldSucceedToGetMachineState)
 {
   testData.state = "TestMachineState";
   std::string state;
-  const auto result = msc->GetMachineState(defaultTimeout, state);
+  const auto result = msc.GetMachineState(defaultTimeout, state);
 
   EXPECT_EQ(result, MachineStateClient::StateError::K_SUCCESS);
   EXPECT_EQ(testData.getMachineStateCallCount, 1);
@@ -224,9 +221,9 @@ TEST_F(MachineStateClientTest, ShouldSucceedToGetMachineState)
 
 TEST_F(MachineStateClientTest, ShouldSucceedToSetMachineState)
 {
-  msc->Register(applicationName, defaultTimeout);
+  msc.Register(applicationName, defaultTimeout);
   std::string state = "TestMachineState";
-  const auto result = msc->SetMachineState(state, defaultTimeout);
+  const auto result = msc.SetMachineState(state, defaultTimeout);
 
   EXPECT_EQ(result, MachineStateClient::StateError::K_SUCCESS);
   EXPECT_EQ(testData.setMachineStateCallCount, 1);
@@ -237,7 +234,7 @@ TEST_F(MachineStateClientTest, ShouldSucceedToSetMachineState)
 TEST_F(MachineStateClientTest, ShouldTimeoutOnRegister)
 {
   testData.isTimeouted = true;
-  const auto result = msc->Register(applicationName, defaultTimeout);
+  const auto result = msc.Register(applicationName, defaultTimeout);
 
   EXPECT_EQ(result, MachineStateClient::StateError::K_TIMEOUT);
   EXPECT_EQ(testData.registerCallCount, 1);
@@ -248,7 +245,7 @@ TEST_F(MachineStateClientTest, ShouldTimeoutOnGettingMachineState)
   testData.isTimeouted = true;
   std::string state;
 
-  const auto result = msc->GetMachineState(defaultTimeout, state);
+  const auto result = msc.GetMachineState(defaultTimeout, state);
 
   EXPECT_EQ(result, MachineStateClient::StateError::K_TIMEOUT);
   EXPECT_EQ(state, "");
@@ -257,9 +254,9 @@ TEST_F(MachineStateClientTest, ShouldTimeoutOnGettingMachineState)
 
 TEST_F(MachineStateClientTest, ShouldTimeoutOnSettingMachineState)
 {
-  msc->Register(applicationName, defaultTimeout);
+  msc.Register(applicationName, defaultTimeout);
   testData.isTimeouted = true;
-  const auto result = msc->SetMachineState("TestMachineState", defaultTimeout);
+  const auto result = msc.SetMachineState("TestMachineState", defaultTimeout);
 
   EXPECT_EQ(result, MachineStateClient::StateError::K_TIMEOUT);
   EXPECT_EQ(testData.setMachineStateCallCount, 1);

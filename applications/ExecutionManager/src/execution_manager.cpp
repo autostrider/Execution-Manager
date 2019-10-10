@@ -19,14 +19,13 @@ namespace {
 ExecutionManager::ExecutionManager(
   std::unique_ptr<IManifestReader> reader,
   std::unique_ptr<IApplicationHandler> applicationHandler,
-  std::unique_ptr<ExecutionManagerClient::ExecutionManagerClient> client)
+  std::unique_ptr<ExecutionManagerClient::IExecutionManagerClient> client)
   : appHandler{std::move(applicationHandler)},
     m_activeProcesses{},
     m_allowedProcessesForState{reader->getStatesSupportedByApplication()},
     m_currentState{},
     m_pendingState{},
     m_machineManifestStates{reader->getMachineStates()},
-    m_machineStateClientAppName{},
     m_rpcClient(std::move(client))
 {
   filterStates();
@@ -34,7 +33,7 @@ ExecutionManager::ExecutionManager(
 
 void ExecutionManager::start()
 {
-  setMachineState(m_machineStateClientPid, MACHINE_STATE_STARTUP);
+  setMachineState(MACHINE_STATE_STARTUP);
 }
 
 void ExecutionManager::filterStates()
@@ -164,36 +163,8 @@ ExecutionManager::reportApplicationState(pid_t processId, AppState state)
   }
 }
 
-bool
-ExecutionManager::registerMachineStateClient(pid_t processId, std::string appName)
-{
-  if (m_machineStateClientPid == -1 ||
-      m_machineStateClientPid == processId)
-  {
-    m_machineStateClientPid = processId;
-    m_machineStateClientAppName = appName;
-
-    LOG << "State Machine Client \""
-        << m_machineStateClientAppName
-        << "\" with pid "
-        << m_machineStateClientPid
-        << " registered.";
-
-    return true;
-  }
-
-  LOG << "State Machine Client \""
-      << appName
-      << "\" registration failed"
-      << "\" with pid "
-      << processId
-      << " registration failed.";
-
-  return false;
-}
-
 MachineState
-ExecutionManager::getMachineState(pid_t processId) const
+ExecutionManager::getMachineState() const
 {
   LOG << "GetMachineState request received.";
 
@@ -201,7 +172,7 @@ ExecutionManager::getMachineState(pid_t processId) const
 }
 
 StateError
-ExecutionManager::setMachineState(pid_t processId, std::string state)
+ExecutionManager::setMachineState(std::string state)
 {
   auto stateIt = std::find(m_machineManifestStates.cbegin(),
                            m_machineManifestStates.cend(),
@@ -211,11 +182,13 @@ ExecutionManager::setMachineState(pid_t processId, std::string state)
   {
     return StateError::K_INVALID_STATE;
   }
-
-  if (processId != m_machineStateClientPid &&
-      m_stateConfirmToBeReceived.empty())
+  // else if (m_stateConfirmToBeReceived.empty())
+  // {
+  //   return StateError::K_INVALID_REQUEST;
+  // }
+  else if (state == m_currentState)
   {
-    return StateError::K_INVALID_REQUEST;
+    return StateError::K_INVALID_STATE;
   }
 
   m_pendingState = state;

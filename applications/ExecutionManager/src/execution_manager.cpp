@@ -152,7 +152,7 @@ ExecutionManager::reportApplicationState(pid_t processId, AppState state)
     return;
   }
 
-  if ((state == AppState::RUNNING) || (state == AppState::SHUTTINGDOWN))
+  if (AppState::INITIALIZING != state)
   {
     m_stateConfirmToBeReceived.erase(processId);
 

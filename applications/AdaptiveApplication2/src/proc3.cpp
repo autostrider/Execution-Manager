@@ -18,7 +18,7 @@ int main()
     }
     AdaptiveApp app3(std::make_unique<StateFactory>(),
                      std::make_unique<api::ApplicationStateClientWrapper>(),
-                     std::make_unique<api::ComponentClientWrapper>());
+                     std::make_unique<api::ComponentClientWrapper>("AA3"));
 
     const std::map<ApplicationState, StateHandler> dispatchMap
     {

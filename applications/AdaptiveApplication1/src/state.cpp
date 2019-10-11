@@ -6,7 +6,7 @@
 
 using ApplicationState = api::ApplicationStateClient::ApplicationState;
 
-State::State(AdaptiveApp& app, 
+State::State(AdaptiveApp& app,
              ApplicationState state,
              std::string stateName) :
     m_app{app},
@@ -47,27 +47,31 @@ void Run::enter()
 {
     api::ComponentState state;
     auto result = m_app.getComponentState(state);
+
     if (
-            api::ComponentClientReturnType::kSuccess == result &&
+            api::ComponentClientReturnType::K_SUCCESS == result &&
             api::ComponentStatesToString.at(api::ComponentStates::kOn) == state
             )
     {
         m_app.readSensorData();
         LOG << "Mean: " << m_app.mean() << ".";
-        m_app.confirmComponentState(state, api::ComponentClientReturnType::kSuccess);
+        m_app.confirmComponentState(state, api::ComponentClientReturnType::K_SUCCESS);
+        LOG << "State kOn is set.";
     }
     else if (
-             api::ComponentClientReturnType::kSuccess == result &&
+             api::ComponentClientReturnType::K_SUCCESS == result &&
              api::ComponentStatesToString.at(api::ComponentStates::kOff) == state
              )
     {
         m_app.reportApplicationState(api::ApplicationStateClient::ApplicationState::K_SUSPEND);
         /*some important stuff related to suspend state*/
-        m_app.confirmComponentState(state, api::ComponentClientReturnType::kSuccess);
+        m_app.confirmComponentState(state, api::ComponentClientReturnType::K_SUCCESS);
+        LOG << "State kOff is set.";
     }
     else
     {
-        m_app.confirmComponentState(state, api::ComponentClientReturnType::kInvalid);
+        m_app.confirmComponentState(state, api::ComponentClientReturnType::K_INVALID);
+        LOG << "Invalid component state received.";
     }
 }
 

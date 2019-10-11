@@ -1,5 +1,6 @@
 #include "machine_state_client.h"
 #include <constants.hpp>
+#include <iostream>
 
 #include <unistd.h>
 
@@ -85,7 +86,10 @@ MachineStateClient::SetMachineState(string state, std::uint32_t timeout)
       auto _result = res.getResult();
       if(_result == StateError::K_SUCCESS)
       {
-        return waitForConfirm(timeout);
+        auto ret = waitForConfirm(timeout);
+        m_promise = std::promise<StateError>();
+
+        return ret;
       }
       else
       {
@@ -99,7 +103,7 @@ MachineStateClient::SetMachineState(string state, std::uint32_t timeout)
 MachineStateClient::StateError
 MachineStateClient::waitForConfirm(std::uint32_t timeout)
 {
-  m_promise = std::promise<StateError>();
+
   std::future<StateError> future = m_promise.get_future();
 
   std::future_status status =
@@ -148,7 +152,11 @@ MachineStateServer::confirmStateTransition
 {
   auto result = context.getParams().getResult();
 
-  m_promise.set_value(result);
+  try
+  {
+    m_promise.set_value(result);
+  }
+  catch(...){}
 
   return kj::READY_NOW;
 }

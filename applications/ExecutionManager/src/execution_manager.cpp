@@ -168,7 +168,10 @@ ExecutionManager::reportApplicationState(pid_t processId, AppState state)
     return;
   }
 
-  if ((state == AppState::RUNNING) || (state == AppState::SHUTTINGDOWN))
+  if ((state == AppState::RUNNING) ||
+      (state == AppState::SHUTTINGDOWN) ||
+      (state == AppState::SUSPEND)
+      )
   {
     m_stateConfirmToBeReceived.erase(processId);
 
@@ -212,7 +215,10 @@ ExecutionManager::setMachineState(std::string state)
 
   killProcessesForState();
 
-  startApplicationsForState();
+  if(m_pendingState != "Suspend")
+  {
+    startApplicationsForState();
+  }
 
   changeComponentsState();
 
@@ -242,7 +248,7 @@ ExecutionManager::getComponentState
 {
   auto iter = m_registeredComponents.find(component);
 
-  if(iter != m_registeredComponents.end())
+  if(iter != m_registeredComponents.cend())
   {
     state = iter->second;
     return ComponentClientReturnType::K_SUCCESS;
@@ -256,6 +262,11 @@ ExecutionManager::getComponentState
 void ExecutionManager::confirmComponentState
 (std::string component, ComponentState state, ComponentClientReturnType status)
 {
+  if (m_componentConfirmToBeReceived.empty())
+  {
+    return;
+  }
+
   m_componentConfirmToBeReceived.erase(component);
 
   if (m_stateConfirmToBeReceived.empty() &&

@@ -1,12 +1,21 @@
 #include "component_client.h"
 #include <constants.hpp>
+#include <logger.hpp>
 
 namespace api
 {
 ComponentClient::ComponentClient
 (const std::string &s, StateUpdateMode mode) noexcept
 : m_client(IPC_PROTOCOL + EM_SOCKET_NAME), componentName(s), updateMode(mode)
-{}
+{
+  auto cap =
+    m_client.getMain<StateManagement>();
+
+  auto request = cap.registerComponentRequest();
+  request.setComponent(componentName);
+
+  request.send().wait(m_client.getWaitScope());
+}
 
 ComponentClientReturnType
 ComponentClient::SetStateUpdateHandler

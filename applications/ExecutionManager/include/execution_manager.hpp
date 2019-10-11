@@ -125,14 +125,10 @@ private:
 
   std::set<pid_t> m_stateConfirmToBeReceived;
 
-<<<<<<< HEAD
   std::map<std::string, ComponentState> m_registeredComponents;
   std::set<std::string> m_componentConfirmToBeReceived;
 
-  std::unique_ptr<ExecutionManagerClient::ExecutionManagerClient> m_rpcClient;
-=======
   std::unique_ptr<ExecutionManagerClient::IExecutionManagerClient> m_rpcClient;
->>>>>>> origin/feature/add-component-client-to-apps
 };
 
 } // namespace ExecutionManager

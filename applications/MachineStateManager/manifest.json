@@ -17,6 +17,10 @@
                           },
                           {
                             "Function_group": "MachineState",
+                            "Mode": "Suspend"
+                          },
+                          {
+                            "Function_group": "MachineState",
                             "Mode": "Living"
                           }
                       ]

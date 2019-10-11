@@ -15,6 +15,9 @@
             "Mode": "Living"
           },
           {
+            "Mode": "Suspend"
+          },
+          {
             "Mode": "Shuttingdown"
           }
         ]

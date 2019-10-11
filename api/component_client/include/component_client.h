@@ -5,6 +5,7 @@
 #include <capnp/ez-rpc.h>
 #include <functional>
 #include <string>
+#include <map>
 
 namespace api {
 
@@ -16,6 +17,18 @@ enum class StateUpdateMode : uint8_t
 {
   kPoll = 0,
   kEvent
+};
+
+enum class ComponentStates: uint8_t
+{
+    kOn = 0,
+    kOff
+};
+
+const std::map<ComponentStates, ComponentState> ComponentStatesToString =
+{
+    {ComponentStates::kOn, "kOn"},
+    {ComponentStates::kOff, "kOff"}
 };
 
 class ComponentClient

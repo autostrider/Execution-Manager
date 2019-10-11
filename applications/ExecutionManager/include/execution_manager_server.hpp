@@ -2,6 +2,7 @@
 #define EXECUTION_MANAGER_SERVER_HPP
 
 #include "execution_manager.hpp"
+#include "msm_handler.hpp"
 
 namespace ExecutionManagerServer
 {
@@ -14,7 +15,8 @@ class ExecutionManagerServer : public ExecutionManagement::Server
 public:
   explicit
   ExecutionManagerServer
-    (ExecutionManager::ExecutionManager& application);
+    (ExecutionManager::ExecutionManager& application,
+     ExecutionManager::MsmHandler msmHandler);
 
 private:
   ::kj::Promise<void>
@@ -40,6 +42,7 @@ private:
 
 private:
   ExecutionManager::ExecutionManager& m_em;
+  ExecutionManager::MsmHandler m_msmHandler;
 };
 
 } // namespace ExecutionManagerServer

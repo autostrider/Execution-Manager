@@ -6,12 +6,15 @@
 #include <iostream>
 
 AdaptiveApp::AdaptiveApp(std::unique_ptr<api::IStateFactory> factory,
-                std::unique_ptr<api::IApplicationStateClientWrapper> client) :
+                         std::unique_ptr<api::IApplicationStateClientWrapper> appClient,
+                         std::unique_ptr<api::IComponentClientWrapper> compClient) :
     m_sensorData(c_numberOfSamples),
     m_factory{std::move(factory)},
     m_currentState{nullptr},
-    m_appClient{std::move(client)}
+    m_appClient{std::move(appClient)},
+    m_componentClient{std::move(compClient)}
 {
+
 }
 
 void AdaptiveApp::init()
@@ -31,13 +34,6 @@ void AdaptiveApp::terminate()
 {
     transitToNextState(
                 std::bind(&api::IStateFactory::createShutDown, m_factory.get(), std::placeholders::_1)
-                );
-}
-
-void AdaptiveApp::suspend()
-{
-    transitToNextState(
-                std::bind(&api::IStateFactory::createSuspend, m_factory.get(), std::placeholders::_1)
                 );
 }
 
@@ -70,4 +66,14 @@ void AdaptiveApp::transitToNextState(api::IAdaptiveApp::FactoryFunc nextState)
 void AdaptiveApp::reportApplicationState(api::ApplicationStateClient::ApplicationState state)
 {
     m_appClient->ReportApplicationState(state);
+}
+
+api::ComponentClientReturnType AdaptiveApp::getComponentState(api::ComponentState &state) noexcept
+{
+    return m_componentClient->GetComponentState(state);
+}
+
+void AdaptiveApp::confirmComponentState(api::ComponentState state, api::ComponentClientReturnType status) noexcept
+{
+    m_componentClient->ConfirmComponentState(state, status);
 }

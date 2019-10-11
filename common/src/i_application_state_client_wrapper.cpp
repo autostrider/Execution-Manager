@@ -1,6 +1,7 @@
 #include "i_application_state_client_wrapper.hpp"
 
-namespace api {
+namespace api
+{
 
 void ApplicationStateClientWrapper::ReportApplicationState(ApplicationStateManagement::ApplicationState state)
 {

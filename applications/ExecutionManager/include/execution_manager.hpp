@@ -51,10 +51,13 @@ public:
 
   StateError setMachineState(pid_t processId, std::string state);
 
-  ComponentState getComponentState(std::string component) const;
+  void registerComponent(std::string component);
+
+  ComponentClientReturnType
+  getComponentState(std::string component, ComponentState& state) const;
 
   void confirmComponentState
-  (std::string component, std::string state, ComponentClientReturnType status);
+  (std::string component, ComponentState state, ComponentClientReturnType status);
 
 private:
   /**
@@ -83,6 +86,8 @@ private:
                           const std::vector<ProcessInfo>&);
 
   void confirmState(StateError status);
+
+  inline void changeComponentsState();
 
 private:
   /**
@@ -122,6 +127,9 @@ private:
   pid_t m_machineStateClientPid {-1};
 
   std::set<pid_t> m_stateConfirmToBeReceived;
+
+  std::map<std::string, ComponentState> m_registeredComponents;
+  std::set<std::string> m_componentConfirmToBeReceived;
 
   std::unique_ptr<ExecutionManagerClient::ExecutionManagerClient> m_rpcClient;
 };

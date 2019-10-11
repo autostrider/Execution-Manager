@@ -5,6 +5,10 @@
 
 namespace ExecutionManagerServer
 {
+
+using ComponentState = ExecutionManager::ComponentState;
+using ComponentClientReturnType = ExecutionManager::ComponentClientReturnType;
+
 class ExecutionManagerServer : public ExecutionManagement::Server
 {
 public:
@@ -24,6 +28,9 @@ private:
 
   ::kj::Promise<void>
   setMachineState(SetMachineStateContext context) override;
+
+  ::kj::Promise<void>
+  registerComponent(RegisterComponentContext context) override;
 
   ::kj::Promise<void>
   getComponentState(GetComponentStateContext context) override;

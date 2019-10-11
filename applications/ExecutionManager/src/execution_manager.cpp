@@ -140,6 +140,22 @@ void ExecutionManager::startApplication(const ProcessInfo& process)
       << " started.";
 }
 
+void ExecutionManager::changeComponentsState()
+{
+  ComponentState pendingComponentsState =
+    (m_pendingState == MACHINE_STATE_SUSPEND) ? COMPONENT_STATE_OFF :
+                                                COMPONENT_STATE_ON;
+
+  for(auto& component : m_registeredComponents)
+  {
+    if(component.second != pendingComponentsState)
+    {
+      m_componentConfirmToBeReceived.emplace(component.first);
+      component.second = pendingComponentsState;
+    }
+  }
+}
+
 void
 ExecutionManager::reportApplicationState(pid_t processId, AppState state)
 {
@@ -157,7 +173,8 @@ ExecutionManager::reportApplicationState(pid_t processId, AppState state)
   {
     m_stateConfirmToBeReceived.erase(processId);
 
-    if (m_stateConfirmToBeReceived.empty())
+    if (m_stateConfirmToBeReceived.empty() &&
+        m_componentConfirmToBeReceived.empty())
     {
      confirmState(StateError::K_SUCCESS);
     }
@@ -224,7 +241,10 @@ ExecutionManager::setMachineState(pid_t processId, std::string state)
 
   startApplicationsForState();
 
-  if (!m_stateConfirmToBeReceived.empty())
+  changeComponentsState();
+
+  if (!m_stateConfirmToBeReceived.empty() ||
+      !m_componentConfirmToBeReceived.empty())
   {
     LOG << "Machine state change to  \""
         << m_pendingState
@@ -238,15 +258,38 @@ ExecutionManager::setMachineState(pid_t processId, std::string state)
   return StateError::K_SUCCESS;
 }
 
-ComponentState ExecutionManager::getComponentState(std::string component) const
+void ExecutionManager::registerComponent(std::string component)
 {
-  return "";
+  m_registeredComponents.emplace(std::make_pair(component, COMPONENT_STATE_ON));
+}
+
+ComponentClientReturnType
+ExecutionManager::getComponentState
+(std::string component, ComponentState& state) const
+{
+  auto iter = m_registeredComponents.find(component);
+
+  if(iter != m_registeredComponents.end())
+  {
+    state = iter->second;
+    return ComponentClientReturnType::K_SUCCESS;
+  }
+  else
+  {
+    return ComponentClientReturnType::K_INVALID;
+  }
 }
 
 void ExecutionManager::confirmComponentState
-(std::string component, std::string state, ComponentClientReturnType status)
+(std::string component, ComponentState state, ComponentClientReturnType status)
 {
+  m_componentConfirmToBeReceived.erase(component);
 
+  if (m_stateConfirmToBeReceived.empty() &&
+      m_componentConfirmToBeReceived.empty())
+    {
+     confirmState(StateError::K_SUCCESS);
+    }
 }
 
 } // namespace ExecutionManager

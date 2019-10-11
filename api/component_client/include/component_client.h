@@ -36,6 +36,9 @@ private:
    capnp::EzRpcClient m_client;
 
    const std::string componentName;
+
+   const StateUpdateMode updateMode;
+   std::function<void(ComponentState const&)> updateHandler;
 };
 
 } // namespace api

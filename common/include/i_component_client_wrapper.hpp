@@ -23,7 +23,7 @@ public:
 class ComponentClientWrapper : public IComponentClientWrapper
 {
 public:
-    ComponentClientWrapper() noexcept;
+    ComponentClientWrapper(const std::string& component) noexcept;
 
     ~ComponentClientWrapper() noexcept;
 

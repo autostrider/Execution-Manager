@@ -5,13 +5,14 @@ namespace api
 {
 ComponentClient::ComponentClient
 (const std::string &s, StateUpdateMode mode) noexcept
-: m_client(IPC_PROTOCOL + EM_SOCKET_NAME), componentName(s)
+: m_client(IPC_PROTOCOL + EM_SOCKET_NAME), componentName(s), updateMode(mode)
 {}
 
 ComponentClientReturnType
 ComponentClient::SetStateUpdateHandler
 (std::function<void(ComponentState const&)> f) noexcept
 {
+  updateHandler = f;
   return ComponentClientReturnType::K_SUCCESS;
 }
 
@@ -19,13 +20,33 @@ ComponentClientReturnType
 ComponentClient::GetComponentState
 (ComponentState& state) noexcept
 {
-  return ComponentClientReturnType::K_SUCCESS;
+  auto cap =
+    m_client.getMain<StateManagement>();
+
+  auto request = cap.getComponentStateRequest();
+  request.setComponent(componentName);
+
+  auto result = request.send().wait(m_client.getWaitScope());
+
+  state = result.getState();
+
+  return result.getResult();
 }
 
 void
 ComponentClient::ConfirmComponentState
 (ComponentState state, ComponentClientReturnType status) noexcept
 {
+  auto cap =
+    m_client.getMain<StateManagement>();
+
+  auto request = cap.confirmComponentStateRequest();
+
+  request.setComponent(componentName);
+  request.setState(state);
+  request.setStatus(status);
+
+  request.send().wait(m_client.getWaitScope());
 }
 
 } // namespace api

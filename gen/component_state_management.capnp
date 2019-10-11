@@ -11,10 +11,12 @@
       kUnchanged @4;
     }
 
-    getComponentState @0 (pid :Int32)
+    registerComponent @0 (component :Text);
+
+    getComponentState @1 (component :Text)
       -> (state :Text, result :ComponentClientReturnType);
 
-    confirmComponentState @1 (pid :Int32,
+    confirmComponentState @2 (component :Text,
                               state :Text,
                               status :ComponentClientReturnType);
   }

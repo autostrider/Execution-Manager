@@ -13,6 +13,7 @@
 static const std::string IPC_PROTOCOL{"unix:"};
 static const std::string EM_SOCKET_NAME{"/tmp/execution_management"};
 static const std::string MSM_SOCKET_NAME{"/tmp/machine_management"};
+static const std::string MSM_TEST{"/tmp/msc_test"};
 static const std::string APPLICATIONS_PATH{"./bin/applications/"};
 
 constexpr std::uint32_t DEFAULT_RESPONSE_TIMEOUT{3000000};

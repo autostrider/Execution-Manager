@@ -2,6 +2,7 @@
 #include <state.hpp>
 #include <constants.hpp>
 #include <logger.hpp>
+#include <fstream>
 
 #include <thread>
 
@@ -12,7 +13,13 @@ static std::atomic<ApplicationState> state{ApplicationState::K_INITIALIZING};
 
 int main()
 {
-    LOG << "group id: " << getpgid(0);
+  {
+    unlink("/tmp/proc1");
+    std::ofstream data{"/tmp/proc1"};
+    data << getpid();
+  }
+//  std::this_thread::sleep_for(std::chrono::seconds{2});
+    LOG << "proc1 pid: " << getpid();
     if (::signal(SIGTERM, signalHandler) == SIG_ERR
             ||
         ::signal(SIGINT, signalHandler) == SIG_ERR)

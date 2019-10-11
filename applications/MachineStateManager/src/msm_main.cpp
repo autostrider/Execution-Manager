@@ -2,6 +2,7 @@
 #include "msm_state_machine.hpp"
 #include <logger.hpp>
 #include <constants.hpp>
+#include <fstream>
 
 #include <thread>
 #include <atomic>
@@ -13,8 +14,13 @@ static std::atomic<ApplicationState> state{ApplicationState::K_INITIALIZING};
 
 int main(int argc, char **argv)
 {
-        LOG << "group id: " << getpgid(0);
-    if (! ::unlink(MSM_SOCKET_NAME.c_str()))
+  {
+   unlink("/tmp/msm");
+  std::ofstream data{"/tmp/msm"};
+  data << getpid();
+  }
+//  std::this_thread::sleep_for(std::chrono::seconds{2});
+  if (! ::unlink(MSM_SOCKET_NAME.c_str()))
     {
         LOG << strerror(errno);
     }

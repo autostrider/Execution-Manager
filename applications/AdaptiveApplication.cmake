@@ -36,5 +36,20 @@ function(add_adaptive_application)
         )
 
         add_dependencies(${PROCESS} ${APP_NAME}_manifest)
+
+        set(SERVICE_INPUT "${CMAKE_CURRENT_SOURCE_DIR}/${PROCESS}.service")
+        set(SERVICE_OUTPUT "~/.config/systemd/user/${APP_NAME}_${PROCESS}.service")
+        add_custom_command(
+          COMMENT "Copy manifest of ${APP_NAME}"
+          OUTPUT ${SERVICE_OUTPUT}
+          DEPENDS ${SERVICE_INPUT}
+          COMMAND ${CMAKE_COMMAND} -E copy_if_different
+          ${SERVICE_INPUT}
+          ${SERVICE_OUTPUT}
+         )
+        add_custom_target(${APP_NAME}_${PROCESS}_service ALL DEPENDS ${SERVICE_INPUT} ${SERVICE_OUTPUT})
+
+        # WorkingDirectory=/home/roman/Execution-Manager/build/
+        # ExecStart=/home/roman/Documents/Execution-Manager/build/bin/applications/AdaptiveApplication1/processes/proc1
     endforeach(PROCESS)
 endfunction(add_adaptive_application)

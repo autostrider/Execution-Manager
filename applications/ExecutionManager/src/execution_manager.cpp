@@ -127,7 +127,7 @@ bool ExecutionManager::processToBeKilled(
 
 void ExecutionManager::startApplication(const ProcessInfo& process)
 {
-  pid_t processId = appHandler->startProcess(process.processName);
+  pid_t processId = appHandler->startProcess(process.applicationName + "_" + process.processName);
   m_activeProcesses.insert({process.processName, processId});
 
   m_stateConfirmToBeReceived.insert(processId);

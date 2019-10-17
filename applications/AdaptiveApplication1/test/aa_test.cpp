@@ -8,7 +8,7 @@
 
 using namespace testing;
 
-class IStateFactoryMock : public api::IStateFactory
+class StateFactoryMock : public api::IStateFactory
 {
 public:
     MOCK_METHOD(std::unique_ptr<api::IState>, createInit, (api::IAdaptiveApp& app), (const));
@@ -16,13 +16,13 @@ public:
     MOCK_METHOD(std::unique_ptr<api::IState>, createShutDown, (api::IAdaptiveApp& app), (const));
 };
 
-class StateClientMock : public api::ApplicationStateClientWrapper
+class ApplicationStateClientMock : public api::ApplicationStateClientWrapper
 {
 public:
     MOCK_METHOD(void, ReportApplicationState, (ApplicationStateManagement::ApplicationState state));
 };
 
-class IStateMock : public api::IState
+class StateMock : public api::IState
 {
 public:
     MOCK_METHOD(void, enter, ());
@@ -32,11 +32,11 @@ public:
 class AppTest : public ::testing::Test
 {
 protected:
-   std::unique_ptr<StateClientMock> stateClientMock{std::make_unique<StateClientMock>()};
-   std::unique_ptr<IStateFactoryMock> factoryMock{std::make_unique<IStateFactoryMock>()};
-   std::unique_ptr<NiceMock<IStateMock>> stateInitMock = std::make_unique<NiceMock<IStateMock>>();
-   std::unique_ptr<NiceMock<IStateMock>> stateRunMock = std::make_unique<NiceMock<IStateMock>>();
-   std::unique_ptr<NiceMock<IStateMock>> stateTermMock = std::make_unique<NiceMock<IStateMock>>();
+   std::unique_ptr<ApplicationStateClientMock> stateClientMock{std::make_unique<ApplicationStateClientMock>()};
+   std::unique_ptr<StateFactoryMock> factoryMock{std::make_unique<StateFactoryMock>()};
+   std::unique_ptr<NiceMock<StateMock>> stateInitMock = std::make_unique<NiceMock<StateMock>>();
+   std::unique_ptr<NiceMock<StateMock>> stateRunMock = std::make_unique<NiceMock<StateMock>>();
+   std::unique_ptr<NiceMock<StateMock>> stateTermMock = std::make_unique<NiceMock<StateMock>>();
 };
 
 TEST_F(AppTest, Should_TransitToInitState)

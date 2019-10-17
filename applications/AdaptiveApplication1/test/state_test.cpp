@@ -11,7 +11,7 @@ using namespace testing;
 
 using ApplicationState = api::ApplicationStateClient::ApplicationState;
 
-class IStateFactoryMock : public api::IStateFactory
+class StateFactoryMock : public api::IStateFactory
 {
 public:
     MOCK_METHOD(std::unique_ptr<api::IState>, createInit, (api::IAdaptiveApp& app),(const));
@@ -19,14 +19,14 @@ public:
     MOCK_METHOD(std::unique_ptr<api::IState>, createShutDown, (api::IAdaptiveApp& app),(const));
 };
 
-class IStateMock : public api::IState
+class StateMock : public api::IState
 {
 public:
     MOCK_METHOD(void, enter, ());
     MOCK_METHOD(void, leave, (), (const));
 };
 
-class StateClientMock : public api::ApplicationStateClientWrapper
+class ApplicationStateClientMock : public api::ApplicationStateClientWrapper
 {
 public:
     MOCK_METHOD(void, ReportApplicationState, (ApplicationStateManagement::ApplicationState state));
@@ -73,20 +73,20 @@ class StateTest : public ::testing::Test
 protected:
     void SetUp() override
     {
-        stateClientMock = std::make_unique<StateClientMock>();
+        stateClientMock = std::make_unique<ApplicationStateClientMock>();
         componentClientMock = std::make_unique<ComponentClientMock>();
-        factoryMock = std::make_unique<IStateFactoryMock>();
+        factoryMock = std::make_unique<StateFactoryMock>();
     }
 
-    std::unique_ptr<StateClientMock> stateClientMock{nullptr};
+    std::unique_ptr<ApplicationStateClientMock> stateClientMock{nullptr};
     std::unique_ptr<ComponentClientMock> componentClientMock{nullptr};
-    std::unique_ptr<IStateFactoryMock> factoryMock{nullptr};
+    std::unique_ptr<StateFactoryMock> factoryMock{nullptr};
     StateFactory factory;
     api::ComponentState emptyState;
 };
 
 
-TEST_F(StateTest, Should_InitCallEnter)
+TEST_F(StateTest, Should_InitOnEnterReportState)
 {
     IAdaptiveAppMock* appMock = new IAdaptiveAppMock{std::move(factoryMock),
             std::move(stateClientMock),
@@ -99,7 +99,7 @@ TEST_F(StateTest, Should_InitCallEnter)
     delete appMock;
 }
 
-TEST_F(StateTest, Should_RunCallEnterRecvKOn)
+TEST_F(StateTest, Should_RunOnEnterConfirmKOn)
 {
     api::ComponentState expectedState = api::ComponentStateKOn;
 
@@ -120,7 +120,7 @@ TEST_F(StateTest, Should_RunCallEnterRecvKOn)
     delete appMock;
 }
 
-TEST_F(StateTest, Should_RunCallEnterRecvKOff)
+TEST_F(StateTest, Should_RunOnEnterConfirmKOff)
 {
     api::ComponentState expectedState = api::ComponentStateKOff;
 
@@ -141,7 +141,7 @@ TEST_F(StateTest, Should_RunCallEnterRecvKOff)
     delete appMock;
 }
 
-TEST_F(StateTest, Should_RunCallEnterRecvInvalidState)
+TEST_F(StateTest, Should_RunOnEnterConfirmInvalidState)
 {
     api::ComponentState expectedState = "invalidState";
     EXPECT_CALL(*componentClientMock, GetComponentState(Eq(emptyState)))
@@ -167,7 +167,7 @@ TEST_F(StateTest, Should_RunCallEnterRecvInvalidState)
     delete appMock;
 }
 
-TEST_F(StateTest, Should_RunCallEnterRecvGeneralError)
+TEST_F(StateTest, Should_RunOnEnterConfirmGeneralError)
 {
     api::ComponentState expectedState = "invalidState";
     EXPECT_CALL(*componentClientMock, GetComponentState(Eq(emptyState)))
@@ -193,7 +193,7 @@ TEST_F(StateTest, Should_RunCallEnterRecvGeneralError)
     delete appMock;
 }
 
-TEST_F(StateTest, Should_RunCallEnterStateUnchangedKOn)
+TEST_F(StateTest, Should_RunOnEnterConfirmStateUnchangedKOn)
 {
     api::ComponentState expectedState = api::ComponentStateKOn;
     EXPECT_CALL(*componentClientMock, GetComponentState(Eq(emptyState))).Times(2)
@@ -231,7 +231,7 @@ TEST_F(StateTest, Should_RunCallEnterStateUnchangedKOn)
     delete appMock;
 }
 
-TEST_F(StateTest, Should_RunCallEnterStateUnchangedKOff)
+TEST_F(StateTest, Should_RunOnEnterConfirmStateUnchangedKOff)
 {
     api::ComponentState expectedState = api::ComponentStateKOff;
     EXPECT_CALL(*componentClientMock, GetComponentState(Eq(emptyState))).Times(2)
@@ -266,7 +266,7 @@ TEST_F(StateTest, Should_RunCallEnterStateUnchangedKOff)
     delete appMock;
 }
 
-TEST_F(StateTest, Should_InitCallLeave)
+TEST_F(StateTest, Should_InitOnLeaveReportRunningState)
 {
     IAdaptiveAppMock* appMock = new IAdaptiveAppMock{std::move(factoryMock),
             std::move(stateClientMock),
@@ -281,7 +281,7 @@ TEST_F(StateTest, Should_InitCallLeave)
     delete appMock;
 }
 
-TEST_F(StateTest, Should_TerminateCallEnter)
+TEST_F(StateTest, Should_TerminateOnEnterReportShutdownState)
 {
     IAdaptiveAppMock* appMock = new IAdaptiveAppMock{std::move(factoryMock),
             std::move(stateClientMock),
@@ -296,7 +296,7 @@ TEST_F(StateTest, Should_TerminateCallEnter)
     delete appMock;
 }
 
-TEST_F(StateTest, Should_TerminateCallLeave)
+TEST_F(StateTest, Should_TerminateOnLeaveDefaultAction)
 {
     IAdaptiveAppMock* appMock = new IAdaptiveAppMock{std::move(factoryMock),
             std::move(stateClientMock),

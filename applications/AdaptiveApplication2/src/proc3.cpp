@@ -13,12 +13,6 @@ static std::atomic<ApplicationState> state{ApplicationState::K_INITIALIZING};
 
 int main()
 {
-  {
-  unlink("/tmp/proc3");
-  std::ofstream data{"/tmp/proc3"};
-  data << getpid();
-  }
-//  std::this_thread::sleep_for(std::chrono::seconds{2});
   if (::signal(SIGTERM, signalHandler) == SIG_ERR
             ||
         ::signal(SIGINT, signalHandler) == SIG_ERR)

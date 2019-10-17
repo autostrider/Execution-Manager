@@ -66,29 +66,7 @@ ApplicationHandler::execProcess(const std::string &processName,
     
   }
 
-//  std::this_thread::sleep_for(std::chrono::seconds{1});
-  std::ifstream data;
-  data.open("/tmp/"+processName);
-  LOG << "failed to open data: " << data.fail() << " " << data.is_open();
-  while (!data.is_open())
-  {
-    LOG << "WAITING KURWA";
-    data.open("/tmp/"+processName);
-  }
-  LOG << "Cat: ";
-  system(("cat /tmp/" +processName).c_str());
-//  do
-//  {
-//    data.open("/tmp/"+processName);
-//    LOG << "here";
-//    system(("cat /tmp/" + processName).c_str());
-//    LOG << "-------------------------";
-//  } while(data.fail());
-//  char t[100];
-  std::string res;
-  data >> res;
-  LOG << processName << " process processed: " << res;
-  return std::stoi(res);
+  return process;
 }
 
 std::vector<std::string> ApplicationHandler::getArgumentsList(const ProcessInfo& process) const

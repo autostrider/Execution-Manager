@@ -14,12 +14,6 @@ static std::atomic<ApplicationState> state{ApplicationState::K_INITIALIZING};
 
 int main(int argc, char **argv)
 {
-  {
-   unlink("/tmp/msm");
-  std::ofstream data{"/tmp/msm"};
-  data << getpid();
-  }
-//  std::this_thread::sleep_for(std::chrono::seconds{2});
   if (! ::unlink(MSM_SOCKET_NAME.c_str()))
     {
         LOG << strerror(errno);

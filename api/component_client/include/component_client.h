@@ -30,11 +30,8 @@ enum class ComponentStates: uint8_t
     kOff
 };
 
-const std::map<ComponentStates, ComponentState> ComponentStatesToString =
-{
-    {ComponentStates::kOn, "kOn"},
-    {ComponentStates::kOff, "kOff"}
-};
+static const ComponentState ComponentStateKOn = "kOn";
+static const ComponentState ComponentStateKOff = "kOff";
 
 class ComponentClient
 {

@@ -33,6 +33,9 @@ class Run : public State
 public:
     Run(AdaptiveApp& app);
     void enter() override;
+private:
+    api::ComponentState m_subState;
+    api::ComponentClientReturnType handleTransition(api::ComponentState state);
 };
 
 class ShutDown : public State

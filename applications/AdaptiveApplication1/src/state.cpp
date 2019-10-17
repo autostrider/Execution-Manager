@@ -47,28 +47,56 @@ void Run::enter()
 {
     api::ComponentState state;
     auto result = m_app.getComponentState(state);
-    if (
-            api::ComponentClientReturnType::kSuccess == result &&
-            api::ComponentStatesToString.at(api::ComponentStates::kOn) == state
-            )
+    if (api::ComponentClientReturnType::kSuccess == result)
     {
-        m_app.readSensorData();
-        LOG << "Mean: " << m_app.mean() << ".";
-        m_app.confirmComponentState(state, api::ComponentClientReturnType::kSuccess);
-    }
-    else if (
-             api::ComponentClientReturnType::kSuccess == result &&
-             api::ComponentStatesToString.at(api::ComponentStates::kOff) == state
-             )
-    {
-        m_app.reportApplicationState(api::ApplicationStateClient::ApplicationState::K_SUSPEND);
-        /*some important stuff related to suspend state*/
-        m_app.confirmComponentState(state, api::ComponentClientReturnType::kSuccess);
+        m_app.confirmComponentState(state, handleTransition(state));
     }
     else
     {
-        m_app.confirmComponentState(state, api::ComponentClientReturnType::kInvalid);
+        m_app.confirmComponentState(state, result);
     }
+
+}
+
+api::ComponentClientReturnType Run::handleTransition(api::ComponentState state)
+{
+    api::ComponentClientReturnType confirm = api::ComponentClientReturnType::kInvalid;
+
+    if (m_subState != state)
+    {
+        if (api::ComponentStateKOn == state)
+        {
+            m_app.readSensorData();
+            LOG << "Mean: " << m_app.mean() << ".";
+            m_subState = state;
+            confirm = api::ComponentClientReturnType::kSuccess;
+        }
+        else if (api::ComponentStateKOff == state)
+        {
+            /*some important stuff related to suspend state
+            * this transition to kOff state will refactored.
+            */
+            m_subState = state;
+            confirm = api::ComponentClientReturnType::kSuccess;
+        }
+    }
+    else
+    {
+        if (api::ComponentStateKOn == state)
+        {
+            m_app.readSensorData();
+            LOG << "Mean: " << m_app.mean() << ".";
+        }
+        else if (api::ComponentStateKOff == state)
+        {
+            /*some important stuff related to suspend state
+            * this transition to kOff state will refactored.
+            */
+        }
+        confirm = api::ComponentClientReturnType::kUnchanged;
+    }
+
+    return confirm;
 }
 
 ShutDown::ShutDown(AdaptiveApp& app) : State (app, ApplicationState::K_SHUTTINGDOWN, AA_STATE_SHUTDOWN)

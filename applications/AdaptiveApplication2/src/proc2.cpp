@@ -18,7 +18,7 @@ int main()
     }
     AdaptiveApp app2(std::make_unique<StateFactory>(),
                      std::make_unique<api::ApplicationStateClientWrapper>(),
-                     std::make_unique<api::ComponentClientWrapper>("AA2"));
+                     std::make_unique<api::ComponentClientWrapper>("proc2"));
 
     const std::map<ApplicationState, StateHandler> dispatchMap
     {

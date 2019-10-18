@@ -12,10 +12,10 @@
             "Mode": "Running"
           },
           {
-            "Mode": "Living"
+            "Mode": "Suspend"
           },
           {
-            "Mode": "Suspend"
+            "Mode": "Living"
           },
           {
             "Mode": "Shuttingdown"

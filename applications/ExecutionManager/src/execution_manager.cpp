@@ -105,6 +105,7 @@ void ExecutionManager::killProcessesForState()
       m_stateConfirmToBeReceived.insert(app->second);
 
       app = m_activeProcesses.erase(app);
+      m_registeredComponents.erase(app->first);
     }
     else
     {
@@ -163,7 +164,8 @@ ExecutionManager::reportApplicationState(pid_t processId, AppState state)
       << processId
       << " received.";
 
-  if (m_stateConfirmToBeReceived.empty())
+  if (m_stateConfirmToBeReceived.empty() &&
+      m_componentConfirmToBeReceived.empty())
   {
     return;
   }

@@ -27,7 +27,7 @@ function(add_adaptive_application)
      )
     add_custom_target(${APP_NAME}_manifest ALL DEPENDS ${MANIFEST_INPUT} ${MANIFEST_OUTPUT})
 
-    message("Adaptive application '${APP_NAME}' added with ${PROCESSES_LENGTH} processes:")
+    message("Adaptive application '${APP_NAME}' added with ${PROCESSES_LENGTH} processes:") 
     foreach(PROCESS ${APP_PROCESSES})
         message("@ ${PROCESS}")
 
@@ -36,20 +36,14 @@ function(add_adaptive_application)
         )
 
         add_dependencies(${PROCESS} ${APP_NAME}_manifest)
-
+        
+        set(SUDO_PATH "/etc/systemd/system/")
         set(SERVICE_INPUT "${CMAKE_CURRENT_SOURCE_DIR}/${PROCESS}.service")
-        set(SERVICE_OUTPUT "~/.config/systemd/user/${APP_NAME}_${PROCESS}.service")
-        add_custom_command(
-          COMMENT "Copy manifest of ${APP_NAME}"
-          OUTPUT ${SERVICE_OUTPUT}
-          DEPENDS ${SERVICE_INPUT}
-          COMMAND ${CMAKE_COMMAND} -E copy_if_different
-          ${SERVICE_INPUT}
-          ${SERVICE_OUTPUT}
-         )
-        add_custom_target(${APP_NAME}_${PROCESS}_service ALL DEPENDS ${SERVICE_INPUT} ${SERVICE_OUTPUT})
+        set(SERVICE_OUTPUT "${SUDO_PATH}${APP_NAME}_${PROCESS}.service")
 
-        # WorkingDirectory=/home/roman/Execution-Manager/build/
-        # ExecStart=/home/roman/Documents/Execution-Manager/build/bin/applications/AdaptiveApplication1/processes/proc1
+        file(READ ${CMAKE_CURRENT_SOURCE_DIR}/${PROCESS}.service files)
+        string(APPEND files "\nWorkingDirectory=${CMAKE_BINARY_DIR}\nExecStart=${CMAKE_BINARY_DIR}/bin/applications/${APP_NAME}/processes/${PROCESS}")
+        file(WRITE ${SUDO_PATH}${APP_NAME}_${PROCESS}.service ${files})
+
     endforeach(PROCESS)
 endfunction(add_adaptive_application)

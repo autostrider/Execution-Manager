@@ -34,7 +34,7 @@ public:
     Run(AdaptiveApp& app);
     void enter() override;
 private:
-    api::ComponentState m_subState;
+    api::ComponentState m_componentState;
     api::ComponentClientReturnType handleTransition(api::ComponentState state);
     void updateSubstate(const api::ComponentState& state, api::ComponentClientReturnType& confirm);
 };

@@ -60,7 +60,7 @@ void Run::enter()
 
 void Run::updateSubstate(const api::ComponentState& state, api::ComponentClientReturnType& confirm)
 {
-    m_subState = state;
+    m_componentState = state;
     confirm = api::ComponentClientReturnType::kSuccess;
 }
 
@@ -68,7 +68,7 @@ api::ComponentClientReturnType Run::handleTransition(api::ComponentState state)
 {
     api::ComponentClientReturnType confirm = api::ComponentClientReturnType::kInvalid;
 
-    if (m_subState != state)
+    if (m_componentState != state)
     {
         if (api::ComponentStateKOn == state)
         {

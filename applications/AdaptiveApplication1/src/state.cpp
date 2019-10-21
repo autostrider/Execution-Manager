@@ -58,6 +58,12 @@ void Run::enter()
 
 }
 
+void Run::updateSubstate(const api::ComponentState& state, api::ComponentClientReturnType& confirm)
+{
+    m_subState = state;
+    confirm = api::ComponentClientReturnType::kSuccess;
+}
+
 api::ComponentClientReturnType Run::handleTransition(api::ComponentState state)
 {
     api::ComponentClientReturnType confirm = api::ComponentClientReturnType::kInvalid;
@@ -68,16 +74,14 @@ api::ComponentClientReturnType Run::handleTransition(api::ComponentState state)
         {
             m_app.readSensorData();
             LOG << "Mean: " << m_app.mean() << ".";
-            m_subState = state;
-            confirm = api::ComponentClientReturnType::kSuccess;
+            updateSubstate(state, confirm);
         }
         else if (api::ComponentStateKOff == state)
         {
             /*some important stuff related to suspend state
-            * this transition to kOff state will refactored.
+            * this transition to kOff state will be refactored.
             */
-            m_subState = state;
-            confirm = api::ComponentClientReturnType::kSuccess;
+            updateSubstate(state, confirm);
         }
     }
     else
@@ -90,7 +94,7 @@ api::ComponentClientReturnType Run::handleTransition(api::ComponentState state)
         else if (api::ComponentStateKOff == state)
         {
             /*some important stuff related to suspend state
-            * this transition to kOff state will refactored.
+            * this transition to kOff state will be refactored.
             */
         }
         confirm = api::ComponentClientReturnType::kUnchanged;

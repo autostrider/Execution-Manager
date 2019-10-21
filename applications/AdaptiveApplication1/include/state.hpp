@@ -36,6 +36,7 @@ public:
 private:
     api::ComponentState m_subState;
     api::ComponentClientReturnType handleTransition(api::ComponentState state);
+    void updateSubstate(const api::ComponentState& state, api::ComponentClientReturnType& confirm);
 };
 
 class ShutDown : public State

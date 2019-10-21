@@ -44,266 +44,211 @@ public:
     MOCK_METHOD(void, ConfirmComponentState,
                 (api::ComponentState state, api::ComponentClientReturnType status), (noexcept));
 };
-class IAdaptiveAppMock : public AdaptiveApp
-{
-public:
-    IAdaptiveAppMock(std::unique_ptr<api::IStateFactory> factory,
-                     std::unique_ptr<api::IApplicationStateClientWrapper> client,
-                     std::unique_ptr<api::IComponentClientWrapper> compClient);
-
-    MOCK_METHOD(void, init, ());
-    MOCK_METHOD(void, run, ());
-    MOCK_METHOD(void, terminate, ());
-
-    MOCK_METHOD(void, reportApplicationState,
-                (api::ApplicationStateClient::ApplicationState state));
-    MOCK_METHOD(void, transitToNextState, (IAdaptiveApp::FactoryFunc nextState));
-};
-
-IAdaptiveAppMock::IAdaptiveAppMock(std::unique_ptr<api::IStateFactory> factory,
-                                   std::unique_ptr<api::IApplicationStateClientWrapper> client,
-                                   std::unique_ptr<api::IComponentClientWrapper> compClient) :
-    AdaptiveApp(std::move(factory), std::move(client), std::move(compClient))
-{
-
-}
 
 class StateTest : public ::testing::Test
 {
 protected:
-    void SetUp() override
-    {
-        stateClientMock = std::make_unique<ApplicationStateClientMock>();
-        componentClientMock = std::make_unique<ComponentClientMock>();
-        factoryMock = std::make_unique<StateFactoryMock>();
-    }
-
-    std::unique_ptr<ApplicationStateClientMock> stateClientMock{nullptr};
-    std::unique_ptr<ComponentClientMock> componentClientMock{nullptr};
-    std::unique_ptr<StateFactoryMock> factoryMock{nullptr};
+    std::unique_ptr<ApplicationStateClientMock> stateClientMock = std::make_unique<ApplicationStateClientMock>();
+    std::unique_ptr<ComponentClientMock> componentClientMock = std::make_unique<ComponentClientMock>();
+    std::unique_ptr<StateFactoryMock> factoryMock = std::make_unique<StateFactoryMock>();
     StateFactory factory;
     api::ComponentState emptyState;
+
+    void setExpectationsForGetCompState(const api::ComponentState& initialState,
+                                        api::ComponentState& expectedState,
+                                        const api::ComponentClientReturnType& result,
+                                        const int times = 1);
+    void setExpectationsForConfirmCompState(const api::ComponentState& expectedState,
+                                            api::ComponentClientReturnType result);
 };
 
 
-TEST_F(StateTest, Should_InitOnEnterReportState)
+void StateTest::setExpectationsForGetCompState(const api::ComponentState& initialState,
+                                               api::ComponentState& expectedState,
+                                               const api::ComponentClientReturnType& result,
+                                               const int times)
 {
-    IAdaptiveAppMock* appMock = new IAdaptiveAppMock{std::move(factoryMock),
+    EXPECT_CALL(*componentClientMock, GetComponentState(Eq(initialState))).Times(times)
+            .WillRepeatedly(
+                DoAll(
+                          SetArgReferee<0>(expectedState),
+                          Return(result))
+                      );
+}
+
+void StateTest::setExpectationsForConfirmCompState(const api::ComponentState& expectedState,
+                                        const api::ComponentClientReturnType result)
+{
+    EXPECT_CALL(*componentClientMock,
+                ConfirmComponentState
+                (
+                    Eq(expectedState),
+                    result)
+                )
+            .WillOnce(Return());
+}
+
+TEST_F(StateTest, shouldReportStateWhenInitEntered)
+{
+    EXPECT_CALL(*stateClientMock, ReportApplicationState(ApplicationState::K_INITIALIZING));//.WillOnce(Return());
+
+    AdaptiveApp* appMock = new AdaptiveApp{std::move(factoryMock),
             std::move(stateClientMock),
             std::move(componentClientMock)};
 
-    EXPECT_CALL(*appMock, reportApplicationState(ApplicationState::K_INITIALIZING));//.WillOnce(Return());
-
-    std::unique_ptr<api::IState> state = factory.createInit(*appMock);
+    auto state = factory.createInit(*appMock);
     state->enter();
+
     delete appMock;
 }
 
-TEST_F(StateTest, Should_RunOnEnterConfirmKOn)
+TEST_F(StateTest, shouldConfirmKOnWhenRunEntered)
 {
     api::ComponentState expectedState = api::ComponentStateKOn;
 
-    EXPECT_CALL(*componentClientMock, GetComponentState(Eq(emptyState)))
-            .WillOnce(DoAll(
-                          SetArgReferee<0>(expectedState),
-                          Return(api::ComponentClientReturnType::kSuccess))
-                      );
-    EXPECT_CALL(*componentClientMock, ConfirmComponentState(expectedState, api::ComponentClientReturnType::kSuccess));
+    setExpectationsForGetCompState(emptyState, expectedState, api::ComponentClientReturnType::kSuccess);
+    setExpectationsForConfirmCompState(expectedState, api::ComponentClientReturnType::kSuccess);
 
-    IAdaptiveAppMock* appMock = new IAdaptiveAppMock{std::move(factoryMock),
+    AdaptiveApp* appMock = new AdaptiveApp{std::move(factoryMock),
             std::move(stateClientMock),
             std::move(componentClientMock)};
 
-    std::unique_ptr<api::IState> state = factory.createRun(*appMock);
+    auto state = factory.createRun(*appMock);
     state->enter();
 
     delete appMock;
 }
 
-TEST_F(StateTest, Should_RunOnEnterConfirmKOff)
+TEST_F(StateTest, shouldConfirmKOffWhenRunEntered)
 {
     api::ComponentState expectedState = api::ComponentStateKOff;
 
-    EXPECT_CALL(*componentClientMock, GetComponentState(Eq(emptyState)))
-            .WillOnce(DoAll(
-                          SetArgReferee<0>(expectedState),
-                          Return(api::ComponentClientReturnType::kSuccess))
-                      );
-    EXPECT_CALL(*componentClientMock, ConfirmComponentState(expectedState, api::ComponentClientReturnType::kSuccess));
+    setExpectationsForGetCompState(emptyState, expectedState, api::ComponentClientReturnType::kSuccess);
+    setExpectationsForConfirmCompState(expectedState, api::ComponentClientReturnType::kSuccess);
 
-    IAdaptiveAppMock* appMock = new IAdaptiveAppMock{std::move(factoryMock),
+    AdaptiveApp* appMock = new AdaptiveApp{std::move(factoryMock),
             std::move(stateClientMock),
             std::move(componentClientMock)};
 
-    std::unique_ptr<api::IState> state = factory.createRun(*appMock);
+    auto state = factory.createRun(*appMock);
     state->enter();
 
     delete appMock;
 }
 
-TEST_F(StateTest, Should_RunOnEnterConfirmInvalidState)
+TEST_F(StateTest, shouldConfirmInvalidStateWhenRunEntered)
 {
     api::ComponentState expectedState = "invalidState";
-    EXPECT_CALL(*componentClientMock, GetComponentState(Eq(emptyState)))
-            .WillOnce(DoAll(
-                          SetArgReferee<0>(expectedState),
-                          Return(api::ComponentClientReturnType::kSuccess))
-                      );
-    EXPECT_CALL(*componentClientMock,
-                ConfirmComponentState
-                (
-                    Eq(expectedState),
-                    api::ComponentClientReturnType::kInvalid)
-                )
-            .WillOnce(Return());
 
-    IAdaptiveAppMock* appMock = new IAdaptiveAppMock{std::move(factoryMock),
+    setExpectationsForGetCompState(emptyState, expectedState, api::ComponentClientReturnType::kSuccess);
+    setExpectationsForConfirmCompState(expectedState, api::ComponentClientReturnType::kInvalid);
+
+    AdaptiveApp* appMock = new AdaptiveApp{std::move(factoryMock),
             std::move(stateClientMock),
             std::move(componentClientMock)};
 
-    std::unique_ptr<api::IState> state = factory.createRun(*appMock);
+    auto state = factory.createRun(*appMock);
     state->enter();
 
     delete appMock;
 }
 
-TEST_F(StateTest, Should_RunOnEnterConfirmGeneralError)
+TEST_F(StateTest, shouldConfirmGeneralErrorWhenRunEntered)
 {
     api::ComponentState expectedState = "invalidState";
-    EXPECT_CALL(*componentClientMock, GetComponentState(Eq(emptyState)))
-            .WillOnce(DoAll(
-                          SetArgReferee<0>(expectedState),
-                          Return(api::ComponentClientReturnType::kGeneralError))
-                      );
-    EXPECT_CALL(*componentClientMock,
-                ConfirmComponentState
-                (
-                    Eq(expectedState),
-                    api::ComponentClientReturnType::kGeneralError)
-                )
-            .WillOnce(Return());
 
-    IAdaptiveAppMock* appMock = new IAdaptiveAppMock{std::move(factoryMock),
+    setExpectationsForGetCompState(emptyState, expectedState, api::ComponentClientReturnType::kGeneralError);
+    setExpectationsForConfirmCompState(expectedState, api::ComponentClientReturnType::kGeneralError);
+
+    AdaptiveApp* appMock = new AdaptiveApp{std::move(factoryMock),
             std::move(stateClientMock),
             std::move(componentClientMock)};
 
-    std::unique_ptr<api::IState> state = factory.createRun(*appMock);
+    auto state = factory.createRun(*appMock);
     state->enter();
 
     delete appMock;
 }
 
-TEST_F(StateTest, Should_RunOnEnterConfirmStateUnchangedKOn)
+TEST_F(StateTest, shouldConfirmStateUnchangedKOnWhenRunEntered)
 {
     api::ComponentState expectedState = api::ComponentStateKOn;
-    EXPECT_CALL(*componentClientMock, GetComponentState(Eq(emptyState))).Times(2)
-            .WillRepeatedly(DoAll(
-                          SetArgReferee<0>(expectedState),
-                          Return(api::ComponentClientReturnType::kSuccess))
-                      );
-    EXPECT_CALL(*componentClientMock,
-                ConfirmComponentState
-                (
-                    Eq(expectedState),
-                    api::ComponentClientReturnType::kSuccess)
-                )
-            .WillOnce(Return());
 
-    EXPECT_CALL(*componentClientMock,
-                ConfirmComponentState
-                (
-                    Eq(expectedState),
-                    api::ComponentClientReturnType::kUnchanged)
-                )
-            .WillOnce(Return());
+    constexpr int getCompStateTimes = 2;
+    setExpectationsForGetCompState(emptyState, expectedState, api::ComponentClientReturnType::kSuccess, getCompStateTimes);
+    setExpectationsForConfirmCompState(expectedState, api::ComponentClientReturnType::kSuccess);
+    setExpectationsForConfirmCompState(expectedState, api::ComponentClientReturnType::kUnchanged);
 
-    IAdaptiveAppMock* appMock = new IAdaptiveAppMock{std::move(factoryMock),
+    AdaptiveApp* appMock = new AdaptiveApp{std::move(factoryMock),
             std::move(stateClientMock),
             std::move(componentClientMock)};
 
-    std::unique_ptr<api::IState> state = factory.createRun(*appMock);
+    auto state = factory.createRun(*appMock);
     state->enter();
-
-
-
     state->enter();
 
     delete appMock;
 }
 
-TEST_F(StateTest, Should_RunOnEnterConfirmStateUnchangedKOff)
+TEST_F(StateTest, shouldConfirmStateUnchangedKOffWhenRunEntered)
 {
     api::ComponentState expectedState = api::ComponentStateKOff;
-    EXPECT_CALL(*componentClientMock, GetComponentState(Eq(emptyState))).Times(2)
-            .WillRepeatedly(DoAll(
-                          SetArgReferee<0>(expectedState),
-                          Return(api::ComponentClientReturnType::kSuccess))
-                      );
-    EXPECT_CALL(*componentClientMock,
-                ConfirmComponentState
-                (
-                    Eq(expectedState),
-                    api::ComponentClientReturnType::kSuccess)
-                )
-            .WillOnce(Return());
 
-    EXPECT_CALL(*componentClientMock,
-                ConfirmComponentState
-                (
-                    Eq(expectedState),
-                    api::ComponentClientReturnType::kUnchanged)
-                )
-            .WillOnce(Return());
+    constexpr int getCompStateTimes = 2;
+    setExpectationsForGetCompState(emptyState, expectedState, api::ComponentClientReturnType::kSuccess, getCompStateTimes);
+    setExpectationsForConfirmCompState(expectedState, api::ComponentClientReturnType::kSuccess);
+    setExpectationsForConfirmCompState(expectedState, api::ComponentClientReturnType::kUnchanged);
 
-    IAdaptiveAppMock* appMock = new IAdaptiveAppMock{std::move(factoryMock),
+    AdaptiveApp* appMock = new AdaptiveApp{std::move(factoryMock),
             std::move(stateClientMock),
             std::move(componentClientMock)};
 
-    std::unique_ptr<api::IState> state = factory.createRun(*appMock);
+    auto state = factory.createRun(*appMock);
     state->enter();
     state->enter();
 
     delete appMock;
 }
 
-TEST_F(StateTest, Should_InitOnLeaveReportRunningState)
+TEST_F(StateTest, shouldReportRunningStateWhenInitLeaved)
 {
-    IAdaptiveAppMock* appMock = new IAdaptiveAppMock{std::move(factoryMock),
+    EXPECT_CALL(*stateClientMock, ReportApplicationState(api::ApplicationStateClient::ApplicationState::K_RUNNING))
+            .WillOnce(Return());
+
+    AdaptiveApp* appMock = new AdaptiveApp{std::move(factoryMock),
             std::move(stateClientMock),
             std::move(componentClientMock)};
 
-    EXPECT_CALL(*appMock, reportApplicationState(api::ApplicationStateClient::ApplicationState::K_RUNNING))
-            .WillOnce(Return());
-
-    std::unique_ptr<api::IState> state = factory.createInit(*appMock);
+    auto state = factory.createInit(*appMock);
     state->leave();
 
     delete appMock;
 }
 
-TEST_F(StateTest, Should_TerminateOnEnterReportShutdownState)
+TEST_F(StateTest, shouldReportShutdownStateWhenShurDownEntered)
 {
-    IAdaptiveAppMock* appMock = new IAdaptiveAppMock{std::move(factoryMock),
+    EXPECT_CALL(*stateClientMock, ReportApplicationState(api::ApplicationStateClient::ApplicationState::K_SHUTTINGDOWN))
+            .WillOnce(Return());
+
+    AdaptiveApp* appMock = new AdaptiveApp{std::move(factoryMock),
             std::move(stateClientMock),
             std::move(componentClientMock)};
 
-    EXPECT_CALL(*appMock, reportApplicationState(api::ApplicationStateClient::ApplicationState::K_SHUTTINGDOWN))
-            .WillOnce(Return());
-
-    std::unique_ptr<api::IState> state = factory.createShutDown(*appMock);
+    auto state = factory.createShutDown(*appMock);
     state->enter();
 
     delete appMock;
 }
 
-TEST_F(StateTest, Should_TerminateOnLeaveDefaultAction)
+TEST_F(StateTest, shouldPerformDefaultActionWhenShutdownLeaved)
 {
-    IAdaptiveAppMock* appMock = new IAdaptiveAppMock{std::move(factoryMock),
+    AdaptiveApp* appMock = new AdaptiveApp{std::move(factoryMock),
             std::move(stateClientMock),
             std::move(componentClientMock)};
 
-    std::unique_ptr<api::IState> state = factory.createShutDown(*appMock);
+    auto state = factory.createShutDown(*appMock);
     state->leave();
 
     delete appMock;
 }
+

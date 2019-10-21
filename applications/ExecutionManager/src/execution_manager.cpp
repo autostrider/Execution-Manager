@@ -101,11 +101,12 @@ void ExecutionManager::killProcessesForState()
     if (allowedApps == m_allowedProcessesForState.cend() ||
         processToBeKilled(app->first, allowedApps->second))
     {
-      appHandler->killProcess(app->second);
-      m_stateConfirmToBeReceived.insert(app->second);
+      auto currentApp = app;
+      appHandler->killProcess(currentApp->second);
+      m_stateConfirmToBeReceived.insert(currentApp->second);
 
-      app = m_activeProcesses.erase(app);
-      m_registeredComponents.erase(app->first);
+      app = m_activeProcesses.erase(currentApp);
+      m_registeredComponents.erase(currentApp->first);
     }
     else
     {
@@ -215,14 +216,14 @@ ExecutionManager::setMachineState(std::string state)
 
   m_pendingState = state;
 
-  killProcessesForState();
-
   if(m_pendingState != "Suspend")
   {
     startApplicationsForState();
   }
 
   changeComponentsState();
+
+  killProcessesForState();
 
   if (!m_stateConfirmToBeReceived.empty() ||
       !m_componentConfirmToBeReceived.empty())

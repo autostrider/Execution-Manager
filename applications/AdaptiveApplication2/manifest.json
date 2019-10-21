@@ -8,8 +8,8 @@
                       "Startup_options": [],
                       "Mode_in_machine_instance_refs": [
                         {
-                              "Function_group": "MachineState",
-                              "Mode": "Starting-up"
+                            "Function_group": "MachineState",
+                            "Mode": "Starting-up"
                         },
                         {
                             "Function_group": "MachineState",
@@ -29,14 +29,14 @@
                 {
                     "Startup_options": [],
                     "Mode_in_machine_instance_refs": [
-                      {
+                        {
+                            "Function_group": "MachineState",
+                            "Mode": "Suspend"
+                        },
+                        {
                           "Function_group": "MachineState",
                           "Mode": "Living"
-                      },
-                      {
-                        "Function_group": "MachineState",
-                        "Mode": "Suspend"
-                    }
+                        }
                     ]
                 }
             ],

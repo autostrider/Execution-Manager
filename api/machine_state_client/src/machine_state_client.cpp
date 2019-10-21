@@ -152,11 +152,7 @@ MachineStateServer::confirmStateTransition
 {
   auto result = context.getParams().getResult();
 
-  try
-  {
-    m_promise.set_value(result);
-  }
-  catch(...){}
+  m_promise.set_value(result);
 
   return kj::READY_NOW;
 }

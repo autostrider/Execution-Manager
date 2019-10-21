@@ -36,7 +36,6 @@ ApplicationHandler::execProcess(const std::string &processName,
   if (!process)
   {
     unlink(("/tmp/" + processName).c_str());
-    LOG << "current errno: " << strerror(errno);
     std::vector<std::string> arguments =
     {
       systemCtl,
@@ -52,7 +51,6 @@ ApplicationHandler::execProcess(const std::string &processName,
          cmd.append(" ");
      }
      
-     LOG << "cmd: " << cmd;
      int res = execvp(systemCtl.c_str(),
                       applicationArgs.data());
 

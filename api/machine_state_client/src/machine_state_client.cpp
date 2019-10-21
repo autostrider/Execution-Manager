@@ -1,5 +1,6 @@
 #include "machine_state_client.h"
 #include <constants.hpp>
+#include <logger.hpp>
 
 #include <unistd.h>
 
@@ -48,6 +49,7 @@ MachineStateClient::Register(string appName, std::uint32_t timeout)
       return result;
     }).wait(m_client.getWaitScope());
 
+  LOG << "Registered successfully";
   return result;
 }
 
@@ -101,7 +103,6 @@ MachineStateClient::waitForConfirm(std::uint32_t timeout)
 {
   m_promise = std::promise<StateError>();
   std::future<StateError> future = m_promise.get_future();
-
   std::future_status status =
     future.wait_for(std::chrono::milliseconds(timeout));
 

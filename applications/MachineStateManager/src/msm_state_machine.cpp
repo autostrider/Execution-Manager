@@ -43,7 +43,7 @@ void Init::enter()
 
     LOG << "Machine State Manager started...";
 
-    std::string applicationName{"MachineStateManager"};
+    std::string applicationName{"MSM"};
 
     StateError result = m_msm.registerMsm(applicationName);
 

@@ -83,7 +83,6 @@ void
 ExecutionManager::confirmState(StateError status)
 {
   m_currentState = m_pendingState;
-
   m_rpcClient->confirm(status);
 
   LOG  << "Machine state changed successfully to "
@@ -127,25 +126,30 @@ bool ExecutionManager::processToBeKilled(
 
 void ExecutionManager::startApplication(const ProcessInfo& process)
 {
-  pid_t processId = appHandler->startProcess(process.processName);
-  m_activeProcesses.insert({process.processName, processId});
+  appHandler->startProcess(process.processName);
 
-  m_stateConfirmToBeReceived.insert(processId);
 
   LOG << "Adaptive aplication \""
       << process.applicationName
-      << "\" with pid "
-      << processId
-      << " started.";
+      << " was started by systemctl.";
 }
 
 void
-ExecutionManager::reportApplicationState(pid_t processId, AppState state)
+ExecutionManager::reportApplicationState(
+    pid_t processId, const std::string& appName, AppState state)
 {
   LOG << "State \"" << applicationStateNames[static_cast<uint16_t>(state)]
-      << "\" for application with pid "
+      << "\" for application " << appName << " with pid "
       << processId
       << " received.";
+
+  if (state == AppState::INITIALIZING)
+  {
+    m_activeProcesses.insert({appName, processId});
+
+    m_stateConfirmToBeReceived.insert(processId);
+
+  }
 
   if (m_stateConfirmToBeReceived.empty())
   {

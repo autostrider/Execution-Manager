@@ -43,7 +43,7 @@ public:
    */
   void start();
 
-  void reportApplicationState(pid_t processId, AppState state);
+  void reportApplicationState(pid_t processId, const std::string &appName, AppState state);
 
   MachineState getMachineState() const;
 

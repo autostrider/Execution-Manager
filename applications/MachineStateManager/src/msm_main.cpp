@@ -20,7 +20,9 @@ int main(int argc, char **argv)
     }
     if (::signal(SIGTERM, signalHandler) == SIG_ERR
             ||
-        ::signal(SIGINT, signalHandler) == SIG_ERR)
+        ::signal(SIGINT, signalHandler) == SIG_ERR
+          ||
+        ::signal(SIGPIPE, signalHandler) == SIG_ERR)
     {
         LOG << "[msm] Error while registering signal.";
     }

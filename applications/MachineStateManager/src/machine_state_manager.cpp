@@ -1,5 +1,6 @@
 #include "machine_state_manager.hpp"
 #include <constants.hpp>
+#include <logger.hpp>
 
 namespace MSM {
 
@@ -15,6 +16,7 @@ MachineStateManager::MachineStateManager(std::unique_ptr<api::IStateFactory> fac
         m_currentState{nullptr},
         m_appStateClient{std::move(appStateClient)}
 {
+  LOG << "OBJ CRETAED";
 }
 
 void MachineStateManager::init()
@@ -53,6 +55,8 @@ void MachineStateManager::transitToNextState(api::IAdaptiveApp::FactoryFunc next
 
 void MachineStateManager::reportApplicationState(ApplicationState state)
 {
+  LOG << "here" << (m_appStateClient == nullptr);
+  LOG << "statwe: " << static_cast<int>(state);
     m_appStateClient->ReportApplicationState(state);
 }
 

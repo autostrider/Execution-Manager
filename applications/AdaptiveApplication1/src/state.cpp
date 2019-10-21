@@ -31,6 +31,7 @@ Init::Init(AdaptiveApp &app) : State (app, ApplicationState::K_INITIALIZING, AA_
 
 void Init::enter()
 {
+  LOG << "something might go wrong";
     m_app.reportApplicationState(getApplicationState());
 }
 
@@ -66,6 +67,7 @@ Suspend::Suspend(AdaptiveApp &app) : State(app, ApplicationState::K_SUSPEND, AA_
 
 void Suspend::enter()
 {
+  LOG << "---- ololololo";
     m_app.reportApplicationState(getApplicationState());
 }
 

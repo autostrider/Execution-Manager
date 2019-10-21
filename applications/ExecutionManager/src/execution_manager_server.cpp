@@ -3,6 +3,7 @@
 #include <kj/async-io.h>
 #include <string>
 #include <iostream>
+#include <logger.hpp>
 
 namespace ExecutionManagerServer
 {
@@ -27,8 +28,8 @@ ExecutionManagerServer::reportApplicationState
 {
   ApplicationState state = context.getParams().getState();
   pid_t applicationPid = context.getParams().getPid();
-
-  m_em.reportApplicationState(applicationPid,
+  std::string appName = context.getParams().getAppName().cStr();
+  m_em.reportApplicationState(applicationPid, appName,
     static_cast<ExecutionManager::AppState>(state));
 
   return kj::READY_NOW;

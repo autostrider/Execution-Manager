@@ -15,7 +15,7 @@ static const std::string EM_SOCKET_NAME{"/tmp/execution_management"};
 static const std::string MSM_SOCKET_NAME{"/tmp/machine_management"};
 static const std::string APPLICATIONS_PATH{"./bin/applications/"};
 
-constexpr std::uint32_t DEFAULT_RESPONSE_TIMEOUT{3000000};
+constexpr std::uint32_t DEFAULT_RESPONSE_TIMEOUT{30000000};
 constexpr std::uint32_t NO_TIMEOUT{0};
 constexpr std::chrono::seconds FIVE_SECONDS{5};
 

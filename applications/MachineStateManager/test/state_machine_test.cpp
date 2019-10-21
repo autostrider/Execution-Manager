@@ -64,7 +64,7 @@ TEST_F(MsmStateMachineTest, UnsuccessfulRegistration)
 TEST_F(MsmStateMachineTest, ShouldRunCallEnter)
 {
     EXPECT_CALL(*machineStateClientMock, SetMachineState(_,_))
-        .Times(3)
+        .Times(4)
         .WillRepeatedly(Return(StateError::K_SUCCESS));
 
     msmMock = new IMachineStateManagerMock{std::move(factoryMock),

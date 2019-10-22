@@ -1,7 +1,8 @@
 #include "machine_state_client.h"
 #include <constants.hpp>
-#include <iostream>
 
+#include <chrono>
+#include <thread>
 #include <unistd.h>
 
 using std::string;
@@ -22,12 +23,36 @@ namespace {
     };
 }
 
-MachineStateClient::MachineStateClient(string path)
-: m_client(path),
+MachineStateClient::MachineStateClient(string path):
+  m_client(path),
   m_clientApplication(m_client.getMain<MachineStateManagement>()),
   m_timer(m_client.getIoProvider().getTimer()),
-  m_pid(getpid())
+  m_pid(getpid()),
+  m_promise(std::promise<StateError>())
 {}
+
+MachineStateClient::~MachineStateClient()
+{
+  if(m_listenFulfiller.get() == nullptr)
+  {
+    return;
+  }
+
+  const kj::Executor* exec;
+  {
+    auto lock = m_serverExecutor.lockExclusive();
+    lock.wait([&](kj::Maybe<const kj::Executor&> value)
+    {
+      return value != nullptr;
+    });
+    exec = &KJ_ASSERT_NONNULL(*lock);
+  }
+
+  exec->executeSync([&]()
+  {
+    m_listenFulfiller->fulfill();
+  });
+}
 
 MachineStateClient::StateError
 MachineStateClient::Register(string appName, std::uint32_t timeout)
@@ -103,7 +128,6 @@ MachineStateClient::SetMachineState(string state, std::uint32_t timeout)
 MachineStateClient::StateError
 MachineStateClient::waitForConfirm(std::uint32_t timeout)
 {
-
   std::future<StateError> future = m_promise.get_future();
 
   std::future_status status =

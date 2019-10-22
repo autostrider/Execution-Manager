@@ -22,9 +22,12 @@ void ApplicationStateClient::ReportApplicationState(ApplicationState state)
   request.setAppName(getAppName());
   request.setPid(m_pid);
   auto promise = request.send();
-  try {
+  try
+  {
     promise.wait(waitScope);
-  } catch (std::exception& e) {
+  }
+  catch (std::exception& e)
+  {
     LOG << e.what();
   }
 }

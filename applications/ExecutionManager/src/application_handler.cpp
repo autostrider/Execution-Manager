@@ -35,7 +35,6 @@ ApplicationHandler::execProcess(const std::string &processName,
 
   if (!process)
   {
-    unlink(("/tmp/" + processName).c_str());
     std::vector<std::string> arguments =
     {
       systemCtl,

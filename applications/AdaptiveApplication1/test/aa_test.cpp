@@ -31,28 +31,29 @@ protected:
 TEST_F(AppTest, Should_TransitToInitState)
 {
     EXPECT_CALL(*stateInitMock, enter());
-
     EXPECT_CALL(*factoryPtr,
                 createInit(Ref(app)))
             .WillOnce(Return(ByMove(std::move(stateInitMock))));
+
     app.init();
 }
 
 TEST_F(AppTest, Should_TransitToRunState)
 {
+
     EXPECT_CALL(*stateInitMock, enter());
     EXPECT_CALL(*stateInitMock, leave());
-    EXPECT_CALL(*stateRunMock, enter());
-
     EXPECT_CALL(*factoryPtr,
                 createInit(Ref(app)))
             .WillOnce(Return(ByMove(std::move(stateInitMock))));
 
+    app.init();
+
+    EXPECT_CALL(*stateRunMock, enter());
     EXPECT_CALL(*factoryPtr,
                 createRun(Ref(app)))
             .WillOnce(Return(ByMove(std::move(stateRunMock))));
 
-    app.init();
     app.run();
 }
 
@@ -60,16 +61,17 @@ TEST_F(AppTest, Should_TransitToTerminateState)
 {
     EXPECT_CALL(*stateInitMock, enter());
     EXPECT_CALL(*stateInitMock, leave());
-    EXPECT_CALL(*stateTermMock, enter());
-
     EXPECT_CALL(*factoryPtr,
                 createInit(Ref(app)))
             .WillOnce(Return(ByMove(std::move(stateInitMock))));
+
+    app.init();
+
+    EXPECT_CALL(*stateTermMock, enter());
     EXPECT_CALL(*factoryPtr,
                 createShutDown(Ref(app)))
             .WillOnce(Return(ByMove(std::move(stateTermMock))));
 
-    app.init();
     app.terminate();
 }
 
@@ -103,7 +105,12 @@ TEST_F(AppTest, shouldReturnZeroMeanWhenSensorDataNotRead)
 
 TEST_F(AppTest, Should_ReportCurrentState)
 {
-    EXPECT_CALL(*stateClientMockPtr, ReportApplicationState(_)).WillOnce(Return());
+    EXPECT_CALL(*stateClientMockPtr, ReportApplicationState(api::ApplicationStateClient::ApplicationState::K_RUNNING));
 
     app.reportApplicationState(api::ApplicationStateClient::ApplicationState::K_RUNNING);
+}
+
+TEST_F(AppTest, Should_ReturnCurrentComponentState)
+{
+
 }

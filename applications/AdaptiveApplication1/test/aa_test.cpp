@@ -102,15 +102,3 @@ TEST_F(AppTest, shouldReturnZeroMeanWhenSensorDataNotRead)
 {
     ASSERT_EQ(app.mean(), 0.0);
 }
-
-TEST_F(AppTest, Should_ReportCurrentState)
-{
-    EXPECT_CALL(*stateClientMockPtr, ReportApplicationState(api::ApplicationStateClient::ApplicationState::K_RUNNING));
-
-    app.reportApplicationState(api::ApplicationStateClient::ApplicationState::K_RUNNING);
-}
-
-TEST_F(AppTest, Should_ReturnCurrentComponentState)
-{
-
-}

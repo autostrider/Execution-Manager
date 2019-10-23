@@ -72,7 +72,6 @@ api::ComponentClientReturnType Run::handleTransition(api::ComponentState state)
     {
         if (api::ComponentStateKOn == state)
         {
-            m_app.readSensorData();
             LOG << "Mean: " << m_app.mean() << ".";
             updateSubstate(state, confirm);
         }
@@ -88,7 +87,6 @@ api::ComponentClientReturnType Run::handleTransition(api::ComponentState state)
     {
         if (api::ComponentStateKOn == state)
         {
-            m_app.readSensorData();
             LOG << "Mean: " << m_app.mean() << ".";
         }
         else if (api::ComponentStateKOff == state)

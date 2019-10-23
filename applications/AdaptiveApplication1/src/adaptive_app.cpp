@@ -8,7 +8,6 @@
 AdaptiveApp::AdaptiveApp(std::unique_ptr<api::IStateFactory> factory,
                          std::unique_ptr<api::IApplicationStateClientWrapper> appClient,
                          std::unique_ptr<api::IComponentClientWrapper> compClient) :
-    m_sensorData(c_numberOfSamples),
     m_factory{std::move(factory)},
     m_currentState{nullptr},
     m_appClient{std::move(appClient)},
@@ -39,22 +38,26 @@ void AdaptiveApp::terminate()
 
 double AdaptiveApp::mean()
 {
-    double sum = std::accumulate(m_sensorData.cbegin(), m_sensorData.cend(), 0.0);
-    return sum / m_sensorData.size();
+    auto data = readSensorData();
+    double sum = std::accumulate(data.cbegin(), data.cend(), 0.0);
+    return sum / data.size();
 }
 
-void AdaptiveApp::readSensorData()
+std::vector<double> AdaptiveApp::readSensorData()
 {
     LOG << "Read data from sensors.";
 
+    const size_t c_numberOfSamples = 50;
+    std::vector<double> data(c_numberOfSamples);
     std::random_device rd{};
     std::mt19937 gen{rd()};
     double mu = 10, sigma = 0.5;
     std::normal_distribution<>d(mu, sigma);
 
     for (size_t k = 0; k < c_numberOfSamples; ++k) {
-        m_sensorData[k] = d(gen);
+        data[k] = d(gen);
     }
+    return data;
 }
 
 void AdaptiveApp::transitToNextState(api::IAdaptiveApp::FactoryFunc nextState)

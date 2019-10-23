@@ -80,25 +80,6 @@ TEST_F(AppTest, shouldReturnExpectMeanWhenSensorDataRead)
     const double mu = 10;
     const double sigma = 0.5;
 
-    app.readSensorData();
     bool result = ::abs(app.mean() - mu) < sigma;
     ASSERT_TRUE(result);
-}
-
-TEST_F(AppTest, Should_ReadSensorData)
-{
-    const double mu = 10;
-    const double sigma = 0.5;
-
-    ASSERT_EQ(app.mean(), 0.0);
-
-    app.readSensorData();
-
-    bool result = ::abs(app.mean() - mu) < sigma;
-    ASSERT_TRUE(result);
-}
-
-TEST_F(AppTest, shouldReturnZeroMeanWhenSensorDataNotRead)
-{
-    ASSERT_EQ(app.mean(), 0.0);
 }

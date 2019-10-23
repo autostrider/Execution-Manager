@@ -77,14 +77,10 @@ TEST_F(StateTest, shouldReportStateWhenInitEntered)
 TEST_F(StateTest, shouldConfirmKOnWhenRunEntered)
 {
     auto state = factory.createRun(appMock);
-    ASSERT_EQ(appMock.mean(), 0.0);
 
     expectGetComponentState(expectedStateKOn, api::ComponentClientReturnType::kSuccess);
     expectConfirmComponentState(expectedStateKOn, api::ComponentClientReturnType::kSuccess);
     state->enter();
-
-    bool result = ::abs(appMock.mean() - mu) < sigma;
-    ASSERT_TRUE(result);
 }
 
 TEST_F(StateTest, shouldConfirmKOffWhenRunEntered)
@@ -117,21 +113,14 @@ TEST_F(StateTest, shouldConfirmGeneralErrorWhenRunEntered)
 TEST_F(StateTest, shouldConfirmStateUnchangedKOnWhenRunEntered)
 {
     auto state = factory.createRun(appMock);
-    ASSERT_EQ(appMock.mean(), 0.0);
 
     expectConfirmComponentState(expectedStateKOn, api::ComponentClientReturnType::kSuccess);
     expectGetComponentState(expectedStateKOn, api::ComponentClientReturnType::kSuccess);
     state->enter();
 
-    bool result = ::abs(appMock.mean() - mu) < sigma;
-    ASSERT_TRUE(result);
-
     expectGetComponentState(expectedStateKOn, api::ComponentClientReturnType::kSuccess);
     expectConfirmComponentState(expectedStateKOn, api::ComponentClientReturnType::kUnchanged);
     state->enter();
-
-    result = ::abs(appMock.mean() - mu) < sigma;
-    ASSERT_TRUE(result);
 }
 
 TEST_F(StateTest, shouldConfirmStateUnchangedKOffWhenRunEntered)
@@ -150,14 +139,10 @@ TEST_F(StateTest, shouldConfirmStateUnchangedKOffWhenRunEntered)
 TEST_F(StateTest, shouldConfirmStateChangedFromKOnToKOffWhenRunEntered)
 {
     auto state = factory.createRun(appMock);
-    ASSERT_EQ(appMock.mean(), 0.0);
 
     expectGetComponentState(expectedStateKOn, api::ComponentClientReturnType::kSuccess);
     expectConfirmComponentState(expectedStateKOn, api::ComponentClientReturnType::kSuccess);
     state->enter();
-
-    bool result = ::abs(appMock.mean() - mu) < sigma;
-    ASSERT_TRUE(result);
 
     expectGetComponentState(expectedStateKOff, api::ComponentClientReturnType::kSuccess);
     expectConfirmComponentState(expectedStateKOff, api::ComponentClientReturnType::kSuccess);
@@ -167,19 +152,14 @@ TEST_F(StateTest, shouldConfirmStateChangedFromKOnToKOffWhenRunEntered)
 TEST_F(StateTest, shouldConfirmStateChangedFromKOffToKOnWhenRunEntered)
 {
     auto state = factory.createRun(appMock);
-    ASSERT_EQ(appMock.mean(), 0.0);
 
     expectGetComponentState(expectedStateKOff, api::ComponentClientReturnType::kSuccess);
     expectConfirmComponentState(expectedStateKOff, api::ComponentClientReturnType::kSuccess);
     state->enter();
 
-    ASSERT_EQ(appMock.mean(), 0.0);
-
     expectGetComponentState(expectedStateKOn, api::ComponentClientReturnType::kSuccess);
     expectConfirmComponentState(expectedStateKOn, api::ComponentClientReturnType::kSuccess);
     state->enter();
-    bool result = ::abs(appMock.mean() - mu) < sigma;
-    ASSERT_TRUE(result);
 }
 
 TEST_F(StateTest, shouldReportRunningStateWhenInitLeft)

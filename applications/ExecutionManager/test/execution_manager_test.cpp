@@ -55,8 +55,9 @@ protected:
   const std::vector<StartupOption> emptyOptions;
   const std::string firstState{"First"};
   const std::string secondState{"Second"};
+  const std::string suspendState{"Suspend"};
   const std::vector<MachineState> transitionStates =
-    {firstState, secondState};
+    {firstState, secondState, suspendState};
   const ProcessInfo app{"app", "app", emptyOptions};
   const ProcessInfo additionalApp{"addApp", "addApp", emptyOptions};
 };
@@ -183,82 +184,133 @@ TEST_F(ExecutionManagerTest, ShouldKillAppAndTransitToNextState)
   );
 }
 
-////TEST_F(ExecutionManagerTest,
-////  ShouldKillOneAppStartAnotherAndTransitToNextState)
-////{
-////  auto em = initEm(transitionStates,
-////    {{firstState, {app}}, {secondState, {additionalApp}}});
+//TEST_F(ExecutionManagerTest,
+//  ShouldKillOneAppStartAnotherAndTransitToNextState)
+//{
+//  auto em = initEm(transitionStates,
+//    {{firstState, {app}}, {secondState, {additionalApp}}});
 
 
-////  {
-////    InSequence seq;
+//  {
+//    InSequence seq;
 
-////    EXPECT_CALL(*pAppHandler, startProcess(app)).WillOnce(Return(appId));
-////    EXPECT_CALL(*pClient, confirm(StateError::K_SUCCESS));
-////    EXPECT_CALL(*pAppHandler, killProcess(appId));
-////    EXPECT_CALL(*pAppHandler, startProcess(additionalApp))
-////      .WillOnce(Return(additionalAppId));
-////    EXPECT_CALL(*pClient, confirm(StateError::K_SUCCESS));
-////  }
-////  em.setMachineState(firstState);
-////  em.reportApplicationState(appId, AppState::RUNNING);
-////  em.setMachineState(secondState);
-////  em.reportApplicationState(appId, AppState::SHUTTINGDOWN);
-////  em.reportApplicationState(additionalAppId, AppState::RUNNING);
+//    EXPECT_CALL(*pAppHandler, startProcess(app)).WillOnce(Return(appId));
+//    EXPECT_CALL(*pClient, confirm(StateError::K_SUCCESS));
+//    EXPECT_CALL(*pAppHandler, killProcess(appId));
+//    EXPECT_CALL(*pAppHandler, startProcess(additionalApp))
+//      .WillOnce(Return(additionalAppId));
+//    EXPECT_CALL(*pClient, confirm(StateError::K_SUCCESS));
+//  }
+//  em.setMachineState(firstState);
+//  em.reportApplicationState(appId, AppState::RUNNING);
+//  em.setMachineState(secondState);
+//  em.reportApplicationState(appId, AppState::SHUTTINGDOWN);
+//  em.reportApplicationState(additionalAppId, AppState::RUNNING);
 
-////  ASSERT_EQ(
-////    em.getMachineState(),
-////    secondState
-////  );
-////}
+//  ASSERT_EQ(
+//    em.getMachineState(),
+//    secondState
+//  );
+//}
 
-////TEST_F(ExecutionManagerTest, ShouldNotKillAppToTransitState)
-////{
-////  auto em = initEm(transitionStates,
-////    {{firstState, {app}}, {secondState, {app}}});
+//TEST_F(ExecutionManagerTest, ShouldNotKillAppToTransitState)
+//{
+//  auto em = initEm(transitionStates,
+//    {{firstState, {app}}, {secondState, {app}}});
 
-////  {
-////    InSequence seq;
-////    EXPECT_CALL(*pAppHandler, startProcess(app)).WillOnce(Return(appId));
-////    EXPECT_CALL(*pClient, confirm(StateError::K_SUCCESS));
-////    EXPECT_CALL(*pClient, confirm(StateError::K_SUCCESS));
-////  }
-////  em.setMachineState(firstState);
-////  em.reportApplicationState(appId, AppState::RUNNING);
-////  em.setMachineState(secondState);
+//  {
+//    InSequence seq;
+//    EXPECT_CALL(*pAppHandler, startProcess(app)).WillOnce(Return(appId));
+//    EXPECT_CALL(*pClient, confirm(StateError::K_SUCCESS));
+//    EXPECT_CALL(*pClient, confirm(StateError::K_SUCCESS));
+//  }
+//  em.setMachineState(firstState);
+//  em.reportApplicationState(appId, AppState::RUNNING);
+//  em.setMachineState(secondState);
 
-////  ASSERT_EQ(
-////    em.getMachineState(),
-////    secondState
-////  );
-////}
+//  ASSERT_EQ(
+//    em.getMachineState(),
+//    secondState
+//  );
+//}
 
-////TEST_F(ExecutionManagerTest, ShouldKillTwoAppsToTransitToNextState)
-////{
-////  auto em = initEm(transitionStates,
-////    {{firstState, {app, additionalApp}}, {secondState, emptyAvailableApps}});
+//TEST_F(ExecutionManagerTest, ShouldKillTwoAppsToTransitToNextState)
+//{
+//  auto em = initEm(transitionStates,
+//    {{firstState, {app, additionalApp}}, {secondState, emptyAvailableApps}});
 
-////  {
-////    InSequence seq;
-////    EXPECT_CALL(*pAppHandler, startProcess(app)).WillOnce(Return(appId));
-////    EXPECT_CALL(*pAppHandler, startProcess(additionalApp))
-////      .WillOnce(Return(additionalAppId));
-////    EXPECT_CALL(*pClient, confirm(StateError::K_SUCCESS));
-////    EXPECT_CALL(*pAppHandler, killProcess(additionalAppId));
-////    EXPECT_CALL(*pAppHandler, killProcess(appId));
-////    EXPECT_CALL(*pClient, confirm(StateError::K_SUCCESS));
-////  }
+//  {
+//    InSequence seq;
+//    EXPECT_CALL(*pAppHandler, startProcess(app)).WillOnce(Return(appId));
+//    EXPECT_CALL(*pAppHandler, startProcess(additionalApp))
+//      .WillOnce(Return(additionalAppId));
+//    EXPECT_CALL(*pClient, confirm(StateError::K_SUCCESS));
+//    EXPECT_CALL(*pAppHandler, killProcess(additionalAppId));
+//    EXPECT_CALL(*pAppHandler, killProcess(appId));
+//    EXPECT_CALL(*pClient, confirm(StateError::K_SUCCESS));
+//  }
 
-////  em.setMachineState(firstState);
-////  em.reportApplicationState(appId, AppState::RUNNING);
-////  em.reportApplicationState(additionalAppId, AppState::RUNNING);
+//  em.setMachineState(firstState);
+//  em.reportApplicationState(appId, AppState::RUNNING);
+//  em.reportApplicationState(additionalAppId, AppState::RUNNING);
 
-////  em.setMachineState(secondState);
-////  em.reportApplicationState(appId, AppState::SHUTTINGDOWN);
-////  em.reportApplicationState(additionalAppId, AppState::SHUTTINGDOWN);
+//  em.setMachineState(secondState);
+//  em.reportApplicationState(appId, AppState::SHUTTINGDOWN);
+//  em.reportApplicationState(additionalAppId, AppState::SHUTTINGDOWN);
 
-////  ASSERT_EQ(
-////    em.getMachineState(),
-////    secondState
-////  );
-////}
+//  ASSERT_EQ(
+//    em.getMachineState(),
+//    secondState
+//  );
+//}
+
+//TEST_F(ExecutionManagerTest, ShouldNotKillAndTransitToSuspendState)
+//{
+//  auto em = initEm(transitionStates,
+//    {{firstState, {app}}, {suspendState, {app}}});
+
+//  {
+//    InSequence seq;
+//    EXPECT_CALL(*pAppHandler, startProcess(app)).WillOnce(Return(appId));
+//    EXPECT_CALL(*pClient, confirm(StateError::K_SUCCESS));
+//    EXPECT_CALL(*pClient, confirm(StateError::K_SUCCESS));
+//  }
+
+//  em.setMachineState(firstState);
+//  em.reportApplicationState(appId, AppState::RUNNING);
+
+//  em.setMachineState(suspendState);
+//  em.reportApplicationState(appId, AppState::SUSPEND);
+
+//  ASSERT_EQ(
+//    em.getMachineState(),
+//    suspendState
+//  );
+//}
+
+//TEST_F(ExecutionManagerTest, ShouldKillAndTransitToSuspendState)
+//{
+//  auto em = initEm(transitionStates,
+//    {{firstState, {app, additionalApp}}, {suspendState, {app}}});
+//  {
+//    InSequence seq;
+//    EXPECT_CALL(*pAppHandler, startProcess(app)).WillOnce(Return(appId));
+//    EXPECT_CALL(*pAppHandler, startProcess(additionalApp)).WillOnce(Return(additionalAppId));
+//    EXPECT_CALL(*pClient, confirm(StateError::K_SUCCESS));
+//    EXPECT_CALL(*pAppHandler, killProcess(additionalAppId));
+//    EXPECT_CALL(*pClient, confirm(StateError::K_SUCCESS));
+//  }
+
+//  em.setMachineState(firstState);
+//  em.reportApplicationState(appId, AppState::RUNNING);
+//  em.reportApplicationState(additionalAppId, AppState::RUNNING);
+
+//  em.setMachineState(suspendState);
+//  em.reportApplicationState(appId, AppState::SUSPEND);
+//  em.reportApplicationState(additionalAppId, AppState::SHUTTINGDOWN);
+
+//  ASSERT_EQ(
+//    em.getMachineState(),
+//    suspendState
+//  );
+//}

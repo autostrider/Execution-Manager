@@ -27,3 +27,5 @@ target_include_directories(machine_state_client
       $<BUILD_INTERFACE:${CMAKE_CURRENT_SOURCE_DIR}/include>
       $<INSTALL_INTERFACE:${CMAKE_CURRENT_SOURCE_DIR}/include>
 )
+
+add_subdirectory(test)

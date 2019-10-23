@@ -143,10 +143,9 @@ ExecutionManager::reportApplicationState(
       << processId
       << " received.";
 
-  if (state == AppState::INITIALIZING)
+  if (AppState::INITIALIZING == state)
   {
     m_activeProcesses.insert({appName, processId});
-
     m_stateConfirmToBeReceived.insert(processId);
 
     return;
@@ -157,14 +156,17 @@ ExecutionManager::reportApplicationState(
     return;
   }
 
-  if ((state == AppState::RUNNING) || (state == AppState::SHUTTINGDOWN))
+  if (AppState::INITIALIZING != state)
   {
     m_stateConfirmToBeReceived.erase(processId);
 
     if (m_stateConfirmToBeReceived.empty())
     {
+     LOG << "Going to change state with: " << static_cast<int>(state);
      confirmState(StateError::K_SUCCESS);
     }
+
+    return;
   }
 }
 
@@ -187,10 +189,10 @@ ExecutionManager::setMachineState(std::string state)
   {
     return StateError::K_INVALID_STATE;
   }
-  // else if (m_stateConfirmToBeReceived.empty())
-  // {
-  //   return StateError::K_INVALID_REQUEST;
-  // }
+//   else if (m_stateConfirmToBeReceived.empty())
+//   {
+//     return StateError::K_INVALID_REQUEST;
+//   }
   else if (state == m_currentState)
   {
     return StateError::K_INVALID_STATE;
@@ -200,7 +202,14 @@ ExecutionManager::setMachineState(std::string state)
 
   killProcessesForState();
 
-  startApplicationsForState();
+  if(m_pendingState == AA_STATE_SUSPEND)
+  {
+    suspend();
+  }
+  else
+  {
+    startApplicationsForState();
+  }
 
   if (!m_stateConfirmToBeReceived.empty())
   {
@@ -214,6 +223,15 @@ ExecutionManager::setMachineState(std::string state)
   }
 
   return StateError::K_SUCCESS;
+}
+
+void 
+ExecutionManager::suspend()
+{
+  for (auto app = m_activeProcesses.cbegin(); app != m_activeProcesses.cend(); app++)
+  {
+    m_stateConfirmToBeReceived.insert(app->second);
+  } 
 }
 
 } // namespace ExecutionManager

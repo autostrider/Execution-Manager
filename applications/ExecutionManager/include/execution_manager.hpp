@@ -49,6 +49,8 @@ public:
 
   StateError setMachineState(std::string state);
 
+  void suspend();
+
 private:
   /**
    * @brief Removes unsupported states from availApps

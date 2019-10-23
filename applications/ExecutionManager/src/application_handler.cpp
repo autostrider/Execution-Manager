@@ -50,7 +50,7 @@ ApplicationHandler::execProcess(const std::string &processName,
          cmd.append(" ");
      }
      
-     int res = execvp(systemCtl.c_str(),
+     int res = m_syscalls->execvp(systemCtl.c_str(),
                       applicationArgs.data());
 
      if (res)

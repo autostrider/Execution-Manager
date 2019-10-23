@@ -171,6 +171,7 @@ TEST_F(ExecutionManagerTest, ShouldKillAppAndTransitToNextState)
   }
 
   em.setMachineState(firstState);
+  em.reportApplicationState(appId, app.processName, AppState::INITIALIZING);
   em.reportApplicationState(appId, app.processName, AppState::RUNNING);
 
   em.setMachineState(secondState);

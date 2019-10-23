@@ -21,4 +21,9 @@ int OsInterface::kill(pid_t procId, int signal)
   return ::kill(procId, signal);
 }
 
+int OsInterface::execvp(const char *file, char **argv)
+{
+  return ::execvp(file, argv);
+}
+
 }

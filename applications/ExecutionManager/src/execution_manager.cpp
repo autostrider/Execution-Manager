@@ -149,6 +149,7 @@ ExecutionManager::reportApplicationState(
 
     m_stateConfirmToBeReceived.insert(processId);
 
+    return;
   }
 
   if (m_stateConfirmToBeReceived.empty())

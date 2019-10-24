@@ -62,7 +62,7 @@ private:
    *        about it in activeApplications.
    * @param process: Application to start.
    */
-  void startApplication(const ProcessInfo& process);
+  void startApplication(const ProcName &process);
 
   /**
    * @brief starts all application that support current state.
@@ -75,7 +75,7 @@ private:
   void killProcessesForState();
 
   bool processToBeKilled (const std::string& app,
-                          const std::vector<ProcessInfo>&);
+                          const std::set<ProcName> &);
 
   void confirmState(StateError status);
 
@@ -94,7 +94,7 @@ private:
    * @brief Structure for application that can run in certain state
    * vector consists of applicationId (name) and string param - executable name.
    */
-  std::map<MachineState, std::vector<ProcessInfo>> m_allowedProcessesForState;
+  std::map<MachineState, std::set<ProcName>> m_allowedProcessesForState;
 
   const static MachineState defaultState;
 
@@ -113,7 +113,7 @@ private:
    */
   std::vector<MachineState> m_machineManifestStates;
 
-  std::set<pid_t> m_stateConfirmToBeReceived;
+  std::set<ProcName> m_stateConfirmToBeReceived;
 
   std::unique_ptr<ExecutionManagerClient::IExecutionManagerClient> m_rpcClient;
 };

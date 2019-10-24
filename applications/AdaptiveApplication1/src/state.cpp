@@ -55,7 +55,6 @@ void Run::enter()
     {
         m_app.confirmComponentState(state, result);
     }
-
 }
 
 void Run::updateSubstate(const api::ComponentState& state, api::ComponentClientReturnType& confirm)

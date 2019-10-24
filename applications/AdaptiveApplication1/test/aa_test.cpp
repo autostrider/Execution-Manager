@@ -10,6 +10,8 @@
 #include "mocks/i_state_factory_mock.hpp"
 #include "mocks/app_state_client_mock.hpp"
 #include "mocks/component_client_mock.hpp"
+#include "mocks/adaptive_app_base_mock.hpp"
+
 
 using namespace testing;
 
@@ -22,10 +24,14 @@ protected:
     std::unique_ptr<api::StateMock> stateRunMock = std::make_unique<StrictMock<api::StateMock>>();
     std::unique_ptr<api::StateMock> stateTermMock = std::make_unique<StrictMock<api::StateMock>>();
     std::unique_ptr<api::ComponentClientMock> compStateMock = std::make_unique<StrictMock<api::ComponentClientMock>>();
+    std::unique_ptr<AppBaseMock> appBaseMock = std::make_unique<StrictMock<AppBaseMock>>();
 
     api::StateFactoryMock* factoryPtr = factoryMock.get();
     api::AppStateClientMock* stateClientMockPtr = stateClientMock.get();
-    AdaptiveApp app{std::move(factoryMock), std::move(stateClientMock), std::move(compStateMock)};
+    AppBaseMock* appBaseMockPtr = appBaseMock.get();
+
+    AdaptiveApp app{std::move(factoryMock), std::move(stateClientMock),
+                std::move(compStateMock), std::move(appBaseMock)};
 };
 
 TEST_F(AppTest, Should_TransitToInitState)
@@ -77,9 +83,7 @@ TEST_F(AppTest, Should_TransitToTerminateState)
 
 TEST_F(AppTest, shouldReturnExpectMeanWhenSensorDataRead)
 {
-    const double mu = 10;
-    const double sigma = 0.5;
-
-    bool result = ::abs(app.mean() - mu) < sigma;
-    ASSERT_TRUE(result);
+    EXPECT_CALL(*appBaseMockPtr, mean());
+    app.mean();
 }
+

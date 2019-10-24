@@ -2,6 +2,7 @@
 #include <state.hpp>
 #include <constants.hpp>
 #include <logger.hpp>
+#include <adaptive_app_base.hpp>
 
 #include <thread>
 
@@ -18,7 +19,8 @@ int main()
     }
     AdaptiveApp app3(std::make_unique<StateFactory>(),
                      std::make_unique<api::ApplicationStateClientWrapper>(),
-                     std::make_unique<api::ComponentClientWrapper>());
+                     std::make_unique<api::ComponentClientWrapper>(),
+                     std::make_unique<AdaptiveAppBase>());
 
     const std::map<ApplicationState, StateHandler> dispatchMap
     {

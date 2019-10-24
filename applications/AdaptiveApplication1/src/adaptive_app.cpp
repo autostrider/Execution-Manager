@@ -7,19 +7,20 @@
 
 AdaptiveApp::AdaptiveApp(std::unique_ptr<api::IStateFactory> factory,
                          std::unique_ptr<api::IApplicationStateClientWrapper> appClient,
-                         std::unique_ptr<api::IComponentClientWrapper> compClient) :
+                         std::unique_ptr<api::IComponentClientWrapper> compClient, std::unique_ptr<IAdaptiveAppBase> baseApp) :
     m_factory{std::move(factory)},
     m_currentState{nullptr},
     m_appClient{std::move(appClient)},
-    m_componentClient{std::move(compClient)}
+    m_componentClient{std::move(compClient)},
+    m_baseApp{std::move(baseApp)}
 {
 
 }
 
 void AdaptiveApp::init()
 {
-   m_currentState = m_factory->createInit(*this);
-   m_currentState->enter();
+    m_currentState = m_factory->createInit(*this);
+    m_currentState->enter();
 }
 
 void AdaptiveApp::run()
@@ -38,26 +39,7 @@ void AdaptiveApp::terminate()
 
 double AdaptiveApp::mean()
 {
-    auto data = readSensorData();
-    double sum = std::accumulate(data.cbegin(), data.cend(), 0.0);
-    return sum / data.size();
-}
-
-std::vector<double> AdaptiveApp::readSensorData()
-{
-    LOG << "Read data from sensors.";
-
-    const size_t c_numberOfSamples = 50;
-    std::vector<double> data(c_numberOfSamples);
-    std::random_device rd{};
-    std::mt19937 gen{rd()};
-    double mu = 10, sigma = 0.5;
-    std::normal_distribution<>d(mu, sigma);
-
-    for (size_t k = 0; k < c_numberOfSamples; ++k) {
-        data[k] = d(gen);
-    }
-    return data;
+    return m_baseApp->mean();
 }
 
 void AdaptiveApp::transitToNextState(api::IAdaptiveApp::FactoryFunc nextState)

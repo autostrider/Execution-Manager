@@ -11,6 +11,7 @@
 #include "mocks/i_state_factory_mock.hpp"
 #include "mocks/app_state_client_mock.hpp"
 #include "mocks/component_client_mock.hpp"
+#include "mocks/adaptive_app_base_mock.hpp"
 
 using namespace testing;
 
@@ -22,14 +23,17 @@ protected:
     std::unique_ptr<api::AppStateClientMock> stateClientMock = std::make_unique<StrictMock<api::AppStateClientMock>>();
     std::unique_ptr<api::ComponentClientMock> componentClientMock = std::make_unique<StrictMock<api::ComponentClientMock>>();
     std::unique_ptr<api::StateFactoryMock> factoryMock = std::make_unique<StrictMock<api::StateFactoryMock>>();
+    std::unique_ptr<AppBaseMock> appBaseMock = std::make_unique<StrictMock<AppBaseMock>>();
     StateFactory factory;
 
     api::AppStateClientMock* stateClientMockPtr = stateClientMock.get();
     api::ComponentClientMock* componentClientMockPtr = componentClientMock.get();
+    AppBaseMock* appBaseMockPtr = appBaseMock.get();
 
     AdaptiveApp appMock{std::move(factoryMock),
                 std::move(stateClientMock),
-                std::move(componentClientMock)};
+                std::move(componentClientMock),
+                       std::move(appBaseMock)};
 
     const api::ComponentState expectedStateKOn = api::ComponentStateKOn;
     const api::ComponentState expectedStateKOff = api::ComponentStateKOff;
@@ -80,6 +84,8 @@ TEST_F(StateTest, shouldConfirmKOnWhenRunEntered)
 
     expectGetComponentState(expectedStateKOn, api::ComponentClientReturnType::kSuccess);
     expectConfirmComponentState(expectedStateKOn, api::ComponentClientReturnType::kSuccess);
+    EXPECT_CALL(*appBaseMockPtr, mean());
+
     state->enter();
 }
 
@@ -116,10 +122,12 @@ TEST_F(StateTest, shouldConfirmStateUnchangedKOnWhenRunEntered)
 
     expectConfirmComponentState(expectedStateKOn, api::ComponentClientReturnType::kSuccess);
     expectGetComponentState(expectedStateKOn, api::ComponentClientReturnType::kSuccess);
+    EXPECT_CALL(*appBaseMockPtr, mean());
     state->enter();
 
     expectGetComponentState(expectedStateKOn, api::ComponentClientReturnType::kSuccess);
     expectConfirmComponentState(expectedStateKOn, api::ComponentClientReturnType::kUnchanged);
+    EXPECT_CALL(*appBaseMockPtr, mean());
     state->enter();
 }
 
@@ -142,6 +150,7 @@ TEST_F(StateTest, shouldConfirmStateChangedFromKOnToKOffWhenRunEntered)
 
     expectGetComponentState(expectedStateKOn, api::ComponentClientReturnType::kSuccess);
     expectConfirmComponentState(expectedStateKOn, api::ComponentClientReturnType::kSuccess);
+    EXPECT_CALL(*appBaseMockPtr, mean());
     state->enter();
 
     expectGetComponentState(expectedStateKOff, api::ComponentClientReturnType::kSuccess);
@@ -159,6 +168,7 @@ TEST_F(StateTest, shouldConfirmStateChangedFromKOffToKOnWhenRunEntered)
 
     expectGetComponentState(expectedStateKOn, api::ComponentClientReturnType::kSuccess);
     expectConfirmComponentState(expectedStateKOn, api::ComponentClientReturnType::kSuccess);
+    EXPECT_CALL(*appBaseMockPtr, mean());
     state->enter();
 }
 
@@ -183,4 +193,5 @@ TEST_F(StateTest, shouldDoNothingWhenShutdownLeft)
     auto state = factory.createShutDown(appMock);
     state->leave();
 }
+
 

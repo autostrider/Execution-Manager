@@ -1,5 +1,5 @@
-#ifndef ADAPTIVE_APP_BASE
-#define ADAPTIVE_APP_BASE
+#ifndef MEAN_CALCULATOR
+#define MEAN_CALCULATOR
 
 #include "i_mean_calculator.hpp"
 

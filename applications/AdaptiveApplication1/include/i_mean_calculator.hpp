@@ -1,5 +1,5 @@
-#ifndef I_ADAPTIVE_APP_BASE
-#define I_ADAPTIVE_APP_BASE
+#ifndef I_MEAN_CALCULATOR
+#define I_MEAN_CALCULATOR
 
 class IMeanCalculator
 {

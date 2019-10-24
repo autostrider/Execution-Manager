@@ -8,9 +8,6 @@
 #include <i_component_client_wrapper.hpp>
 #include "i_mean_calculator.hpp"
 
-#include <random>
-#include <iostream>
-
 AdaptiveApp::AdaptiveApp(std::unique_ptr<api::IStateFactory> factory,
                          std::unique_ptr<api::IApplicationStateClientWrapper> appClient,
                          std::unique_ptr<api::IComponentClientWrapper> compClient, std::unique_ptr<IMeanCalculator> baseApp) :

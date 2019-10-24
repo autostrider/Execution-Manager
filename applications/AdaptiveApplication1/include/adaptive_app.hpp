@@ -4,7 +4,6 @@
 #include <i_adaptive_app.hpp>
 #include <i_component_client_wrapper.hpp>
 
-#include <vector>
 #include <memory>
 #include <atomic>
 

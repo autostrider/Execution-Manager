@@ -1,16 +1,16 @@
-#include "adaptive_app_base.hpp"
+#include "mean_calculator.hpp"
 
 #include <numeric>
 #include <random>
 
-double AdaptiveAppBase::mean()
+double MeanCalculator::mean()
 {
     auto data = readSensorData();
     double sum = std::accumulate(data.cbegin(), data.cend(), 0.0);
     return sum / data.size();
 }
 
-std::vector<double> AdaptiveAppBase::readSensorData()
+std::vector<double> MeanCalculator::readSensorData()
 {
     const size_t c_numberOfSamples = 50;
     std::vector<double> data(c_numberOfSamples);

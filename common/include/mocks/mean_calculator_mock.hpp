@@ -3,13 +3,12 @@
 
 #include "gmock/gmock.h"
 
-#include "adaptive_app_base.hpp"
+#include "i_mean_calculator.hpp"
 
-class AppBaseMock : public AdaptiveAppBase
+class MeanCalculatorMock : public IMeanCalculator
 {
 public:
     MOCK_METHOD(double, mean,());
-    MOCK_METHOD(std::vector<double>, readSensorData, ());
 };
 
 

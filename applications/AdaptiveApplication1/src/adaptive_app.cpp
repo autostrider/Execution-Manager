@@ -2,12 +2,18 @@
 #include <state.hpp>
 #include <logger.hpp>
 
+#include <i_state_factory.hpp>
+#include <i_application_state_client_wrapper.hpp>
+#include <application_state_client.h>
+#include <i_component_client_wrapper.hpp>
+#include "i_mean_calculator.hpp"
+
 #include <random>
 #include <iostream>
 
 AdaptiveApp::AdaptiveApp(std::unique_ptr<api::IStateFactory> factory,
                          std::unique_ptr<api::IApplicationStateClientWrapper> appClient,
-                         std::unique_ptr<api::IComponentClientWrapper> compClient, std::unique_ptr<IAdaptiveAppBase> baseApp) :
+                         std::unique_ptr<api::IComponentClientWrapper> compClient, std::unique_ptr<IMeanCalculator> baseApp) :
     m_factory{std::move(factory)},
     m_currentState{nullptr},
     m_appClient{std::move(appClient)},

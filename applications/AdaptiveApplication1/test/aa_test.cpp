@@ -1,129 +1,86 @@
 #include "gtest/gtest.h"
 #include "gmock/gmock.h"
-#include <iostream>
-#include <atomic>
 
 #include <adaptive_app.hpp>
-#include <state.hpp>
+
+#include "mocks/i_state_mock.hpp"
+#include "mocks/i_state_factory_mock.hpp"
+#include "mocks/app_state_client_mock.hpp"
+#include "mocks/component_client_mock.hpp"
+#include "mocks/mean_calculator_mock.hpp"
+
 
 using namespace testing;
-
-class IStateFactoryMock : public api::IStateFactory
-{
-public:
-    MOCK_METHOD(std::unique_ptr<api::IState>, createInit, (api::IAdaptiveApp& app), (const));
-    MOCK_METHOD(std::unique_ptr<api::IState>, createRun, (api::IAdaptiveApp& app), (const));
-    MOCK_METHOD(std::unique_ptr<api::IState>, createShutDown, (api::IAdaptiveApp& app), (const));
-    MOCK_METHOD(std::unique_ptr<api::IState>, createSuspend, (api::IAdaptiveApp& app), (const));
-};
-
-class StateClientMock : public api::ApplicationStateClientWrapper
-{
-public:
-    MOCK_METHOD(void, ReportApplicationState, (ApplicationStateManagement::ApplicationState state));
-};
-
-class IStateMock : public api::IState
-{
-public:
-    MOCK_METHOD(void, enter, ());
-    MOCK_METHOD(void, leave, (), (const));
-};
 
 class AppTest : public ::testing::Test
 {
 protected:
-   std::unique_ptr<StateClientMock> stateClientMock{std::make_unique<StateClientMock>()};
-   std::unique_ptr<IStateFactoryMock> factoryMock{std::make_unique<IStateFactoryMock>()};
-   std::unique_ptr<NiceMock<IStateMock>> stateInitMock = std::make_unique<NiceMock<IStateMock>>();
-   std::unique_ptr<NiceMock<IStateMock>> stateRunMock = std::make_unique<NiceMock<IStateMock>>();
-   std::unique_ptr<NiceMock<IStateMock>> stateTermMock = std::make_unique<NiceMock<IStateMock>>();
+    std::unique_ptr<api::AppStateClientMock> stateClientMock{std::make_unique<StrictMock<api::AppStateClientMock>>()};
+    std::unique_ptr<api::StateFactoryMock> factoryMock{std::make_unique<StrictMock<api::StateFactoryMock>>()};
+    std::unique_ptr<api::StateMock> stateInitMock = std::make_unique<StrictMock<api::StateMock>>();
+    std::unique_ptr<api::StateMock> stateRunMock = std::make_unique<StrictMock<api::StateMock>>();
+    std::unique_ptr<api::StateMock> stateTermMock = std::make_unique<StrictMock<api::StateMock>>();
+    std::unique_ptr<api::ComponentClientMock> compStateMock = std::make_unique<StrictMock<api::ComponentClientMock>>();
+    std::unique_ptr<MeanCalculatorMock> meanCalculatorMock = std::make_unique<StrictMock<MeanCalculatorMock>>();
+
+    api::StateFactoryMock* factoryPtr = factoryMock.get();
+    api::AppStateClientMock* stateClientMockPtr = stateClientMock.get();
+    MeanCalculatorMock* meanCalculatorMockPtr = meanCalculatorMock.get();
+
+    AdaptiveApp app{std::move(factoryMock), std::move(stateClientMock),
+                std::move(compStateMock), std::move(meanCalculatorMock)};
 };
 
 TEST_F(AppTest, Should_TransitToInitState)
 {
-    EXPECT_CALL(*factoryMock,
-                createInit((_)))
+    EXPECT_CALL(*stateInitMock, enter());
+    EXPECT_CALL(*factoryPtr,
+                createInit(Ref(app)))
             .WillOnce(Return(ByMove(std::move(stateInitMock))));
 
-     AdaptiveApp app{std::move(factoryMock),
-                     nullptr};
-     app.init();
-
+    app.init();
 }
 
 TEST_F(AppTest, Should_TransitToRunState)
 {
-    EXPECT_CALL(*factoryMock,
-                createInit((_)))
+
+    EXPECT_CALL(*stateInitMock, enter());
+    EXPECT_CALL(*stateInitMock, leave());
+    EXPECT_CALL(*factoryPtr,
+                createInit(Ref(app)))
             .WillOnce(Return(ByMove(std::move(stateInitMock))));
 
-    EXPECT_CALL(*factoryMock,
-                createRun((_)))
+    app.init();
+
+    EXPECT_CALL(*stateRunMock, enter());
+    EXPECT_CALL(*factoryPtr,
+                createRun(Ref(app)))
             .WillOnce(Return(ByMove(std::move(stateRunMock))));
 
-     AdaptiveApp app{std::move(factoryMock),
-                     nullptr};
-     app.init();
-     app.run();
+    app.run();
 }
 
 TEST_F(AppTest, Should_TransitToTerminateState)
 {
-    EXPECT_CALL(*factoryMock,
-                createInit((_)))
+    EXPECT_CALL(*stateInitMock, enter());
+    EXPECT_CALL(*stateInitMock, leave());
+    EXPECT_CALL(*factoryPtr,
+                createInit(Ref(app)))
             .WillOnce(Return(ByMove(std::move(stateInitMock))));
-    EXPECT_CALL(*factoryMock,
-                createShutDown((_)))
+
+    app.init();
+
+    EXPECT_CALL(*stateTermMock, enter());
+    EXPECT_CALL(*factoryPtr,
+                createShutDown(Ref(app)))
             .WillOnce(Return(ByMove(std::move(stateTermMock))));
 
-     AdaptiveApp app{std::move(factoryMock),
-                     nullptr};
-     app.init();
-     app.terminate();
+    app.terminate();
 }
 
-TEST_F(AppTest, WhenSensorDataRead)
+TEST_F(AppTest, shouldReturnMean)
 {
-    const double mu = 10;
-    const double sigma = 0.5;
-
-    AdaptiveApp app{std::move(factoryMock),
-                    nullptr};
-
-    app.readSensorData();
-    bool result = ::abs(app.mean() - mu) < sigma;
-    ASSERT_TRUE(result);
+    EXPECT_CALL(*meanCalculatorMockPtr, mean());
+    app.mean();
 }
 
-TEST_F(AppTest, Should_ReadSensorData)
-{
-    const double mu = 10;
-    const double sigma = 0.5;
-
-    AdaptiveApp app{std::move(factoryMock),
-                    nullptr};
-
-    ASSERT_EQ(app.mean(), 0.0);
-
-    app.readSensorData();
-
-    bool result = ::abs(app.mean() - mu) < sigma;
-    ASSERT_TRUE(result);
-}
-
-TEST_F(AppTest, WhenSensorNotDataRead)
-{
-    AdaptiveApp app{std::move(factoryMock),
-                    nullptr};
-
-    ASSERT_EQ(app.mean(), 0.0);
-}
-
-TEST_F(AppTest, Should_ReportCurrentState)
-{
-    EXPECT_CALL(*stateClientMock, ReportApplicationState(_)).WillOnce(Return());
-
-    AdaptiveApp app{nullptr, std::move(stateClientMock)};
-    app.reportApplicationState(api::ApplicationStateClient::ApplicationState::K_RUNNING);
-}

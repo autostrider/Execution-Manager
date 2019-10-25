@@ -26,7 +26,6 @@ public:
   void init() override;
   void run() override;
   void terminate() override;
-  void suspend() override;
 
   api::MachineStateClient::StateError setMachineState(const std::string&);
   api::MachineStateClient::StateError registerMsm(const std::string&);

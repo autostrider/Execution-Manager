@@ -152,7 +152,7 @@ ExecutionManager::reportApplicationState(pid_t processId, AppState state)
     return;
   }
 
-  if ((state == AppState::RUNNING) || (state == AppState::SHUTTINGDOWN))
+  if (AppState::INITIALIZING != state)
   {
     m_stateConfirmToBeReceived.erase(processId);
 
@@ -195,7 +195,14 @@ ExecutionManager::setMachineState(std::string state)
 
   killProcessesForState();
 
-  startApplicationsForState();
+  if(m_pendingState == AA_STATE_SUSPEND)
+  {
+    suspend();
+  }
+  else
+  {
+    startApplicationsForState();
+  }
 
   if (!m_stateConfirmToBeReceived.empty())
   {
@@ -209,6 +216,15 @@ ExecutionManager::setMachineState(std::string state)
   }
 
   return StateError::K_SUCCESS;
+}
+
+void 
+ExecutionManager::suspend()
+{
+  for (auto app = m_activeProcesses.cbegin(); app != m_activeProcesses.cend(); app++)
+  {
+    m_stateConfirmToBeReceived.insert(app->second);
+  } 
 }
 
 } // namespace ExecutionManager

@@ -8,14 +8,13 @@
 namespace api
 {
 
-class IStateFactoryMock : public IStateFactory
+class StateFactoryMock : public IStateFactory
 {
 public:
-    IStateFactoryMock() = default;
+    StateFactoryMock() = default;
     MOCK_METHOD(std::unique_ptr<IState>, createInit, (IAdaptiveApp& msm), (const));
     MOCK_METHOD(std::unique_ptr<IState>, createRun, (IAdaptiveApp& msm), (const));
     MOCK_METHOD(std::unique_ptr<IState>, createShutDown, (IAdaptiveApp& msm), (const));
-    MOCK_METHOD(std::unique_ptr<IState>, createSuspend, (IAdaptiveApp &app), (const));
 };
 
 } // namespace api

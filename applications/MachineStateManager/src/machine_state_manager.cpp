@@ -37,13 +37,6 @@ void MachineStateManager::terminate()
                 );
 }
 
-void MachineStateManager::suspend()
-{
-    transitToNextState(
-                std::bind(&api::IStateFactory::createSuspend, m_factory.get(), std::placeholders::_1)
-                );
-}
-
 void MachineStateManager::transitToNextState(api::IAdaptiveApp::FactoryFunc nextState)
 {
     m_currentState->leave();

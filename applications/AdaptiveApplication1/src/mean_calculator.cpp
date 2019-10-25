@@ -16,7 +16,9 @@ std::vector<double> MeanCalculator::readSensorData()
     std::vector<double> data(c_numberOfSamples);
     std::random_device rd{};
     std::mt19937 gen{rd()};
-    double mu = 10, sigma = 0.5;
+
+    const double mu = 10;
+    const double sigma = 0.5;
     std::normal_distribution<>d(mu, sigma);
 
     for (size_t k = 0; k < c_numberOfSamples; ++k) {

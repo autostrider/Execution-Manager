@@ -21,7 +21,7 @@ public:
     AdaptiveApp(std::unique_ptr<api::IStateFactory> factory,
                 std::unique_ptr<api::IApplicationStateClientWrapper> appClient,
                 std::unique_ptr<api::IComponentClientWrapper> compClient,
-                std::unique_ptr<IMeanCalculator> baseApp);
+                std::unique_ptr<IMeanCalculator> meanCalculator);
     virtual ~AdaptiveApp() override = default;
 
     void init() override;
@@ -44,6 +44,6 @@ private:
     std::unique_ptr<api::IState> m_currentState;
     std::unique_ptr<api::IApplicationStateClientWrapper> m_appClient;
     std::unique_ptr<api::IComponentClientWrapper> m_componentClient;
-    std::unique_ptr<IMeanCalculator> m_baseApp;
+    std::unique_ptr<IMeanCalculator> m_meanCalculator;
 };
 #endif

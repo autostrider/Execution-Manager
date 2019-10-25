@@ -10,12 +10,12 @@
 
 AdaptiveApp::AdaptiveApp(std::unique_ptr<api::IStateFactory> factory,
                          std::unique_ptr<api::IApplicationStateClientWrapper> appClient,
-                         std::unique_ptr<api::IComponentClientWrapper> compClient, std::unique_ptr<IMeanCalculator> baseApp) :
+                         std::unique_ptr<api::IComponentClientWrapper> compClient, std::unique_ptr<IMeanCalculator> meanCalculator) :
     m_factory{std::move(factory)},
     m_currentState{nullptr},
     m_appClient{std::move(appClient)},
     m_componentClient{std::move(compClient)},
-    m_baseApp{std::move(baseApp)}
+    m_meanCalculator{std::move(meanCalculator)}
 {
 
 }
@@ -42,7 +42,7 @@ void AdaptiveApp::terminate()
 
 double AdaptiveApp::mean()
 {
-    return m_baseApp->mean();
+    return m_meanCalculator->mean();
 }
 
 void AdaptiveApp::transitToNextState(api::IAdaptiveApp::FactoryFunc nextState)

@@ -1,10 +1,7 @@
 #include "gtest/gtest.h"
 #include "gmock/gmock.h"
-#include <iostream>
-#include <atomic>
 
 #include <adaptive_app.hpp>
-#include <state.hpp>
 
 #include "mocks/i_state_mock.hpp"
 #include "mocks/i_state_factory_mock.hpp"

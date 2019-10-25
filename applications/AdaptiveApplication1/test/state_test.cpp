@@ -1,8 +1,4 @@
-#include "adaptive_app.hpp"
 #include "state.hpp"
-
-#include <iostream>
-#include <atomic>
 
 #include "gtest/gtest.h"
 #include "gmock/gmock.h"

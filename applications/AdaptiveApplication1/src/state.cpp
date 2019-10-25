@@ -2,8 +2,6 @@
 #include <constants.hpp>
 #include <logger.hpp>
 
-#include <iostream>
-
 using ApplicationState = api::ApplicationStateClient::ApplicationState;
 
 State::State(AdaptiveApp& app, 

@@ -32,7 +32,7 @@ private:
    * @param process: process for certain mode dependent startup config.
    * @return vector of command line arguments for application.
    */
-    std::vector<std::string> getArgumentsList(const ProcessInfo& process) const;
+//    std::vector<std::string> getArgumentsList(const ProcessInfo& process) const;
 
     /**
    * @brief Method that converts input std::vector of std::string to

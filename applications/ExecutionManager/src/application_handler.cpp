@@ -66,22 +66,22 @@ ApplicationHandler::execProcess(const std::string &processName,
   return process;
 }
 
-std::vector<std::string> ApplicationHandler::getArgumentsList(const ProcessInfo& process) const
-{
-  std::vector<std::string> arguments;
-  arguments.reserve(process.startOptions.size() + 1);
+//std::vector<std::string> ApplicationHandler::getArgumentsList(const ProcessInfo& process) const
+//{
+//  std::vector<std::string> arguments;
+//  arguments.reserve(process.startOptions.size() + 1);
 
-  // insert app name
-  arguments.push_back(process.processName);
+//  // insert app name
+//  arguments.push_back(process.processName);
 
-  std::transform(process.startOptions.cbegin(),
-                 process.startOptions.cend(),
-                 std::back_inserter(arguments),
-                 [](const StartupOption& option)
-                 { return option.makeCommandLineOption(); });
+//  std::transform(process.startOptions.cbegin(),
+//                 process.startOptions.cend(),
+//                 std::back_inserter(arguments),
+//                 [](const StartupOption& option)
+//                 { return option.makeCommandLineOption(); });
 
-  return arguments;
-}
+//  return arguments;
+//}
 
 std::vector<char*>
 ApplicationHandler::convertToNullTerminatingArgv(

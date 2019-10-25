@@ -106,8 +106,6 @@ private:
    */
   std::map<MachineState, std::vector<ProcessInfo>> m_allowedProcessesForState;
 
-  const static MachineState defaultState;
-
   /**
    * brief Current machine state.
    */

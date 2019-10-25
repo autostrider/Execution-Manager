@@ -2,6 +2,9 @@
 #include <state.hpp>
 #include <constants.hpp>
 #include <logger.hpp>
+#include <mean_calculator.hpp>
+#include <i_application_state_client_wrapper.hpp>
+
 
 #include <thread>
 
@@ -18,7 +21,8 @@ int main()
     }
     AdaptiveApp app(std::make_unique<StateFactory>(),
                     std::make_unique<api::ApplicationStateClientWrapper>(),
-                    std::make_unique<api::ComponentClientWrapper>("proc1"));
+                    std::make_unique<api::ComponentClientWrapper>("proc1"),
+                    std::make_unique<MeanCalculator>());
 
     const std::map<ApplicationState, StateHandler> dispatchMap
     {

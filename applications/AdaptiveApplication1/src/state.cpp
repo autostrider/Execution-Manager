@@ -47,32 +47,57 @@ void Run::enter()
 {
     api::ComponentState state;
     auto result = m_app.getComponentState(state);
-
-    if (
-            api::ComponentClientReturnType::K_SUCCESS == result &&
-            api::ComponentStatesToString.at(api::ComponentStates::kOn) == state
-            )
+    if (api::ComponentClientReturnType::K_SUCCESS == result)
     {
-        m_app.readSensorData();
-        LOG << "Mean: " << m_app.mean() << ".";
-        m_app.confirmComponentState(state, api::ComponentClientReturnType::K_SUCCESS);
-        LOG << "State kOn is set.";
-    }
-    else if (
-             api::ComponentClientReturnType::K_SUCCESS == result &&
-             api::ComponentStatesToString.at(api::ComponentStates::kOff) == state
-             )
-    {
-        m_app.reportApplicationState(api::ApplicationStateClient::ApplicationState::K_SUSPEND);
-        /*some important stuff related to suspend state*/
-        m_app.confirmComponentState(state, api::ComponentClientReturnType::K_SUCCESS);
-        LOG << "State kOff is set.";
+        m_app.confirmComponentState(state, handleTransition(state));
     }
     else
     {
-        m_app.confirmComponentState(state, api::ComponentClientReturnType::K_INVALID);
-        LOG << "Invalid component state received.";
+        m_app.confirmComponentState(state, result);
     }
+}
+
+void Run::updateSubstate(const api::ComponentState& state, api::ComponentClientReturnType& confirm)
+{
+    m_componentState = state;
+    confirm = api::ComponentClientReturnType::K_SUCCESS;
+}
+
+api::ComponentClientReturnType Run::handleTransition(api::ComponentState state)
+{
+    api::ComponentClientReturnType confirm = api::ComponentClientReturnType::K_INVALID;
+
+    if (m_componentState != state)
+    {
+        if (api::ComponentStateKOn == state)
+        {
+            LOG << "Mean: " << m_app.mean() << ".";
+            updateSubstate(state, confirm);
+        }
+        else if (api::ComponentStateKOff == state)
+        {
+            /*some important stuff related to suspend state
+            * this transition to kOff state will be refactored.
+            */
+            updateSubstate(state, confirm);
+        }
+    }
+    else
+    {
+        if (api::ComponentStateKOn == state)
+        {
+            LOG << "Mean: " << m_app.mean() << ".";
+        }
+        else if (api::ComponentStateKOff == state)
+        {
+            /*some important stuff related to suspend state
+            * this transition to kOff state will be refactored.
+            */
+        }
+        confirm = api::ComponentClientReturnType::K_UNCHANGED;
+    }
+
+    return confirm;
 }
 
 ShutDown::ShutDown(AdaptiveApp& app) : State (app, ApplicationState::K_SHUTTINGDOWN, AA_STATE_SHUTDOWN)

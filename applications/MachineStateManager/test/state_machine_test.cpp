@@ -16,7 +16,7 @@ protected:
     void SetUp() override
     {
         appStateClientMock = std::make_unique<AppStateClientMock>();
-        factoryMock = std::make_unique<IStateFactoryMock>();
+        factoryMock = std::make_unique<StateFactoryMock>();
         machineStateClientMock = std::make_unique<MachineStateClientMock>();
     }
 
@@ -26,7 +26,7 @@ protected:
     }
 
    std::unique_ptr<AppStateClientMock> appStateClientMock{nullptr};
-   std::unique_ptr<IStateFactoryMock> factoryMock{nullptr};
+   std::unique_ptr<StateFactoryMock> factoryMock{nullptr};
    std::unique_ptr<MachineStateClientMock> machineStateClientMock{nullptr};
    MsmStateFactory factory;
    IMachineStateManagerMock* msmMock;
@@ -64,7 +64,7 @@ TEST_F(MsmStateMachineTest, UnsuccessfulRegistration)
 TEST_F(MsmStateMachineTest, ShouldRunCallEnter)
 {
     EXPECT_CALL(*machineStateClientMock, SetMachineState(_,_))
-        .Times(4)
+        .Times(5)
         .WillRepeatedly(Return(StateError::K_SUCCESS));
 
     msmMock = new IMachineStateManagerMock{std::move(factoryMock),

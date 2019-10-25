@@ -75,6 +75,7 @@ void Run::enter()
 {
     const std::vector<std::string> states{MACHINE_STATE_RUNNING,
                                           MACHINE_STATE_SUSPEND,
+                                          MACHINE_STATE_RUNNING,
                                           MACHINE_STATE_LIVING,
                                           MACHINE_STATE_SHUTTINGDOWN};
 

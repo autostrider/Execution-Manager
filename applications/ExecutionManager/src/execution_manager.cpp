@@ -144,6 +144,14 @@ void ExecutionManager::startApplication(const ProcName& process)
       << "\" was started by systemctl.";
 }
 
+void ExecutionManager::checkAndSendConfirm()
+{
+  if (m_stateConfirmToBeReceived == m_allowedProcessesForState[m_pendingState])
+  {
+    confirmState(StateError::K_SUCCESS);
+  }
+}
+
 void
 ExecutionManager::reportApplicationState(
     pid_t processId, const std::string& appName, AppState state)
@@ -153,23 +161,22 @@ ExecutionManager::reportApplicationState(
       << processId
       << " received.";
 
-  if (AppState::SHUTTINGDOWN == state)
+  switch (state)
   {
+  case AppState::SHUTTINGDOWN:
     m_activeProcesses.erase(appName);
     m_stateConfirmToBeReceived.erase(appName);
-
-  }
-
-  if ((AppState::RUNNING == state) || (AppState::SUSPEND == state))
-  {
+    break;
+  case AppState::RUNNING:
+  case AppState::SUSPEND:
     m_stateConfirmToBeReceived.insert(appName);
     m_activeProcesses.insert({appName, processId});
+    break;
+  default:
+    break;
   }
 
-  if (m_stateConfirmToBeReceived == m_allowedProcessesForState[m_pendingState])
-  {
-    confirmState(StateError::K_SUCCESS);
-  }
+  checkAndSendConfirm();
 }
 
 MachineState
@@ -209,14 +216,11 @@ ExecutionManager::setMachineState(std::string state)
     startApplicationsForState();
   }
 
-    LOG << "Machine state change to  \""
-        << m_pendingState
-        << "\" requested.";
+  LOG << "Machine state change to  \""
+      << m_pendingState
+      << "\" requested.";
 
-    if (m_stateConfirmToBeReceived == m_allowedProcessesForState[m_pendingState])
-    {
-      confirmState(StateError::K_SUCCESS);
-    }
+  checkAndSendConfirm();
 
   return StateError::K_SUCCESS;
 }

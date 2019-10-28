@@ -79,6 +79,8 @@ private:
 
   void confirmState(StateError status);
 
+  inline void checkAndSendConfirm();
+
 private:
   /**
    * @brief Holds interface responsible for starting applications

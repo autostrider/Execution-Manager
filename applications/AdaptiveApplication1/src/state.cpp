@@ -61,6 +61,7 @@ void Run::updateSubstate(const api::ComponentState& state, api::ComponentClientR
 {
     m_componentState = state;
     confirm = api::ComponentClientReturnType::K_SUCCESS;
+    LOG << "Component State " << m_componentState << ".";
 }
 
 api::ComponentClientReturnType Run::handleTransition(api::ComponentState state)

@@ -1,4 +1,5 @@
 #include "execution_manager_client.hpp"
+#include <logger.hpp>
 
 #include <capnp/rpc-twoparty.h>
 
@@ -27,11 +28,9 @@ ExecutionManagerClient::confirm(StateError status)
     capnp::TwoPartyClient client(*connection);
     auto capability = client.bootstrap()
       .castAs<MachineStateManagement::MachineStateManager>();
-
     auto request = capability.confirmStateTransitionRequest();
 
     request.setResult(status);
-
     request.send().ignoreResult().wait(waitScope);
   });
 }

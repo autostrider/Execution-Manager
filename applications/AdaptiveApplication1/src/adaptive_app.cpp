@@ -53,7 +53,8 @@ void AdaptiveApp::transitToNextState(api::IAdaptiveApp::FactoryFunc nextState)
 }
 void AdaptiveApp::reportApplicationState(api::ApplicationStateClient::ApplicationState state)
 {
-    m_appClient->ReportApplicationState(state);
+  LOG << "gtrjkj" << static_cast<int>(state);
+   m_appClient->ReportApplicationState(state);
 }
 
 api::ComponentClientReturnType AdaptiveApp::getComponentState(api::ComponentState &state) noexcept

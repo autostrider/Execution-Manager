@@ -2,6 +2,7 @@
 #include "msm_state_machine.hpp"
 #include <logger.hpp>
 #include <constants.hpp>
+#include <fstream>
 
 #include <thread>
 #include <atomic>
@@ -13,12 +14,19 @@ static std::atomic<ApplicationState> state{ApplicationState::K_INITIALIZING};
 
 int main(int argc, char **argv)
 {
-    ::unlink(MSM_SOCKET_NAME.c_str());
-
-    if (::signal(SIGTERM, signalHandler) == SIG_ERR)
+  if (! ::unlink(MSM_SOCKET_NAME.c_str()))
+    {
+        LOG << strerror(errno);
+    }
+    if (::signal(SIGTERM, signalHandler) == SIG_ERR
+            ||
+        ::signal(SIGINT, signalHandler) == SIG_ERR
+          ||
+        ::signal(SIGPIPE, signalHandler) == SIG_ERR)
     {
         LOG << "[msm] Error while registering signal.";
     }
+    
     MSM::MachineStateManager msm(std::make_unique<MSM::MsmStateFactory>(),
                                  std::make_unique<api::ApplicationStateClientWrapper>(),
                                  std::make_unique<api::MachineStateClientWrapper>());

@@ -102,7 +102,7 @@ TEST_F(ExecutionManagerTest, ShouldSuccessfullyReportWhenNoSetStateOccured)
 {
   auto em = initEm({testState}, {{testState, {app}}});
 
-  em.reportApplicationState(appId, AppState::RUNNING);
+  em.reportApplicationState(appId, app.processName, AppState::RUNNING);
 }
 
 TEST_F(ExecutionManagerTest, ShouldFailToSetSameMachineState)
@@ -142,13 +142,14 @@ TEST_F(ExecutionManagerTest, ShouldStartAppAndTransitToNextState)
     InSequence seq;
 
     EXPECT_CALL(*pClient, confirm(StateError::K_SUCCESS));
-    EXPECT_CALL(*pAppHandler, startProcess(app.applicationName)).WillOnce(Return(appId));
+    EXPECT_CALL(*pAppHandler, startProcess(app.processName));
     EXPECT_CALL(*pClient, confirm(StateError::K_SUCCESS));
   }
   em.setMachineState(firstState);
 
   em.setMachineState(secondState);
-  em.reportApplicationState(appId, AppState::RUNNING);
+  em.reportApplicationState(appId, app.processName, AppState::INITIALIZING);
+  em.reportApplicationState(appId, app.processName, AppState::RUNNING);
 
   ASSERT_EQ(
     em.getMachineState(),
@@ -163,17 +164,19 @@ TEST_F(ExecutionManagerTest, ShouldKillAppAndTransitToNextState)
 
   {
     InSequence seq;
-    EXPECT_CALL(*pAppHandler, startProcess(app.applicationName)).WillOnce(Return(appId));
+    EXPECT_CALL(*pAppHandler, startProcess(app.processName))
+        .WillOnce(Return(appId));
     EXPECT_CALL(*pClient, confirm(StateError::K_SUCCESS));
-    EXPECT_CALL(*pAppHandler, killProcess(app.applicationName));
+    EXPECT_CALL(*pAppHandler, killProcess(app.processName));
     EXPECT_CALL(*pClient, confirm(StateError::K_SUCCESS));
   }
 
   em.setMachineState(firstState);
-  em.reportApplicationState(appId, AppState::RUNNING);
+  em.reportApplicationState(appId, app.processName, AppState::INITIALIZING);
+  em.reportApplicationState(appId, app.processName, AppState::RUNNING);
 
   em.setMachineState(secondState);
-  em.reportApplicationState(appId, AppState::SHUTTINGDOWN);
+  em.reportApplicationState(appId, app.processName, AppState::SHUTTINGDOWN);
 
   ASSERT_EQ(
     em.getMachineState(),
@@ -191,18 +194,22 @@ TEST_F(ExecutionManagerTest,
   {
     InSequence seq;
 
-    EXPECT_CALL(*pAppHandler, startProcess(app.applicationName)).WillOnce(Return(appId));
+    EXPECT_CALL(*pAppHandler, startProcess(app.processName)).WillOnce(Return(appId));
     EXPECT_CALL(*pClient, confirm(StateError::K_SUCCESS));
-    EXPECT_CALL(*pAppHandler, killProcess(app.applicationName));
-    EXPECT_CALL(*pAppHandler, startProcess(additionalApp.applicationName))
+    EXPECT_CALL(*pAppHandler, killProcess(app.processName));
+    EXPECT_CALL(*pAppHandler, startProcess(additionalApp.processName))
       .WillOnce(Return(additionalAppId));
     EXPECT_CALL(*pClient, confirm(StateError::K_SUCCESS));
   }
   em.setMachineState(firstState);
-  em.reportApplicationState(appId, AppState::RUNNING);
+  em.reportApplicationState(appId, app.processName, AppState::INITIALIZING);
+  em.reportApplicationState(appId, app.processName, AppState::RUNNING);
   em.setMachineState(secondState);
-  em.reportApplicationState(appId, AppState::SHUTTINGDOWN);
-  em.reportApplicationState(additionalAppId, AppState::RUNNING);
+  em.reportApplicationState(appId, app.processName, AppState::SHUTTINGDOWN);
+  em.reportApplicationState(additionalAppId, additionalApp.processName,
+                            AppState::INITIALIZING);
+  em.reportApplicationState(additionalAppId, additionalApp.processName,
+                            AppState::RUNNING);
 
   ASSERT_EQ(
     em.getMachineState(),
@@ -217,12 +224,14 @@ TEST_F(ExecutionManagerTest, ShouldNotKillAppToTransitState)
 
   {
     InSequence seq;
-    EXPECT_CALL(*pAppHandler, startProcess(app.applicationName)).WillOnce(Return(appId));
+    EXPECT_CALL(*pAppHandler, startProcess(app.processName))
+        .WillOnce(Return(appId));
     EXPECT_CALL(*pClient, confirm(StateError::K_SUCCESS));
     EXPECT_CALL(*pClient, confirm(StateError::K_SUCCESS));
   }
   em.setMachineState(firstState);
-  em.reportApplicationState(appId, AppState::RUNNING);
+  em.reportApplicationState(appId, app.processName, AppState::INITIALIZING);
+  em.reportApplicationState(appId, app.processName, AppState::RUNNING);
   em.setMachineState(secondState);
 
   ASSERT_EQ(
@@ -238,22 +247,28 @@ TEST_F(ExecutionManagerTest, ShouldKillTwoAppsToTransitToNextState)
 
   {
     InSequence seq;
-    EXPECT_CALL(*pAppHandler, startProcess(app.applicationName)).WillOnce(Return(appId));
-    EXPECT_CALL(*pAppHandler, startProcess(additionalApp.applicationName))
-      .WillOnce(Return(additionalAppId));
+  EXPECT_CALL(*pAppHandler, startProcess(additionalApp.processName))
+    .WillOnce(Return(additionalAppId));
+    EXPECT_CALL(*pAppHandler, startProcess(app.processName))
+        .WillOnce(Return(appId));
     EXPECT_CALL(*pClient, confirm(StateError::K_SUCCESS));
-    EXPECT_CALL(*pAppHandler, killProcess(additionalApp.applicationName));
-    EXPECT_CALL(*pAppHandler, killProcess(app.applicationName));
+    EXPECT_CALL(*pAppHandler, killProcess(additionalApp.processName));
+    EXPECT_CALL(*pAppHandler, killProcess(app.processName));
     EXPECT_CALL(*pClient, confirm(StateError::K_SUCCESS));
   }
 
   em.setMachineState(firstState);
-  em.reportApplicationState(appId, AppState::RUNNING);
-  em.reportApplicationState(additionalAppId, AppState::RUNNING);
+  em.reportApplicationState(appId, app.processName, AppState::INITIALIZING);
+  em.reportApplicationState(appId, app.processName, AppState::RUNNING);
+  em.reportApplicationState(additionalAppId, additionalApp.processName,
+                            AppState::INITIALIZING);
+  em.reportApplicationState(additionalAppId, additionalApp.processName,
+                            AppState::RUNNING);
 
   em.setMachineState(secondState);
-  em.reportApplicationState(appId, AppState::SHUTTINGDOWN);
-  em.reportApplicationState(additionalAppId, AppState::SHUTTINGDOWN);
+  em.reportApplicationState(appId, app.processName, AppState::SHUTTINGDOWN);
+  em.reportApplicationState(additionalAppId, additionalApp.processName,
+                            AppState::SHUTTINGDOWN);
 
   ASSERT_EQ(
     em.getMachineState(),
@@ -268,16 +283,18 @@ TEST_F(ExecutionManagerTest, ShouldNotKillAndTransitToSuspendState)
 
   {
     InSequence seq;
-    EXPECT_CALL(*pAppHandler, startProcess(app.applicationName)).WillOnce(Return(appId));
+    EXPECT_CALL(*pAppHandler, startProcess(app.processName))
+        .WillOnce(Return(appId));
     EXPECT_CALL(*pClient, confirm(StateError::K_SUCCESS));
     EXPECT_CALL(*pClient, confirm(StateError::K_SUCCESS));
   }
 
   em.setMachineState(firstState);
-  em.reportApplicationState(appId, AppState::RUNNING);
+  em.reportApplicationState(appId, app.processName, AppState::INITIALIZING);
+  em.reportApplicationState(appId, app.processName, AppState::RUNNING);
 
   em.setMachineState(suspendState);
-  em.reportApplicationState(appId, AppState::SUSPEND);
+  em.reportApplicationState(appId, app.processName, AppState::SUSPEND);
 
   ASSERT_EQ(
     em.getMachineState(),
@@ -288,23 +305,32 @@ TEST_F(ExecutionManagerTest, ShouldNotKillAndTransitToSuspendState)
 TEST_F(ExecutionManagerTest, ShouldKillAndTransitToSuspendState)
 {
   auto em = initEm(transitionStates,
-    {{firstState, {app, additionalApp}}, {suspendState, {app}}});
+  {
+    {firstState, {app, additionalApp}},
+    {suspendState, {app}},
+    {secondState, {}}
+  });
+
   {
     InSequence seq;
-    EXPECT_CALL(*pAppHandler, startProcess(app.applicationName)).WillOnce(Return(appId));
-    EXPECT_CALL(*pAppHandler, startProcess(additionalApp.applicationName)).WillOnce(Return(additionalAppId));
-    EXPECT_CALL(*pClient, confirm(StateError::K_SUCCESS));
-    EXPECT_CALL(*pAppHandler, killProcess(additionalApp.applicationName));
-    EXPECT_CALL(*pClient, confirm(StateError::K_SUCCESS));
+
+  EXPECT_CALL(*pAppHandler, startProcess(additionalApp.processName));
+  EXPECT_CALL(*pAppHandler, startProcess(app.processName));
+  EXPECT_CALL(*pClient, confirm(StateError::K_SUCCESS));
+  EXPECT_CALL(*pAppHandler, killProcess(additionalApp.processName));
+  EXPECT_CALL(*pClient, confirm(StateError::K_SUCCESS));
+
   }
 
   em.setMachineState(firstState);
-  em.reportApplicationState(appId, AppState::RUNNING);
-  em.reportApplicationState(additionalAppId, AppState::RUNNING);
+  em.reportApplicationState(appId, app.processName, AppState::RUNNING);
+  em.reportApplicationState(additionalAppId, additionalApp.processName,
+                            AppState::RUNNING);
 
   em.setMachineState(suspendState);
-  em.reportApplicationState(appId, AppState::SUSPEND);
-  em.reportApplicationState(additionalAppId, AppState::SHUTTINGDOWN);
+  em.reportApplicationState(appId, app.processName, AppState::SUSPEND);
+  em.reportApplicationState(additionalAppId, additionalApp.processName,
+                            AppState::SHUTTINGDOWN);
 
   ASSERT_EQ(
     em.getMachineState(),

@@ -34,8 +34,12 @@ public:
     api::ComponentClientReturnType getComponentState
     (api::ComponentState& state) noexcept;
 
+
     void confirmComponentState
     (api::ComponentState state, api::ComponentClientReturnType status) noexcept;
+
+    void setComponentState(const api::ComponentState &componentState);
+    api::ComponentState getComponentState() const;
 
 private:
     void transitToNextState(IAdaptiveApp::FactoryFunc nextState) override;
@@ -45,5 +49,7 @@ private:
     std::unique_ptr<api::IApplicationStateClientWrapper> m_appClient;
     std::unique_ptr<api::IComponentClientWrapper> m_componentClient;
     std::unique_ptr<IMeanCalculator> m_meanCalculator;
+
+    api::ComponentState m_componentState = "lalalala";
 };
 #endif

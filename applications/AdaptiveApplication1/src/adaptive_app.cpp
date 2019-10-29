@@ -51,6 +51,16 @@ void AdaptiveApp::transitToNextState(api::IAdaptiveApp::FactoryFunc nextState)
     m_currentState = nextState(*this);
     m_currentState->enter();
 }
+
+void AdaptiveApp::setComponentState(const api::ComponentState &componentState)
+{
+    m_componentState = componentState;
+}
+
+api::ComponentState AdaptiveApp::getComponentState() const
+{
+    return m_componentState;
+}
 void AdaptiveApp::reportApplicationState(api::ApplicationStateClient::ApplicationState state)
 {
     m_appClient->ReportApplicationState(state);

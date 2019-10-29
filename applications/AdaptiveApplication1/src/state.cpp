@@ -59,17 +59,20 @@ void Run::enter()
 
 void Run::updateSubstate(const api::ComponentState& state, api::ComponentClientReturnType& confirm)
 {
-    m_componentState = state;
+    m_app.setComponentState(state);
     confirm = api::ComponentClientReturnType::K_SUCCESS;
-    LOG << "Component State " << m_componentState << ".";
+    LOG << "Component State " << m_app.getComponentState() << ".";
 }
 
 api::ComponentClientReturnType Run::handleTransition(api::ComponentState state)
 {
     api::ComponentClientReturnType confirm = api::ComponentClientReturnType::K_INVALID;
 
-    if (m_componentState != state)
+    LOG << "Old Component State " << m_app.getComponentState() << ".";
+
+    if (m_app.getComponentState() != state)
     {
+        LOG << "Update Component State";
         if (api::ComponentStateKOn == state)
         {
             LOG << "Mean: " << m_app.mean() << ".";
@@ -85,6 +88,7 @@ api::ComponentClientReturnType Run::handleTransition(api::ComponentState state)
     }
     else
     {
+        LOG << "Component State Unchanged";
         if (api::ComponentStateKOn == state)
         {
             LOG << "Mean: " << m_app.mean() << ".";

@@ -8,6 +8,8 @@ git:
   submodules: false
 
 before_install:
+- env
+- export SRC_DIR="`pwd`"
 # - sudo apt-get update
 - sudo apt-get install -y ninja-build
 - git submodule update --init --remote --recursive
@@ -15,5 +17,5 @@ before_install:
 script:
   - mkdir build
   - cd build
-  - cmake -Dstdlib=libstdc++ -GNinja ..
-  - ninja -v
+  - cmake -Dstdlib=libstdc++ -GNinja "$SRC_DIR"
+  - ninja

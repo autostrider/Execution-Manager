@@ -12,7 +12,9 @@ before_install:
 - sudo apt-get install -y ninja-build
 - sudo apt-get install cmake
 - git submodule update --init --remote --recursive
+
+script:
 - mkdir build
 - cd build
-- sudo cmake -GNinja ..
-- sudo ninja
+- sudo cmake -GNinja .. ninja
+

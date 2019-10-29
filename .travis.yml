@@ -13,9 +13,5 @@ before_install:
 - git submodule update --init --remote --recursive
 - mkdir build
 - cd build
-
-- echo "====================="
-- ls -l /etc/systemd/user/
-- echo "====================="
-- sudo cmake -GNinja ..
+- cmake -GNinja ..
 - ninja

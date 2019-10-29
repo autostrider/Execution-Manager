@@ -16,6 +16,7 @@ public:
 
     virtual void enter() = 0;
     void leave() const override;
+    void performAction() override;
     api::ApplicationStateClient::ApplicationState getApplicationState() const;
 
 protected:

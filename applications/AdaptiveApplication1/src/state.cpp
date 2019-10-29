@@ -20,6 +20,11 @@ void State::leave() const
 {
 }
 
+void State::performAction()
+{
+
+}
+
 ApplicationState State::getApplicationState() const
 {
     return m_applState;

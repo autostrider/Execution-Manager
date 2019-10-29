@@ -10,8 +10,9 @@ class State : public api::IState
 public:
     State(AdaptiveApp& app, api::ApplicationStateClient::ApplicationState state, std::string stateName);
 
-    virtual void enter() = 0;
+    virtual void enter() override = 0;
     void leave() const override;
+    virtual void performAction() override;
     api::ApplicationStateClient::ApplicationState getApplicationState() const;
 
 protected:

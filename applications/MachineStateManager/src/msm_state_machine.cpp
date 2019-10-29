@@ -29,6 +29,11 @@ void MsmState::leave() const
 {
 }
 
+void MsmState::performAction()
+{
+
+}
+
 Init::Init(MachineStateManager& msm) 
     : MsmState (msm, ApplicationState::K_INITIALIZING, AA_STATE_INIT)
 {

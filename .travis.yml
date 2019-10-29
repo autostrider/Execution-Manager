@@ -17,5 +17,5 @@ before_install:
 script:
   - mkdir build
   - cd build
-  - cmake -Dstdlib=libstdc++ -GNinja "$SRC_DIR"
+  - sudo cmake -Dstdlib=libstdc++ -GNinja "$SRC_DIR"
   - ninja

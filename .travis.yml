@@ -1,15 +1,13 @@
 language: cpp
 compiler:
   - gcc
-sudo: required
+sudo: true 
 dist: bionic
 os: linux
 git:
   submodules: false
 
 before_install:
-- env
-- export SRC_DIR="`pwd`"
 # - sudo apt-get update
 - sudo apt-get install -y ninja-build
 - git submodule update --init --remote --recursive
@@ -17,5 +15,5 @@ before_install:
 script:
   - mkdir build
   - cd build
-  - sudo cmake -Dstdlib=libstdc++ -GNinja "$SRC_DIR"
+  - sudo cmake -GNinja ..
   - ninja

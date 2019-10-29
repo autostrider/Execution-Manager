@@ -218,12 +218,9 @@ ExecutionManager::setMachineState(std::string state)
 
   killProcessesForState();
 
-  if(m_pendingState == "Suspend")
-  {
-    changeComponentsState();
-  }
-
   startApplicationsForState();
+
+  changeComponentsState();
 
   if (!m_stateConfirmToBeReceived.empty() ||
       !m_componentConfirmToBeReceived.empty())

@@ -11,9 +11,7 @@ before_install:
 # - sudo apt-get update
 - sudo apt-get install -y ninja-build
 - git submodule update --init --remote --recursive
-
-script:
-  - mkdir build
-  - cd build
-  - sudo cmake -GNinja ..
-  - ninja
+- mkdir build
+- cd build
+- sudo cmake -GNinja ..
+- ninja

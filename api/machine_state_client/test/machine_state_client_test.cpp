@@ -4,7 +4,6 @@
 #include "gtest/gtest.h"
 
 #include <thread>
-#include <logger.hpp>
 
 using api::MachineStateClient;
 
@@ -180,8 +179,6 @@ public:
 
     unlink(MSM_SOCKET_NAME.c_str());
     unlink(MSM_TEST.c_str());
-
-    LOG << "Test TearDown";
   }
 
   std::thread serverThread;
@@ -199,9 +196,65 @@ public:
 
 TEST_F(MachineStateClientTest, ShouldSucceedToRegister)
 {
-  LOG << "Test HERE 1";
-
   const auto result = msc.Register(applicationName, defaultTimeout);
 
-  LOG << "Test HERE 2";
+  EXPECT_EQ(result, MachineStateClient::StateError::K_SUCCESS);
+  EXPECT_EQ(testData.registerCallCount, 1);
+  EXPECT_EQ(testData.appName, applicationName);
+  EXPECT_EQ(testData.pid, getpid());
+}
+
+TEST_F(MachineStateClientTest, ShouldSucceedToGetMachineState)
+{
+  testData.state = "TestMachineState";
+  std::string state;
+  const auto result = msc.GetMachineState(defaultTimeout, state);
+
+  EXPECT_EQ(result, MachineStateClient::StateError::K_SUCCESS);
+  EXPECT_EQ(testData.getMachineStateCallCount, 1);
+  EXPECT_EQ(testData.state, state);
+  EXPECT_EQ(testData.pid, getpid());
+}
+
+TEST_F(MachineStateClientTest, ShouldSucceedToSetMachineState)
+{
+  msc.Register(applicationName, defaultTimeout);
+  std::string state = "TestMachineState";
+  const auto result = msc.SetMachineState(state, defaultTimeout);
+
+  EXPECT_EQ(result, MachineStateClient::StateError::K_SUCCESS);
+  EXPECT_EQ(testData.setMachineStateCallCount, 1);
+  EXPECT_EQ(testData.state, state);
+  EXPECT_EQ(testData.pid, getpid());
+}
+
+TEST_F(MachineStateClientTest, ShouldTimeoutOnRegister)
+{
+  testData.isTimeouted = true;
+  const auto result = msc.Register(applicationName, defaultTimeout);
+
+  EXPECT_EQ(result, MachineStateClient::StateError::K_TIMEOUT);
+  EXPECT_EQ(testData.registerCallCount, 1);
+}
+
+TEST_F(MachineStateClientTest, ShouldTimeoutOnGettingMachineState)
+{
+  testData.isTimeouted = true;
+  std::string state;
+
+  const auto result = msc.GetMachineState(defaultTimeout, state);
+
+  EXPECT_EQ(result, MachineStateClient::StateError::K_TIMEOUT);
+  EXPECT_EQ(state, "");
+  EXPECT_EQ(testData.getMachineStateCallCount, 1);
+}
+
+TEST_F(MachineStateClientTest, ShouldTimeoutOnSettingMachineState)
+{
+  msc.Register(applicationName, defaultTimeout);
+  testData.isTimeouted = true;
+  const auto result = msc.SetMachineState("TestMachineState", defaultTimeout);
+
+  EXPECT_EQ(result, MachineStateClient::StateError::K_TIMEOUT);
+  EXPECT_EQ(testData.setMachineStateCallCount, 1);
 }

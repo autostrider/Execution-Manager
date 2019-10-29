@@ -1,11 +1,8 @@
 #include "machine_state_client.h"
-#include <constants.hpp>
 
-#include <chrono>
 #include <thread>
-#include <unistd.h>
-#include <iostream>
-#include <logger.hpp>
+#include <chrono>
+
 using std::string;
 
 namespace api {
@@ -24,31 +21,25 @@ namespace {
     };
 }
 
-MachineStateClient::MachineStateClient(string path):
-  m_client(path),
-  m_clientApplication(m_client.getMain<MachineStateManagement>()),
-  m_timer(m_client.getIoProvider().getTimer()),
-  m_pid(getpid()),
-  m_promise(std::promise<StateError>())
+MachineStateClient::MachineStateClient(string path)
+:
+    m_client(path),
+    m_clientApplication(m_client.getMain<MachineStateManagement>()),
+    m_timer(m_client.getIoProvider().getTimer()),
+    m_pid(getpid()),
+    m_promise(std::promise<StateError>())
 {}
 
 MachineStateClient::~MachineStateClient()
 {
-  LOG << "~MachineStateClient start";
-
   if(m_listenFulfiller.get() == nullptr)
   {
-    LOG << "~MachineStateClient start 0";
-
     return;
   }
-
-  LOG << "~MachineStateClient start 1";
 
   const kj::Executor* exec;
   {
     auto lock = m_serverExecutor.lockExclusive();
-
     lock.wait([&](kj::Maybe<const kj::Executor&> value)
     {
       return value != nullptr;
@@ -56,15 +47,10 @@ MachineStateClient::~MachineStateClient()
     exec = &KJ_ASSERT_NONNULL(*lock);
   }
 
-  LOG << "~MachineStateClient start 3";
-
   exec->executeSync([&]()
   {
     m_listenFulfiller->fulfill();
   });
-
-  LOG << "~MachineStateClient end";
-
 }
 
 MachineStateClient::StateError
@@ -77,13 +63,14 @@ MachineStateClient::Register(string appName, std::uint32_t timeout)
   auto promise =
     m_timer.timeoutAfter(timeout * kj::MILLISECONDS, request.send());
 
+  m_serverThread = startServer();
+
   auto result = promise.then([](auto&& res)
       {
         return res.getResult();
       }, exceptionLambda)
     .then([&](auto&& result)
     {
-      startServer();
       return result;
     }).wait(m_client.getWaitScope());
 
@@ -122,12 +109,9 @@ MachineStateClient::SetMachineState(string state, std::uint32_t timeout)
   auto result = promise.then([&](auto&& res)
     {
       auto _result = res.getResult();
-      if(_result == StateError::K_SUCCESS)
+      if(res.getResult() == StateError::K_SUCCESS)
       {
-        auto ret = waitForConfirm(timeout);
-        m_promise = std::promise<StateError>();
-
-        return ret;
+        return waitForConfirm(timeout);
       }
       else
       {
@@ -151,55 +135,46 @@ MachineStateClient::waitForConfirm(std::uint32_t timeout)
     return StateError::K_TIMEOUT;
   }
 
-  return future.get();
+  auto val = future.get();
+
+  m_promise = std::promise<StateError>();
+  return val;
 }
 
-void
+kj::Own<kj::Thread>
 MachineStateClient::startServer()
 {
-  m_serverThread = m_client.getIoProvider().newPipeThread(
-    [&](kj::AsyncIoProvider& ioProvider, auto&, kj::WaitScope& waitScope)
+  std::promise<void> startUpPromise;
+
+  auto sThread = kj::heap<kj::Thread>([&]() noexcept
   {
-    LOG << "Some strange thread 1";
+    auto ioContext = kj::setupAsyncIo();
 
     capnp::TwoPartyServer server(
       kj::heap<MachineStateServer>(m_promise));
-
-    LOG << "Some strange thread 2";
-
-    auto address = ioProvider.getNetwork()
-        .parseAddress(IPC_PROTOCOL + MSM_SOCKET_NAME)
-          .wait(waitScope);
-
-    LOG << "Some strange thread 3";
+    auto address = ioContext.provider->getNetwork()
+        .parseAddress(std::string{"unix:/tmp/machine_management"})
+          .wait(ioContext.waitScope);
 
     auto listener = address->listen();
-
-    LOG << "Some strange thread 4";
-
     auto listenPromise = server.listen(*listener);
-
-    // ==========================================
-
-    auto exitPaf = kj::newPromiseAndFulfiller<void>();
-    auto exitPromise = listenPromise.exclusiveJoin(kj::mv(exitPaf.promise));
-    m_listenFulfiller = kj::mv(exitPaf.fulfiller);
 
     *m_serverExecutor.lockExclusive() = kj::getCurrentThreadExecutor();
 
-    // ==========================================
+    auto exitPaf = kj::newPromiseAndFulfiller<void>();
+    auto exitPromise = listenPromise.exclusiveJoin(kj::mv(exitPaf.promise));
 
-    LOG << "Some strange thread 5";
+    m_listenFulfiller = kj::mv(exitPaf.fulfiller);
 
-    server.drain().wait(waitScope);
+    startUpPromise.set_value();
+    exitPromise.wait(ioContext.waitScope);
 
-    LOG << "Some strange thread 6";
-
-    //listenPromise.wait(waitScope);
-    exitPromise.wait(waitScope);
-
-    LOG << "Some strange thread";
+    std::this_thread::sleep_for(std::chrono::milliseconds(10));
   });
+
+  startUpPromise.get_future().wait();
+
+  return sThread;
 }
 
 MachineStateServer::MachineStateServer

@@ -37,7 +37,8 @@ ApplicationHandler::execProcess(const std::string &processName,
   {
     std::vector<std::string> arguments =
     {
-      systemCtl,
+      SYSTEMCTL,
+      USER,
       systemctlActions.at(action),
       processName + SERVICE_EXTENSION
     };
@@ -50,7 +51,7 @@ ApplicationHandler::execProcess(const std::string &processName,
          cmd.append(" ");
      }
      
-     int res = m_syscalls->execvp(systemCtl.c_str(),
+     int res = m_syscalls->execvp(SYSTEMCTL.c_str(),
                       applicationArgs.data());
 
      if (res)

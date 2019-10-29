@@ -74,14 +74,16 @@ TEST_F(ApplicationHandlerTest, ShouldSucceedToStartService)
 
   // Pairs containing argument info, first : position in arguments list, second : value.
   std::pair<int, const char*> procNameArg {0, systemctl};
-  std::pair<int, const char*> systemctlAction {1, "start"};
-  std::pair<int, const char*> suOptionArg {2, serviceName.c_str()};
-  std::pair<int, const char*> nullTerminatingArg {3, nullptr};
+  std::pair<int, const char*> userArg{1, "--user"};
+  std::pair<int, const char*> systemctlAction {2, "start"};
+  std::pair<int, const char*> suOptionArg {3, serviceName.c_str()};
+  std::pair<int, const char*> nullTerminatingArg {4, nullptr};
 
   EXPECT_CALL(*m_iosmock, fork()).WillOnce(Return(childProcessId));
   EXPECT_CALL(*m_iosmock, execvp(_, _))
     .WillOnce(DoAll(CheckProcessName(systemctl),
   CheckArg(procNameArg),
+  CheckArg(userArg),
   CheckArg(systemctlAction),
   CheckArg(suOptionArg),
   CheckArg(nullTerminatingArg),
@@ -103,18 +105,20 @@ TEST_F(ApplicationHandlerTest, ShouldSucceedToStopService)
 
   // Pairs containing argument info, first : position in arguments list, second : value.
   std::pair<int, const char*> procNameArg {0, systemctl};
-  std::pair<int, const char*> systemctlAction {1, "stop"};
-  std::pair<int, const char*> suOptionArg {2, serviceName.c_str()};
-  std::pair<int, const char*> nullTerminatingArg {3, nullptr};
+  std::pair<int, const char*> userArg{1, "--user"};
+  std::pair<int, const char*> systemctlAction {2, "stop"};
+  std::pair<int, const char*> suOptionArg {3, serviceName.c_str()};
+  std::pair<int, const char*> nullTerminatingArg {4, nullptr};
 
   EXPECT_CALL(*m_iosmock, fork()).WillOnce(Return(childProcessId));
   EXPECT_CALL(*m_iosmock, execvp(_, _))
-    .WillOnce(DoAll(CheckProcessName(systemctl),
-  CheckArg(procNameArg),
-  CheckArg(systemctlAction),
-  CheckArg(suOptionArg),
-  CheckArg(nullTerminatingArg),
-  Return(execvRes)));
+      .WillOnce(DoAll(CheckProcessName(systemctl),
+    CheckArg(procNameArg),
+    CheckArg(userArg),
+    CheckArg(systemctlAction),
+    CheckArg(suOptionArg),
+    CheckArg(nullTerminatingArg),
+    Return(execvRes)));
 
   ExecutionManager::ApplicationHandler appHandler{std::move(m_iosmock)};
   appHandler.killProcess(pinfo.processName);

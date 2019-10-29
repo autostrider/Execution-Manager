@@ -16,5 +16,5 @@ script:
   - mkdir build
   - pwd
   - cd build
-  - cmake -GNinja ..
+  - sudo env "PATH=$PATH" cmake -GNinja .. . --target install
   - ninja

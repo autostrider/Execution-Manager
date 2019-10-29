@@ -4,7 +4,8 @@
 #include <chrono>
 #include <thread>
 #include <unistd.h>
-
+#include <iostream>
+#include <logger.hpp>
 using std::string;
 
 namespace api {
@@ -33,14 +34,21 @@ MachineStateClient::MachineStateClient(string path):
 
 MachineStateClient::~MachineStateClient()
 {
+  LOG << "~MachineStateClient start";
+
   if(m_listenFulfiller.get() == nullptr)
   {
+    LOG << "~MachineStateClient start 0";
+
     return;
   }
+
+  LOG << "~MachineStateClient start 1";
 
   const kj::Executor* exec;
   {
     auto lock = m_serverExecutor.lockExclusive();
+
     lock.wait([&](kj::Maybe<const kj::Executor&> value)
     {
       return value != nullptr;
@@ -48,10 +56,15 @@ MachineStateClient::~MachineStateClient()
     exec = &KJ_ASSERT_NONNULL(*lock);
   }
 
+  LOG << "~MachineStateClient start 3";
+
   exec->executeSync([&]()
   {
     m_listenFulfiller->fulfill();
   });
+
+  LOG << "~MachineStateClient end";
+
 }
 
 MachineStateClient::StateError
@@ -145,23 +158,47 @@ void
 MachineStateClient::startServer()
 {
   m_serverThread = m_client.getIoProvider().newPipeThread(
-    [&](kj::AsyncIoProvider& ioProvider,
-        auto&,
-        kj::WaitScope& waitScope)
+    [&](kj::AsyncIoProvider& ioProvider, auto&, kj::WaitScope& waitScope)
   {
+    LOG << "Some strange thread 1";
+
     capnp::TwoPartyServer server(
       kj::heap<MachineStateServer>(m_promise));
+
+    LOG << "Some strange thread 2";
 
     auto address = ioProvider.getNetwork()
         .parseAddress(IPC_PROTOCOL + MSM_SOCKET_NAME)
           .wait(waitScope);
 
+    LOG << "Some strange thread 3";
+
     auto listener = address->listen();
+
+    LOG << "Some strange thread 4";
+
     auto listenPromise = server.listen(*listener);
+
+    // ==========================================
+
+    auto exitPaf = kj::newPromiseAndFulfiller<void>();
+    auto exitPromise = listenPromise.exclusiveJoin(kj::mv(exitPaf.promise));
+    m_listenFulfiller = kj::mv(exitPaf.fulfiller);
+
+    *m_serverExecutor.lockExclusive() = kj::getCurrentThreadExecutor();
+
+    // ==========================================
+
+    LOG << "Some strange thread 5";
 
     server.drain().wait(waitScope);
 
-    listenPromise.wait(waitScope);
+    LOG << "Some strange thread 6";
+
+    //listenPromise.wait(waitScope);
+    exitPromise.wait(waitScope);
+
+    LOG << "Some strange thread";
   });
 }
 

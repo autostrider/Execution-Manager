@@ -2,6 +2,8 @@
 #include <state.hpp>
 #include <constants.hpp>
 #include <logger.hpp>
+#include <mean_calculator.hpp>
+#include <i_application_state_client_wrapper.hpp>
 
 #include <thread>
 
@@ -12,21 +14,20 @@ static std::atomic<ApplicationState> state{ApplicationState::K_INITIALIZING};
 
 int main()
 {
-    if (::signal(SIGTERM, signalHandler) == SIG_ERR
-            ||
-        ::signal(SIGINT, signalHandler) == SIG_ERR)
+    if (::signal(SIGTERM, signalHandler) == SIG_ERR)
     {
         LOG << "[proc2] Error while registering signal.";
     }
     AdaptiveApp app2(std::make_unique<StateFactory>(),
-                    std::make_unique<api::ApplicationStateClientWrapper>());
+                     std::make_unique<api::ApplicationStateClientWrapper>(),
+                     std::make_unique<api::ComponentClientWrapper>(),
+                     std::make_unique<MeanCalculator>());
 
     const std::map<ApplicationState, StateHandler> dispatchMap
     {
         {ApplicationState::K_INITIALIZING, std::bind(&api::IAdaptiveApp::init, &app2)},
         {ApplicationState::K_RUNNING, std::bind(&api::IAdaptiveApp::run, &app2)},
-        {ApplicationState::K_SHUTTINGDOWN, std::bind(&api::IAdaptiveApp::terminate, &app2)},
-        {ApplicationState::K_SUSPEND, std::bind(&api::IAdaptiveApp::suspend, &app2)}
+        {ApplicationState::K_SHUTTINGDOWN, std::bind(&api::IAdaptiveApp::terminate, &app2)}
     };
 
     dispatchMap.at(state)();

@@ -34,6 +34,10 @@ class Run : public State
 public:
     Run(AdaptiveApp& app);
     void enter() override;
+private:
+    api::ComponentState m_componentState;
+    api::ComponentClientReturnType handleTransition(api::ComponentState state);
+    void updateSubstate(const api::ComponentState& state, api::ComponentClientReturnType& confirm);
 };
 
 class ShutDown : public State
@@ -43,19 +47,12 @@ public:
     void enter() override;
 };
 
-class Suspend : public State
-{
-public:
-    Suspend(AdaptiveApp& app);
-    void enter() override;
-};
 class StateFactory: public api::IStateFactory
 {
 public:
     std::unique_ptr<api::IState> createInit(api::IAdaptiveApp& app) const override;
     std::unique_ptr<api::IState> createRun(api::IAdaptiveApp& app) const override;
     std::unique_ptr<api::IState> createShutDown(api::IAdaptiveApp& app) const override;
-    std::unique_ptr<api::IState> createSuspend(api::IAdaptiveApp& app) const override;
 };
 
 #endif // STATE_HPP

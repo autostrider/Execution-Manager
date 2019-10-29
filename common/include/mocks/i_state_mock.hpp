@@ -8,7 +8,7 @@
 namespace api
 {
 
-class IStateMock : public IState
+class StateMock : public IState
 {
 public:
     MOCK_METHOD(void, enter, ());

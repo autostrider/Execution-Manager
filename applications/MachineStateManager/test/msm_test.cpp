@@ -13,23 +13,23 @@ using namespace api;
 class MsmTest : public ::testing::Test
 {
 protected:
-   std::unique_ptr<IStateFactoryMock> factoryMock{nullptr};
+   std::unique_ptr<StateFactoryMock> factoryMock{nullptr};
    std::unique_ptr<AppStateClientMock> appStateClientMock{nullptr};
    std::unique_ptr<MachineStateClientMock> machineStateClientMock{nullptr};
 
-   std::unique_ptr<NiceMock<IStateMock>> stateInitMock{nullptr};
-   std::unique_ptr<NiceMock<IStateMock>> stateRunMock{nullptr};
-   std::unique_ptr<NiceMock<IStateMock>> stateTermMock{nullptr};
+   std::unique_ptr<NiceMock<StateMock>> stateInitMock{nullptr};
+   std::unique_ptr<NiceMock<StateMock>> stateRunMock{nullptr};
+   std::unique_ptr<NiceMock<StateMock>> stateTermMock{nullptr};
 
     void SetUp() override
     {
         appStateClientMock = std::make_unique<AppStateClientMock>();
-        factoryMock = std::make_unique<IStateFactoryMock>();
+        factoryMock = std::make_unique<StateFactoryMock>();
         machineStateClientMock = std::make_unique<MachineStateClientMock>();
 
-        stateInitMock = std::make_unique<NiceMock<IStateMock>>();
-        stateRunMock = std::make_unique<NiceMock<IStateMock>>();
-        stateTermMock = std::make_unique<NiceMock<IStateMock>>();
+        stateInitMock = std::make_unique<NiceMock<StateMock>>();
+        stateRunMock = std::make_unique<NiceMock<StateMock>>();
+        stateTermMock = std::make_unique<NiceMock<StateMock>>();
 
         EXPECT_CALL(*factoryMock, createInit((_)))
             .WillOnce(Return(ByMove(std::move(stateInitMock))));

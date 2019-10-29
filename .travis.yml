@@ -2,7 +2,7 @@ language: cpp
 compiler:
   - gcc
 sudo: required 
-dist: xenial
+dist: bionic
 os: linux
 git:
   submodules: false
@@ -10,7 +10,7 @@ git:
 before_install:
 # - sudo apt-get update
 - sudo apt-get install -y ninja-build
-- sudo env "PATH=$PATH" cmake --build . --target install
+- sudo apt-get install cmake
 - git submodule update --init --remote --recursive
 - mkdir build
 - cd build

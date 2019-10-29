@@ -14,7 +14,6 @@ before_install:
 
 script:
   - mkdir build
-  - pwd
   - cd build
-  - sudo env "PATH=$PATH" cmake -GNinja .. . --target install
-  - ninja
+  - cmake -Dstdlib=libstdc++ -GNinja ..
+  - ninja -v

@@ -10,7 +10,7 @@ git:
 before_install:
 # - sudo apt-get update
 - sudo apt-get install -y ninja-build
-- sudo apt-get install cmake
+- sudo env "PATH=$PATH" cmake --build . --target install
 - git submodule update --init --remote --recursive
 - mkdir build
 - cd build

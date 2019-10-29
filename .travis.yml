@@ -14,6 +14,7 @@ before_install:
 
 script:
   - mkdir build
+  - pwd
   - cd build
-  - sudo cmake -GNinja ..
+  - cmake -GNinja ..
   - ninja

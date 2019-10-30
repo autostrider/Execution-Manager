@@ -3,6 +3,8 @@
 #include <fstream>
 #include <logger.hpp>
 #include <exception>
+#include <algorithm>
+#include <sstream>
 
 namespace api
 {
@@ -36,14 +38,26 @@ std::string ApplicationStateClient::getAppName()
 {
   static constexpr auto procPath = "/proc/";
   static constexpr auto cmdName = "/cmdline";
+  static constexpr auto delimiter = '/';
 
   std::ifstream data {procPath + std::to_string(m_pid) + cmdName};
   std::string fullCmd;
   data >> fullCmd;
 
-  const auto lastSlash = fullCmd.find_last_of("/");
+  std::reverse(fullCmd.begin(), fullCmd.end());
+  std::stringstream info{fullCmd};
+  std::string processName;
+  std::getline(info, processName, delimiter);
+  std::reverse(processName.begin(), processName.end());
+  std::string appName;
+  // According to our spec, we have /AppName/process/procName
+  // so we skip process word
+  std::getline(info, appName, delimiter);
+  // actual app name
+  std::getline(info, appName, delimiter);
+  std::reverse(appName.begin(), appName.end());
 
-  return fullCmd.substr(lastSlash + 1);
+  return appName.append("_").append(processName);
 }
 
 } // namespace api

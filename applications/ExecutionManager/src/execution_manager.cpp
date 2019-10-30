@@ -37,7 +37,10 @@ ExecutionManager::ExecutionManager(
         processesInfoForState.second.begin(),
           processesInfoForState.second.end(),
           std::inserter(availableProcesses, availableProcesses.begin()),
-          [](auto item) { return item.processName; }
+          [](auto item) {
+        return item.applicationName
+                .append("_")
+                .append(item.processName); }
           );
 
     m_allowedProcessesForState.insert(

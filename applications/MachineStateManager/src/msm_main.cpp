@@ -1,6 +1,7 @@
 #include "machine_state_manager.hpp"
 #include "msm_state_machine.hpp"
 #include <logger.hpp>
+#include <manifest_reader.hpp>
 #include <constants.hpp>
 
 #include <thread>
@@ -19,15 +20,26 @@ int main(int argc, char **argv)
     {
         LOG << "[msm] Error while registering signal.";
     }
-    MSM::MachineStateManager msm(std::make_unique<MSM::MsmStateFactory>(),
-                                 std::make_unique<api::ApplicationStateClientWrapper>(),
-                                 std::make_unique<api::MachineStateClientWrapper>());
+    MSM::MachineStateManager msm(
+                std::make_unique<MSM::MsmStateFactory>(),
+                std::make_unique<api::ApplicationStateClientWrapper>(),
+                std::make_unique<api::MachineStateClientWrapper>(),
+                std::make_unique<ExecutionManager::ManifestReader>());
 
     const std::map<ApplicationState, StateHandler> dispatchMap
     {
-        {ApplicationState::K_INITIALIZING, std::bind(&api::IAdaptiveApp::init, &msm)},
-        {ApplicationState::K_RUNNING, std::bind(&api::IAdaptiveApp::run, &msm)},
-        {ApplicationState::K_SHUTTINGDOWN, std::bind(&api::IAdaptiveApp::terminate, &msm)}
+        {
+            ApplicationState::K_INITIALIZING,
+            std::bind(&api::IAdaptiveApp::init, &msm)
+        },
+        {
+            ApplicationState::K_RUNNING,
+            std::bind(&api::IAdaptiveApp::run, &msm)
+        },
+        {
+            ApplicationState::K_SHUTTINGDOWN,
+            std::bind(&api::IAdaptiveApp::terminate, &msm)
+        }
     };
 
     dispatchMap.at(state)();

@@ -138,7 +138,6 @@ void ExecutionManager::startApplication(const ProcName& process)
 {
   appHandler->startProcess(process);
 
-
   LOG << "Adaptive aplication \""
       << process
       << "\" was started by systemctl.";

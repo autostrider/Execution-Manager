@@ -27,7 +27,6 @@ int main(int argc, char **argv)
         LOG << "[msm] Error while registering signal.";
     }
     
-
     MSM::MachineStateManager msm(std::make_unique<MSM::MsmStateFactory>(),
                                  std::make_unique<api::ApplicationStateClientWrapper>(),
                                  std::make_unique<api::MachineStateClientWrapper>());
@@ -36,8 +35,7 @@ int main(int argc, char **argv)
     {
         {ApplicationState::K_INITIALIZING, std::bind(&api::IAdaptiveApp::init, &msm)},
         {ApplicationState::K_RUNNING, std::bind(&api::IAdaptiveApp::run, &msm)},
-        {ApplicationState::K_SHUTTINGDOWN, std::bind(&api::IAdaptiveApp::terminate, &msm)},
-        {ApplicationState::K_SUSPEND, std::bind(&api::IAdaptiveApp::suspend, &msm)}
+        {ApplicationState::K_SHUTTINGDOWN, std::bind(&api::IAdaptiveApp::terminate, &msm)}
     };
 
     dispatchMap.at(state)();

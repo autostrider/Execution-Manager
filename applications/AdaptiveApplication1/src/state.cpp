@@ -2,9 +2,11 @@
 #include <constants.hpp>
 #include <logger.hpp>
 
+#include <iostream>
+
 using ApplicationState = api::ApplicationStateClient::ApplicationState;
 
-State::State(AdaptiveApp& app, 
+State::State(AdaptiveApp& app,
              ApplicationState state,
              std::string stateName) :
     m_app{app},

@@ -20,7 +20,7 @@ int main()
     }
     AdaptiveApp app2(std::make_unique<StateFactory>(),
                      std::make_unique<api::ApplicationStateClientWrapper>(),
-                     std::make_unique<api::ComponentClientWrapper>(),
+                     std::make_unique<api::ComponentClientWrapper>("proc2"),
                      std::make_unique<MeanCalculator>());
 
     app2.init();

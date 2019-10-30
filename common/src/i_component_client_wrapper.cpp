@@ -4,8 +4,11 @@
 namespace api
 {
 
-ComponentClientWrapper::ComponentClientWrapper() noexcept
-  : m_client{IPC_PROTOCOL + MSM_SOCKET_NAME, StateUpdateMode::kPoll}
+ComponentClientWrapper::ComponentClientWrapper(const std::string& component) noexcept
+  : m_client{component, StateUpdateMode::kPoll}
+{}
+
+ComponentClientWrapper::~ComponentClientWrapper() noexcept
 {}
 
 ComponentClientReturnType

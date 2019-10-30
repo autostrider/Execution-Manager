@@ -4,7 +4,7 @@
 #include "gtest/gtest.h"
 
 #include <thread>
-
+/*
 using api::MachineStateClient;
 
 struct TestData
@@ -91,7 +91,7 @@ private:
       auto ioContext = kj::setupAsyncIo();
 
       auto address = ioContext.provider->getNetwork()
-        .parseAddress("unix:/tmp/machine_management")
+        .parseAddress(IPC_PROTOCOL + MSM_SOCKET_NAME)
           .wait(ioContext.waitScope);
 
       auto connection = address->connect().wait(ioContext.waitScope);

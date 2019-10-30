@@ -12,6 +12,9 @@
             "Mode": "Running"
           },
           {
+            "Mode": "Suspend"
+          },
+          {
             "Mode": "Living"
           },
           {

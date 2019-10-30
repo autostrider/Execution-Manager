@@ -23,23 +23,18 @@ int main()
                      std::make_unique<api::ComponentClientWrapper>(),
                      std::make_unique<MeanCalculator>());
 
-    const std::map<ApplicationState, StateHandler> dispatchMap
-    {
-        {ApplicationState::K_INITIALIZING, std::bind(&api::IAdaptiveApp::init, &app3)},
-        {ApplicationState::K_RUNNING, std::bind(&api::IAdaptiveApp::run, &app3)},
-        {ApplicationState::K_SHUTTINGDOWN, std::bind(&api::IAdaptiveApp::terminate, &app3)}
-    };
+    app3.init();
 
-    dispatchMap.at(state)();
     state = ApplicationState::K_RUNNING;
+    app3.run();
 
     while (ApplicationState::K_RUNNING == state)
     {
-        dispatchMap.at(state)();
+        app3.performAction();
         std::this_thread::sleep_for(FIVE_SECONDS);
     }
 
-    dispatchMap.at(state)();
+    app3.terminate();
 
     return 0;
 }

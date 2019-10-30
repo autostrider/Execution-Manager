@@ -27,18 +27,16 @@ public:
     void init() override;
     void run() override;
     void terminate() override;
+    void performAction() override;
 
     double mean();
     void reportApplicationState(api::ApplicationStateClient::ApplicationState state) override;
 
-    api::ComponentClientReturnType getComponentState
-    (api::ComponentState& state) noexcept;
-
-    void confirmComponentState
-    (api::ComponentState state, api::ComponentClientReturnType status) noexcept;
-
 private:
     void transitToNextState(IAdaptiveApp::FactoryFunc nextState) override;
+    api::ComponentClientReturnType handleTransition(api::ComponentState state);
+
+    api::ComponentState m_componentState;
 
     std::unique_ptr<api::IStateFactory> m_factory;
     std::unique_ptr<api::IState> m_currentState;

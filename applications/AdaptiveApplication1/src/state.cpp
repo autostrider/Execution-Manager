@@ -18,11 +18,6 @@ void State::leave() const
 {
 }
 
-void State::performAction()
-{
-
-}
-
 ApplicationState State::getApplicationState() const
 {
     return m_applState;
@@ -37,72 +32,29 @@ void Init::enter()
     m_app.reportApplicationState(getApplicationState());
 }
 
-void Init::leave() const
-{
-    m_app.reportApplicationState(ApplicationState::K_RUNNING);
-}
-
 Run::Run(AdaptiveApp &app) : State (app, ApplicationState::K_RUNNING, AA_STATE_RUNNING)
 {
 }
 
 void Run::enter()
 {
-    api::ComponentState state;
-    auto result = m_app.getComponentState(state);
-    if (api::ComponentClientReturnType::kSuccess == result)
-    {
-        m_app.confirmComponentState(state, handleTransition(state));
-    }
-    else
-    {
-        m_app.confirmComponentState(state, result);
-    }
+    m_app.reportApplicationState(getApplicationState());
 }
 
-void Run::updateSubstate(const api::ComponentState& state, api::ComponentClientReturnType& confirm)
+void Run::performAction()
 {
-    m_componentState = state;
-    confirm = api::ComponentClientReturnType::kSuccess;
+    LOG << "Mean: " << m_app.mean() << ".";
 }
 
-api::ComponentClientReturnType Run::handleTransition(api::ComponentState state)
+Suspend::Suspend(AdaptiveApp& app) : State (app, ApplicationState::K_SHUTTINGDOWN, AA_STATE_SUSPEND)
 {
-    api::ComponentClientReturnType confirm = api::ComponentClientReturnType::kInvalid;
-
-    if (m_componentState != state)
-    {
-        if (api::ComponentStateKOn == state)
-        {
-            LOG << "Mean: " << m_app.mean() << ".";
-            updateSubstate(state, confirm);
-        }
-        else if (api::ComponentStateKOff == state)
-        {
-            /*some important stuff related to suspend state
-            * this transition to kOff state will be refactored.
-            */
-            updateSubstate(state, confirm);
-        }
-    }
-    else
-    {
-        if (api::ComponentStateKOn == state)
-        {
-            LOG << "Mean: " << m_app.mean() << ".";
-        }
-        else if (api::ComponentStateKOff == state)
-        {
-            /*some important stuff related to suspend state
-            * this transition to kOff state will be refactored.
-            */
-        }
-        confirm = api::ComponentClientReturnType::kUnchanged;
-    }
-
-    return confirm;
 }
 
+void Suspend::enter()
+{
+   // m_app.reportApplicationState(getApplicationState());
+    LOG << "Suspend state...";
+}
 ShutDown::ShutDown(AdaptiveApp& app) : State (app, ApplicationState::K_SHUTTINGDOWN, AA_STATE_SHUTDOWN)
 {
 }
@@ -128,3 +80,7 @@ std::unique_ptr<api::IState> StateFactory::createShutDown(api::IAdaptiveApp& app
     return std::make_unique<ShutDown>(dynamic_cast<AdaptiveApp&>(app));
 }
 
+std::unique_ptr<api::IState> StateFactory::createSuspend(api::IAdaptiveApp &app) const
+{
+    return std::make_unique<Suspend>(dynamic_cast<AdaptiveApp&>(app));
+}

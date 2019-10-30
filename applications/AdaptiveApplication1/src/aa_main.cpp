@@ -10,7 +10,7 @@
 static void signalHandler(int signo);
 using ApplicationState = api::ApplicationStateClient::ApplicationState;
 
-static std::atomic<ApplicationState> state{ApplicationState::K_INITIALIZING};
+static std::atomic<bool> isTerminated{false};
 
 int main()
 {
@@ -23,28 +23,21 @@ int main()
                     std::make_unique<api::ComponentClientWrapper>(),
                     std::make_unique<MeanCalculator>());
 
-    const std::map<ApplicationState, StateHandler> dispatchMap
-    {
-        {ApplicationState::K_INITIALIZING, std::bind(&api::IAdaptiveApp::init, &app)},
-        {ApplicationState::K_RUNNING, std::bind(&api::IAdaptiveApp::run, &app)},
-        {ApplicationState::K_SHUTTINGDOWN, std::bind(&api::IAdaptiveApp::terminate, &app)}
-    };
+    app.init();
+    app.run();
 
-    dispatchMap.at(state)();
-    state = ApplicationState::K_RUNNING;
-
-    while (ApplicationState::K_RUNNING == state)
+    while (false == isTerminated)
     {
-        dispatchMap.at(state)();
+        app.performAction();
         std::this_thread::sleep_for(FIVE_SECONDS);
     }
 
-    dispatchMap.at(state)();
+    app.terminate();
     return 0;
 }
 
 static void signalHandler(int signo)
 {
     LOG << "[aa_main] Received signal: " << sys_siglist[signo] << ".";
-    state = mapSignalToState.at(signo);
+    isTerminated = true;
 }

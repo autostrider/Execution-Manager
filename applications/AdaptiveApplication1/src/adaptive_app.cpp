@@ -40,6 +40,32 @@ void AdaptiveApp::terminate()
                 );
 }
 
+void AdaptiveApp::performAction()
+{
+    api::ComponentState state;
+    auto result = m_componentClient->GetComponentState(state);
+    if (api::ComponentClientReturnType::kSuccess == result)
+    {
+        auto confirm = handleTransition(state);
+        if (api::ComponentClientReturnType::kSuccess == confirm)
+        {
+            //state changed from\to kOn\kOff
+            auto createNewState = m_componentState == api::ComponentStateKOn ?
+                        &api::IStateFactory::createRun :
+                        &api::IStateFactory::createSuspend;
+            transitToNextState(
+                        std::bind(createNewState, m_factory.get(), std::placeholders::_1)
+                        );
+        }
+        m_componentClient->ConfirmComponentState(state, confirm);
+    }
+    else
+    {
+        m_componentClient->ConfirmComponentState(state, result);
+    }
+    m_currentState->performAction();
+}
+
 double AdaptiveApp::mean()
 {
     return m_meanCalculator->mean();
@@ -51,17 +77,28 @@ void AdaptiveApp::transitToNextState(api::IAdaptiveApp::FactoryFunc nextState)
     m_currentState = nextState(*this);
     m_currentState->enter();
 }
+
+api::ComponentClientReturnType AdaptiveApp::handleTransition(api::ComponentState state)
+{
+    api::ComponentClientReturnType confirm = api::ComponentClientReturnType::kInvalid;
+
+    LOG << "Current CompState: " << m_componentState;
+    if (m_componentState != state)
+    {
+        LOG << "Updating ComponentState to: " << state;
+        m_componentState = state;
+        confirm = api::ComponentClientReturnType::kSuccess;
+    }
+    else
+    {
+        LOG << "ComponentState is unchanged.";
+        confirm = api::ComponentClientReturnType::kUnchanged;
+    }
+
+    return confirm;
+}
+
 void AdaptiveApp::reportApplicationState(api::ApplicationStateClient::ApplicationState state)
 {
     m_appClient->ReportApplicationState(state);
-}
-
-api::ComponentClientReturnType AdaptiveApp::getComponentState(api::ComponentState &state) noexcept
-{
-    return m_componentClient->GetComponentState(state);
-}
-
-void AdaptiveApp::confirmComponentState(api::ComponentState state, api::ComponentClientReturnType status) noexcept
-{
-    m_componentClient->ConfirmComponentState(state, status);
 }

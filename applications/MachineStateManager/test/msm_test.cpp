@@ -22,7 +22,7 @@ protected:
    std::unique_ptr<MachineStateClientMock> machineStateClientMock =
            std::make_unique<MachineStateClientMock>();
    std::unique_ptr<ExecutionManager::ManifestReaderMock> manifestReaderMock =
-           std::make_unique<ExecutionManager::ManifestReaderMock>();
+           std::make_unique<NiceMock<ExecutionManager::ManifestReaderMock>>();
 
    std::unique_ptr<NiceMock<StateMock>> stateInitMock =
            std::make_unique<NiceMock<StateMock>>();
@@ -32,15 +32,15 @@ protected:
            std::make_unique<NiceMock<StateMock>>();
 
    StateFactoryMock* pFactoryMock = factoryMock.get();
-   ExecutionManager::ManifestReaderMock* pManifestReaderMock =
-           manifestReaderMock.get();
+//   NiceMock<ExecutionManager::ManifestReaderMock*> pManifestReaderMock =
+//           manifestReaderMock.get();
 
    void SetUp() override
    {
        EXPECT_CALL(*pFactoryMock, createInit((_)))
            .WillOnce(Return(ByMove(std::move(stateInitMock))));
-       ON_CALL(*manifestReaderMock, getMachineStates())
-               .WillByDefault(Return(std::vector<std::string>{}));
+//       ON_CALL(*pManifestReaderMock, getMachineStates())
+//               .WillByDefault(Return(std::vector<std::string>{}));
    }
 
     MachineStateManager initMsm()

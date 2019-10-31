@@ -21,8 +21,8 @@ protected:
 
     IMachineStateManagerMock* initIMsm()
     {
-        ON_CALL(*pManifestReaderMock, getMachineStates())
-                .WillByDefault(Return(std::vector<std::string>{}));
+//        ON_CALL(*pManifestReaderMock, getMachineStates())
+//                .WillByDefault(Return(std::vector<std::string>{}));
         return new IMachineStateManagerMock{std::move(factoryMock),
                     std::move(appStateClientMock),
                     std::move(machineStateClientMock),
@@ -35,11 +35,11 @@ protected:
            std::make_unique<StateFactoryMock>();
    std::unique_ptr<MachineStateClientMock> machineStateClientMock =
            std::make_unique<MachineStateClientMock>();
-   std::unique_ptr<ExecutionManager::ManifestReaderMock> manifestReaderMock =
-           std::make_unique<ExecutionManager::ManifestReaderMock>();
+   std::unique_ptr<NiceMock<ExecutionManager::ManifestReaderMock>> manifestReaderMock =
+           std::make_unique<NiceMock<ExecutionManager::ManifestReaderMock>>();
    MsmStateFactory factory;
    IMachineStateManagerMock* msmMock;
-   ExecutionManager::ManifestReaderMock* pManifestReaderMock;
+//   ExecutionManager::ManifestReaderMock* pManifestReaderMock;
 };
 
 TEST_F(MsmStateMachineTest, ShouldInitCallEnter)

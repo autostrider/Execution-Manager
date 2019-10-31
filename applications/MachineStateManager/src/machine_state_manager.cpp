@@ -48,8 +48,6 @@ void MachineStateManager::transitToNextState(api::IAdaptiveApp::FactoryFunc next
 
 void MachineStateManager::reportApplicationState(ApplicationState state)
 {
-  LOG << "here" << (m_appStateClient == nullptr);
-  LOG << "statwe: " << static_cast<int>(state);
     m_appStateClient->ReportApplicationState(state);
 }
 

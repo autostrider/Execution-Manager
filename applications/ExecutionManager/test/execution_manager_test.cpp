@@ -61,13 +61,18 @@ protected:
     {startingUpState, firstState, secondState, suspendState};
   const ProcessInfo app{"app", "app", emptyOptions};
   const ProcessInfo additionalApp{"addApp", "addApp", emptyOptions};
+  std::string component = "ComponentTest";
+  ComponentState state = "kOff";
+  ComponentClientReturnType status = ComponentClientReturnType::K_SUCCESS;
 };
 
 TEST_F(ExecutionManagerTest, ShouldSucceedToSetStartingUpMachineState)
 {
   auto em = initEm(transitionStates, {});
 
-  EXPECT_CALL(*pClient, confirm(StateError::K_SUCCESS)).Times(1);
+  EXPECT_CALL(*pClient, confirm(StateError::K_SUCCESS));
+  
+  em.start();
   em.setMachineState(startingUpState);
 
   ASSERT_EQ(
@@ -319,6 +324,72 @@ TEST_F(ExecutionManagerTest, ShouldKillAndTransitToSuspendState)
   em.setMachineState(suspendState);
   em.reportApplicationState(appId, AppState::SUSPEND);
   em.reportApplicationState(additionalAppId, AppState::SHUTTINGDOWN);
+
+  ASSERT_EQ(
+    em.getMachineState(),
+    suspendState
+  );
+}
+
+TEST_F(ExecutionManagerTest, ShouldRegisterComponent)
+{
+  auto em = initEm(transitionStates, {});
+
+  em.registerComponent(component);
+}
+
+TEST_F(ExecutionManagerTest, ShouldGetComponentStateWithEmptyMap)
+{
+  auto em = initEm({suspendState}, {{suspendState, emptyAvailableApps}});
+
+  auto result = em.getComponentState(component, state);
+
+  EXPECT_EQ(result, ComponentClientReturnType::K_INVALID);
+}
+
+TEST_F(ExecutionManagerTest, ShouldGetComponentState)
+{
+  auto em = initEm({suspendState}, {{suspendState, emptyAvailableApps}});
+  
+  em.registerComponent(component);
+  auto result = em.getComponentState(component, state);
+
+  EXPECT_EQ(result, ComponentClientReturnType::K_SUCCESS);
+}
+
+TEST_F(ExecutionManagerTest, ShouldConfirmComponentStateWithEmptyMap)
+{
+  auto em = initEm({suspendState}, {{suspendState, emptyAvailableApps}});
+
+  em.confirmComponentState(component, state, status);
+
+  EXPECT_EQ(status, ComponentClientReturnType::K_SUCCESS);
+}
+
+TEST_F(ExecutionManagerTest, ShouldConfirmComponentState)
+{
+  auto em = initEm(transitionStates,
+    {{firstState, {app, additionalApp}}, {suspendState, {app}}});
+  {
+    InSequence seq;
+    EXPECT_CALL(*pAppHandler, startProcess(app)).WillOnce(Return(appId));
+    EXPECT_CALL(*pAppHandler, startProcess(additionalApp)).WillOnce(Return(additionalAppId));
+    EXPECT_CALL(*pClient, confirm(StateError::K_SUCCESS));
+    EXPECT_CALL(*pAppHandler, killProcess(additionalAppId));
+    EXPECT_CALL(*pClient, confirm(StateError::K_SUCCESS));
+  }
+
+  em.setMachineState(firstState);
+  em.reportApplicationState(appId, AppState::RUNNING);
+  em.reportApplicationState(additionalAppId, AppState::RUNNING);
+
+  em.registerComponent(component);
+
+  em.setMachineState(suspendState);
+  em.reportApplicationState(appId, AppState::SUSPEND);
+  em.reportApplicationState(additionalAppId, AppState::SHUTTINGDOWN);
+ 
+  em.confirmComponentState(component, state, status);
 
   ASSERT_EQ(
     em.getMachineState(),

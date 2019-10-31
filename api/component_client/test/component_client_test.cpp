@@ -4,6 +4,7 @@
 
 #include <iostream>
 #include <thread>
+#include <unistd.h>
 #include <capnp/rpc-twoparty.h>
 #include <kj/async-io.h>
 #include <execution_management.capnp.h>
@@ -12,13 +13,16 @@
 #include "gmock/gmock.h"
 
 using namespace std;
+using namespace testing;
 
+using api::ComponentClient;
 using ComponentClientReturnType = ::StateManagement::ComponentClientReturnType;
 
 struct TestData
 {
   std::string component;
   std::string state;
+  ComponentClientReturnType status;
 
   size_t registerComponentCallCount{0};
   size_t getComponentStateCallCount{0};
@@ -30,11 +34,11 @@ class ExecutionManagementTestServer
   : public ExecutionManagement::Server
 {
 public:
-  explicit
-  ExecutionManagementTestServer
-  (TestData& data)
-  : m_data(data)
+  explicit ExecutionManagementTestServer
+          (TestData& data)
+    : m_data(data)
   {}
+
 private:
   using StateError = ::MachineStateManagement::StateError;
 
@@ -49,7 +53,6 @@ private:
     {
       std::this_thread::sleep_for(std::chrono::milliseconds(m_defaultDelay));
     }
-
     return kj::READY_NOW;
   }
 
@@ -66,7 +69,6 @@ private:
     {
       std::this_thread::sleep_for(std::chrono::milliseconds(m_defaultDelay));
     }
-
     return kj::READY_NOW;
   }
 
@@ -74,46 +76,96 @@ private:
   confirmComponentState(ConfirmComponentStateContext context) override
   {
     ++m_data.confirmComponentStateCallCount;
-    // m_data.state = context.getParams().getState().cStr();
-    // m_data.pid = context.getParams().getPid();
-
-    // context.getResults().setResult(StateError::K_SUCCESS);
-
-    // sendConfirm(StateError::K_SUCCESS);
-
-    if(m_data.isTimeouted)
-    {
-      std::this_thread::sleep_for(std::chrono::milliseconds(m_defaultDelay));
-    }
+    m_data.component = context.getParams().getComponent().cStr();
+    m_data.state = context.getParams().getState().cStr();
+    m_data.status = context.getParams().getStatus();
 
     return kj::READY_NOW;
   }
 
-//   void sendConfirm(StateError status)
-//   {
-//     std::thread([&]()
-//     {
-//       auto ioContext = kj::setupAsyncIo();
-
-//       auto address = ioContext.provider->getNetwork()
-//         .parseAddress(IPC_PROTOCOL + MSM_SOCKET_NAME)
-//           .wait(ioContext.waitScope);
-
-//       auto connection = address->connect().wait(ioContext.waitScope);
-
-//       capnp::TwoPartyClient client(*connection);
-//       auto capability = client.bootstrap()
-//         .castAs<MachineStateManagement::MachineStateManager>();
-
-//       auto request = capability.confirmStateTransitionRequest();
-
-//       request.setResult(status);
-
-//       request.send().ignoreResult().wait(ioContext.waitScope);
-
-//     }).join();
-//   }
 private:
   TestData& m_data;
   static const uint32_t m_defaultDelay;
 };
+
+const uint32_t ExecutionManagementTestServer::m_defaultDelay = 800;
+
+class ComponentClientTest
+: public ::testing::Test
+{
+  protected:
+  
+  ComponentClientTest() {}
+  virtual ~ComponentClientTest() noexcept(true) {}
+
+  virtual void SetUp()
+  {
+		unlink(EM_SOCKET_NAME.c_str());
+  }
+
+  virtual void TearDoun()
+  {
+		unlink(EM_SOCKET_NAME.c_str());
+  }
+
+  const uint32_t defaultTimeout{666};
+
+  TestData testData;
+  api::StateUpdateMode mode = api::StateUpdateMode::kPoll;
+  std::string componentName = "TestName";
+  ExecutionManagementTestServer emServer {testData};
+  
+  const std::string socketName{IPC_PROTOCOL + EM_SOCKET_NAME};
+  capnp::EzRpcServer server{kj::heap<ExecutionManagementTestServer>(testData), socketName}; 
+
+  ComponentClient cc {componentName, mode};
+};
+
+TEST_F(ComponentClientTest, ShouldSucceedToSetStateUpdateHandlerState)
+{
+  LOG << "Test Start";
+  
+  std::function<void(std::string const&)> f;
+
+	const auto result = cc.SetStateUpdateHandler(f);
+
+  EXPECT_EQ(result, ComponentClientReturnType::K_SUCCESS);
+  EXPECT_EQ(testData.registerComponentCallCount, 1);
+
+  LOG << "Test DONE";
+}
+
+TEST_F(ComponentClientTest, ShouldSucceedToGetComponentClientState)
+{
+  LOG << "Test Start";
+  
+  testData.state = "TestComponentState";
+  std::string state;
+  
+	const auto result = cc.GetComponentState(state);
+
+  EXPECT_EQ(result, ComponentClientReturnType::K_SUCCESS);
+  EXPECT_EQ(testData.getComponentStateCallCount, 1);
+  EXPECT_EQ(testData.state, state);
+ 
+  LOG << "Test DONE";
+}
+
+TEST_F(ComponentClientTest, ShouldSucceedToConfirmComponentState)
+{
+  LOG << "Test Start";
+
+  testData.state = "TestComponentState";
+  testData.status = ComponentClientReturnType::K_SUCCESS;
+  std::string state;
+  ComponentClientReturnType status;
+
+  cc.ConfirmComponentState(state, status);
+
+  EXPECT_EQ(testData.confirmComponentStateCallCount, 1);
+  EXPECT_EQ(testData.component, componentName);
+  EXPECT_EQ(testData.state, state);
+  EXPECT_EQ(testData.status, status);
+
+  LOG << "Test DONE";
+}

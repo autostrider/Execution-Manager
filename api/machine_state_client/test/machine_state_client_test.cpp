@@ -4,7 +4,7 @@
 #include "gtest/gtest.h"
 
 #include <thread>
-/*
+
 using api::MachineStateClient;
 
 struct TestData

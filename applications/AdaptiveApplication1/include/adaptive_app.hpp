@@ -36,7 +36,7 @@ private:
     void transitToNextState(IAdaptiveApp::FactoryFunc nextState) override;
     api::ComponentClientReturnType handleTransition(api::ComponentState state);
 
-    api::ComponentState m_componentState;
+    api::ComponentState m_componentState = api::ComponentStateKOn;
 
     std::unique_ptr<api::IStateFactory> m_factory;
     std::unique_ptr<api::IState> m_currentState;

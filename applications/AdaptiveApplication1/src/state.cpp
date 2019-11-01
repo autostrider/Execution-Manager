@@ -20,6 +20,11 @@ void State::leave() const
 {
 }
 
+void State::performAction()
+{
+
+}
+
 ApplicationState State::getApplicationState() const
 {
     return m_applState;
@@ -54,8 +59,6 @@ Suspend::Suspend(AdaptiveApp& app) : State (app, ApplicationState::K_SHUTTINGDOW
 
 void Suspend::enter()
 {
-   // m_app.reportApplicationState(getApplicationState());
-    LOG << "Suspend state...";
 }
 ShutDown::ShutDown(AdaptiveApp& app) : State (app, ApplicationState::K_SHUTTINGDOWN, AA_STATE_SHUTDOWN)
 {

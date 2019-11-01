@@ -44,10 +44,10 @@ void AdaptiveApp::performAction()
 {
     api::ComponentState state;
     auto result = m_componentClient->GetComponentState(state);
-    if (api::ComponentClientReturnType::kSuccess == result)
+    if (api::ComponentClientReturnType::K_SUCCESS == result)
     {
         auto confirm = handleTransition(state);
-        if (api::ComponentClientReturnType::kSuccess == confirm)
+        if (api::ComponentClientReturnType::K_SUCCESS == confirm)
         {
             //state changed from\to kOn\kOff
             auto createNewState = m_componentState == api::ComponentStateKOn ?
@@ -80,19 +80,19 @@ void AdaptiveApp::transitToNextState(api::IAdaptiveApp::FactoryFunc nextState)
 
 api::ComponentClientReturnType AdaptiveApp::handleTransition(api::ComponentState state)
 {
-    api::ComponentClientReturnType confirm = api::ComponentClientReturnType::kInvalid;
+    api::ComponentClientReturnType confirm = api::ComponentClientReturnType::K_INVALID;
 
     LOG << "Current CompState: " << m_componentState;
     if (m_componentState != state)
     {
         LOG << "Updating ComponentState to: " << state;
         m_componentState = state;
-        confirm = api::ComponentClientReturnType::kSuccess;
+        confirm = api::ComponentClientReturnType::K_SUCCESS;
     }
     else
     {
         LOG << "ComponentState is unchanged.";
-        confirm = api::ComponentClientReturnType::kUnchanged;
+        confirm = api::ComponentClientReturnType::K_UNCHANGED;
     }
 
     return confirm;

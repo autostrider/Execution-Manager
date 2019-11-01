@@ -85,9 +85,13 @@ api::ComponentClientReturnType AdaptiveApp::handleTransition(api::ComponentState
     LOG << "Current CompState: " << m_componentState;
     if (m_componentState != state)
     {
-        LOG << "Updating ComponentState to: " << state;
-        m_componentState = state;
-        confirm = api::ComponentClientReturnType::K_SUCCESS;
+        if (api::ComponentStateKOn == state || api::ComponentStateKOff == state)
+        {
+            LOG << "Updating ComponentState to: " << state;
+            m_componentState = state;
+            confirm = api::ComponentClientReturnType::K_SUCCESS;
+        }
+        return confirm;
     }
     else
     {

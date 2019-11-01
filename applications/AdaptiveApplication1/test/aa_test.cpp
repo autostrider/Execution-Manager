@@ -155,6 +155,40 @@ TEST_F(AppTest, shouldStayInKonStateWhenPerformActionCalled)
     app.performAction();
 }
 
+TEST_F(AppTest, shouldStayInKonStateWhenInvalidStateReceived)
+{
+    EXPECT_CALL(*factoryPtr, createInit(Ref(app))).WillOnce(Return(ByMove(std::move(stateInitMock))));
+    EXPECT_CALL(*stateInitMockPtr, enter());
+    EXPECT_CALL(*stateInitMockPtr, leave());
+    app.init();
+
+    EXPECT_CALL(*factoryPtr, createRun(Ref(app))).WillOnce(Return(ByMove(std::move(stateRunMock))));
+    EXPECT_CALL(*stateRunMockPtr, enter());
+    EXPECT_CALL(*stateRunMockPtr, performAction());
+    expectGetComponentState(expectedStateInvalid, api::ComponentClientReturnType::K_SUCCESS);
+    expectConfirmComponentState(expectedStateInvalid, api::ComponentClientReturnType::K_INVALID);
+
+    app.run();
+    app.performAction();
+}
+
+TEST_F(AppTest, shouldStayInKonStateWhenGetComponentStateFailed)
+{
+    EXPECT_CALL(*factoryPtr, createInit(Ref(app))).WillOnce(Return(ByMove(std::move(stateInitMock))));
+    EXPECT_CALL(*stateInitMockPtr, enter());
+    EXPECT_CALL(*stateInitMockPtr, leave());
+    app.init();
+
+    EXPECT_CALL(*factoryPtr, createRun(Ref(app))).WillOnce(Return(ByMove(std::move(stateRunMock))));
+    EXPECT_CALL(*stateRunMockPtr, enter());
+    EXPECT_CALL(*stateRunMockPtr, performAction());
+    expectGetComponentState(expectedStateInvalid, api::ComponentClientReturnType::K_GENERAL_ERROR);
+    expectConfirmComponentState(expectedStateInvalid, api::ComponentClientReturnType::K_GENERAL_ERROR);
+
+    app.run();
+    app.performAction();
+}
+
 TEST_F(AppTest, shouldTransitToKoffStateWhenPerformActionCalled)
 {
     EXPECT_CALL(*factoryPtr, createInit(Ref(app))).WillOnce(Return(ByMove(std::move(stateInitMock))));

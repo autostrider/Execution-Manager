@@ -38,7 +38,7 @@ const std::map<int, api::ApplicationStateClient::ApplicationState> mapSignalToSt
     {SIGINT, api::ApplicationStateClient::ApplicationState::K_SUSPEND}
 };
 
-enum class SystemCtlAction
+enum class SystemCtlAction : std::uint8_t
 {
   START,
   STOP

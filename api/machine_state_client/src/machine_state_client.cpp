@@ -1,6 +1,5 @@
 #include "machine_state_client.h"
 #include <constants.hpp>
-#include <logger.hpp>
 
 #include <unistd.h>
 
@@ -77,7 +76,6 @@ MachineStateClient::Register(string appName, std::uint32_t timeout)
       return result;
     }).wait(m_client.getWaitScope());
 
-  LOG << "Registered successfully";
   return result;
 }
 

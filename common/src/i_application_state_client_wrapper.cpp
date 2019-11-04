@@ -1,5 +1,4 @@
 #include "i_application_state_client_wrapper.hpp"
-#include "logger.hpp"
 
 namespace api
 {

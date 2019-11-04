@@ -17,12 +17,8 @@ int main(int argc, char **argv)
   }
   try
   {
-    if(!::unlink(EM_SOCKET_NAME.c_str()))
-    {
-        LOG << "here ->" << strerror(errno);
-    }
+    ::unlink(EM_SOCKET_NAME.c_str());
     
-    LOG << "group id: " << getpgid(0);
     auto io = kj::setupAsyncIo();
 
     ExecutionManager::ExecutionManager executionManager

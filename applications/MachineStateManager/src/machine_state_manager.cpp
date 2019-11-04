@@ -1,6 +1,5 @@
 #include "machine_state_manager.hpp"
 #include <constants.hpp>
-#include <logger.hpp>
 
 namespace MSM {
 
@@ -16,7 +15,6 @@ MachineStateManager::MachineStateManager(std::unique_ptr<api::IStateFactory> fac
         m_currentState{nullptr},
         m_appStateClient{std::move(appStateClient)}
 {
-  LOG << "OBJ CRETAED";
 }
 
 void MachineStateManager::init()

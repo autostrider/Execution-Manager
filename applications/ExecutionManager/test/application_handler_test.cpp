@@ -9,11 +9,6 @@
 using namespace std;
 using namespace testing;
 
-namespace
-{
-
-}
-
 namespace ApplicationHandlerTest
 {  
 class ApplicationHandlerTest :
@@ -22,20 +17,6 @@ class ApplicationHandlerTest :
 protected:
   unique_ptr<OSInterfaceMock> m_iosmock = make_unique<OSInterfaceMock>();
 };
-
-TEST_F(ApplicationHandlerTest, ShouldStartChildProcess)
-{
-  const int expectedValue = 0;
-  const int childProcessId = 0;
-
-  ExecutionManager::ProcessInfo pinfo;
-
-  EXPECT_CALL(*m_iosmock, fork()).WillOnce(Return(childProcessId));
-  EXPECT_CALL(*m_iosmock, execvp(_,_)).WillOnce(Return(expectedValue));
-
-  ExecutionManager::ApplicationHandler appHandler{std::move(m_iosmock)};
-  ASSERT_EQ(appHandler.startProcess(pinfo.processName), expectedValue);
-}
 
 TEST_F(ApplicationHandlerTest, ShouldThrowExeptionIfFailedToCreateProcess)
 {
@@ -90,7 +71,7 @@ TEST_F(ApplicationHandlerTest, ShouldSucceedToStartService)
   Return(execvRes)));
 
   ExecutionManager::ApplicationHandler appHandler{std::move(m_iosmock)};
-  ASSERT_EQ(appHandler.startProcess(pinfo.processName), childProcessId);
+  appHandler.startProcess(pinfo.processName);
 }
 
 TEST_F(ApplicationHandlerTest, ShouldSucceedToStopService)

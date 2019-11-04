@@ -69,8 +69,8 @@ protected:
 TEST_F(ApplicationStateClientTest, ShouldSucceedToReportApplicationState)
 {
   api::ApplicationStateClient asc;
-	asc.ReportApplicationState(ApplicationState::K_RUNNING);
+  asc.ReportApplicationState(ApplicationState::K_RUNNING);
 
-	ASSERT_EQ(ApplicationState::K_RUNNING, sharedResource.m_state);
+  ASSERT_EQ(ApplicationState::K_RUNNING, sharedResource.m_state);
 }
 } //namespace

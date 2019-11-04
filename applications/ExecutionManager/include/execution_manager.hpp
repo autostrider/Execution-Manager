@@ -58,8 +58,7 @@ private:
   void filterStates();
 
   /**
-   * @brief Starts given application and stores information
-   *        about it in activeApplications.
+   * @brief Starts given as systemctl service.
    * @param process: Application to start.
    */
   void startApplication(const ProcName &process);
@@ -85,7 +84,7 @@ private:
   /**
    * @brief Holds interface responsible for starting applications
    */
-  std::unique_ptr<IApplicationHandler> appHandler;
+  std::unique_ptr<IApplicationHandler> m_appHandler;
 
   /**
    * @brief structure that holds application and required processes.
@@ -94,7 +93,7 @@ private:
 
   /**
    * @brief Structure for application that can run in certain state
-   * vector consists of applicationId (name) and string param - executable name.
+   * set consists of service files names.
    */
   std::map<MachineState, std::set<ProcName>> m_allowedProcessesForState;
 

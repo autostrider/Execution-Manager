@@ -1,5 +1,4 @@
 #include "execution_manager_client.hpp"
-#include <logger.hpp>
 
 #include <capnp/rpc-twoparty.h>
 

@@ -20,7 +20,7 @@ ExecutionManager::ExecutionManager(
   std::unique_ptr<IManifestReader> reader,
   std::unique_ptr<IApplicationHandler> applicationHandler,
   std::unique_ptr<ExecutionManagerClient::IExecutionManagerClient> client)
-  : appHandler{std::move(applicationHandler)},
+  : m_appHandler{std::move(applicationHandler)},
     m_activeProcesses{},
     m_allowedProcessesForState{},
     m_currentState{},
@@ -30,6 +30,7 @@ ExecutionManager::ExecutionManager(
 {
   const auto fullProcessesInfoInStates =
       reader->getStatesSupportedByApplication();
+
   for (const auto& processesInfoForState: fullProcessesInfoInStates)
   {
     std::set<ProcName> availableProcesses;
@@ -46,6 +47,7 @@ ExecutionManager::ExecutionManager(
     m_allowedProcessesForState.insert(
       {processesInfoForState.first, availableProcesses});
   }
+
   filterStates();
 }
 
@@ -120,7 +122,7 @@ void ExecutionManager::killProcessesForState()
     if (allowedApps == m_allowedProcessesForState.cend() ||
         processToBeKilled(app->first, allowedApps->second))
     {
-      appHandler->killProcess(app->first);
+      m_appHandler->killProcess(app->first);
       m_stateConfirmToBeReceived.insert(app->first);
     }
   }
@@ -139,7 +141,7 @@ bool ExecutionManager::processToBeKilled(const std::string& app,
 
 void ExecutionManager::startApplication(const ProcName& process)
 {
-  appHandler->startProcess(process);
+  m_appHandler->startProcess(process);
 
   LOG << "Adaptive aplication \""
       << process

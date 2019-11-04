@@ -19,20 +19,15 @@ public:
   explicit ApplicationHandler(std::unique_ptr<IOsInterface> syscalls,
                               std::string path = APPLICATIONS_PATH);
 
-  pid_t startProcess(const std::string& process) override;
+  void startProcess(const std::string& process) override;
 
   void killProcess(const std::string& process) override;
 
   ~ApplicationHandler() override = default;
 
 private:
-  int execProcess(const std::string& processName, SystemCtlAction action) const;
-    /**
-   * @brief Builds vector of command line arguments passed to application.
-   * @param process: process for certain mode dependent startup config.
-   * @return vector of command line arguments for application.
-   */
-//    std::vector<std::string> getArgumentsList(const ProcessInfo& process) const;
+  void
+  execProcess(const std::string& processName, SystemCtlAction action) const;
 
     /**
    * @brief Method that converts input std::vector of std::string to

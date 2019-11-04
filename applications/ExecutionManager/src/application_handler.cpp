@@ -17,7 +17,7 @@ ApplicationHandler::ApplicationHandler(std::unique_ptr<IOsInterface> syscalls,
           m_syscalls{std::move(syscalls)}
 { }
 
-pid_t ApplicationHandler::startProcess(const std::string &process)
+void ApplicationHandler::startProcess(const std::string &process)
 {
   return execProcess(process, SystemCtlAction::START);
 }
@@ -27,8 +27,7 @@ void ApplicationHandler::killProcess(const std::string &process)
   execProcess(process, SystemCtlAction::STOP);
 }
 
-int
-ApplicationHandler::execProcess(const std::string &processName,
+void ApplicationHandler::execProcess(const std::string &processName,
                                 SystemCtlAction action) const
 {
   pid_t process = m_syscalls->fork();
@@ -60,29 +59,9 @@ ApplicationHandler::execProcess(const std::string &processName,
                            + processName
                            + " "
                            + strerror(errno));
-     }
-    
+     }    
   }
-
-  return process;
 }
-
-//std::vector<std::string> ApplicationHandler::getArgumentsList(const ProcessInfo& process) const
-//{
-//  std::vector<std::string> arguments;
-//  arguments.reserve(process.startOptions.size() + 1);
-
-//  // insert app name
-//  arguments.push_back(process.processName);
-
-//  std::transform(process.startOptions.cbegin(),
-//                 process.startOptions.cend(),
-//                 std::back_inserter(arguments),
-//                 [](const StartupOption& option)
-//                 { return option.makeCommandLineOption(); });
-
-//  return arguments;
-//}
 
 std::vector<char*>
 ApplicationHandler::convertToNullTerminatingArgv(

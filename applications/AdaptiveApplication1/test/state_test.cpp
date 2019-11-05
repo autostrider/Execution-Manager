@@ -29,40 +29,7 @@ protected:
                 std::move(stateClientMock),
                 std::move(componentClientMock),
                        std::move(meanCalculatorMock)};
-
-    const api::ComponentState expectedStateKOn = api::ComponentStateKOn;
-    const api::ComponentState expectedStateKOff = api::ComponentStateKOff;
-    const api::ComponentState expectedStateInvalid = "invalidState";
-    const double mu = 10;
-    const double sigma = 0.5;
-
-    void expectGetComponentState(const api::ComponentState &expectedState,
-                                 const api::ComponentClientReturnType& result);
-    void expectConfirmComponentState(const api::ComponentState& expectedState,
-                                     api::ComponentClientReturnType result);
 };
-
-void StateTest::expectGetComponentState(const api::ComponentState& expectedState,
-                                        const api::ComponentClientReturnType& result)
-{
-    EXPECT_CALL(*componentClientMockPtr, GetComponentState(_))
-            .WillOnce(
-                DoAll(
-                    SetArgReferee<0>(expectedState),
-                    Return(result))
-                );
-}
-
-void StateTest::expectConfirmComponentState(const api::ComponentState& expectedState,
-                                            const api::ComponentClientReturnType result)
-{
-    EXPECT_CALL(*componentClientMockPtr,
-                ConfirmComponentState
-                (
-                    Eq(expectedState),
-                    result)
-                );
-}
 
 TEST_F(StateTest, shouldReportStateWhenInitEntered)
 {
@@ -101,7 +68,18 @@ TEST_F(StateTest, shouldDoNothingWhenShutdownLeft)
     state->leave();
 }
 
-TEST_F(StateTest, shouldDoNothingWhenPerformActionCalledForState)
+TEST_F(StateTest, shouldDoNothingWhenPerformActionCalledForInitState)
+{
+    auto state = factory.createInit(appMock);
+    state->performAction();
+}
+TEST_F(StateTest, shouldDoNothingWhenPerformActionCalledForSuspendState)
+{
+    auto state = factory.createSuspend(appMock);
+    state->performAction();
+}
+
+TEST_F(StateTest, shouldDoNothingWhenPerformActionCalledForShutdownState)
 {
     auto state = factory.createShutDown(appMock);
     state->performAction();

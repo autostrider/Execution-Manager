@@ -10,9 +10,8 @@ class State : public api::IState
 public:
     State(AdaptiveApp& app, api::ApplicationStateClient::ApplicationState state, std::string stateName);
 
-    virtual void enter() override = 0;
     void leave() const override;
-    virtual void performAction();
+    virtual void performAction() override;
     api::ApplicationStateClient::ApplicationState getApplicationState() const;
 
 protected:
@@ -43,11 +42,12 @@ public:
     void enter() override;
 };
 
-class Suspend : public State
+class Suspend : public api::IState
 {
 public:
-    Suspend(AdaptiveApp& app);
     void enter() override;
+    void leave() const override;
+    virtual void performAction() override;
 };
 
 class StateFactory: public api::IStateFactory

@@ -106,16 +106,6 @@ void Run::enter()
     }
 }
 
-Suspend::Suspend(MachineStateManager& msm)
-    : MsmState (msm, ApplicationState::K_SUSPEND, AA_STATE_SUSPEND)
-{
-}
-
-void Suspend::enter()
-{
-
-}
-
 ShutDown::ShutDown(MachineStateManager& msm)
     : MsmState (msm, ApplicationState::K_SHUTTINGDOWN, AA_STATE_SHUTDOWN)
 {
@@ -146,7 +136,7 @@ std::unique_ptr<api::IState> MsmStateFactory::createShutDown(api::IAdaptiveApp& 
 
 std::unique_ptr<api::IState> MsmStateFactory::createSuspend(api::IAdaptiveApp &msm) const
 {
-    return std::make_unique<Suspend>(dynamic_cast<MachineStateManager&>(msm));
+    return nullptr;
 }
 
 } // namespace MSM

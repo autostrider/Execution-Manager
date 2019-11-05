@@ -34,7 +34,7 @@ public:
 
 private:
     void transitToNextState(IAdaptiveApp::FactoryFunc nextState) override;
-    api::ComponentClientReturnType handleTransition(api::ComponentState state);
+    api::ComponentClientReturnType handleTransition(const api::ComponentState& state);
 
     api::ComponentState m_componentState = api::ComponentStateKOn;
 

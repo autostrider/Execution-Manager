@@ -47,12 +47,6 @@ public:
     void enter() override;
 };
 
-class Suspend : public MsmState
-{
-public:
-    Suspend(MachineStateManager& msm);
-    void enter() override;
-};
 class MsmStateFactory : public api::IStateFactory
 {
 public:

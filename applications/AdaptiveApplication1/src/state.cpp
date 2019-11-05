@@ -2,8 +2,6 @@
 #include <constants.hpp>
 #include <logger.hpp>
 
-#include <iostream>
-
 using ApplicationState = api::ApplicationStateClient::ApplicationState;
 
 State::State(AdaptiveApp& app,
@@ -53,13 +51,20 @@ void Run::performAction()
     LOG << "Mean: " << m_app.mean() << ".";
 }
 
-Suspend::Suspend(AdaptiveApp& app) : State (app, ApplicationState::K_SHUTTINGDOWN, AA_STATE_SUSPEND)
-{
-}
-
 void Suspend::enter()
 {
 }
+
+void Suspend::leave() const
+{
+
+}
+
+void Suspend::performAction()
+{
+
+}
+
 ShutDown::ShutDown(AdaptiveApp& app) : State (app, ApplicationState::K_SHUTTINGDOWN, AA_STATE_SHUTDOWN)
 {
 }
@@ -87,5 +92,5 @@ std::unique_ptr<api::IState> StateFactory::createShutDown(api::IAdaptiveApp& app
 
 std::unique_ptr<api::IState> StateFactory::createSuspend(api::IAdaptiveApp &app) const
 {
-    return std::make_unique<Suspend>(dynamic_cast<AdaptiveApp&>(app));
+    return std::make_unique<Suspend>();
 }

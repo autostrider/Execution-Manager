@@ -85,15 +85,7 @@ void ExecutionManager::startApplicationsForState()
       if (m_activeProcesses.find(executableToStart) ==
           m_activeProcesses.cend())
       {
-
-        try
-        {
           startApplication(executableToStart);
-        }
-        catch (const runtime_error& err)
-        {
-          LOG << err.what();
-        }
       }
     }
   }

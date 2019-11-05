@@ -55,11 +55,11 @@ void ApplicationHandler::execProcess(const std::string &processName,
 
      if (res)
      {
-       throw runtime_error(std::string{"Error occured creating process: "}
-                           + processName
-                           + " "
-                           + strerror(errno));
-     }    
+       LOG << std::string{"Error occured creating process: "}
+           << processName
+           << " "
+           << strerror(errno);
+     }
   }
 }
 

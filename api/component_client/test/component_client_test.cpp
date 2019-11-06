@@ -8,6 +8,7 @@
 #include <capnp/rpc-twoparty.h>
 #include <kj/async-io.h>
 #include <execution_management.capnp.h>
+#include <kj/exception.c++>
 
 #include "gtest/gtest.h"
 #include "gmock/gmock.h"
@@ -75,11 +76,15 @@ private:
   ::kj::Promise<void>
   confirmComponentState(ConfirmComponentStateContext context) override
   {
-    ++m_data.confirmComponentStateCallCount;
-    m_data.component = context.getParams().getComponent().cStr();
-    m_data.state = context.getParams().getState().cStr();
-    m_data.status = context.getParams().getStatus();
-
+    try
+    {
+      ++m_data.confirmComponentStateCallCount;
+      m_data.component = context.getParams().getComponent().cStr();
+      m_data.state = context.getParams().getState().cStr();
+      m_data.status = context.getParams().getStatus();
+    }
+    catch(...){LOG << "ERRRRRROR";}
+    
     return kj::READY_NOW;
   }
 
@@ -145,10 +150,10 @@ TEST_F(ComponentClientTest, ShouldSucceedToGetComponentClientState)
 
 TEST_F(ComponentClientTest, ShouldSucceedToConfirmComponentState)
 {
-  testData.state = "TestComponentState";
-  testData.status = ComponentClientReturnType::K_SUCCESS;
-  std::string state;
-  ComponentClientReturnType status;
+  testData.state;
+  testData.status;
+  std::string state = "TestComponentState";
+  ComponentClientReturnType status = ComponentClientReturnType::K_SUCCESS;
 
   cc.ConfirmComponentState(state, status);
 
@@ -156,4 +161,14 @@ TEST_F(ComponentClientTest, ShouldSucceedToConfirmComponentState)
   EXPECT_EQ(testData.component, componentName);
   EXPECT_EQ(testData.state, state);
   EXPECT_EQ(testData.status, status);
+}
+
+TEST_F(ComponentClientTest, ShouldFailToConfirmComponentState)
+{
+  testData.state;
+  testData.status;
+  std::string state = std::string(100000000, 'a');
+  ComponentClientReturnType status = ComponentClientReturnType::K_SUCCESS;
+
+  EXPECT_DEATH_IF_SUPPORTED(cc.ConfirmComponentState(state, status), "");
 }

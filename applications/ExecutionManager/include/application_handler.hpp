@@ -19,9 +19,9 @@ public:
   explicit ApplicationHandler(std::unique_ptr<IOsInterface> syscalls,
                               std::string path = APPLICATIONS_PATH);
 
-  void startProcess(const std::string& process) override;
+  void startProcess(const std::string& serviceName) override;
 
-  void killProcess(const std::string& process) override;
+  void killProcess(const std::string& serviceName) override;
 
   ~ApplicationHandler() override = default;
 

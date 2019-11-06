@@ -9,18 +9,9 @@ namespace ExecutionManager {
 
 class IApplicationHandler {
 public:
-    /**
-     * @brief Starts new service.
-     * @param application: service file name.
-     * @return pid of process
-     */
-    virtual void startProcess(const std::string& application) = 0;
+    virtual void startProcess(const std::string& service) = 0;
 
-    /**
-     * @brief Send SIGTERM to application with provided pid
-     * @param processId: name of service to be killed.
-     */
-    virtual void killProcess(const std::string& processId) = 0;
+    virtual void killProcess(const std::string& service) = 0;
 
     virtual ~IApplicationHandler() = default;
 };

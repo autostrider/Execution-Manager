@@ -17,14 +17,14 @@ ApplicationHandler::ApplicationHandler(std::unique_ptr<IOsInterface> syscalls,
           m_syscalls{std::move(syscalls)}
 { }
 
-void ApplicationHandler::startProcess(const std::string &process)
+void ApplicationHandler::startProcess(const std::string &serviceName)
 {
-  return execProcess(process, SYSTEMCTL_START);
+  return execProcess(serviceName, SYSTEMCTL_START);
 }
 
-void ApplicationHandler::killProcess(const std::string &process)
+void ApplicationHandler::killProcess(const std::string &serviceName)
 {
-  execProcess(process, SYSTEMCTL_STOP);
+  execProcess(serviceName, SYSTEMCTL_STOP);
 }
 
 void ApplicationHandler::execProcess(const std::string &processName,

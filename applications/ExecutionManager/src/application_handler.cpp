@@ -19,16 +19,16 @@ ApplicationHandler::ApplicationHandler(std::unique_ptr<IOsInterface> syscalls,
 
 void ApplicationHandler::startProcess(const std::string &process)
 {
-  return execProcess(process, SystemCtlAction::START);
+  return execProcess(process, SYSTEMCTL_START);
 }
 
 void ApplicationHandler::killProcess(const std::string &process)
 {
-  execProcess(process, SystemCtlAction::STOP);
+  execProcess(process, SYSTEMCTL_STOP);
 }
 
 void ApplicationHandler::execProcess(const std::string &processName,
-                                SystemCtlAction action) const
+                                const std::string& action) const
 {
   pid_t process = m_syscalls->fork();
 
@@ -38,7 +38,7 @@ void ApplicationHandler::execProcess(const std::string &processName,
     {
       SYSTEMCTL,
       USER,
-      systemctlActions.at(action),
+      action,
       processName + SERVICE_EXTENSION
     };
      auto applicationArgs = convertToNullTerminatingArgv(arguments);

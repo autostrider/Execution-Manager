@@ -27,7 +27,7 @@ public:
 
 private:
   void
-  execProcess(const std::string& processName, SystemCtlAction action) const;
+  execProcess(const std::string& processName, const std::string& action) const;
 
   std::vector<char*>
   convertToNullTerminatingArgv(

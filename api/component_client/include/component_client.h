@@ -25,9 +25,6 @@ enum class ComponentStates: uint8_t
     kOff
 };
 
-static const ComponentState ComponentStateKOn = "kOn";
-static const ComponentState ComponentStateKOff = "kOff";
-
 class ComponentClient
 {
 public:

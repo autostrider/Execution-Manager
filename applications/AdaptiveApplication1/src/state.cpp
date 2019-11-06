@@ -70,12 +70,12 @@ api::ComponentClientReturnType Run::handleTransition(api::ComponentState state)
 
     if (m_componentState != state)
     {
-        if (api::ComponentStateKOn == state)
+        if (COMPONENT_STATE_ON == state)
         {
             LOG << "Mean: " << m_app.mean() << ".";
             updateSubstate(state, confirm);
         }
-        else if (api::ComponentStateKOff == state)
+        else if (COMPONENT_STATE_OFF == state)
         {
             /*some important stuff related to suspend state
             * this transition to kOff state will be refactored.
@@ -85,11 +85,11 @@ api::ComponentClientReturnType Run::handleTransition(api::ComponentState state)
     }
     else
     {
-        if (api::ComponentStateKOn == state)
+        if (COMPONENT_STATE_ON == state)
         {
             LOG << "Mean: " << m_app.mean() << ".";
         }
-        else if (api::ComponentStateKOff == state)
+        else if (COMPONENT_STATE_OFF == state)
         {
             /*some important stuff related to suspend state
             * this transition to kOff state will be refactored.

@@ -37,7 +37,7 @@ private:
 
 ApplicationStateClientServer::ApplicationStateClientServer (Data& sharedResource) : m_sharedResource{sharedResource}
 {
-    cout << "Application State Client server started..." << endl;
+    LOG << "Application State Client server started...";
 }
 
 ::kj::Promise<void>
@@ -73,13 +73,9 @@ protected:
 
 TEST_F(ApplicationStateClientTest, ShouldSucceedToReportApplicationState)
 {
-    LOG << "Test Start";
 	api::ApplicationStateClient asc;
-    LOG << "ApplicationStateClient";
 	asc.ReportApplicationState(ApplicationState::K_RUNNING);
-    LOG << "ReportApplicationState";
 
 	ASSERT_EQ(ApplicationState::K_RUNNING, sharedResource.m_state);
-    LOG << "Test DONE";
 }
 } //namespace

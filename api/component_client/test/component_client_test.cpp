@@ -100,7 +100,7 @@ class ComponentClientTest
 
   virtual void SetUp()
   {
-		unlink(EM_SOCKET_NAME.c_str());
+    unlink(EM_SOCKET_NAME.c_str());
   }
 
   virtual void TearDoun()
@@ -123,22 +123,16 @@ class ComponentClientTest
 
 TEST_F(ComponentClientTest, ShouldSucceedToSetStateUpdateHandlerState)
 {
-  LOG << "Test Start";
-  
   std::function<void(std::string const&)> f;
 
 	const auto result = cc.SetStateUpdateHandler(f);
 
   EXPECT_EQ(result, ComponentClientReturnType::K_SUCCESS);
   EXPECT_EQ(testData.registerComponentCallCount, 1);
-
-  LOG << "Test DONE";
 }
 
 TEST_F(ComponentClientTest, ShouldSucceedToGetComponentClientState)
 {
-  LOG << "Test Start";
-  
   testData.state = "TestComponentState";
   std::string state;
   
@@ -147,14 +141,10 @@ TEST_F(ComponentClientTest, ShouldSucceedToGetComponentClientState)
   EXPECT_EQ(result, ComponentClientReturnType::K_SUCCESS);
   EXPECT_EQ(testData.getComponentStateCallCount, 1);
   EXPECT_EQ(testData.state, state);
- 
-  LOG << "Test DONE";
 }
 
 TEST_F(ComponentClientTest, ShouldSucceedToConfirmComponentState)
 {
-  LOG << "Test Start";
-
   testData.state = "TestComponentState";
   testData.status = ComponentClientReturnType::K_SUCCESS;
   std::string state;
@@ -166,6 +156,4 @@ TEST_F(ComponentClientTest, ShouldSucceedToConfirmComponentState)
   EXPECT_EQ(testData.component, componentName);
   EXPECT_EQ(testData.state, state);
   EXPECT_EQ(testData.status, status);
-
-  LOG << "Test DONE";
 }

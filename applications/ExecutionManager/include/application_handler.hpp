@@ -29,15 +29,9 @@ private:
   void
   execProcess(const std::string& processName, SystemCtlAction action) const;
 
-    /**
-   * @brief Method that converts input std::vector of std::string to
-   *        std::vector<char*> to pass as argv in application.
-   * @param vectorToConvert: vector that will be converted.
-   * @return Vector of char* including `nullptr` that be passed to application.
-   */
-    std::vector<char*>
-    convertToNullTerminatingArgv(
-            std::vector<std::string>& vectorToConvert) const;
+  std::vector<char*>
+  convertToNullTerminatingArgv(
+          std::vector<std::string>& vectorToConvert) const;
 
 private:
   const std::string corePath;

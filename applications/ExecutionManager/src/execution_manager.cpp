@@ -58,14 +58,14 @@ void ExecutionManager::start()
 
 void ExecutionManager::filterStates()
 {
-  for (auto app = m_activeProcesses.begin();
-       app != m_activeProcesses.end();)
+  for (auto app = m_allowedProcessesForState.begin();
+       app != m_allowedProcessesForState.end();)
   {
     if (std::find(m_machineManifestStates.cbegin(),
                   m_machineManifestStates.cend(),
                   app->first) == m_machineManifestStates.cend())
     {
-      app = m_activeProcesses.erase(app);
+      app = m_allowedProcessesForState.erase(app);
     }
     else
     {

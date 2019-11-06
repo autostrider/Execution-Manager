@@ -44,12 +44,6 @@ void ApplicationHandler::execProcess(const std::string &processName,
      auto applicationArgs = convertToNullTerminatingArgv(arguments);
      std::string cmd;
      
-     for (const auto& item: arguments)
-     {
-         cmd.append(item);
-         cmd.append(" ");
-     }
-     
      int res = m_syscalls->execvp(SYSTEMCTL.c_str(),
                       applicationArgs.data());
 

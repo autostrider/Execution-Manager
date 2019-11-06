@@ -38,9 +38,6 @@ public:
                    std::unique_ptr<IApplicationHandler> applicationHandler,
                    std::unique_ptr<ExecutionManagerClient::IExecutionManagerClient> client);
 
-  /**
-   * @brief Main method of Execution manager.
-   */
   void start();
 
   void reportApplicationState(pid_t processId, const std::string &appName, AppState state);
@@ -52,25 +49,12 @@ public:
   void suspend();
 
 private:
-  /**
-   * @brief Removes unsupported states from availApps
-   */
   void filterStates();
 
-  /**
-   * @brief Starts given as systemctl service.
-   * @param process: Application to start.
-   */
   void startApplication(const ProcName &process);
 
-  /**
-   * @brief starts all application that support current state.
-   */
   void startApplicationsForState();
 
-  /**
-   * @brief kill all processes that doesn't support current state.
-   */
   void killProcessesForState();
 
   bool processToBeKilled (const std::string& app,
@@ -81,37 +65,18 @@ private:
   inline void checkAndSendConfirm();
 
 private:
-  /**
-   * @brief Holds interface responsible for starting applications
-   */
   std::unique_ptr<IApplicationHandler> m_appHandler;
 
-  /**
-   * @brief structure that holds application and required processes.
-   */
   std::map<ProcName, pid_t> m_activeProcesses;
 
-  /**
-   * @brief Structure for application that can run in certain state
-   * set consists of service files names.
-   */
   std::map<MachineState, std::set<ProcName>> m_allowedProcessesForState;
 
   const static MachineState defaultState;
 
-  /**
-   * brief Current machine state.
-   */
   MachineState m_currentState;
 
-  /**
-   * brief Pending machine state.
-   */
   MachineState m_pendingState;
 
-  /**
-   * @brief Vector that holds state transitions.
-   */
   std::vector<MachineState> m_machineManifestStates;
 
   std::set<ProcName> m_stateConfirmToBeReceived;

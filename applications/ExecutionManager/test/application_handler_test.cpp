@@ -18,21 +18,6 @@ protected:
   unique_ptr<OSInterfaceMock> m_iosmock = make_unique<OSInterfaceMock>();
 };
 
-TEST_F(ApplicationHandlerTest, ShouldThrowExeptionIfFailedToCreateProcess)
-{
-  const int execvRes = 1;
-  const int childProcessId = 0;
-
-  ExecutionManager::ProcessInfo pinfo;
-
-  EXPECT_CALL(*m_iosmock, fork()).WillOnce(Return(childProcessId));
-  EXPECT_CALL(*m_iosmock, execvp(_,_)).WillOnce(Return(execvRes));
-
-  ExecutionManager::ApplicationHandler appHandler{std::move(m_iosmock)};
-
-  ASSERT_THROW(appHandler.startProcess(pinfo.processName), runtime_error);
-}
-
 ACTION_P(CheckProcessName, fullProcName)
 {
   ASSERT_STREQ("systemctl", arg0);

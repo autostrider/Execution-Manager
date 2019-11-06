@@ -2,4 +2,3 @@
 Description=Adaptive Application 2 process 1
 [Service]
 Type=forking
-PIDFile=/var/run/proc1.pid

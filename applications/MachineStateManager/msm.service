@@ -2,4 +2,3 @@
 Description=Machine state manager
 [Service]
 Type=forking
-PIDFile=/var/run/msm.pid

@@ -43,9 +43,7 @@ void AdaptiveApp::terminate()
 void AdaptiveApp::suspend()
 {
     transitToNextState(
-                std::bind(&api::IStateFactory::createSuspend,
-                          m_factory.get(),
-                          std::placeholders::_1)
+                std::bind(&api::IStateFactory::createSuspend, m_factory.get(), std::placeholders::_1)
                 );
 }
 
@@ -53,36 +51,43 @@ void AdaptiveApp::performAction()
 {
     api::ComponentState state;
     auto result = m_componentClient->GetComponentState(state);
+    auto confirm = api::ComponentClientReturnType::K_GENERAL_ERROR;
+
+    LOG << "Current ComponentState: " << m_componentState;
+
     if (api::ComponentClientReturnType::K_SUCCESS == result)
     {
-        if (isValidComponentState(state))
+        if (isValid(state))
         {
-            if (shouldChangeComponentState(state))
+            if (shouldChange(state))
             {
-                if (api::ComponentStateKOn == state)
+                LOG << "Updating ComponentState to: " << state;
+                m_componentState = state;
+                if (shouldResume(state))
                 {
                     run();
                 }
-                else if (api::ComponentStateKOff == state)
+                else if (shouldSuspend(state))
                 {
                     suspend();
                 }
-                m_componentClient->ConfirmComponentState(state, api::ComponentClientReturnType::K_SUCCESS);
+                confirm = api::ComponentClientReturnType::K_SUCCESS;
             }
             else
             {
-                m_componentClient->ConfirmComponentState(state, api::ComponentClientReturnType::K_UNCHANGED);
+                confirm = api::ComponentClientReturnType::K_UNCHANGED;
             }
         }
         else
         {
-            m_componentClient->ConfirmComponentState(state, api::ComponentClientReturnType::K_INVALID);
+            confirm = api::ComponentClientReturnType::K_INVALID;
         }
     }
     else
     {
-        m_componentClient->ConfirmComponentState(state, result);
+        confirm = result;
     }
+    m_componentClient->ConfirmComponentState(state, confirm);
     m_currentState->performAction();
 }
 
@@ -98,23 +103,24 @@ void AdaptiveApp::transitToNextState(api::IAdaptiveApp::FactoryFunc nextState)
     m_currentState->enter();
 }
 
-bool AdaptiveApp::shouldChangeComponentState(const api::ComponentState &state)
+bool AdaptiveApp::shouldChange(const api::ComponentState &state) const
 {
-    LOG << "Current CompState: " << m_componentState;
-    if (m_componentState != state)
-    {
-
-        LOG << "Updating ComponentState to: " << state;
-        m_componentState = state;
-        return true;
-    }
-
-    return false;
+    return m_componentState != state;
 }
 
-bool AdaptiveApp::isValidComponentState(const api::ComponentState &state) const
+bool AdaptiveApp::isValid(const api::ComponentState &state) const
 {
     return api::ComponentStateKOn == state || api::ComponentStateKOff == state;
+}
+
+bool AdaptiveApp::shouldResume(const api::ComponentState& state) const
+{
+    return api::ComponentStateKOn == state;
+}
+
+bool AdaptiveApp::shouldSuspend(const api::ComponentState& state) const
+{
+    return api::ComponentStateKOff == state;
 }
 
 void AdaptiveApp::reportApplicationState(api::ApplicationStateClient::ApplicationState state)

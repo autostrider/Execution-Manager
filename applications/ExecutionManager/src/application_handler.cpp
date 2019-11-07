@@ -32,7 +32,11 @@ void ApplicationHandler::execProcess(const std::string &processName,
 {
   pid_t process = m_syscalls->fork();
 
-  if (!process)
+  if (-1 == process)
+  {
+    LOG << "Error forking the process" << strerror(errno);
+  }
+  else if (!process)
   {
     std::vector<std::string> arguments =
     {
@@ -42,7 +46,6 @@ void ApplicationHandler::execProcess(const std::string &processName,
       processName + SERVICE_EXTENSION
     };
      auto applicationArgs = convertToNullTerminatingArgv(arguments);
-     std::string cmd;
      
      int res = m_syscalls->execvp(SYSTEMCTL.c_str(),
                       applicationArgs.data());

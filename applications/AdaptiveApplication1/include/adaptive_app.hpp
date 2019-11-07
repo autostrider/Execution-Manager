@@ -33,8 +33,10 @@ public:
     void reportApplicationState(api::ApplicationStateClient::ApplicationState state) override;
 
 private:
+    void suspend();
     void transitToNextState(IAdaptiveApp::FactoryFunc nextState) override;
-    api::ComponentClientReturnType handleTransition(const api::ComponentState& state);
+    bool shouldChangeComponentState(const api::ComponentState& state);
+    bool isValidComponentState(const api::ComponentState& state) const;
 
     api::ComponentState m_componentState = api::ComponentStateKOn;
 

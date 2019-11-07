@@ -1,39 +1,22 @@
 #include "application_state_client.h"
 #include <constants.hpp>
+#include <common.hpp>
 #include <fstream>
 #include <logger.hpp>
 #include <exception>
 #include <algorithm>
 #include <sstream>
 
-namespace api
+namespace 
 {
-ApplicationStateClient::ApplicationStateClient()
-  : m_client(IPC_PROTOCOL + EM_SOCKET_NAME),
-    m_pid(getpid())
-{}
 
-void ApplicationStateClient::ReportApplicationState(ApplicationState state)
-{
-  auto& waitScope = m_client.getWaitScope();
-  auto cap =
-    m_client.getMain<ApplicationStateManagement>();
-
-  auto request = cap.reportApplicationStateRequest();
-  request.setState(state);
-  request.setAppName(getAppName());
-  request.setPid(m_pid);
-  auto promise = request.send();
-  promise.wait(waitScope);
-}
-
-std::string ApplicationStateClient::getAppName()
+std::string getAppName(pid_t appPid)
 {
   static constexpr auto procPath = "/proc/";
   static constexpr auto cmdName = "/cmdline";
   static constexpr auto delimiter = '/';
 
-  std::ifstream data {procPath + std::to_string(m_pid) + cmdName};
+  std::ifstream data {procPath + std::to_string(appPid) + cmdName};
   std::string fullCmd;
   data >> fullCmd;
 
@@ -50,7 +33,29 @@ std::string ApplicationStateClient::getAppName()
   std::getline(info, appName, delimiter);
   std::reverse(appName.begin(), appName.end());
 
-  return appName.append("_").append(processName);
+  return getServiceName(appName, processName);
+}
+
+}
+namespace api
+{
+ApplicationStateClient::ApplicationStateClient()
+  : m_client(IPC_PROTOCOL + EM_SOCKET_NAME),
+    m_pid(getpid())
+{}
+
+void ApplicationStateClient::ReportApplicationState(ApplicationState state)
+{
+  auto& waitScope = m_client.getWaitScope();
+  auto cap =
+    m_client.getMain<ApplicationStateManagement>();
+
+  auto request = cap.reportApplicationStateRequest();
+  request.setState(state);
+  request.setAppName(getAppName(m_pid));
+  request.setPid(m_pid);
+  auto promise = request.send();
+  promise.wait(waitScope);
 }
 
 } // namespace api

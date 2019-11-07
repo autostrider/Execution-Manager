@@ -1,5 +1,6 @@
 #include "execution_manager.hpp"
 #include <constants.hpp>
+#include <common.hpp>
 
 #include <iostream>
 #include <logger.hpp>
@@ -38,14 +39,13 @@ ExecutionManager::ExecutionManager(
         processesInfoForState.second.begin(),
           processesInfoForState.second.end(),
           std::inserter(availableProcesses, availableProcesses.begin()),
-          [](auto item) {
-        return item.applicationName
-                .append("_")
-                .append(item.processName); }
-          );
+          [](auto item) { 
+            return getServiceName(item.applicationName, item.processName); 
+            });
 
     m_allowedProcessesForState.insert(
-      {processesInfoForState.first, availableProcesses});
+      {processesInfoForState.first, availableProcesses}
+    );
   }
 
   filterStates();

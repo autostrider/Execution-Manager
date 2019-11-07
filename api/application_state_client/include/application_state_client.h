@@ -16,7 +16,6 @@ public:
 
   void ReportApplicationState(ApplicationState state);
 private:
-  std::string getAppName();
   capnp::EzRpcClient m_client;
 
   pid_t m_pid;

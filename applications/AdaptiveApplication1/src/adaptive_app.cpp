@@ -31,6 +31,8 @@ void AdaptiveApp::run()
     transitToNextState(
                 std::bind(&api::IStateFactory::createRun, m_factory.get(), std::placeholders::_1)
                 );
+    m_componentState = api::ComponentStateKOn;
+    LOG << "ComponentState updated to: " << m_componentState;
 }
 
 void AdaptiveApp::terminate()
@@ -45,6 +47,8 @@ void AdaptiveApp::suspend()
     transitToNextState(
                 std::bind(&api::IStateFactory::createSuspend, m_factory.get(), std::placeholders::_1)
                 );
+    m_componentState = api::ComponentStateKOff;
+    LOG << "ComponentState updated to: " << m_componentState;
 }
 
 void AdaptiveApp::performAction()
@@ -62,15 +66,11 @@ void AdaptiveApp::performAction()
             if (shouldResume(state))
             {
                 run();
-                m_componentState = api::ComponentStateKOn;
-                LOG << "ComponentState updated to: " << m_componentState;
                 confirm = api::ComponentClientReturnType::K_SUCCESS;
             }
             else if (shouldSuspend(state))
             {
                 suspend();
-                m_componentState = api::ComponentStateKOff;
-                LOG << "ComponentState updated to: " << m_componentState;
                 confirm = api::ComponentClientReturnType::K_SUCCESS;
             }
             else

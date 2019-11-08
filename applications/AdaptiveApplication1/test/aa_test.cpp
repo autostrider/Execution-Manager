@@ -46,9 +46,10 @@ protected:
     void expectConfirmComponentState(const api::ComponentState& expectedState,
                                      api::ComponentClientReturnType result);
     void goToInit();
-    void goToRun();
-    void goToTerminate();
-    void goToSuspend();
+    void goToRunFromState(api::StateMock *oldStateMock);
+    void goToTerminateFromState(api::StateMock *oldStateMock);
+    void goToSuspendFromState(api::StateMock *oldStateMock);
+    void performActionOnState(api::StateMock *stateMock);
 };
 void AppTest::expectGetComponentState(const api::ComponentState& expectedState,
                                       const api::ComponentClientReturnType& result)
@@ -81,8 +82,9 @@ void AppTest::goToInit()
     app.init();
 }
 
-void AppTest::goToRun()
+void AppTest::goToRunFromState(api::StateMock* oldStateMock)
 {
+    EXPECT_CALL(*oldStateMock, leave());
     EXPECT_CALL(*stateRunMock, enter());
     EXPECT_CALL(*factoryPtr,
                 createRun(Ref(app)))
@@ -90,8 +92,9 @@ void AppTest::goToRun()
     app.run();
 }
 
-void AppTest::goToTerminate()
+void AppTest::goToTerminateFromState(api::StateMock *oldStateMock)
 {
+    EXPECT_CALL(*oldStateMock, leave());
     EXPECT_CALL(*stateTermMock, enter());
     EXPECT_CALL(*factoryPtr,
                 createShutDown(Ref(app)))
@@ -100,10 +103,17 @@ void AppTest::goToTerminate()
 }
 
 
-void AppTest::goToSuspend()
+void AppTest::goToSuspendFromState(api::StateMock *oldStateMock)
 {
+    EXPECT_CALL(*oldStateMock, leave());
     EXPECT_CALL(*factoryPtr, createSuspend(Ref(app))).WillOnce(Return(ByMove(std::move(stateSuspendMock))));
     EXPECT_CALL(*stateSuspendMockPtr, enter());
+}
+
+void AppTest::performActionOnState(api::StateMock *stateMock)
+{
+     EXPECT_CALL(*stateMock, performAction());
+     app.performAction();
 }
 
 TEST_F(AppTest, Should_TransitToInitState)
@@ -114,18 +124,13 @@ TEST_F(AppTest, Should_TransitToInitState)
 TEST_F(AppTest, Should_TransitToRunState)
 {
     goToInit();
-
-    EXPECT_CALL(*stateInitMockPtr, leave());
-    goToRun();
-
+    goToRunFromState(stateInitMockPtr);
 }
 
 TEST_F(AppTest, Should_TransitToTerminateState)
 {
     goToInit();
-
-    EXPECT_CALL(*stateInitMockPtr, leave());
-    goToTerminate();
+    goToTerminateFromState(stateInitMockPtr);
 }
 
 TEST_F(AppTest, shouldReturnMean)
@@ -137,84 +142,63 @@ TEST_F(AppTest, shouldReturnMean)
 TEST_F(AppTest, shouldReportErrorWhenErrorOccuredWhileGettingCompState)
 {
     goToInit();
-
-    EXPECT_CALL(*stateInitMockPtr, leave());
-    goToRun();
+    goToRunFromState(stateInitMockPtr);
 
     expectGetComponentState(expectedStateKOn, api::ComponentClientReturnType::K_GENERAL_ERROR);
     expectConfirmComponentState(expectedStateKOn, api::ComponentClientReturnType::K_GENERAL_ERROR);
-    EXPECT_CALL(*stateRunMockPtr, performAction());
-    app.performAction();
+    performActionOnState(stateRunMockPtr);
 }
 
 TEST_F(AppTest, shouldStayInKOnStateWhenPerformActionCalled)
 {
     goToInit();
-
-    EXPECT_CALL(*stateInitMockPtr, leave());
-    goToRun();
+    goToRunFromState(stateInitMockPtr);
 
     expectGetComponentState(expectedStateKOn, api::ComponentClientReturnType::K_SUCCESS);
     expectConfirmComponentState(expectedStateKOn, api::ComponentClientReturnType::K_UNCHANGED);
-    EXPECT_CALL(*stateRunMockPtr, performAction());
-    app.performAction();
+    performActionOnState(stateRunMockPtr);
 }
 
 TEST_F(AppTest, shouldStayInKOnStateWhenInvalidStateReceived)
 {
     goToInit();
-
-    EXPECT_CALL(*stateInitMockPtr, leave());
-    goToRun();
+    goToRunFromState(stateInitMockPtr);
 
     expectGetComponentState(expectedStateInvalid, api::ComponentClientReturnType::K_SUCCESS);
     expectConfirmComponentState(expectedStateInvalid, api::ComponentClientReturnType::K_INVALID);
-    EXPECT_CALL(*stateRunMockPtr, performAction());
-    app.performAction();
+    performActionOnState(stateRunMockPtr);
 }
 
 TEST_F(AppTest, shouldStayInKOnStateWhenGetComponentStateFailed)
 {
     goToInit();
-
-    EXPECT_CALL(*stateInitMockPtr, leave());
-    goToRun();
+    goToRunFromState(stateInitMockPtr);
 
     expectGetComponentState(expectedStateInvalid, api::ComponentClientReturnType::K_GENERAL_ERROR);
     expectConfirmComponentState(expectedStateInvalid, api::ComponentClientReturnType::K_GENERAL_ERROR);
-    EXPECT_CALL(*stateRunMockPtr, performAction());
-    app.performAction();
+    performActionOnState(stateRunMockPtr);
 }
 
 TEST_F(AppTest, shouldTransitToKOffStateWhenPerformActionCalled)
 {
     goToInit();
-    EXPECT_CALL(*stateInitMockPtr, leave());
-
-    goToRun();
-    EXPECT_CALL(*stateRunMockPtr, leave());
-
-    goToSuspend();
+    goToRunFromState(stateInitMockPtr);
+    goToSuspendFromState(stateRunMockPtr);
 
     expectGetComponentState(expectedStateKOff, api::ComponentClientReturnType::K_SUCCESS);
     expectConfirmComponentState(expectedStateKOff, api::ComponentClientReturnType::K_SUCCESS);
-    EXPECT_CALL(*stateSuspendMockPtr, performAction());
-    app.performAction();
+    performActionOnState(stateSuspendMockPtr);
 }
 
 TEST_F(AppTest, shouldTransitToKOnStateFromKOffWhenPerformActionCalled)
 {
     goToInit();
-    EXPECT_CALL(*stateInitMockPtr, leave());
+    goToRunFromState(stateInitMockPtr);
+    goToSuspendFromState(stateRunMockPtr);
 
-    goToRun();
-    EXPECT_CALL(*stateRunMockPtr, leave());
-
-    goToSuspend();
     expectGetComponentState(expectedStateKOff, api::ComponentClientReturnType::K_SUCCESS);
     expectConfirmComponentState(expectedStateKOff, api::ComponentClientReturnType::K_SUCCESS);
-    EXPECT_CALL(*stateSuspendMockPtr, performAction());
-    app.performAction();
+    performActionOnState(stateSuspendMockPtr);
 
     stateRunMock = std::make_unique<StrictMock<api::StateMock>>();
     stateRunMockPtr = stateRunMock.get();
@@ -224,7 +208,5 @@ TEST_F(AppTest, shouldTransitToKOnStateFromKOffWhenPerformActionCalled)
     EXPECT_CALL(*factoryPtr, createRun(Ref(app))).WillOnce(Return(ByMove(std::move(stateRunMock))));
     EXPECT_CALL(*stateRunMockPtr, enter());
     expectConfirmComponentState(expectedStateKOn, api::ComponentClientReturnType::K_SUCCESS);
-    EXPECT_CALL(*stateRunMockPtr, performAction());
-
-    app.performAction();
+    performActionOnState(stateRunMockPtr);
 }

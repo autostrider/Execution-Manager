@@ -33,32 +33,29 @@ protected:
 
 TEST_F(StateTest, shouldReportStateWhenInitEntered)
 {
-    EXPECT_CALL(*stateClientMockPtr, ReportApplicationState(ApplicationState::K_INITIALIZING));
-
     auto state = factory.createInit(appMock);
+    EXPECT_CALL(*stateClientMockPtr, ReportApplicationState(ApplicationState::K_INITIALIZING));
     state->enter();
 }
 
 TEST_F(StateTest, shouldReportRunningStateWhenRunEntered)
 {
-    EXPECT_CALL(*stateClientMockPtr, ReportApplicationState(api::ApplicationStateClient::ApplicationState::K_RUNNING));
-
     auto state = factory.createRun(appMock);
+    EXPECT_CALL(*stateClientMockPtr, ReportApplicationState(api::ApplicationStateClient::ApplicationState::K_RUNNING));
     state->enter();
 }
 
 TEST_F(StateTest, shouldCalculateMeanWhenPerforemActionCalled)
 {
-    EXPECT_CALL(*meanCalculatorMockPtr, mean());
     auto state = factory.createRun(appMock);
+    EXPECT_CALL(*meanCalculatorMockPtr, mean());
     state->performAction();
 }
 
 TEST_F(StateTest, shouldReportShutdownStateWhenShutDownEntered)
 {
-    EXPECT_CALL(*stateClientMockPtr, ReportApplicationState(api::ApplicationStateClient::ApplicationState::K_SHUTTINGDOWN));
-
     auto state = factory.createShutDown(appMock);
+    EXPECT_CALL(*stateClientMockPtr, ReportApplicationState(api::ApplicationStateClient::ApplicationState::K_SHUTTINGDOWN));
     state->enter();
 }
 

@@ -11,7 +11,13 @@
       kUnchanged @4;
     }
 
-    registerComponent @0 (component :Text);
+    enum StateUpdateMode
+    {
+      kPoll @0;
+      kEvent @1;
+    }
+
+    registerComponent @0 (component :Text, mode :StateUpdateMode);
 
     getComponentState @1 (component :Text)
       -> (state :Text, result :ComponentClientReturnType);
@@ -19,4 +25,10 @@
     confirmComponentState @2 (component :Text,
                               state :Text,
                               status :ComponentClientReturnType);
+
+    interface StateManager
+    {
+      setComponentState @0 (state :Text)
+        -> (result :ComponentClientReturnType);
+    }
   }

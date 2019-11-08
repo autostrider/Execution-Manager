@@ -4,8 +4,9 @@
 namespace api
 {
 
-ComponentClientWrapper::ComponentClientWrapper(const std::string& component) noexcept
-  : m_client{component, StateUpdateMode::kPoll}
+ComponentClientWrapper::ComponentClientWrapper(const std::string& component, 
+                                               api::StateUpdateMode updateMode) noexcept
+  : m_client{component, updateMode}
 {}
 
 ComponentClientWrapper::~ComponentClientWrapper() noexcept

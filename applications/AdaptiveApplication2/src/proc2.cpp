@@ -21,9 +21,12 @@ int main()
     }
 
     const std::string componentName{"proc2"};
+    auto componentStateUpdateMode = api::StateUpdateMode::K_POLL;
+
     AdaptiveApp app2(std::make_unique<StateFactory>(),
                     std::make_unique<api::ApplicationStateClientWrapper>(),
-                    std::make_unique<api::ComponentClientWrapper>(componentName),
+                    std::make_unique<api::ComponentClientWrapper>(componentName,
+                                                                  componentStateUpdateMode),
                     std::make_unique<MeanCalculator>());
 
     app2.init();

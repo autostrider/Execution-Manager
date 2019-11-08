@@ -11,13 +11,20 @@ namespace ExecutionManagerClient
 class ExecutionManagerClient : public IExecutionManagerClient
 {
 public:
-  ExecutionManagerClient(const std::string& msmAddress, kj::AsyncIoContext& context);
+  ExecutionManagerClient(const std::string& msmAddress, 
+                         kj::AsyncIoContext& context, 
+                         std::string m_componentAddress);
+                         
   void confirm(StateError status);
+
+  StateManagement::ComponentClientReturnType SetComponentState(std::string& state ,std::string& componentName);
 
   ~ExecutionManagerClient() override = default;
 private:
   const std::string m_msmAddress;
   kj::AsyncIoContext& m_ioContext;
+
+  const std::string m_componentAddress;
 
   kj::AsyncIoProvider::PipeThread m_sendThread;
 };

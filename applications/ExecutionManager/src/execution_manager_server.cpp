@@ -83,7 +83,8 @@ ExecutionManagerServer::setMachineState(SetMachineStateContext context)
 ::kj::Promise<void>
 ExecutionManagerServer::registerComponent(RegisterComponentContext context)
 {
-  m_em.registerComponent(context.getParams().getComponent().cStr());
+  m_em.registerComponent(context.getParams().getComponent().cStr(), 
+                         context.getParams().getMode());
 
   return kj::READY_NOW;
 }

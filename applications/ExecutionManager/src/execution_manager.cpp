@@ -146,6 +146,10 @@ void ExecutionManager::changeComponentsState()
   ComponentState pendingComponentsState =
     (m_pendingState == MACHINE_STATE_SUSPEND) ? COMPONENT_STATE_OFF :
                                                 COMPONENT_STATE_ON;
+/*
+  std::string componentName{"proc1"};
+  m_rpcClient->SetComponentState(pendingComponentsState, componentName);
+*/
 
   for(auto& component : m_registeredComponents)
   {
@@ -234,7 +238,7 @@ ExecutionManager::setMachineState(std::string state)
   return StateError::K_SUCCESS;
 }
 
-void ExecutionManager::registerComponent(std::string component)
+void ExecutionManager::registerComponent(std::string component, StateUpdateMode updateMode)
 {
   m_registeredComponents.emplace(std::make_pair(component, COMPONENT_STATE_ON));
 }

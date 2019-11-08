@@ -59,18 +59,18 @@ void AdaptiveApp::performAction()
     {
         if (isValid(state))
         {
-            if (shouldChange(state))
+            if (shouldResume(state))
             {
-                LOG << "Updating ComponentState to: " << state;
-                m_componentState = state;
-                if (shouldResume(state))
-                {
-                    run();
-                }
-                else if (shouldSuspend(state))
-                {
-                    suspend();
-                }
+                run();
+                m_componentState = api::ComponentStateKOn;
+                LOG << "ComponentState updated to: " << m_componentState;
+                confirm = api::ComponentClientReturnType::K_SUCCESS;
+            }
+            else if (shouldSuspend(state))
+            {
+                suspend();
+                m_componentState = api::ComponentStateKOff;
+                LOG << "ComponentState updated to: " << m_componentState;
                 confirm = api::ComponentClientReturnType::K_SUCCESS;
             }
             else
@@ -115,12 +115,12 @@ bool AdaptiveApp::isValid(const api::ComponentState &state) const
 
 bool AdaptiveApp::shouldResume(const api::ComponentState& state) const
 {
-    return api::ComponentStateKOn == state;
+    return (m_componentState != state && api::ComponentStateKOn == state);
 }
 
 bool AdaptiveApp::shouldSuspend(const api::ComponentState& state) const
 {
-    return api::ComponentStateKOff == state;
+    return (m_componentState != state && api::ComponentStateKOff == state);
 }
 
 void AdaptiveApp::reportApplicationState(api::ApplicationStateClient::ApplicationState state)

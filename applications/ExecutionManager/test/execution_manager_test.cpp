@@ -107,7 +107,7 @@ TEST_F(ExecutionManagerTest, ShouldSuccessfullyReportWhenNoSetStateOccured)
 {
   auto em = initEm({testState}, {{testState, {app}}});
 
-  em.reportApplicationState(appId, appServiceName, AppState::RUNNING);
+  em.reportApplicationState(appServiceName, AppState::RUNNING);
 }
 
 TEST_F(ExecutionManagerTest, ShouldFailToSetSameMachineState)
@@ -153,7 +153,7 @@ TEST_F(ExecutionManagerTest, ShouldStartAppAndTransitToNextState)
   em.setMachineState(firstState);
 
   em.setMachineState(secondState);
-  em.reportApplicationState(appId, appServiceName, AppState::RUNNING);
+  em.reportApplicationState(appServiceName, AppState::RUNNING);
 
   ASSERT_EQ(
     em.getMachineState(),
@@ -175,10 +175,10 @@ TEST_F(ExecutionManagerTest, ShouldKillAppAndTransitToNextState)
   }
 
   em.setMachineState(firstState);
-  em.reportApplicationState(appId, appServiceName, AppState::RUNNING);
+  em.reportApplicationState(appServiceName, AppState::RUNNING);
 
   em.setMachineState(secondState);
-  em.reportApplicationState(appId, appServiceName, AppState::SHUTTINGDOWN);
+  em.reportApplicationState(appServiceName, AppState::SHUTTINGDOWN);
 
   ASSERT_EQ(
     em.getMachineState(),
@@ -203,11 +203,11 @@ TEST_F(ExecutionManagerTest,
     EXPECT_CALL(*pClient, confirm(StateError::K_SUCCESS));
   }
   em.setMachineState(firstState);
-  em.reportApplicationState(appId, appServiceName, AppState::RUNNING);
+  em.reportApplicationState(appServiceName, AppState::RUNNING);
 
   em.setMachineState(secondState);
-  em.reportApplicationState(appId, appServiceName, AppState::SHUTTINGDOWN);
-  em.reportApplicationState(additionalAppId, additionalAppServiceName,
+  em.reportApplicationState(appServiceName, AppState::SHUTTINGDOWN);
+  em.reportApplicationState(additionalAppServiceName,
                             AppState::RUNNING);
 
   ASSERT_EQ(
@@ -228,7 +228,7 @@ TEST_F(ExecutionManagerTest, ShouldNotKillAppToTransitState)
     EXPECT_CALL(*pClient, confirm(StateError::K_SUCCESS));
   }
   em.setMachineState(firstState);
-  em.reportApplicationState(appId, appServiceName, AppState::RUNNING);
+  em.reportApplicationState(appServiceName, AppState::RUNNING);
   em.setMachineState(secondState);
 
   ASSERT_EQ(
@@ -255,13 +255,13 @@ TEST_F(ExecutionManagerTest, ShouldKillTwoAppsToTransitToNextState)
   }
 
   em.setMachineState(firstState);
-  em.reportApplicationState(appId, appServiceName, AppState::RUNNING);
-  em.reportApplicationState(additionalAppId, additionalAppServiceName,
+  em.reportApplicationState(appServiceName, AppState::RUNNING);
+  em.reportApplicationState(additionalAppServiceName,
                             AppState::RUNNING);
 
   em.setMachineState(secondState);
-  em.reportApplicationState(appId, appServiceName, AppState::SHUTTINGDOWN);
-  em.reportApplicationState(additionalAppId, additionalAppServiceName,
+  em.reportApplicationState(appServiceName, AppState::SHUTTINGDOWN);
+  em.reportApplicationState(additionalAppServiceName,
                             AppState::SHUTTINGDOWN);
 
   ASSERT_EQ(
@@ -283,10 +283,10 @@ TEST_F(ExecutionManagerTest, ShouldNotKillAndTransitToSuspendState)
   }
 
   em.setMachineState(firstState);
-  em.reportApplicationState(appId, appServiceName, AppState::RUNNING);
+  em.reportApplicationState(appServiceName, AppState::RUNNING);
 
   em.setMachineState(suspendState);
-  em.reportApplicationState(appId, appServiceName, AppState::SUSPEND);
+  em.reportApplicationState(appServiceName, AppState::SUSPEND);
 
   ASSERT_EQ(
     em.getMachineState(),
@@ -315,13 +315,13 @@ TEST_F(ExecutionManagerTest, ShouldKillAndTransitToSuspendState)
   }
 
   em.setMachineState(firstState);
-  em.reportApplicationState(appId, appServiceName, AppState::RUNNING);
-  em.reportApplicationState(additionalAppId, additionalAppServiceName,
+  em.reportApplicationState(appServiceName, AppState::RUNNING);
+  em.reportApplicationState(additionalAppServiceName,
                             AppState::RUNNING);
 
   em.setMachineState(suspendState);
-  em.reportApplicationState(appId, appServiceName, AppState::SUSPEND);
-  em.reportApplicationState(additionalAppId, additionalAppServiceName,
+  em.reportApplicationState(appServiceName, AppState::SUSPEND);
+  em.reportApplicationState(additionalAppServiceName,
                             AppState::SHUTTINGDOWN);
 
   ASSERT_EQ(

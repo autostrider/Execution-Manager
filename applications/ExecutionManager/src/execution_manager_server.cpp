@@ -27,9 +27,8 @@ ExecutionManagerServer::reportApplicationState
   (ReportApplicationStateContext context)
 {
   ApplicationState state = context.getParams().getState();
-  pid_t applicationPid = context.getParams().getPid();
   std::string appName = context.getParams().getAppName().cStr();
-  m_em.reportApplicationState(applicationPid, appName,
+  m_em.reportApplicationState(appName,
     static_cast<ExecutionManager::AppState>(state));
 
   return kj::READY_NOW;

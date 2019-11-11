@@ -112,10 +112,9 @@ void ExecutionManager::killProcessesForState()
        app++)
   {
     if (allowedApps == m_allowedProcessesForState.cend() ||
-        processToBeKilled(app->first, allowedApps->second))
+        processToBeKilled(*app, allowedApps->second))
     {
-      m_appHandler->killProcess(app->first);
-      m_stateConfirmToBeReceived.insert(app->first);
+      m_appHandler->killProcess(*app);
     }
   }
 }
@@ -142,7 +141,7 @@ void ExecutionManager::startApplication(const ProcName& process)
 
 void ExecutionManager::checkAndSendConfirm()
 {
-  if (m_stateConfirmToBeReceived == m_allowedProcessesForState[m_pendingState])
+  if (m_activeProcesses == m_allowedProcessesForState[m_pendingState])
   {
     confirmState(StateError::K_SUCCESS);
   }
@@ -150,23 +149,20 @@ void ExecutionManager::checkAndSendConfirm()
 
 void
 ExecutionManager::reportApplicationState(
-    pid_t processId, const std::string& appName, AppState state)
+    const std::string& appName, AppState state)
 {
   LOG << "State \"" << applicationStateNames[static_cast<uint16_t>(state)]
-      << "\" for application " << appName << " with pid "
-      << processId
+      << "\" for application " << appName
       << " received.";
 
   switch (state)
   {
   case AppState::SHUTTINGDOWN:
     m_activeProcesses.erase(appName);
-    m_stateConfirmToBeReceived.erase(appName);
     break;
   case AppState::RUNNING:
   case AppState::SUSPEND:
-    m_stateConfirmToBeReceived.insert(appName);
-    m_activeProcesses.insert({appName, processId});
+    m_activeProcesses.insert(appName);
     break;
   default:
     break;
@@ -224,10 +220,7 @@ ExecutionManager::setMachineState(std::string state)
 void 
 ExecutionManager::suspend()
 {
-  for (auto app = m_activeProcesses.cbegin(); app != m_activeProcesses.cend(); app++)
-  {
-    m_stateConfirmToBeReceived.insert(app->first);
-  } 
+  LOG << "Suspend entered";
 }
 
 } // namespace ExecutionManager

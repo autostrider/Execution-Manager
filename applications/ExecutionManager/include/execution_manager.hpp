@@ -34,13 +34,15 @@ enum class AppState : uint16_t
 class ExecutionManager
 {
 public:
-  ExecutionManager(std::unique_ptr<IManifestReader> reader,
-                   std::unique_ptr<IApplicationHandler> applicationHandler,
-                   std::unique_ptr<ExecutionManagerClient::IExecutionManagerClient> client);
+  ExecutionManager(
+    std::unique_ptr<IManifestReader> reader,
+    std::unique_ptr<IApplicationHandler> applicationHandler,
+    std::unique_ptr<ExecutionManagerClient::IExecutionManagerClient> client
+  );
 
   void start();
 
-  void reportApplicationState(pid_t processId, const std::string &appName, AppState state);
+  void reportApplicationState(const std::string &appName, AppState state);
 
   MachineState getMachineState() const;
 
@@ -67,7 +69,7 @@ private:
 private:
   std::unique_ptr<IApplicationHandler> m_appHandler;
 
-  std::map<ProcName, pid_t> m_activeProcesses;
+  std::set<ProcName> m_activeProcesses;
 
   std::map<MachineState, std::set<ProcName>> m_allowedProcessesForState;
 
@@ -78,8 +80,6 @@ private:
   MachineState m_pendingState;
 
   std::vector<MachineState> m_machineManifestStates;
-
-  std::set<ProcName> m_stateConfirmToBeReceived;
 
   std::unique_ptr<ExecutionManagerClient::IExecutionManagerClient> m_rpcClient;
 };

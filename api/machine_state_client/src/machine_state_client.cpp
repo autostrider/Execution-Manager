@@ -1,7 +1,4 @@
 #include "machine_state_client.h"
-#include <constants.hpp>
-
-#include <unistd.h>
 
 #include <thread>
 #include <chrono>
@@ -24,7 +21,8 @@ namespace {
     };
 }
 
-MachineStateClient::MachineStateClient(string path):
+MachineStateClient::MachineStateClient(string path)
+:
     m_client(path),
     m_clientApplication(m_client.getMain<MachineStateManagement>()),
     m_timer(m_client.getIoProvider().getTimer()),
@@ -111,7 +109,7 @@ MachineStateClient::SetMachineState(string state, std::uint32_t timeout)
   auto result = promise.then([&](auto&& res)
     {
       auto _result = res.getResult();
-      if(_result == StateError::K_SUCCESS)
+      if(res.getResult() == StateError::K_SUCCESS)
       {
         return waitForConfirm(timeout);
       }
@@ -151,12 +149,11 @@ MachineStateClient::startServer()
   auto sThread = kj::heap<kj::Thread>([&]() noexcept
   {
     auto ioContext = kj::setupAsyncIo();
-    const int timeout = 10;
 
     capnp::TwoPartyServer server(
       kj::heap<MachineStateServer>(m_promise));
     auto address = ioContext.provider->getNetwork()
-        .parseAddress(IPC_PROTOCOL + MSM_SOCKET_NAME)
+        .parseAddress(std::string{"unix:/tmp/machine_management"})
           .wait(ioContext.waitScope);
 
     auto listener = address->listen();
@@ -172,7 +169,7 @@ MachineStateClient::startServer()
     startUpPromise.set_value();
     exitPromise.wait(ioContext.waitScope);
 
-    std::this_thread::sleep_for(std::chrono::milliseconds(timeout));
+    std::this_thread::sleep_for(std::chrono::milliseconds(10));
   });
 
   startUpPromise.get_future().wait();

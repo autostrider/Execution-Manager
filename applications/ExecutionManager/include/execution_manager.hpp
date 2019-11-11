@@ -17,8 +17,10 @@ namespace ExecutionManager
 
 using applicationId = std::string;
 using MachineState = std::string;
+using ComponentState = std::string;
 using ProcName = std::string;
 using StateError = ::MachineStateManagement::StateError;
+using ComponentClientReturnType = ::StateManagement::ComponentClientReturnType;
 using std::pair;
 
 struct ApplicationManifest;
@@ -49,7 +51,13 @@ public:
 
   StateError setMachineState(std::string state);
 
-  void suspend();
+  void registerComponent(std::string component);
+
+  ComponentClientReturnType
+  getComponentState(std::string component, ComponentState& state) const;
+
+  void confirmComponentState
+  (std::string component, ComponentState state, ComponentClientReturnType status);
 
 private:
   /**
@@ -79,6 +87,8 @@ private:
 
   void confirmState(StateError status);
 
+  inline void changeComponentsState();
+
 private:
   /**
    * @brief Holds interface responsible for starting applications
@@ -96,8 +106,6 @@ private:
    */
   std::map<MachineState, std::vector<ProcessInfo>> m_allowedProcessesForState;
 
-  const static MachineState defaultState;
-
   /**
    * brief Current machine state.
    */
@@ -114,6 +122,9 @@ private:
   std::vector<MachineState> m_machineManifestStates;
 
   std::set<pid_t> m_stateConfirmToBeReceived;
+
+  std::map<std::string, ComponentState> m_registeredComponents;
+  std::set<std::string> m_componentConfirmToBeReceived;
 
   std::unique_ptr<ExecutionManagerClient::IExecutionManagerClient> m_rpcClient;
 };

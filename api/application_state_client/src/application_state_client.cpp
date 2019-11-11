@@ -53,7 +53,6 @@ void ApplicationStateClient::ReportApplicationState(ApplicationState state)
   auto request = cap.reportApplicationStateRequest();
   request.setState(state);
   request.setAppName(getAppName(m_pid));
-  request.setPid(m_pid);
   auto promise = request.send();
   promise.wait(waitScope);
 }

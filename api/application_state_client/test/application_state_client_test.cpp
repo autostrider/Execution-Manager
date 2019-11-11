@@ -42,7 +42,6 @@ ApplicationStateClientServer::ApplicationStateClientServer (Data& sharedResource
 ApplicationStateClientServer::reportApplicationState(ReportApplicationStateContext context)
 {
     m_sharedResource.m_state = context.getParams().getState();
-    m_sharedResource.m_appPid = context.getParams().getPid();
          
     return kj::READY_NOW;
 }

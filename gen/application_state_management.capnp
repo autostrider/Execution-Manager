@@ -11,5 +11,5 @@ interface ApplicationStateManagement
     kSuspend @3;
   }
 
-  reportApplicationState @0 (pid :Int32, appName :Text, state :ApplicationState);
+  reportApplicationState @0 (appName :Text, state :ApplicationState);
 }

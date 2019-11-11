@@ -2,13 +2,15 @@
 #include "execution_manager_server.hpp"
 #include "manifest_reader.hpp"
 #include "execution_manager_client.hpp"
-#include "msm_handler.hpp"
 #include "os_interface.hpp"
 #include <logger.hpp>
 
-#include <memory>
+#include <cerrno>
 #include <csignal>
 #include <capnp/rpc-twoparty.h>
+#include <sys/stat.h>
+#include <sys/types.h>
+
 
 int main(int argc, char **argv)
 {
@@ -17,6 +19,10 @@ int main(int argc, char **argv)
   }
   try
   {
+    if ( my_chmod("../applications/ExecutionManager/machine_manifest.json", S_IRUSR|S_IRGRP|S_IROTH) !=0)
+    {
+      LOG << strerror(errno);
+    }
     ::unlink(EM_SOCKET_NAME.c_str());
     auto io = kj::setupAsyncIo();
 
@@ -50,4 +56,16 @@ int main(int argc, char **argv)
   }
 
   return EXIT_SUCCESS;
+}
+
+static inline int my_chmod(const char * path, mode_t mode)
+{
+    int result = chmod(path, mode);
+
+    if (result != 0)
+    {
+        result = errno;
+    }
+
+    return (result);
 }

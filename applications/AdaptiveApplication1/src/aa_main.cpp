@@ -19,9 +19,11 @@ int main()
     {
         LOG << "[aa_main] Error while registering signal.";
     }
+
+    const std::string componentName{"proc1"};
     AdaptiveApp app(std::make_unique<StateFactory>(),
                     std::make_unique<api::ApplicationStateClientWrapper>(),
-                    std::make_unique<api::ComponentClientWrapper>("proc1"),
+                    std::make_unique<api::ComponentClientWrapper>(componentName),
                     std::make_unique<MeanCalculator>());
 
     app.init();

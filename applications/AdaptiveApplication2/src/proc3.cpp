@@ -17,11 +17,13 @@ int main()
 {
     if (::signal(SIGTERM, signalHandler) == SIG_ERR)
     {
-        LOG << "[aa_main] Error while registering signal.";
+        LOG << "[proc3] Error while registering signal.";
     }
+
+    const std::string componentName{"proc3"};
     AdaptiveApp app3(std::make_unique<StateFactory>(),
                     std::make_unique<api::ApplicationStateClientWrapper>(),
-                    std::make_unique<api::ComponentClientWrapper>("proc3"),
+                    std::make_unique<api::ComponentClientWrapper>(componentName),
                     std::make_unique<MeanCalculator>());
 
     app3.init();

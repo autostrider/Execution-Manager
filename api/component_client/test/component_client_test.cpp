@@ -24,11 +24,6 @@ struct TestData
   std::string component;
   std::string state;
   ComponentClientReturnType status;
-
-  size_t registerComponentCallCount{0};
-  size_t getComponentStateCallCount{0};
-  size_t confirmComponentStateCallCount{0};
-  bool isTimeouted{false};
 };
 
 class ExecutionManagementTestServer
@@ -46,45 +41,29 @@ private:
   ::kj::Promise<void>
   registerComponent(RegisterComponentContext context) override
   {
-    ++m_data.registerComponentCallCount;
-
     context.getParams().getComponent().cStr();
-    
-    if(m_data.isTimeouted)
-    {
-      std::this_thread::sleep_for(std::chrono::milliseconds(m_defaultDelay));
-    }
+  
     return kj::READY_NOW;
   }
 
   ::kj::Promise<void>
   getComponentState(GetComponentStateContext context) override
   {
-    ++m_data.getComponentStateCallCount;
     m_data.component = context.getParams().getComponent().cStr();
     
     context.getResults().setState(m_data.state);
     context.getResults().setResult(ComponentClientReturnType::K_SUCCESS);
 
-    if(m_data.isTimeouted)
-    {
-      std::this_thread::sleep_for(std::chrono::milliseconds(m_defaultDelay));
-    }
     return kj::READY_NOW;
   }
 
   ::kj::Promise<void>
   confirmComponentState(ConfirmComponentStateContext context) override
   {
-    try
-    {
-      ++m_data.confirmComponentStateCallCount;
       m_data.component = context.getParams().getComponent().cStr();
       m_data.state = context.getParams().getState().cStr();
       m_data.status = context.getParams().getStatus();
-    }
-    catch(...){LOG << "ERRRRRROR";}
-    
+
     return kj::READY_NOW;
   }
 
@@ -93,22 +72,18 @@ private:
   static const uint32_t m_defaultDelay;
 };
 
-const uint32_t ExecutionManagementTestServer::m_defaultDelay = 800;
-
 class ComponentClientTest
 : public ::testing::Test
 {
   protected:
-  
-  ComponentClientTest() {}
   virtual ~ComponentClientTest() noexcept(true) {}
 
-  virtual void SetUp()
+  void SetUp() override
   {
     unlink(EM_SOCKET_NAME.c_str());
   }
 
-  virtual void TearDoun()
+  void TearDown() override
   {
 		unlink(EM_SOCKET_NAME.c_str());
   }
@@ -126,14 +101,13 @@ class ComponentClientTest
   ComponentClient cc {componentName, mode};
 };
 
-TEST_F(ComponentClientTest, ShouldSucceedToSetStateUpdateHandlerState)
+TEST_F(ComponentClientTest, ShouldSucceedToSetStateUpdateHandler)
 {
   std::function<void(std::string const&)> f;
 
 	const auto result = cc.SetStateUpdateHandler(f);
 
   EXPECT_EQ(result, ComponentClientReturnType::K_SUCCESS);
-  EXPECT_EQ(testData.registerComponentCallCount, 1);
 }
 
 TEST_F(ComponentClientTest, ShouldSucceedToGetComponentClientState)
@@ -144,7 +118,6 @@ TEST_F(ComponentClientTest, ShouldSucceedToGetComponentClientState)
 	const auto result = cc.GetComponentState(state);
 
   EXPECT_EQ(result, ComponentClientReturnType::K_SUCCESS);
-  EXPECT_EQ(testData.getComponentStateCallCount, 1);
   EXPECT_EQ(testData.state, state);
 }
 
@@ -157,7 +130,6 @@ TEST_F(ComponentClientTest, ShouldSucceedToConfirmComponentState)
 
   cc.ConfirmComponentState(state, status);
 
-  EXPECT_EQ(testData.confirmComponentStateCallCount, 1);
   EXPECT_EQ(testData.component, componentName);
   EXPECT_EQ(testData.state, state);
   EXPECT_EQ(testData.status, status);
@@ -165,8 +137,6 @@ TEST_F(ComponentClientTest, ShouldSucceedToConfirmComponentState)
 
 TEST_F(ComponentClientTest, ShouldFailToConfirmComponentState)
 {
-  testData.state;
-  testData.status;
   std::string state = std::string(100000000, 'a');
   ComponentClientReturnType status = ComponentClientReturnType::K_SUCCESS;
 

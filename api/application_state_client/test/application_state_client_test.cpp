@@ -56,12 +56,12 @@ protected:
 
     ApplicationStateClientTest() {}
 
-	virtual void SetUp()
+	void SetUp() override
 	{
 		unlink(EM_SOCKET_NAME.c_str());
 	}
 
-	virtual void TearDown()
+	void TearDown() override
     {
         unlink(EM_SOCKET_NAME.c_str());
     }

@@ -171,7 +171,8 @@ ExecutionManager::reportApplicationState(pid_t processId, AppState state)
     return;
   }
 
-  if (AppState::INITIALIZING != state)
+  if ((state != AppState::INITIALIZING) ||
+      (state == AppState::SUSPEND))
   {
     m_stateConfirmToBeReceived.erase(processId);
 

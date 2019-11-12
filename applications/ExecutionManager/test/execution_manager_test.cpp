@@ -296,7 +296,6 @@ TEST_F(ExecutionManagerTest, ShouldNotKillAndTransitToSuspendState)
   em.reportApplicationState(appId, AppState::RUNNING);
 
   em.setMachineState(suspendState);
-  em.reportApplicationState(appId, AppState::SUSPEND);
 
   ASSERT_EQ(
     em.getMachineState(),
@@ -322,7 +321,6 @@ TEST_F(ExecutionManagerTest, ShouldKillAndTransitToSuspendState)
   em.reportApplicationState(additionalAppId, AppState::RUNNING);
 
   em.setMachineState(suspendState);
-  em.reportApplicationState(appId, AppState::SUSPEND);
   em.reportApplicationState(additionalAppId, AppState::SHUTTINGDOWN);
 
   ASSERT_EQ(
@@ -338,7 +336,7 @@ TEST_F(ExecutionManagerTest, ShouldRegisterComponent)
   em.registerComponent(component);
 }
 
-TEST_F(ExecutionManagerTest, ShouldGetComponentStateWithEmptyMap)
+TEST_F(ExecutionManagerTest, ShouldNotGetComponentState)
 {
   auto em = initEm({suspendState}, {{suspendState, emptyAvailableApps}});
 
@@ -357,13 +355,11 @@ TEST_F(ExecutionManagerTest, ShouldGetComponentState)
   EXPECT_EQ(result, ComponentClientReturnType::K_SUCCESS);
 }
 
-TEST_F(ExecutionManagerTest, ShouldConfirmComponentStateWithEmptyMap)
+TEST_F(ExecutionManagerTest, ShouldNotConfirmComponentState)
 {
   auto em = initEm({suspendState}, {{suspendState, emptyAvailableApps}});
 
   em.confirmComponentState(component, state, status);
-
-  EXPECT_EQ(status, ComponentClientReturnType::K_SUCCESS);
 }
 
 TEST_F(ExecutionManagerTest, ShouldConfirmComponentState)
@@ -386,7 +382,6 @@ TEST_F(ExecutionManagerTest, ShouldConfirmComponentState)
   em.registerComponent(component);
 
   em.setMachineState(suspendState);
-  em.reportApplicationState(appId, AppState::SUSPEND);
   em.reportApplicationState(additionalAppId, AppState::SHUTTINGDOWN);
  
   em.confirmComponentState(component, state, status);

@@ -50,7 +50,6 @@ ComponentClient::ConfirmComponentState
 
   request.setComponent(componentName);
   request.setState(state);
-  request.setStatus(status);
 
   request.send().wait(m_client.getWaitScope());
 }

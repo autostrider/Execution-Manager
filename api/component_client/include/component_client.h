@@ -28,17 +28,13 @@ enum class ComponentStates: uint8_t
 class ComponentClient
 {
 public:
-  ComponentClient
-  (const std::string &s, StateUpdateMode mode) noexcept;
+  ComponentClient (const std::string &s, StateUpdateMode mode) noexcept;
 
-  ComponentClientReturnType SetStateUpdateHandler
-  (std::function<void(ComponentState const&)> f) noexcept;
+  ComponentClientReturnType SetStateUpdateHandler (std::function<void(ComponentState const&)> f) noexcept;
 
-  ComponentClientReturnType GetComponentState
-  (ComponentState& state) noexcept;
+  ComponentClientReturnType GetComponentState (ComponentState& state) noexcept;
 
-  void ConfirmComponentState
-  (ComponentState state, ComponentClientReturnType status) noexcept;
+  void ConfirmComponentState (ComponentState state, ComponentClientReturnType status) noexcept;
 private:
    capnp::EzRpcClient m_client;
 

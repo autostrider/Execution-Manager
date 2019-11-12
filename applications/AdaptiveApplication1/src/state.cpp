@@ -2,8 +2,6 @@
 #include <constants.hpp>
 #include <logger.hpp>
 
-#include <iostream>
-
 using ApplicationState = api::ApplicationStateClient::ApplicationState;
 
 State::State(AdaptiveApp& app,
@@ -20,6 +18,11 @@ void State::leave() const
 {
 }
 
+void State::performAction()
+{
+
+}
+
 ApplicationState State::getApplicationState() const
 {
     return m_applState;
@@ -34,71 +37,31 @@ void Init::enter()
     m_app.reportApplicationState(getApplicationState());
 }
 
-void Init::leave() const
-{
-    m_app.reportApplicationState(ApplicationState::K_RUNNING);
-}
-
 Run::Run(AdaptiveApp &app) : State (app, ApplicationState::K_RUNNING, AA_STATE_RUNNING)
 {
 }
 
 void Run::enter()
 {
-    api::ComponentState state;
-    auto result = m_app.getComponentState(state);
-    if (api::ComponentClientReturnType::K_SUCCESS == result)
-    {
-        m_app.confirmComponentState(state, handleTransition(state));
-    }
-    else
-    {
-        m_app.confirmComponentState(state, result);
-    }
+    m_app.reportApplicationState(getApplicationState());
 }
 
-void Run::updateSubstate(const api::ComponentState& state, api::ComponentClientReturnType& confirm)
+void Run::performAction()
 {
-    m_componentState = state;
-    confirm = api::ComponentClientReturnType::K_SUCCESS;
-    LOG << "Component State " << m_componentState << ".";
+    LOG << "Mean: " << m_app.mean() << ".";
 }
 
-api::ComponentClientReturnType Run::handleTransition(api::ComponentState state)
+void Suspend::enter()
 {
-    api::ComponentClientReturnType confirm = api::ComponentClientReturnType::K_INVALID;
+}
 
-    if (m_componentState != state)
-    {
-        if (COMPONENT_STATE_ON == state)
-        {
-            LOG << "Mean: " << m_app.mean() << ".";
-            updateSubstate(state, confirm);
-        }
-        else if (COMPONENT_STATE_OFF == state)
-        {
-            /*some important stuff related to suspend state
-            * this transition to kOff state will be refactored.
-            */
-            updateSubstate(state, confirm);
-        }
-    }
-    else
-    {
-        if (COMPONENT_STATE_ON == state)
-        {
-            LOG << "Mean: " << m_app.mean() << ".";
-        }
-        else if (COMPONENT_STATE_OFF == state)
-        {
-            /*some important stuff related to suspend state
-            * this transition to kOff state will be refactored.
-            */
-        }
-        confirm = api::ComponentClientReturnType::K_UNCHANGED;
-    }
+void Suspend::leave() const
+{
+}
 
-    return confirm;
+void Suspend::performAction()
+{
+
 }
 
 ShutDown::ShutDown(AdaptiveApp& app) : State (app, ApplicationState::K_SHUTTINGDOWN, AA_STATE_SHUTDOWN)
@@ -126,3 +89,7 @@ std::unique_ptr<api::IState> StateFactory::createShutDown(api::IAdaptiveApp& app
     return std::make_unique<ShutDown>(dynamic_cast<AdaptiveApp&>(app));
 }
 
+std::unique_ptr<api::IState> StateFactory::createSuspend(api::IAdaptiveApp &app) const
+{
+    return std::make_unique<Suspend>();
+}

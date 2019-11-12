@@ -29,7 +29,12 @@ void MsmState::leave() const
 {
 }
 
-Init::Init(MachineStateManager& msm)
+void MsmState::performAction()
+{
+
+}
+
+Init::Init(MachineStateManager& msm) 
     : MsmState (msm, ApplicationState::K_INITIALIZING, AA_STATE_INIT)
 {
 }
@@ -127,6 +132,11 @@ std::unique_ptr<api::IState> MsmStateFactory::createRun(api::IAdaptiveApp& msm) 
 std::unique_ptr<api::IState> MsmStateFactory::createShutDown(api::IAdaptiveApp& msm) const
 {
     return std::make_unique<ShutDown>(dynamic_cast<MachineStateManager&>(msm));
+}
+
+std::unique_ptr<api::IState> MsmStateFactory::createSuspend(api::IAdaptiveApp &msm) const
+{
+    return nullptr;
 }
 
 } // namespace MSM

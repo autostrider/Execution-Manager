@@ -19,7 +19,7 @@ ApplicationHandler::ApplicationHandler(std::unique_ptr<IOsInterface> syscalls,
 
 void ApplicationHandler::startProcess(const std::string &serviceName)
 {
-  return execProcess(serviceName, SYSTEMCTL_START);
+  execProcess(serviceName, SYSTEMCTL_START);
 }
 
 void ApplicationHandler::killProcess(const std::string &serviceName)

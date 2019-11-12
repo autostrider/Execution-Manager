@@ -23,31 +23,12 @@ ExecutionManager::ExecutionManager(
   std::unique_ptr<ExecutionManagerClient::IExecutionManagerClient> client)
   : m_appHandler{std::move(applicationHandler)},
     m_activeProcesses{},
-    m_allowedProcessesForState{},
+    m_allowedProcessesForState{reader->getStatesSupportedByApplication()},
     m_currentState{},
     m_pendingState{},
     m_machineManifestStates{reader->getMachineStates()},
     m_rpcClient(std::move(client))
 {
-  const auto fullProcessesInfoInStates =
-      reader->getStatesSupportedByApplication();
-
-  for (const auto& processesInfoForState: fullProcessesInfoInStates)
-  {
-    std::set<ProcName> availableProcesses;
-    std::transform(
-        processesInfoForState.second.begin(),
-          processesInfoForState.second.end(),
-          std::inserter(availableProcesses, availableProcesses.begin()),
-          [](auto item) { 
-            return getServiceName(item.applicationName, item.processName); 
-            });
-
-    m_allowedProcessesForState.insert(
-      {processesInfoForState.first, availableProcesses}
-    );
-  }
-
   filterStates();
 }
 

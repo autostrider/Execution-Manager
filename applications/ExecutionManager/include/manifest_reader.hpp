@@ -23,7 +23,7 @@ class ManifestReader : public IManifestReader
 public:
   explicit ManifestReader(const ManifestReaderConf& conf = ManifestReaderConf{});
 
-   std::map<MachineState, std::vector<ProcessInfo>>
+   std::map<MachineState, std::set<std::string>>
    getStatesSupportedByApplication() override;
 
   std::vector<MachineState> getMachineStates() override;

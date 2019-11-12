@@ -5,6 +5,7 @@
 
 #include <map>
 #include <vector>
+#include <set>
 
 namespace ExecutionManager
 {
@@ -12,7 +13,7 @@ namespace ExecutionManager
 class IManifestReader
 {
 public:
-  virtual std::map<MachineState, std::vector<ProcessInfo>>
+  virtual std::map<MachineState, std::set<std::string>>
   getStatesSupportedByApplication() = 0;
 
   virtual std::vector<MachineState> getMachineStates() = 0;

@@ -26,10 +26,10 @@ ManifestReader::ManifestReader(const ManifestReaderConf &conf)
   : conf(conf)
 { }
 
-std::map<MachineState, std::vector<ProcessInfo> > ManifestReader::getStatesSupportedByApplication()
+std::map<MachineState, std::set<std::string>> ManifestReader::getStatesSupportedByApplication()
 {
   const auto& applicationNames = getListOfApplications();
-  std::map<MachineState, std::vector<ProcessInfo>> res;
+  std::map<MachineState, std::set<std::string>> res;
   const static std::string manifestFile = "/manifest.json";
 
   for (auto file: applicationNames)
@@ -49,9 +49,7 @@ std::map<MachineState, std::vector<ProcessInfo> > ManifestReader::getStatesSuppo
           if (mode.functionGroup == machineStateFunctionGroup)
           {
             res[mode.mode]
-              .push_back({manifest.manifest.manifestId,
-                          process.name,
-                          conf.startupOptions});
+              .insert(manifest.manifest.manifestId + "_" + process.name);
           }
         }
       }

@@ -15,23 +15,19 @@ std::string getAppName(pid_t appPid)
   static constexpr auto procPath = "/proc/";
   static constexpr auto cmdName = "/cmdline";
   static constexpr auto delimiter = '/';
+  static constexpr int processesSize = 11;
 
   std::ifstream data {procPath + std::to_string(appPid) + cmdName};
   std::string fullCmd;
   data >> fullCmd;
 
-  std::reverse(fullCmd.begin(), fullCmd.end());
-  std::stringstream info{fullCmd};
-  std::string processName;
-  std::getline(info, processName, delimiter);
-  std::reverse(processName.begin(), processName.end());
-  std::string appName;
-  // According to our spec, we have /AppName/process/procName
-  // so we skip process word
-  std::getline(info, appName, delimiter);
-  // actual app name
-  std::getline(info, appName, delimiter);
-  std::reverse(appName.begin(), appName.end());
+  int prevPos = fullCmd.length();
+  int currPos = fullCmd.find_last_of(delimiter, currPos);
+  std::string processName = fullCmd.substr(currPos + 1);
+  
+  prevPos = currPos - processesSize;
+  currPos = fullCmd.find_last_of(delimiter, prevPos);
+  std::string appName = fullCmd.substr(currPos + 1, prevPos - currPos);
 
   return getServiceName(appName, processName);
 }

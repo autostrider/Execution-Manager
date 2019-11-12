@@ -8,6 +8,7 @@
 #include <string>
 #include <chrono>
 #include <map>
+#include <set>
 
 
 static const std::string IPC_PROTOCOL{"unix:"};
@@ -31,6 +32,8 @@ static const std::string MACHINE_STATE_LIVING{"Living"};
 static const std::string MACHINE_STATE_SHUTTINGDOWN{"Shuttingdown"};
 
 using StateHandler = std::function<void()>;
+using ProcName = std::string;
+using ProcessesList = std::set<ProcName>;
 
 const std::map<int, api::ApplicationStateClient::ApplicationState> mapSignalToState
 {

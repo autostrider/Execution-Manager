@@ -10,14 +10,11 @@
 #include <string>
 #include <vector>
 #include <map>
-#include <set>
 
 namespace ExecutionManager
 {
 
-using applicationId = std::string;
 using MachineState = std::string;
-using ProcName = std::string;
 using StateError = ::MachineStateManagement::StateError;
 using std::pair;
 

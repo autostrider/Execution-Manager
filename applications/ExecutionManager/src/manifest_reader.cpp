@@ -26,10 +26,10 @@ ManifestReader::ManifestReader(const ManifestReaderConf &conf)
   : conf(conf)
 { }
 
-std::map<MachineState, std::set<std::string>> ManifestReader::getStatesSupportedByApplication()
+std::map<MachineState, ProcessesList> ManifestReader::getStatesSupportedByApplication()
 {
   const auto& applicationNames = getListOfApplications();
-  std::map<MachineState, std::set<std::string>> res;
+  std::map<MachineState, ProcessesList> res;
   const static std::string manifestFile = "/manifest.json";
 
   for (auto file: applicationNames)
@@ -86,10 +86,10 @@ std::vector<MachineState> ManifestReader::getMachineStates()
   return res;
 }
 
-std::set<std::string> ManifestReader::getListOfApplications()
+ProcessesList ManifestReader::getListOfApplications()
 {
   DIR* dp = nullptr;
-  std::set<std::string> fileNames;
+  ProcessesList fileNames;
 
   if ((dp = opendir(conf.pathToApplicationsFolder.c_str())) == nullptr)
   {

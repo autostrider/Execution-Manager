@@ -2,10 +2,10 @@
 #define IMANIFEST_READER_HPP
 
 #include "manifests.hpp"
+#include "constants.hpp"
 
 #include <map>
 #include <vector>
-#include <set>
 
 namespace ExecutionManager
 {
@@ -13,7 +13,7 @@ namespace ExecutionManager
 class IManifestReader
 {
 public:
-  virtual std::map<MachineState, std::set<std::string>>
+  virtual std::map<MachineState, ProcessesList>
   getStatesSupportedByApplication() = 0;
 
   virtual std::vector<MachineState> getMachineStates() = 0;

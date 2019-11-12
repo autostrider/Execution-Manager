@@ -107,13 +107,13 @@ protected:
   void SetUp() override;
   void TearDown() override;
 
-  const std::map<MachineState, std::set<std::string>>
+  const std::map<MachineState, ProcessesList>
     availableAppsForStates =
       {
         {"Startup", { "msm_msm", "test-aa2_proc2"} },
         {"Running", { "msm_msm", "test-aa1_proc1"} },
       };
-  const std::map<MachineState, std::set<std::string>> emptyAppsForStates =
+  const std::map<MachineState, ProcessesList> emptyAppsForStates =
     {};
 private:
   void createApplicationManifests();

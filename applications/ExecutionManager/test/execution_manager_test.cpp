@@ -51,7 +51,7 @@ protected:
   ApplicationHandlerMock* pAppHandler = applicationHandler.get();
   const std::string wrongMachineState{"WrongMachineState"};
   const std::string testState{"TestState"};
-  const std::set<std::string> emptyAvailableApps{};
+  const ProcessesList emptyAvailableApps{};
   const std::string firstState{"First"};
   const std::string secondState{"Second"};
   const std::string suspendState{"Suspend"};

@@ -28,21 +28,21 @@ protected:
   void setupArgumetnsCheck
   (const std::string& serviceName, const std::string& action)
   {
-      std::pair<int, const char*> procNameArg {0, SYSTEMCTL.c_str()};
-      std::pair<int, const char*> userArg{1, "--user"};
-      std::pair<int, const char*> systemctlAction {2, action.c_str()};
-      std::pair<int, const char*> suOptionArg {3, serviceName.c_str()};
-      std::pair<int, const char*> nullTerminatingArg {4, nullptr};
+    static const std::pair<int, const char*> procNameArg {0, SYSTEMCTL.c_str()};
+    static const std::pair<int, const char*> userArg{1, "--user"};
+    std::pair<int, const char*> systemctlAction {2, action.c_str()};
+    std::pair<int, const char*> suOptionArg {3, serviceName.c_str()};
+    static const std::pair<int, const char*> nullTerminatingArg {4, nullptr};
 
-      EXPECT_CALL(*m_iosmock, fork()).WillOnce(Return(childProcessId));
-      EXPECT_CALL(*m_iosmock, execvp(_, _))
-        .WillOnce(DoAll(CheckProcessName(SYSTEMCTL),
-      CheckArg(procNameArg),
-      CheckArg(userArg),
-      CheckArg(systemctlAction),
-      CheckArg(suOptionArg),
-      CheckArg(nullTerminatingArg),
-      Return(execvRes)));
+    EXPECT_CALL(*m_iosmock, fork()).WillOnce(Return(childProcessId));
+    EXPECT_CALL(*m_iosmock, execvp(_, _))
+      .WillOnce(DoAll(CheckProcessName(SYSTEMCTL),
+    CheckArg(procNameArg),
+    CheckArg(userArg),
+    CheckArg(systemctlAction),
+    CheckArg(suOptionArg),
+    CheckArg(nullTerminatingArg),
+    Return(execvRes)));
   }
 
   const int childProcessId = 0;
@@ -78,15 +78,15 @@ TEST_F(ApplicationHandlerTest, ShouldFailToStartProcessWhenExecvpFailed)
 
 TEST_F(ApplicationHandlerTest, ShouldSucceedToStartService)
 {
-  setupArgumetnsCheck(serviceName, "start");
+  setupArgumetnsCheck(serviceName, SYSTEMCTL_START);
 
   ExecutionManager::ApplicationHandler appHandler{std::move(m_iosmock)};
-  appHandler.startProcess("dsfasd");
+  appHandler.startProcess(processName);
 }
 
 TEST_F(ApplicationHandlerTest, ShouldSucceedToStopService)
 {
-  setupArgumetnsCheck(serviceName, "stop");
+  setupArgumetnsCheck(serviceName, SYSTEMCTL_STOP);
 
   ExecutionManager::ApplicationHandler appHandler{std::move(m_iosmock)};
   appHandler.killProcess(processName);

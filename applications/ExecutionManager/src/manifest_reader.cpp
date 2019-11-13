@@ -1,4 +1,5 @@
 #include "manifest_reader.hpp"
+#include <common.hpp>
 
 #include <dirent.h>
 #include <json.hpp>
@@ -49,7 +50,7 @@ std::map<MachineState, ProcessesList> ManifestReader::getStatesSupportedByApplic
           if (mode.functionGroup == machineStateFunctionGroup)
           {
             res[mode.mode]
-              .insert(manifest.manifest.manifestId + "_" + process.name);
+              .insert(getServiceName(manifest.manifest.manifestId, process.name));
           }
         }
       }

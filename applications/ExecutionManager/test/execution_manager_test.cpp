@@ -54,13 +54,27 @@ protected:
   const ProcessesList emptyAvailableApps{};
   const std::string firstState{"First"};
   const std::string secondState{"Second"};
+  const std::string startingUpState{"Starting-up"};
   const std::string suspendState{"Suspend"};
   const std::vector<MachineState> transitionStates =
-    {firstState, secondState, suspendState};
+    {startingUpState, firstState, secondState, suspendState};
   const std::string app{"app_app"};
   const std::string additionalApp{
       "additionalApp_additionalApp"};
 };
+
+TEST_F(ExecutionManagerTest, ShouldSucceedToSetStartingUpMachineState)
+{
+  auto em = initEm(transitionStates, {});
+
+  EXPECT_CALL(*pClient, confirm(StateError::K_SUCCESS)).Times(1);
+  ASSERT_EQ(em.setMachineState(startingUpState), StateError::K_SUCCESS);
+
+  ASSERT_EQ(
+    em.getMachineState(),
+    startingUpState
+  );
+}
 
 TEST_F(ExecutionManagerTest,
   ShouldSucceedToGetMachineState)

@@ -1,6 +1,7 @@
 #include "application_state_client.h"
 
 #include <capnp/ez-rpc.h>
+#include <constants.hpp>
 #include <execution_management.capnp.h>
 #include <iostream>
 #include <unistd.h>
@@ -42,6 +43,7 @@ ApplicationStateClientServer::ApplicationStateClientServer (Data& sharedResource
 ApplicationStateClientServer::reportApplicationState(ReportApplicationStateContext context)
 {
     m_sharedResource.m_state = context.getParams().getState();
+
          
     return kj::READY_NOW;
 }
@@ -55,21 +57,24 @@ protected:
 
 	virtual void SetUp()
 	{
-		::unlink(socketName);
+		::unlink(EM_SOCKET_NAME.c_str());
 	}
 
-	virtual void TearDown() {}
+	virtual void TearDown()
+    {
+        unlink(EM_SOCKET_NAME.c_str());
+    }
 
     Data sharedResource;  
-    const char* socketName = "/tmp/execution_management"; 
-    capnp::EzRpcServer server{kj::heap<ApplicationStateClientServer>(sharedResource), string{"unix:"} + socketName}; 
+    const std::string socketName{IPC_PROTOCOL + EM_SOCKET_NAME};
+    capnp::EzRpcServer server{kj::heap<ApplicationStateClientServer>(sharedResource), socketName}; 
 };
 
 TEST_F(ApplicationStateClientTest, ShouldSucceedToReportApplicationState)
 {
-  api::ApplicationStateClient asc;
-  asc.ReportApplicationState(ApplicationState::K_RUNNING);
+	api::ApplicationStateClient asc; 
+	asc.ReportApplicationState(ApplicationState::K_RUNNING);
 
-  ASSERT_EQ(ApplicationState::K_RUNNING, sharedResource.m_state);
+	ASSERT_EQ(ApplicationState::K_RUNNING, sharedResource.m_state);
 }
 } //namespace

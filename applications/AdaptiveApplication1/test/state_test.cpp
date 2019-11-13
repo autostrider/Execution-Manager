@@ -1,13 +1,12 @@
 #include "state.hpp"
-
-#include "gtest/gtest.h"
-#include "gmock/gmock.h"
-
 #include "mocks/i_state_mock.hpp"
 #include "mocks/i_state_factory_mock.hpp"
 #include "mocks/app_state_client_mock.hpp"
 #include "mocks/component_client_mock.hpp"
 #include "mocks/mean_calculator_mock.hpp"
+
+#include "gtest/gtest.h"
+#include "gmock/gmock.h"
 
 using namespace testing;
 
@@ -30,157 +29,33 @@ protected:
                 std::move(stateClientMock),
                 std::move(componentClientMock),
                        std::move(meanCalculatorMock)};
-
-    const api::ComponentState expectedStateKOn = api::ComponentStateKOn;
-    const api::ComponentState expectedStateKOff = api::ComponentStateKOff;
-    const api::ComponentState expectedStateInvalid = "invalidState";
-    const double mu = 10;
-    const double sigma = 0.5;
-
-    void expectGetComponentState(const api::ComponentState &expectedState,
-                                 const api::ComponentClientReturnType& result);
-    void expectConfirmComponentState(const api::ComponentState& expectedState,
-                                     api::ComponentClientReturnType result);
 };
-
-
-void StateTest::expectGetComponentState(const api::ComponentState& expectedState,
-                                        const api::ComponentClientReturnType& result)
-{
-    EXPECT_CALL(*componentClientMockPtr, GetComponentState(_))
-            .WillOnce(
-                DoAll(
-                    SetArgReferee<0>(expectedState),
-                    Return(result))
-                );
-}
-
-void StateTest::expectConfirmComponentState(const api::ComponentState& expectedState,
-                                            const api::ComponentClientReturnType result)
-{
-    EXPECT_CALL(*componentClientMockPtr,
-                ConfirmComponentState
-                (
-                    Eq(expectedState),
-                    result)
-                );
-}
 
 TEST_F(StateTest, shouldReportStateWhenInitEntered)
 {
+    auto state = factory.createInit(appMock);
     EXPECT_CALL(*stateClientMockPtr, ReportApplicationState(ApplicationState::K_INITIALIZING));
-
-    auto state = factory.createInit(appMock);
     state->enter();
 }
 
-TEST_F(StateTest, shouldConfirmKOnWhenRunEntered)
+TEST_F(StateTest, shouldReportRunningStateWhenRunEntered)
 {
     auto state = factory.createRun(appMock);
-
-    expectGetComponentState(expectedStateKOn, api::ComponentClientReturnType::kSuccess);
-    expectConfirmComponentState(expectedStateKOn, api::ComponentClientReturnType::kSuccess);
-    EXPECT_CALL(*meanCalculatorMockPtr, mean());
-
-    state->enter();
-}
-
-TEST_F(StateTest, shouldConfirmKOffWhenRunEntered)
-{
-    auto state = factory.createRun(appMock);
-
-    expectGetComponentState(expectedStateKOff, api::ComponentClientReturnType::kSuccess);
-    expectConfirmComponentState(expectedStateKOff, api::ComponentClientReturnType::kSuccess);
-    state->enter();
-}
-
-TEST_F(StateTest, shouldConfirmInvalidStateWhenRunEntered)
-{
-    auto state = factory.createRun(appMock);
-
-    expectGetComponentState(expectedStateInvalid, api::ComponentClientReturnType::kSuccess);
-    expectConfirmComponentState(expectedStateInvalid, api::ComponentClientReturnType::kInvalid);
-    state->enter();
-}
-
-TEST_F(StateTest, shouldConfirmGeneralErrorWhenRunEntered)
-{
-    auto state = factory.createRun(appMock);
-
-    expectGetComponentState(expectedStateInvalid, api::ComponentClientReturnType::kGeneralError);
-    expectConfirmComponentState(expectedStateInvalid, api::ComponentClientReturnType::kGeneralError);
-    state->enter();
-}
-
-TEST_F(StateTest, shouldConfirmStateUnchangedKOnWhenRunEntered)
-{
-    auto state = factory.createRun(appMock);
-
-    expectConfirmComponentState(expectedStateKOn, api::ComponentClientReturnType::kSuccess);
-    expectGetComponentState(expectedStateKOn, api::ComponentClientReturnType::kSuccess);
-    EXPECT_CALL(*meanCalculatorMockPtr, mean());
-    state->enter();
-
-    expectGetComponentState(expectedStateKOn, api::ComponentClientReturnType::kSuccess);
-    expectConfirmComponentState(expectedStateKOn, api::ComponentClientReturnType::kUnchanged);
-    EXPECT_CALL(*meanCalculatorMockPtr, mean());
-    state->enter();
-}
-
-TEST_F(StateTest, shouldConfirmStateUnchangedKOffWhenRunEntered)
-{
-    auto state = factory.createRun(appMock);
-
-    expectGetComponentState(expectedStateKOff, api::ComponentClientReturnType::kSuccess);
-    expectConfirmComponentState(expectedStateKOff, api::ComponentClientReturnType::kSuccess);
-    state->enter();
-
-    expectGetComponentState(expectedStateKOff, api::ComponentClientReturnType::kSuccess);
-    expectConfirmComponentState(expectedStateKOff, api::ComponentClientReturnType::kUnchanged);
-    state->enter();
-}
-
-TEST_F(StateTest, shouldConfirmStateChangedFromKOnToKOffWhenRunEntered)
-{
-    auto state = factory.createRun(appMock);
-
-    expectGetComponentState(expectedStateKOn, api::ComponentClientReturnType::kSuccess);
-    expectConfirmComponentState(expectedStateKOn, api::ComponentClientReturnType::kSuccess);
-    EXPECT_CALL(*meanCalculatorMockPtr, mean());
-    state->enter();
-
-    expectGetComponentState(expectedStateKOff, api::ComponentClientReturnType::kSuccess);
-    expectConfirmComponentState(expectedStateKOff, api::ComponentClientReturnType::kSuccess);
-    state->enter();
-}
-
-TEST_F(StateTest, shouldConfirmStateChangedFromKOffToKOnWhenRunEntered)
-{
-    auto state = factory.createRun(appMock);
-
-    expectGetComponentState(expectedStateKOff, api::ComponentClientReturnType::kSuccess);
-    expectConfirmComponentState(expectedStateKOff, api::ComponentClientReturnType::kSuccess);
-    state->enter();
-
-    expectGetComponentState(expectedStateKOn, api::ComponentClientReturnType::kSuccess);
-    expectConfirmComponentState(expectedStateKOn, api::ComponentClientReturnType::kSuccess);
-    EXPECT_CALL(*meanCalculatorMockPtr, mean());
-    state->enter();
-}
-
-TEST_F(StateTest, shouldReportRunningStateWhenInitLeft)
-{
     EXPECT_CALL(*stateClientMockPtr, ReportApplicationState(api::ApplicationStateClient::ApplicationState::K_RUNNING));
+    state->enter();
+}
 
-    auto state = factory.createInit(appMock);
-    state->leave();
+TEST_F(StateTest, shouldCalculateMeanWhenPerforemActionCalled)
+{
+    auto state = factory.createRun(appMock);
+    EXPECT_CALL(*meanCalculatorMockPtr, mean());
+    state->performAction();
 }
 
 TEST_F(StateTest, shouldReportShutdownStateWhenShutDownEntered)
 {
-    EXPECT_CALL(*stateClientMockPtr, ReportApplicationState(api::ApplicationStateClient::ApplicationState::K_SHUTTINGDOWN));
-
     auto state = factory.createShutDown(appMock);
+    EXPECT_CALL(*stateClientMockPtr, ReportApplicationState(api::ApplicationStateClient::ApplicationState::K_SHUTTINGDOWN));
     state->enter();
 }
 
@@ -190,4 +65,30 @@ TEST_F(StateTest, shouldDoNothingWhenShutdownLeft)
     state->leave();
 }
 
+TEST_F(StateTest, shouldDoNothingWhenPerformActionCalledForInitState)
+{
+    auto state = factory.createInit(appMock);
+    state->performAction();
+}
+TEST_F(StateTest, shouldDoNothingWhenPerformActionCalledForSuspendState)
+{
+    auto state = factory.createSuspend(appMock);
+    state->performAction();
+}
 
+TEST_F(StateTest, shouldDoNothingWhenPerformActionCalledForShutdownState)
+{
+    auto state = factory.createShutDown(appMock);
+    state->performAction();
+}
+
+TEST_F(StateTest, shouldDoNothingWhenSuspendEntered)
+{
+    auto state = factory.createSuspend(appMock);
+    state->leave();
+}
+TEST_F(StateTest, shouldDoNothingWhenSuspendLeft)
+{
+    auto state = factory.createSuspend(appMock);
+    state->enter();
+}

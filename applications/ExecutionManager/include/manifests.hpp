@@ -42,20 +42,6 @@ struct ProcessInfo
   std::string applicationName;
   std::string processName;
   std::vector<StartupOption> startOptions;
-
-  std::string createRelativePath() const
-  {
-    return applicationName
-        + "/processes/"
-        + processName;
-  }
-
-  bool operator==(const ProcessInfo& rhs) const
-  {
-    return processName == rhs.processName &&
-           applicationName == rhs.applicationName;
-
-  }
 };
 
 struct ModeDepStartupConfig

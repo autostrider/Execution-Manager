@@ -633,11 +633,4 @@ TEST(ApplicationManifestReadingTestsFail, ShouldFaildWhenDirectoryNotExists)
   EXPECT_THROW(reader.getStatesSupportedByApplication(), std::runtime_error);
 }
 
-TEST(ProcessInfoTests, ShouldReturnRelativePathToProcess)
-{
-  const ProcessInfo testInput{"app", "process", {}};
-
-  ASSERT_EQ(testInput.createRelativePath(), "app/processes/process");
-}
-
 } // namespace ExecutionManagerTests

@@ -9,13 +9,16 @@
 #include <memory>
 #include <string>
 #include <vector>
-#include <map>
+#include <set>
 
 namespace ExecutionManager
 {
 
 using MachineState = std::string;
+using ComponentState = std::string;
+using ProcName = std::string;
 using StateError = ::MachineStateManagement::StateError;
+using ComponentClientReturnType = ::StateManagement::ComponentClientReturnType;
 using std::pair;
 
 struct ApplicationManifest;
@@ -39,13 +42,19 @@ public:
 
   void start();
 
-  void reportApplicationState(const std::string &appName, AppState state);
+  void reportApplicationState(const std::string& appName, AppState state);
 
   MachineState getMachineState() const;
 
   StateError setMachineState(std::string state);
 
-  void suspend();
+  void registerComponent(std::string component);
+
+  ComponentClientReturnType
+  getComponentState(std::string component, ComponentState& state) const;
+
+  void confirmComponentState
+  (std::string component, ComponentState state, ComponentClientReturnType status);
 
 private:
   void filterStates();
@@ -63,6 +72,10 @@ private:
 
   inline void checkAndSendConfirm();
 
+  inline bool isConfirmAvailable();
+
+  inline void changeComponentsState();
+
 private:
   std::unique_ptr<IApplicationHandler> m_appHandler;
 
@@ -77,6 +90,11 @@ private:
   MachineState m_pendingState;
 
   std::vector<MachineState> m_machineManifestStates;
+
+  std::set<pid_t> m_stateConfirmToBeReceived;
+
+  std::map<std::string, ComponentState> m_registeredComponents;
+  std::set<std::string> m_componentConfirmToBeReceived;
 
   std::unique_ptr<ExecutionManagerClient::IExecutionManagerClient> m_rpcClient;
 };

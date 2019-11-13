@@ -5,7 +5,7 @@ set(CAPNPC_OUTPUT_DIR ${CMAKE_CURRENT_SOURCE_DIR}/generated)
 #################################################################
 #                 Application State Management                  #
 #################################################################
-capnp_generate_cpp(asGenSources asGenHeaders 
+capnp_generate_cpp(asGenSources asGenHeaders
   application_state_management.capnp
 )
 
@@ -15,7 +15,7 @@ add_library(application_state_management STATIC
    ${asGenHeaders}
 )
 # Lib target alias
-add_library(${GEN_NAMESPACE_NAME}::application_state_management 
+add_library(${GEN_NAMESPACE_NAME}::application_state_management
             ALIAS                  application_state_management)
 
 # Link needed libraries
@@ -34,7 +34,7 @@ target_include_directories(application_state_management
 #################################################################
 #                   Machine State Management                    #
 #################################################################
-capnp_generate_cpp(msGenSources msGenHeaders 
+capnp_generate_cpp(msGenSources msGenHeaders
   machine_state_management.capnp
 )
 
@@ -44,7 +44,7 @@ add_library(machine_state_management STATIC
    ${msGenHeaders}
 )
 # Lib target alias
-add_library(${GEN_NAMESPACE_NAME}::machine_state_management 
+add_library(${GEN_NAMESPACE_NAME}::machine_state_management
             ALIAS                  machine_state_management)
 
 # Link needed libraries
@@ -61,9 +61,38 @@ target_include_directories(machine_state_management
 )
 
 #################################################################
+#                     Component State Management                #
+#################################################################
+capnp_generate_cpp(cmGenSources cmGenHeaders
+  component_state_management.capnp
+)
+
+# Create major target
+add_library(component_state_management STATIC
+   ${cmGenSources}
+   ${cmGenHeaders}
+)
+# Lib target alias
+add_library(${GEN_NAMESPACE_NAME}::component_state_management
+            ALIAS                  component_state_management)
+
+# Link needed libraries
+target_link_libraries(component_state_management
+    PUBLIC
+      CapnProto::capnp
+)
+
+# Specify include directory
+target_include_directories(component_state_management
+    PUBLIC
+      $<BUILD_INTERFACE:${CMAKE_CURRENT_SOURCE_DIR}/generated>
+      $<INSTALL_INTERFACE:${CMAKE_CURRENT_SOURCE_DIR}/generated>
+)
+
+#################################################################
 #                     Execution Management                      #
 #################################################################
-capnp_generate_cpp(emGenSources emGenHeaders 
+capnp_generate_cpp(emGenSources emGenHeaders
   execution_management.capnp
 )
 
@@ -73,7 +102,7 @@ add_library(execution_management STATIC
    ${emGenHeaders}
 )
 # Lib target alias
-add_library(${GEN_NAMESPACE_NAME}::execution_management 
+add_library(${GEN_NAMESPACE_NAME}::execution_management
             ALIAS                  execution_management)
 
 # Link needed libraries
@@ -81,6 +110,7 @@ target_link_libraries(execution_management
     PUBLIC
       machine_state_management
       application_state_management
+      component_state_management
       CapnProto::capnp
 )
 
@@ -91,9 +121,10 @@ target_include_directories(execution_management
       $<INSTALL_INTERFACE:${CMAKE_CURRENT_SOURCE_DIR}/generated>
 )
 
-# Dependency to AS and MS
+# Dependency to AS, MS and CM
 add_dependencies(execution_management application_state_management
                                       machine_state_management
+                                      component_state_management
 )
 
 #################################################################
@@ -109,5 +140,6 @@ add_custom_target(gen
 add_dependencies(gen
   machine_state_management
   application_state_management
+  component_state_management
   execution_management
 )

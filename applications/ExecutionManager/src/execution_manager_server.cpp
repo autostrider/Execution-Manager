@@ -80,4 +80,39 @@ ExecutionManagerServer::setMachineState(SetMachineStateContext context)
   return kj::READY_NOW;
 }
 
+::kj::Promise<void>
+ExecutionManagerServer::registerComponent(RegisterComponentContext context)
+{
+  m_em.registerComponent(context.getParams().getComponent().cStr());
+
+  return kj::READY_NOW;
+}
+
+::kj::Promise<void>
+ExecutionManagerServer::getComponentState(GetComponentStateContext context)
+{
+  std::string component = context.getParams().getComponent().cStr();
+
+  ComponentState state;
+  auto result = m_em.getComponentState(component, state);
+
+  context.getResults().setState(state);
+  context.getResults().setResult(result);
+
+  return kj::READY_NOW;
+}
+
+::kj::Promise<void>
+ExecutionManagerServer::confirmComponentState
+(ConfirmComponentStateContext context)
+{
+  std::string component = context.getParams().getComponent().cStr();
+  ComponentState state = context.getParams().getState().cStr();
+  ComponentClientReturnType status = context.getParams().getStatus();
+
+  m_em.confirmComponentState(component, state, status);
+
+  return kj::READY_NOW;
+}
+
 } //namespace ExecutionManagerServer

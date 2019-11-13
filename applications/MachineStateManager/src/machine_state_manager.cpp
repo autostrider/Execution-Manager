@@ -37,6 +37,11 @@ void MachineStateManager::terminate()
                 );
 }
 
+void MachineStateManager::performAction()
+{
+
+}
+
 void MachineStateManager::transitToNextState(api::IAdaptiveApp::FactoryFunc nextState)
 {
     m_currentState->leave();

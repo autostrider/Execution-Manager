@@ -76,6 +76,7 @@ void
 ExecutionManager::confirmState(StateError status)
 {
   m_currentState = m_pendingState;
+
   m_rpcClient->confirm(status);
 
   LOG  << "Machine state changed successfully to "
@@ -120,11 +121,32 @@ void ExecutionManager::startApplication(const ProcName& process)
       << "\" was started by systemctl.";
 }
 
+bool ExecutionManager::isConfirmAvailable()
+{
+  return m_activeProcesses == m_allowedProcessesForState[m_pendingState];
+}
+
 void ExecutionManager::checkAndSendConfirm()
 {
-  if (m_activeProcesses == m_allowedProcessesForState[m_pendingState])
+  if (isConfirmAvailable())
   {
     confirmState(StateError::K_SUCCESS);
+  }
+}
+
+void ExecutionManager::changeComponentsState()
+{
+  ComponentState pendingComponentsState =
+    (m_pendingState == MACHINE_STATE_SUSPEND) ? COMPONENT_STATE_OFF :
+                                                COMPONENT_STATE_ON;
+
+  for(auto& component : m_registeredComponents)
+  {
+    if(component.second != pendingComponentsState)
+    {
+      m_componentConfirmToBeReceived.emplace(component.first);
+      component.second = pendingComponentsState;
+    }
   }
 }
 
@@ -180,9 +202,16 @@ ExecutionManager::setMachineState(std::string state)
 
   killProcessesForState();
 
-  if(m_pendingState == AA_STATE_SUSPEND)
+  startApplicationsForState();
+
+  changeComponentsState();
+
+  if (!isConfirmAvailable() ||
+      !m_componentConfirmToBeReceived.empty())
   {
-    suspend();
+    LOG << "Machine state change to \""
+        << m_pendingState
+        << "\" requested.";
   }
   else
   {
@@ -198,10 +227,43 @@ ExecutionManager::setMachineState(std::string state)
   return StateError::K_SUCCESS;
 }
 
-void 
-ExecutionManager::suspend()
+void ExecutionManager::registerComponent(std::string component)
 {
-  LOG << "Suspend entered";
+  m_registeredComponents.emplace(std::make_pair(component, COMPONENT_STATE_ON));
+}
+
+ComponentClientReturnType
+ExecutionManager::getComponentState
+(std::string component, ComponentState& state) const
+{
+  auto iter = m_registeredComponents.find(component);
+
+  if(iter != m_registeredComponents.cend())
+  {
+    state = iter->second;
+    return ComponentClientReturnType::K_SUCCESS;
+  }
+  else
+  {
+    return ComponentClientReturnType::K_INVALID;
+  }
+}
+
+void ExecutionManager::confirmComponentState
+(std::string component, ComponentState state, ComponentClientReturnType status)
+{
+  if (m_componentConfirmToBeReceived.empty())
+  {
+    return;
+  }
+
+  m_componentConfirmToBeReceived.erase(component);
+
+  if (isConfirmAvailable() &&
+      m_componentConfirmToBeReceived.empty())
+    {
+     confirmState(StateError::K_SUCCESS);
+    }
 }
 
 } // namespace ExecutionManager

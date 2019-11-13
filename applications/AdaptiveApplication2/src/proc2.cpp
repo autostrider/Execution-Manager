@@ -5,12 +5,13 @@
 #include <mean_calculator.hpp>
 #include <i_application_state_client_wrapper.hpp>
 
+
 #include <thread>
 
 static void signalHandler(int signo);
 using ApplicationState = api::ApplicationStateClient::ApplicationState;
 
-static std::atomic<ApplicationState> state{ApplicationState::K_INITIALIZING};
+static std::atomic<bool> isTerminated{false};
 
 int main()
 {
@@ -18,33 +19,28 @@ int main()
     {
         LOG << "[proc2] Error while registering signal.";
     }
+
+    const std::string componentName{"proc2"};
     AdaptiveApp app2(std::make_unique<StateFactory>(),
-                     std::make_unique<api::ApplicationStateClientWrapper>(),
-                     std::make_unique<api::ComponentClientWrapper>(),
-                     std::make_unique<MeanCalculator>());
+                    std::make_unique<api::ApplicationStateClientWrapper>(),
+                    std::make_unique<api::ComponentClientWrapper>(componentName),
+                    std::make_unique<MeanCalculator>());
 
-    const std::map<ApplicationState, StateHandler> dispatchMap
+    app2.init();
+    app2.run();
+
+    while (false == isTerminated)
     {
-        {ApplicationState::K_INITIALIZING, std::bind(&api::IAdaptiveApp::init, &app2)},
-        {ApplicationState::K_RUNNING, std::bind(&api::IAdaptiveApp::run, &app2)},
-        {ApplicationState::K_SHUTTINGDOWN, std::bind(&api::IAdaptiveApp::terminate, &app2)}
-    };
-
-    dispatchMap.at(state)();
-    state = ApplicationState::K_RUNNING;
-
-    while (ApplicationState::K_RUNNING == state)
-    {
-        dispatchMap.at(state)();
+        app2.performAction();
         std::this_thread::sleep_for(FIVE_SECONDS);
     }
 
-    dispatchMap.at(state)();
+    app2.terminate();
     return 0;
 }
 
 static void signalHandler(int signo)
 {
     LOG << "[proc2] Received signal: " << sys_siglist[signo] << ".";
-    state = mapSignalToState.at(signo);
+    isTerminated = true;
 }

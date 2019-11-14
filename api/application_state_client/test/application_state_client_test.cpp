@@ -9,7 +9,7 @@
 #include "gtest/gtest.h"
 #include "gmock/gmock.h"
 
-using namespace std;
+using namespace ::testing;
 
 namespace ApplicationStateClientTest
 {
@@ -34,9 +34,10 @@ private:
     Data& m_sharedResource;
 };
 
-ApplicationStateClientServer::ApplicationStateClientServer (Data& sharedResource) : m_sharedResource{sharedResource}
+ApplicationStateClientServer::ApplicationStateClientServer(Data& sharedResource) 
+    : m_sharedResource{sharedResource}
 {
-    cout << "Application State Client server started..." << endl;
+    std::cout << "Application State Client server started..." << std::endl;
 }
 
 ::kj::Promise<void>
@@ -48,21 +49,21 @@ ApplicationStateClientServer::reportApplicationState(ReportApplicationStateConte
     return kj::READY_NOW;
 }
 
-class ApplicationStateClientTest : public ::testing::Test 
+class ApplicationStateClientTest : public Test 
 {
 protected:
     virtual ~ApplicationStateClientTest() noexcept(true) {}
 
     ApplicationStateClientTest() {}
 
-	virtual void SetUp()
-	{
-		::unlink(EM_SOCKET_NAME.c_str());
-	}
+  virtual void SetUp()
+  {
+    ::unlink(EM_SOCKET_NAME.c_str());
+  }
 
-	virtual void TearDown()
+  virtual void TearDown()
     {
-        unlink(EM_SOCKET_NAME.c_str());
+        ::unlink(EM_SOCKET_NAME.c_str());
     }
 
     Data sharedResource;  

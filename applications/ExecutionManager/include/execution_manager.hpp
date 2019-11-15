@@ -27,10 +27,10 @@ struct ApplicationManifest;
 
 enum class AppState : uint16_t
 {
-  INITIALIZING,
-  RUNNING,
-  SHUTTINGDOWN,
-  SUSPEND
+  kInitializing,
+  kRunning,
+  kShuttingdown,
+  kSuspend
 };
 
 class ExecutionManager
@@ -87,7 +87,7 @@ private:
 
   void confirmState(StateError status);
 
-  inline void changeComponentsState();
+  void changeComponentsState();
 
 private:
   /**
@@ -124,7 +124,7 @@ private:
   std::set<pid_t> m_stateConfirmToBeReceived;
 
   std::map<std::string, ComponentState> m_registeredComponents;
-  std::set<std::string> m_componentConfirmToBeReceived;
+  std::set<std::string> m_componentPendingConfirmsToBeReceived;
 
   std::unique_ptr<ExecutionManagerClient::IExecutionManagerClient> m_rpcClient;
 };

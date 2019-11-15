@@ -101,12 +101,11 @@ void ExecutionManager::killProcessesForState()
     if (allowedApps == m_allowedProcessesForState.cend() ||
         processToBeKilled(app->first, allowedApps->second))
     {
-      auto currentApp = app;
-      appHandler->killProcess(currentApp->second);
-      m_stateConfirmToBeReceived.insert(currentApp->second);
+      appHandler->killProcess(app->second);
+      m_stateConfirmToBeReceived.insert(app->second);
 
-      app = m_activeProcesses.erase(currentApp);
-      m_registeredComponents.erase(currentApp->first);
+      m_registeredComponents.erase(app->first);
+      app = m_activeProcesses.erase(app);
     }
     else
     {
@@ -143,15 +142,22 @@ void ExecutionManager::startApplication(const ProcessInfo& process)
 
 void ExecutionManager::changeComponentsState()
 {
-  ComponentState pendingComponentsState =
-    (m_pendingState == MACHINE_STATE_SUSPEND) ? COMPONENT_STATE_OFF :
-                                                COMPONENT_STATE_ON;
+  ComponentState pendingComponentsState;
+
+  if (m_pendingState == MACHINE_STATE_SUSPEND)
+  {
+    pendingComponentsState = COMPONENT_STATE_OFF;
+  }
+  else if (m_pendingState == MACHINE_STATE_RUNNING)
+  {
+    pendingComponentsState = COMPONENT_STATE_ON;
+  }  
 
   for(auto& component : m_registeredComponents)
   {
     if(component.second != pendingComponentsState)
     {
-      m_componentConfirmToBeReceived.emplace(component.first);
+      m_componentPendingConfirmsToBeReceived.emplace(component.first);
       component.second = pendingComponentsState;
     }
   }
@@ -166,18 +172,17 @@ ExecutionManager::reportApplicationState(pid_t processId, AppState state)
       << " received.";
 
   if (m_stateConfirmToBeReceived.empty() &&
-      m_componentConfirmToBeReceived.empty())
+      m_componentPendingConfirmsToBeReceived.empty())
   {
     return;
   }
 
-  if ((state != AppState::INITIALIZING) ||
-      (state == AppState::SUSPEND))
+  if (state != AppState::kInitializing)
   {
     m_stateConfirmToBeReceived.erase(processId);
 
     if (m_stateConfirmToBeReceived.empty() &&
-        m_componentConfirmToBeReceived.empty())
+        m_componentPendingConfirmsToBeReceived.empty())
     {
      confirmState(StateError::K_SUCCESS);
     }
@@ -217,11 +222,16 @@ ExecutionManager::setMachineState(std::string state)
   killProcessesForState();
 
   startApplicationsForState();
-
-  changeComponentsState();
-
+  
+  if (m_pendingState == MACHINE_STATE_SUSPEND ||
+      (m_currentState == MACHINE_STATE_SUSPEND &&
+       m_pendingState == MACHINE_STATE_RUNNING))
+  {
+    changeComponentsState();
+  }
+  
   if (!m_stateConfirmToBeReceived.empty() ||
-      !m_componentConfirmToBeReceived.empty())
+      !m_componentPendingConfirmsToBeReceived.empty())
   {
     LOG << "Machine state change to \""
         << m_pendingState
@@ -249,26 +259,26 @@ ExecutionManager::getComponentState
   if(iter != m_registeredComponents.cend())
   {
     state = iter->second;
-    return ComponentClientReturnType::K_SUCCESS;
+    return ComponentClientReturnType::kSuccess;
   }
   else
   {
-    return ComponentClientReturnType::K_INVALID;
+    return ComponentClientReturnType::kInvalid;
   }
 }
 
 void ExecutionManager::confirmComponentState
 (std::string component, ComponentState state, ComponentClientReturnType status)
 {
-  if (m_componentConfirmToBeReceived.empty())
+  if (m_componentPendingConfirmsToBeReceived.empty())
   {
     return;
   }
 
-  m_componentConfirmToBeReceived.erase(component);
+  m_componentPendingConfirmsToBeReceived.erase(component);
 
   if (m_stateConfirmToBeReceived.empty() &&
-      m_componentConfirmToBeReceived.empty())
+      m_componentPendingConfirmsToBeReceived.empty())
     {
      confirmState(StateError::K_SUCCESS);
     }

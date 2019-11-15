@@ -52,7 +52,7 @@ private:
     m_data.component = context.getParams().getComponent().cStr();
     
     context.getResults().setState(m_data.state);
-    context.getResults().setResult(ComponentClientReturnType::K_SUCCESS);
+    context.getResults().setResult(ComponentClientReturnType::kSuccess);
 
     return kj::READY_NOW;
   }
@@ -107,7 +107,7 @@ TEST_F(ComponentClientTest, ShouldSucceedToSetStateUpdateHandler)
 
 	const auto result = cc.SetStateUpdateHandler(f);
 
-  EXPECT_EQ(result, ComponentClientReturnType::K_SUCCESS);
+  EXPECT_EQ(result, ComponentClientReturnType::kSuccess);
 }
 
 TEST_F(ComponentClientTest, ShouldSucceedToGetComponentClientState)
@@ -117,28 +117,18 @@ TEST_F(ComponentClientTest, ShouldSucceedToGetComponentClientState)
   
 	const auto result = cc.GetComponentState(state);
 
-  EXPECT_EQ(result, ComponentClientReturnType::K_SUCCESS);
+  EXPECT_EQ(result, ComponentClientReturnType::kSuccess);
   EXPECT_EQ(testData.state, state);
 }
 
 TEST_F(ComponentClientTest, ShouldSucceedToConfirmComponentState)
 {
-  testData.state;
-  testData.status;
   std::string state = "TestComponentState";
-  ComponentClientReturnType status = ComponentClientReturnType::K_SUCCESS;
+  ComponentClientReturnType status = ComponentClientReturnType::kSuccess;
 
   cc.ConfirmComponentState(state, status);
 
   EXPECT_EQ(testData.component, componentName);
   EXPECT_EQ(testData.state, state);
   EXPECT_EQ(testData.status, status);
-}
-
-TEST_F(ComponentClientTest, ShouldFailToConfirmComponentState)
-{
-  std::string state = std::string(100000000, 'a');
-  ComponentClientReturnType status = ComponentClientReturnType::K_SUCCESS;
-
-  EXPECT_DEATH_IF_SUPPORTED(cc.ConfirmComponentState(state, status), "");
 }

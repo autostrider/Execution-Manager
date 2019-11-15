@@ -21,7 +21,7 @@ ComponentClient::SetStateUpdateHandler
 (std::function<void(ComponentState const&)> f) noexcept
 {
   updateHandler = f;
-  return ComponentClientReturnType::K_SUCCESS;
+  return ComponentClientReturnType::kSuccess;
 }
 
 ComponentClientReturnType
@@ -50,6 +50,7 @@ ComponentClient::ConfirmComponentState
 
   request.setComponent(componentName);
   request.setState(state);
+  request.setStatus(status);
 
   request.send().wait(m_client.getWaitScope());
 }

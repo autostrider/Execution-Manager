@@ -55,32 +55,32 @@ void AdaptiveApp::performAction()
 {
     api::ComponentState state;
     auto result = m_componentClient->GetComponentState(state);
-    auto confirm = api::ComponentClientReturnType::K_GENERAL_ERROR;
+    auto confirm = api::ComponentClientReturnType::kGeneralError;
 
     LOG << "Current ComponentState: " << m_componentState;
 
-    if (api::ComponentClientReturnType::K_SUCCESS == result)
+    if (api::ComponentClientReturnType::kSuccess == result)
     {
         if (isValid(state))
         {
             if (shouldResume(state))
             {
                 run();
-                confirm = api::ComponentClientReturnType::K_SUCCESS;
+                confirm = api::ComponentClientReturnType::kSuccess;
             }
             else if (shouldSuspend(state))
             {
                 suspend();
-                confirm = api::ComponentClientReturnType::K_SUCCESS;
+                confirm = api::ComponentClientReturnType::kSuccess;
             }
             else
             {
-                confirm = api::ComponentClientReturnType::K_UNCHANGED;
+                confirm = api::ComponentClientReturnType::kUnchanged;
             }
         }
         else
         {
-            confirm = api::ComponentClientReturnType::K_INVALID;
+            confirm = api::ComponentClientReturnType::kInvalid;
         }
     }
     else

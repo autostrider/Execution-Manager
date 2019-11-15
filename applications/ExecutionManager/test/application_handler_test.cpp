@@ -74,7 +74,8 @@ TEST_F(ApplicationHandlerTest, ShouldFailToStartProcessWhenExecvpFailed)
 
 TEST_F(ApplicationHandlerTest, ShouldSucceedToStartService)
 {
-  setupArgumentsCheck(serviceName, SYSTEMCTL_START);
+  static const std::string start{"start"};
+  setupArgumentsCheck(serviceName, start);
 
   ExecutionManager::ApplicationHandler appHandler{std::move(m_iosmock)};
   appHandler.startProcess(processName);
@@ -82,7 +83,8 @@ TEST_F(ApplicationHandlerTest, ShouldSucceedToStartService)
 
 TEST_F(ApplicationHandlerTest, ShouldSucceedToStopService)
 {
-  setupArgumentsCheck(serviceName, SYSTEMCTL_STOP);
+  static const std::string stop{"stop"};
+  setupArgumentsCheck(serviceName, stop);
 
   ExecutionManager::ApplicationHandler appHandler{std::move(m_iosmock)};
   appHandler.killProcess(processName);

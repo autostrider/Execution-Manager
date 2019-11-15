@@ -52,16 +52,16 @@ ApplicationStateClientServer::reportApplicationState(ReportApplicationStateConte
 class ApplicationStateClientTest : public Test 
 {
 protected:
-    virtual ~ApplicationStateClientTest() noexcept(true) {}
+    ~ApplicationStateClientTest() noexcept(true) override {}
 
     ApplicationStateClientTest() {}
 
-  virtual void SetUp()
+  void SetUp() override
   {
     ::unlink(EM_SOCKET_NAME.c_str());
   }
 
-  virtual void TearDown()
+  void TearDown() override
     {
         ::unlink(EM_SOCKET_NAME.c_str());
     }

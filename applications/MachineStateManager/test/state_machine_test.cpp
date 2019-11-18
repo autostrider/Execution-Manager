@@ -34,7 +34,7 @@ protected:
 
 TEST_F(MsmStateMachineTest, ShouldInitCallEnter)
 {
-    EXPECT_CALL(*machineStateClientMock, Register(_,_)).WillOnce(Return(StateError::K_SUCCESS));
+    EXPECT_CALL(*machineStateClientMock, Register(_,_)).WillOnce(Return(StateError::kSuccess));
 
     msmMock = new IMachineStateManagerMock{std::move(factoryMock),
                                            std::move(appStateClientMock),
@@ -48,7 +48,7 @@ TEST_F(MsmStateMachineTest, ShouldInitCallEnter)
 
 TEST_F(MsmStateMachineTest, UnsuccessfulRegistration)
 {
-    EXPECT_CALL(*machineStateClientMock, Register(_,_)).WillOnce(Return(StateError::K_INVALID_STATE));
+    EXPECT_CALL(*machineStateClientMock, Register(_,_)).WillOnce(Return(StateError::kInvalidState));
 
     msmMock = new IMachineStateManagerMock{std::move(factoryMock),
                                            std::move(appStateClientMock),
@@ -65,7 +65,7 @@ TEST_F(MsmStateMachineTest, ShouldRunCallEnter)
 {
     EXPECT_CALL(*machineStateClientMock, SetMachineState(_,_))
         .Times(5)
-        .WillRepeatedly(Return(StateError::K_SUCCESS));
+        .WillRepeatedly(Return(StateError::kSuccess));
 
     msmMock = new IMachineStateManagerMock{std::move(factoryMock),
                                            std::move(appStateClientMock),

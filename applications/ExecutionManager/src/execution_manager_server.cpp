@@ -42,11 +42,11 @@ ExecutionManagerServer::register_(RegisterContext context)
 
   if (m_msmHandler.registerMsm(applicationPid, newMachineClient))
   {
-    context.getResults().setResult(StateError::K_SUCCESS);
+    context.getResults().setResult(StateError::kSuccess);
   }
   else
   {
-    context.getResults().setResult(StateError::K_INVALID_REQUEST);
+    context.getResults().setResult(StateError::kInvalidRequest);
   }
 
   return kj::READY_NOW;
@@ -59,7 +59,7 @@ ExecutionManagerServer::getMachineState(GetMachineStateContext context)
 
   context.getResults().setState(m_em.getMachineState());
 
-  context.getResults().setResult(StateError::K_SUCCESS);
+  context.getResults().setResult(StateError::kSuccess);
 
   return kj::READY_NOW;
 }

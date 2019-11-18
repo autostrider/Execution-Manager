@@ -14,9 +14,9 @@ namespace {
         {
         case kj::Exception::Type::OVERLOADED:
         case kj::Exception::Type::DISCONNECTED:
-          return MachineStateClient::StateError::K_TIMEOUT;
+          return MachineStateClient::StateError::kTimeout;
         default:
-          return MachineStateClient::StateError::K_INVALID_REQUEST;
+          return MachineStateClient::StateError::kInvalidRequest;
         }
     };
 }
@@ -109,7 +109,7 @@ MachineStateClient::SetMachineState(string state, std::uint32_t timeout)
   auto result = promise.then([&](auto&& res)
     {
       auto _result = res.getResult();
-      if (_result == StateError::K_SUCCESS)
+      if (_result == StateError::kSuccess)
       {
         return waitForConfirm(timeout);
       }
@@ -132,7 +132,7 @@ MachineStateClient::waitForConfirm(std::uint32_t timeout)
 
   if(status == std::future_status::timeout)
   {
-    return StateError::K_TIMEOUT;
+    return StateError::kTimeout;
   }
 
   auto val = future.get();

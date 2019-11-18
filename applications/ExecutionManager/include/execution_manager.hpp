@@ -27,10 +27,10 @@ struct ApplicationManifest;
 
 enum class AppState : uint16_t
 {
-  kInitializing,
-  kRunning,
-  kShuttingdown,
-  kSuspend
+  K_INITIALIZING,
+  K_RUNNING,
+  K_SHUTTINGDOWN,
+  K_SUSPEND
 };
 
 class ExecutionManager

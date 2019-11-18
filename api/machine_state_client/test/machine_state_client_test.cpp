@@ -38,7 +38,7 @@ private:
     m_data.appName = context.getParams().getAppName();
     m_data.pid = context.getParams().getPid();
 
-    context.getResults().setResult(StateError::kSuccess);
+    context.getResults().setResult(StateError::K_SUCCESS);
 
     if(m_data.isTimeouted)
     {
@@ -55,7 +55,7 @@ private:
     m_data.pid = context.getParams().getPid();
     context.getResults().setState(m_data.state);
 
-    context.getResults().setResult(StateError::kSuccess);
+    context.getResults().setResult(StateError::K_SUCCESS);
 
     if(m_data.isTimeouted)
     {
@@ -72,9 +72,9 @@ private:
     m_data.state = context.getParams().getState().cStr();
     m_data.pid = context.getParams().getPid();
 
-    context.getResults().setResult(StateError::kSuccess);
+    context.getResults().setResult(StateError::K_SUCCESS);
 
-    sendConfirm(StateError::kSuccess);
+    sendConfirm(StateError::K_SUCCESS);
 
     if(m_data.isTimeouted)
     {
@@ -198,7 +198,7 @@ TEST_F(MachineStateClientTest, ShouldSucceedToRegister)
 {
   const auto result = msc.Register(applicationName, defaultTimeout);
 
-  EXPECT_EQ(result, MachineStateClient::StateError::kSuccess);
+  EXPECT_EQ(result, MachineStateClient::StateError::K_SUCCESS);
   EXPECT_EQ(testData.registerCallCount, 1);
   EXPECT_EQ(testData.appName, applicationName);
   EXPECT_EQ(testData.pid, getpid());
@@ -210,7 +210,7 @@ TEST_F(MachineStateClientTest, ShouldSucceedToGetMachineState)
   std::string state;
   const auto result = msc.GetMachineState(defaultTimeout, state);
 
-  EXPECT_EQ(result, MachineStateClient::StateError::kSuccess);
+  EXPECT_EQ(result, MachineStateClient::StateError::K_SUCCESS);
   EXPECT_EQ(testData.getMachineStateCallCount, 1);
   EXPECT_EQ(testData.state, state);
   EXPECT_EQ(testData.pid, getpid());
@@ -222,7 +222,7 @@ TEST_F(MachineStateClientTest, ShouldSucceedToSetMachineState)
   std::string state = "TestMachineState";
   const auto result = msc.SetMachineState(state, defaultTimeout);
 
-  EXPECT_EQ(result, MachineStateClient::StateError::kSuccess);
+  EXPECT_EQ(result, MachineStateClient::StateError::K_SUCCESS);
   EXPECT_EQ(testData.setMachineStateCallCount, 1);
   EXPECT_EQ(testData.state, state);
   EXPECT_EQ(testData.pid, getpid());
@@ -233,7 +233,7 @@ TEST_F(MachineStateClientTest, ShouldTimeoutOnRegister)
   testData.isTimeouted = true;
   const auto result = msc.Register(applicationName, defaultTimeout);
 
-  EXPECT_EQ(result, MachineStateClient::StateError::kTimeout);
+  EXPECT_EQ(result, MachineStateClient::StateError::K_TIMEOUT);
   EXPECT_EQ(testData.registerCallCount, 1);
 }
 
@@ -244,7 +244,7 @@ TEST_F(MachineStateClientTest, ShouldTimeoutOnGettingMachineState)
 
   const auto result = msc.GetMachineState(defaultTimeout, state);
 
-  EXPECT_EQ(result, MachineStateClient::StateError::kTimeout);
+  EXPECT_EQ(result, MachineStateClient::StateError::K_TIMEOUT);
   EXPECT_EQ(state, "");
   EXPECT_EQ(testData.getMachineStateCallCount, 1);
 }
@@ -255,6 +255,6 @@ TEST_F(MachineStateClientTest, ShouldTimeoutOnSettingMachineState)
   testData.isTimeouted = true;
   const auto result = msc.SetMachineState("TestMachineState", defaultTimeout);
 
-  EXPECT_EQ(result, MachineStateClient::StateError::kTimeout);
+  EXPECT_EQ(result, MachineStateClient::StateError::K_TIMEOUT);
   EXPECT_EQ(testData.setMachineStateCallCount, 1);
 }

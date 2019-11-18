@@ -21,7 +21,7 @@ ComponentClient::SetStateUpdateHandler
 (std::function<void(ComponentState const&)> f) noexcept
 {
   updateHandler = f;
-  return ComponentClientReturnType::kSuccess;
+  return ComponentClientReturnType::K_SUCCESS;
 }
 
 ComponentClientReturnType

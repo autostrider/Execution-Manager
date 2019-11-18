@@ -1,4 +1,4 @@
-#include <component_client.h>
+#include "component_client.h"
 #include <constants.hpp>
 #include <logger.hpp>
 
@@ -52,7 +52,7 @@ private:
     m_data.component = context.getParams().getComponent().cStr();
     
     context.getResults().setState(m_data.state);
-    context.getResults().setResult(ComponentClientReturnType::kSuccess);
+    context.getResults().setResult(ComponentClientReturnType::K_SUCCESS);
 
     return kj::READY_NOW;
   }
@@ -107,7 +107,7 @@ TEST_F(ComponentClientTest, ShouldSucceedToSetStateUpdateHandler)
 
 	const auto result = cc.SetStateUpdateHandler(f);
 
-  EXPECT_EQ(result, ComponentClientReturnType::kSuccess);
+  EXPECT_EQ(result, ComponentClientReturnType::K_SUCCESS);
 }
 
 TEST_F(ComponentClientTest, ShouldSucceedToGetComponentClientState)
@@ -117,14 +117,14 @@ TEST_F(ComponentClientTest, ShouldSucceedToGetComponentClientState)
   
 	const auto result = cc.GetComponentState(state);
 
-  EXPECT_EQ(result, ComponentClientReturnType::kSuccess);
+  EXPECT_EQ(result, ComponentClientReturnType::K_SUCCESS);
   EXPECT_EQ(testData.state, state);
 }
 
 TEST_F(ComponentClientTest, ShouldSucceedToConfirmComponentState)
 {
   std::string state = "TestComponentState";
-  ComponentClientReturnType status = ComponentClientReturnType::kSuccess;
+  ComponentClientReturnType status = ComponentClientReturnType::K_SUCCESS;
 
   cc.ConfirmComponentState(state, status);
 

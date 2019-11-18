@@ -177,14 +177,14 @@ ExecutionManager::reportApplicationState(pid_t processId, AppState state)
     return;
   }
 
-  if (state != AppState::kInitializing)
+  if (state != AppState::K_INITIALIZING)
   {
     m_stateConfirmToBeReceived.erase(processId);
 
     if (m_stateConfirmToBeReceived.empty() &&
         m_componentPendingConfirmsToBeReceived.empty())
     {
-     confirmState(StateError::kSuccess);
+     confirmState(StateError::K_SUCCESS);
     }
   }
 }
@@ -206,7 +206,7 @@ ExecutionManager::setMachineState(std::string state)
 
   if (stateIt == m_machineManifestStates.end())
   {
-    return StateError::kInvalidState;
+    return StateError::K_INVALID_STATE;
   }
   // else if (m_stateConfirmToBeReceived.empty())
   // {
@@ -214,7 +214,7 @@ ExecutionManager::setMachineState(std::string state)
   // }
   else if (state == m_currentState)
   {
-    return StateError::kInvalidState;
+    return StateError::K_INVALID_STATE;
   }
 
   m_pendingState = state;
@@ -238,10 +238,10 @@ ExecutionManager::setMachineState(std::string state)
   }
   else
   {
-    confirmState(StateError::kSuccess);
+    confirmState(StateError::K_SUCCESS);
   }
 
-  return StateError::kSuccess;
+  return StateError::K_SUCCESS;
 }
 
 void ExecutionManager::registerComponent(std::string component)
@@ -258,11 +258,11 @@ ExecutionManager::getComponentState
   if(iter != m_registeredComponents.cend())
   {
     state = iter->second;
-    return ComponentClientReturnType::kSuccess;
+    return ComponentClientReturnType::K_SUCCESS;
   }
   else
   {
-    return ComponentClientReturnType::kInvalid;
+    return ComponentClientReturnType::K_INVALID;
   }
 }
 
@@ -279,7 +279,7 @@ void ExecutionManager::confirmComponentState
   if (m_stateConfirmToBeReceived.empty() &&
       m_componentPendingConfirmsToBeReceived.empty())
     {
-     confirmState(StateError::kSuccess);
+     confirmState(StateError::K_SUCCESS);
     }
 }
 

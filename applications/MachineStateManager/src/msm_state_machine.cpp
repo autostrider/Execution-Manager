@@ -52,7 +52,7 @@ void Init::enter()
 
     StateError result = m_msm.registerMsm(applicationName);
 
-    if (StateError::kSuccess == result)
+    if (StateError::K_SUCCESS == result)
     {
         LOG << "Successful registration as a MSM.";
         std::this_thread::sleep_for(FIVE_SECONDS);
@@ -96,9 +96,9 @@ void Run::enter()
 
         result = m_msm.setMachineState(state);
 
-        if (StateError::kSuccess != result)
+        if (StateError::K_SUCCESS != result)
         {
-            if (!((StateError::kTimeout == result) && (MACHINE_STATE_SHUTTINGDOWN == state)))
+            if (!((StateError::K_TIMEOUT == result) && (MACHINE_STATE_SHUTTINGDOWN == state)))
             {
                 LOG << "Failed to set machine state " << state << ".";
             }

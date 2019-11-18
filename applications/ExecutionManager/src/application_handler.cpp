@@ -50,7 +50,7 @@ void ApplicationHandler::execProcess(const std::string &processName,
      int res = m_syscalls->execvp(SYSTEMCTL.c_str(),
                       applicationArgs.data());
 
-     if (res)
+     if (-1 == res)
      {
        LOG << std::string{"Error occured creating process: "}
            << processName

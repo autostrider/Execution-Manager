@@ -45,7 +45,6 @@ ApplicationStateClientServer::reportApplicationState(ReportApplicationStateConte
 {
     m_sharedResource.m_state = context.getParams().getState();
 
-         
     return kj::READY_NOW;
 }
 
@@ -66,9 +65,10 @@ protected:
         ::unlink(EM_SOCKET_NAME.c_str());
     }
 
-    Data sharedResource;  
+    Data sharedResource;
     const std::string socketName{IPC_PROTOCOL + EM_SOCKET_NAME};
-    capnp::EzRpcServer server{kj::heap<ApplicationStateClientServer>(sharedResource), socketName}; 
+    capnp::EzRpcServer server
+    {kj::heap<ApplicationStateClientServer>(sharedResource), socketName}; 
 };
 
 TEST_F(ApplicationStateClientTest, ShouldSucceedToReportApplicationState)

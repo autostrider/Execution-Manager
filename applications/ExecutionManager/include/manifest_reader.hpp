@@ -23,7 +23,7 @@ class ManifestReader : public IManifestReader
 public:
   explicit ManifestReader(const ManifestReaderConf& conf = ManifestReaderConf{});
 
-   std::map<MachineState, ProcessesList>
+   std::map<MachineState, ProcessesContainer>
    getStatesSupportedByApplication() override;
 
   std::vector<MachineState> getMachineStates() override;
@@ -34,7 +34,7 @@ public:
 private:
   json getJsonData(const std::string &manifestPath);
 
-  ProcessesList getListOfApplications();
+  ProcessesContainer getListOfApplications();
 
   const ManifestReaderConf conf;
 

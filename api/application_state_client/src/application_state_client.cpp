@@ -2,10 +2,6 @@
 #include <constants.hpp>
 #include <common.hpp>
 #include <fstream>
-#include <logger.hpp>
-#include <exception>
-#include <algorithm>
-#include <sstream>
 
 namespace 
 {
@@ -15,18 +11,17 @@ std::string getAppName(pid_t appPid)
   static constexpr auto procPath = "/proc/";
   static constexpr auto cmdName = "/cmdline";
   static constexpr auto delimiter = '/';
-  // size of part to omit: `/processes`
+  // size of part to omit: `/processes/`
   static constexpr int processesSize = 11;
 
   std::ifstream data {procPath + std::to_string(appPid) + cmdName};
   std::string fullCmd;
   data >> fullCmd;
 
-  int prevPos = fullCmd.length();
-  int currPos = fullCmd.find_last_of(delimiter, currPos);
+  auto currPos = fullCmd.find_last_of(delimiter);
   std::string processName = fullCmd.substr(currPos + 1);
   
-  prevPos = currPos - processesSize;
+  auto prevPos = currPos - processesSize;
   currPos = fullCmd.find_last_of(delimiter, prevPos);
   std::string appName = fullCmd.substr(currPos + 1, prevPos - currPos);
 

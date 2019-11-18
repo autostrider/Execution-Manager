@@ -36,7 +36,7 @@ static const std::string COMPONENT_STATE_OFF{"kOff"};
 
 using StateHandler = std::function<void()>;
 using ProcName = std::string;
-using ProcessesList = std::set<ProcName>;
+using ProcessesContainer = std::set<ProcName>;
 
 const std::map<int, api::ApplicationStateClient::ApplicationState> mapSignalToState
 {

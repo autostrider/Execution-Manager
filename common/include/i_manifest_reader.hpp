@@ -13,7 +13,7 @@ namespace ExecutionManager
 class IManifestReader
 {
 public:
-  virtual std::map<MachineState, ProcessesContainer>
+  virtual std::map<MachineState, std::set<ProcName>>
   getStatesSupportedByApplication() = 0;
 
   virtual std::vector<MachineState> getMachineStates() = 0;

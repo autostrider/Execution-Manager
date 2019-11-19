@@ -11,7 +11,7 @@ namespace ExecutionManager
 class ManifestReaderMock : public IManifestReader
 {
 public:
-  MOCK_METHOD((std::map<MachineState, ProcessesContainer>),
+  MOCK_METHOD((std::map<MachineState, std::set<ProcName>>),
     getStatesSupportedByApplication, (), (override));
 
   MOCK_METHOD(std::vector<MachineState>, getMachineStates, ());

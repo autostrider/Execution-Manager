@@ -218,10 +218,6 @@ ExecutionManager::setMachineState(std::string state)
     startApplicationsForState();
   }
 
-  LOG << "Machine state change to  \""
-      << m_pendingState
-      << "\" requested.";
-
   checkAndSendConfirm();
 
   return StateError::K_SUCCESS;

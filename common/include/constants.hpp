@@ -8,7 +8,6 @@
 #include <string>
 #include <chrono>
 #include <map>
-#include <set>
 
 static const std::string IPC_PROTOCOL{"unix:"};
 static const std::string EM_SOCKET_NAME{"/tmp/execution_management"};

@@ -2,11 +2,6 @@
 
 #include <fstream>
 
-namespace
-{
-static constexpr auto delimiter = '/';
-}
-
 std::string
 getServiceName(const std::string& appName, const std::string& procName)
 {
@@ -27,7 +22,8 @@ std::string getAppBinaryPath(pid_t appPid)
 
 std::string parseServiceName(const std::string& binaryPath)
 {
-  // size of part to omit
+  static constexpr auto delimiter = '/';
+
   static const auto processesSize = std::string("/processes/").size();
   auto currPos = binaryPath.find_last_of(delimiter);
   std::string processName = binaryPath.substr(currPos + 1);

@@ -2,18 +2,28 @@
 
 #include "gtest/gtest.h"
 
-TEST(ParseServiceNameTest, ShouldSuccessfulyParseServiceName)
+using namespace testing;
+using testParamType = std::pair<std::string, std::string>;
+class ParseServiceNameTest: public TestWithParam<std::pair<std::string, std::string>>
 {
-  static const std::string correctPath = 
-    "/path/to/Application/processes/Process";
+};
 
-  ASSERT_EQ("Application_Process", parseServiceName(correctPath));
-}
-
-TEST(ParseServiceNameTest, ShouldReturnIncorrectWhenBadPathProvided)
+std::vector<std::pair<std::string, std::string>> testData = 
 {
-  static const std::string incorrectPath = 
-    "/some/path/application/process";
+  {"/path/to/Application/processes/Process", "Application_Process"},
+  {"process", "process_process"},
+  {"/some/app/path/process/", "pa_"},
+  {"app/process", "process_process"}
 
-  ASSERT_NE(parseServiceName(incorrectPath), "application_process");
+};
+
+INSTANTIATE_TEST_SUITE_P(ParseServiceName, 
+                         ParseServiceNameTest, 
+                         ValuesIn(testData));
+
+TEST_P(ParseServiceNameTest, ShouldReturnServiceNameFromString)
+{
+  auto testParam = GetParam();
+
+  ASSERT_EQ(parseServiceName(testParam.first), testParam.second);
 }

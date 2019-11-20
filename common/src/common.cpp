@@ -20,17 +20,17 @@ std::string getAppBinaryPath(pid_t appPid)
   return fullCmd;
 }
 
-std::string parseServiceName(const std::string& binaryPath)
+std::string parseServiceName(const std::string& path)
 {
   static constexpr auto delimiter = '/';
 
   static const auto processesSize = std::string("/processes/").size();
-  auto currPos = binaryPath.find_last_of(delimiter);
-  std::string processName = binaryPath.substr(currPos + 1);
+  auto currPos = path.find_last_of(delimiter);
+  std::string processName = path.substr(currPos + 1);
   
   auto prevPos = currPos - processesSize;
-  currPos = binaryPath.find_last_of(delimiter, prevPos);
-  std::string appName = binaryPath.substr(currPos + 1, prevPos - currPos);
+  currPos = path.find_last_of(delimiter, prevPos);
+  std::string appName = path.substr(currPos + 1, prevPos - currPos);
 
   return getServiceName(appName, processName);
 }

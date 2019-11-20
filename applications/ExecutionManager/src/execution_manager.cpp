@@ -1,5 +1,6 @@
 #include "execution_manager.hpp"
 #include <constants.hpp>
+#include <common.hpp>
 
 #include <iostream>
 #include <logger.hpp>
@@ -20,7 +21,7 @@ ExecutionManager::ExecutionManager(
   std::unique_ptr<IManifestReader> reader,
   std::unique_ptr<IApplicationHandler> applicationHandler,
   std::unique_ptr<ExecutionManagerClient::IExecutionManagerClient> client)
-  : appHandler{std::move(applicationHandler)},
+  : m_appHandler{std::move(applicationHandler)},
     m_activeProcesses{},
     m_allowedProcessesForState{reader->getStatesSupportedByApplication()},
     m_currentState{},
@@ -38,14 +39,14 @@ void ExecutionManager::start()
 
 void ExecutionManager::filterStates()
 {
-  for (auto app = m_activeProcesses.begin();
-       app != m_activeProcesses.end();)
+  for (auto app = m_allowedProcessesForState.begin();
+       app != m_allowedProcessesForState.end();)
   {
     if (std::find(m_machineManifestStates.cbegin(),
                   m_machineManifestStates.cend(),
                   app->first) == m_machineManifestStates.cend())
     {
-      app = m_activeProcesses.erase(app);
+      app = m_allowedProcessesForState.erase(app);
     }
     else
     {
@@ -62,18 +63,10 @@ void ExecutionManager::startApplicationsForState()
   {
     for (const auto& executableToStart: allowedApps->second)
     {
-      if (m_activeProcesses.find(executableToStart.processName) ==
+      if (m_activeProcesses.find(executableToStart) ==
           m_activeProcesses.cend())
       {
-
-        try
-        {
           startApplication(executableToStart);
-        }
-        catch (const runtime_error& err)
-        {
-          LOG << err.what() << ".";
-        }
       }
     }
   }
@@ -96,49 +89,49 @@ void ExecutionManager::killProcessesForState()
 {
   auto allowedApps = m_allowedProcessesForState.find(m_pendingState);
 
-  for (auto app = m_activeProcesses.cbegin(); app != m_activeProcesses.cend();)
+  for (auto app = m_activeProcesses.cbegin();
+       app != m_activeProcesses.cend();
+       app++)
   {
     if (allowedApps == m_allowedProcessesForState.cend() ||
-        processToBeKilled(app->first, allowedApps->second))
+        processToBeKilled(*app, allowedApps->second))
     {
-      auto currentApp = app;
-      appHandler->killProcess(currentApp->second);
-      m_stateConfirmToBeReceived.insert(currentApp->second);
-
-      app = m_activeProcesses.erase(currentApp);
-      m_registeredComponents.erase(currentApp->first);
-    }
-    else
-    {
-      app++;
+      m_appHandler->killProcess(*app);
     }
   }
 }
 
-bool ExecutionManager::processToBeKilled(
-  const std::string& app,
-  const std::vector<ProcessInfo>& allowedApps)
+bool ExecutionManager::processToBeKilled(const std::string& app,
+  const std::set<ProcName> &allowedApps)
 {
   auto it = std::find_if(allowedApps.cbegin(),
                      allowedApps.cend(),
                      [&app](auto& listItem)
-    { return app == listItem.processName; });
+    { return app == listItem; });
 
   return (it  == allowedApps.cend());
 };
 
-void ExecutionManager::startApplication(const ProcessInfo& process)
+void ExecutionManager::startApplication(const ProcName& process)
 {
-  pid_t processId = appHandler->startProcess(process);
-  m_activeProcesses.insert({process.processName, processId});
-
-  m_stateConfirmToBeReceived.insert(processId);
+  m_appHandler->startProcess(process);
 
   LOG << "Adaptive aplication \""
-      << process.applicationName
-      << "\" with pid "
-      << processId
-      << " started.";
+      << process
+      << "\" was started by systemctl.";
+}
+
+bool ExecutionManager::isConfirmAvailable()
+{
+  return m_activeProcesses == m_allowedProcessesForState[m_pendingState];
+}
+
+void ExecutionManager::checkAndSendConfirm()
+{
+  if (isConfirmAvailable())
+  {
+    confirmState(StateError::K_SUCCESS);
+  }
 }
 
 void ExecutionManager::changeComponentsState()
@@ -158,29 +151,27 @@ void ExecutionManager::changeComponentsState()
 }
 
 void
-ExecutionManager::reportApplicationState(pid_t processId, AppState state)
+ExecutionManager::reportApplicationState(
+    const std::string& appName, AppState state)
 {
   LOG << "State \"" << applicationStateNames[static_cast<uint16_t>(state)]
-      << "\" for application with pid "
-      << processId
+      << "\" for application " << appName
       << " received.";
 
-  if (m_stateConfirmToBeReceived.empty() &&
-      m_componentConfirmToBeReceived.empty())
+  switch (state)
   {
-    return;
+  case AppState::SHUTTINGDOWN:
+    m_activeProcesses.erase(appName);
+    break;
+  case AppState::RUNNING:
+  case AppState::SUSPEND:
+    m_activeProcesses.insert(appName);
+    break;
+  default:
+    break;
   }
 
-  if (AppState::INITIALIZING != state)
-  {
-    m_stateConfirmToBeReceived.erase(processId);
-
-    if (m_stateConfirmToBeReceived.empty() &&
-        m_componentConfirmToBeReceived.empty())
-    {
-     confirmState(StateError::K_SUCCESS);
-    }
-  }
+  checkAndSendConfirm();
 }
 
 MachineState
@@ -202,10 +193,6 @@ ExecutionManager::setMachineState(std::string state)
   {
     return StateError::K_INVALID_STATE;
   }
-  // else if (m_stateConfirmToBeReceived.empty())
-  // {
-  //   return StateError::K_INVALID_REQUEST;
-  // }
   else if (state == m_currentState)
   {
     return StateError::K_INVALID_STATE;
@@ -219,7 +206,7 @@ ExecutionManager::setMachineState(std::string state)
 
   changeComponentsState();
 
-  if (!m_stateConfirmToBeReceived.empty() ||
+  if (!isConfirmAvailable() ||
       !m_componentConfirmToBeReceived.empty())
   {
     LOG << "Machine state change to \""
@@ -228,8 +215,10 @@ ExecutionManager::setMachineState(std::string state)
   }
   else
   {
-    confirmState(StateError::K_SUCCESS);
+    startApplicationsForState();
   }
+
+  checkAndSendConfirm();
 
   return StateError::K_SUCCESS;
 }
@@ -266,7 +255,7 @@ void ExecutionManager::confirmComponentState
 
   m_componentConfirmToBeReceived.erase(component);
 
-  if (m_stateConfirmToBeReceived.empty() &&
+  if (isConfirmAvailable() &&
       m_componentConfirmToBeReceived.empty())
     {
      confirmState(StateError::K_SUCCESS);

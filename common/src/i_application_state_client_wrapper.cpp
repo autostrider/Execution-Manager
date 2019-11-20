@@ -5,7 +5,7 @@ namespace api
 
 void ApplicationStateClientWrapper::ReportApplicationState(ApplicationStateManagement::ApplicationState state)
 {
-    m_client.ReportApplicationState(state);
+  m_client.ReportApplicationState(state);
 }
 
 }

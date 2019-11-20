@@ -18,6 +18,7 @@ int main(int argc, char **argv)
   try
   {
     ::unlink(EM_SOCKET_NAME.c_str());
+    
     auto io = kj::setupAsyncIo();
 
     ExecutionManager::ExecutionManager executionManager

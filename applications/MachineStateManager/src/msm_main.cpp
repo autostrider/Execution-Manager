@@ -15,7 +15,9 @@ int main(int argc, char **argv)
 {
     ::unlink(MSM_SOCKET_NAME.c_str());
 
-    if (::signal(SIGTERM, signalHandler) == SIG_ERR)
+    if (::signal(SIGTERM, signalHandler) == SIG_ERR
+            ||
+        ::signal(SIGINT, signalHandler) == SIG_ERR)
     {
         LOG << "[msm] Error while registering signal.";
     }

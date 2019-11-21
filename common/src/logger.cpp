@@ -38,7 +38,13 @@ namespace  Logger
     std::string getApplicationName(std::string filePath)
     {
         filePath = filePath.erase(0, appPath.size());
-        filePath = filePath.erase(filePath.find_first_of('/'), std::string::npos);
+        if (filePath.find_first_of('/') < std::string::npos)
+        {
+          auto fileName = filePath.substr(filePath.find_last_of('/')+1, std::string::npos);
+          filePath = filePath.erase(filePath.find_first_of('/'), std::string::npos);
+          filePath.append("::");
+          filePath.append(fileName);
+        }
         
         if (std::isdigit(filePath[filePath.size()-1]))
         {

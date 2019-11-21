@@ -107,19 +107,13 @@ protected:
   void SetUp() override;
   void TearDown() override;
 
-  const std::map<MachineState, std::vector<ProcessInfo>>
+  const std::map<MachineState, std::set<ProcName>>
     availableAppsForStates =
       {
-          {"Startup", {
-             ProcessInfo{"msm", "msm", {}},
-             ProcessInfo{"test-aa2", "proc2", {}},
-                       }},
-          {"Running", {
-             ProcessInfo{"msm", "msm", {}},
-             ProcessInfo{"test-aa1", "proc1", {}},
-                      }},
+        {"Startup", { "msm_msm", "test-aa2_proc2"} },
+        {"Running", { "msm_msm", "test-aa1_proc1"} },
       };
-  const std::map<MachineState, std::vector<ProcessInfo>> emptyAppsForStates =
+  const std::map<MachineState, std::set<ProcName>> emptyAppsForStates =
     {};
 private:
   void createApplicationManifests();
@@ -632,31 +626,11 @@ TEST_P(EmptyApplicationManifestReadingTests,
   EXPECT_EQ(result, emptyAppsForStates);
 }
 
-TEST_P(ApplicationCommandLineOptionsReadingTests,
-       ShouldReturnCompleteCommandLineOptionWhenProvided)
-{
-  const auto& testParam = GetParam();
-  static auto expectedArg = arguments.cbegin();
-  ManifestReader reader{testParam.conf};
-
-  auto result = reader.getStatesSupportedByApplication();
-
-  ASSERT_EQ(result["Startup"][0].startOptions[0].makeCommandLineOption(),
-            *(expectedArg++));
-}
-
 TEST(ApplicationManifestReadingTestsFail, ShouldFaildWhenDirectoryNotExists)
 {
   ManifestReader reader{ManifestReaderConf{"./not-exists", "manifest"}};
 
   EXPECT_THROW(reader.getStatesSupportedByApplication(), std::runtime_error);
-}
-
-TEST(ProcessInfoTests, ShouldReturnRelativePathToProcess)
-{
-  const ProcessInfo testInput{"app", "process", {}};
-
-  ASSERT_EQ(testInput.createRelativePath(), "app/processes/process");
 }
 
 } // namespace ExecutionManagerTests

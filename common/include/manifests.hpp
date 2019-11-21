@@ -42,20 +42,6 @@ struct ProcessInfo
   std::string applicationName;
   std::string processName;
   std::vector<StartupOption> startOptions;
-
-  std::string createRelativePath() const
-  {
-    return applicationName
-        + "/processes/"
-        + processName;
-  }
-
-  bool operator==(const ProcessInfo& rhs) const
-  {
-    return processName == rhs.processName &&
-           applicationName == rhs.applicationName;
-
-  }
 };
 
 struct ModeDepStartupConfig
@@ -65,34 +51,20 @@ struct ModeDepStartupConfig
     std::vector<StartupOption> startupOptions;
 };
 
-/**
- * @brief The Process struct
- */
 struct Process
 {
-  /// Name of executable.
   std::string name;
 
-  /// Startup configs.
   std::vector<ModeDepStartupConfig> modeDependentStartupConf;
 };
 
 struct ApplicationManifestInternal
 {
-  /** 
-   * @brief Name of Adaptive Application.
-   */
   std::string manifestId;
 
-  /**
-   * @brief Vector of executables of application
-   */
   std::vector<Process> processes;
 };
 
-/**
- * @brief Application manifest structure.
- */
 struct ApplicationManifest
 {
     ApplicationManifestInternal manifest;
@@ -164,28 +136,16 @@ void to_json(json& jsonObject, const ModeDepStartupConfig& startupConf);
 void
 from_json(const json& jsonObject, const ModeDepStartupConfig& startupConf);
 
-/**
- * @brief Process serialization
- */
 void to_json(json& jsonObject, const Process& process);
 
-/**
- * @brief Process deserialization
- */
 void from_json(const json& jsonObject, Process& process);
 
 void to_json(json& jsonObject, const ApplicationManifestInternal& manifest);
 
 void from_json(const json& jsonObject, ApplicationManifestInternal& manifest);
 
-/**
- * @brief ApplicationManifest serialization
- */
 void to_json(json& jsonObject, const ApplicationManifest& applicationManifest);
 
-/**
- * @brief ApplicationManifest deserialization
- */
 void from_json(const json& jsonObject, ApplicationManifest& applicationManifest);
 
 } // namespace ExecutionManager

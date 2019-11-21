@@ -1,6 +1,7 @@
 #include "application_state_client.h"
 
 #include <capnp/ez-rpc.h>
+#include <constants.hpp>
 #include <execution_management.capnp.h>
 #include <iostream>
 #include <unistd.h>
@@ -8,7 +9,7 @@
 #include "gtest/gtest.h"
 #include "gmock/gmock.h"
 
-using namespace std;
+using namespace ::testing;
 
 namespace ApplicationStateClientTest
 {
@@ -33,37 +34,41 @@ private:
     Data& m_sharedResource;
 };
 
-ApplicationStateClientServer::ApplicationStateClientServer (Data& sharedResource) : m_sharedResource{sharedResource}
+ApplicationStateClientServer::ApplicationStateClientServer(Data& sharedResource) 
+    : m_sharedResource{sharedResource}
 {
-    cout << "Application State Client server started..." << endl;
+    std::cout << "Application State Client server started..." << std::endl;
 }
 
 ::kj::Promise<void>
 ApplicationStateClientServer::reportApplicationState(ReportApplicationStateContext context)
 {
     m_sharedResource.m_state = context.getParams().getState();
-    m_sharedResource.m_appPid = context.getParams().getPid();
-         
+
     return kj::READY_NOW;
 }
 
-class ApplicationStateClientTest : public ::testing::Test 
+class ApplicationStateClientTest : public Test 
 {
 protected:
-    virtual ~ApplicationStateClientTest() noexcept(true) {}
+    ~ApplicationStateClientTest() noexcept(true) override {}
 
     ApplicationStateClientTest() {}
 
-	virtual void SetUp()
-	{
-		::unlink(socketName);
-	}
+  void SetUp() override
+  {
+    ::unlink(EM_SOCKET_NAME.c_str());
+  }
 
-	virtual void TearDown() {}
+  void TearDown() override
+    {
+        ::unlink(EM_SOCKET_NAME.c_str());
+    }
 
-    Data sharedResource;  
-    const char* socketName = "/tmp/execution_management"; 
-    capnp::EzRpcServer server{kj::heap<ApplicationStateClientServer>(sharedResource), string{"unix:"} + socketName}; 
+    Data sharedResource;
+    const std::string socketName{IPC_PROTOCOL + EM_SOCKET_NAME};
+    capnp::EzRpcServer server
+    {kj::heap<ApplicationStateClientServer>(sharedResource), socketName}; 
 };
 
 TEST_F(ApplicationStateClientTest, ShouldSucceedToReportApplicationState)

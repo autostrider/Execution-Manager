@@ -3,6 +3,7 @@
 #include <kj/async-io.h>
 #include <string>
 #include <iostream>
+#include <logger.hpp>
 
 namespace ExecutionManagerServer
 {
@@ -16,7 +17,7 @@ ExecutionManagerServer::ExecutionManagerServer
   : m_em{application},
     m_msmHandler{msmHandler}
 {
-  std::cout << "Execution Manager server started..." << std::endl;
+  LOG << "Execution Manager server started..." << std::endl;
 
   m_em.start();
 }
@@ -26,9 +27,8 @@ ExecutionManagerServer::reportApplicationState
   (ReportApplicationStateContext context)
 {
   ApplicationState state = context.getParams().getState();
-  pid_t applicationPid = context.getParams().getPid();
-
-  m_em.reportApplicationState(applicationPid,
+  std::string appName = context.getParams().getAppName().cStr();
+  m_em.reportApplicationState(appName,
     static_cast<ExecutionManager::AppState>(state));
 
   return kj::READY_NOW;
@@ -76,6 +76,41 @@ ExecutionManagerServer::setMachineState(SetMachineStateContext context)
   }
 
   m_em.setMachineState(state);
+
+  return kj::READY_NOW;
+}
+
+::kj::Promise<void>
+ExecutionManagerServer::registerComponent(RegisterComponentContext context)
+{
+  m_em.registerComponent(context.getParams().getComponent().cStr());
+
+  return kj::READY_NOW;
+}
+
+::kj::Promise<void>
+ExecutionManagerServer::getComponentState(GetComponentStateContext context)
+{
+  std::string component = context.getParams().getComponent().cStr();
+
+  ComponentState state;
+  auto result = m_em.getComponentState(component, state);
+
+  context.getResults().setState(state);
+  context.getResults().setResult(result);
+
+  return kj::READY_NOW;
+}
+
+::kj::Promise<void>
+ExecutionManagerServer::confirmComponentState
+(ConfirmComponentStateContext context)
+{
+  std::string component = context.getParams().getComponent().cStr();
+  ComponentState state = context.getParams().getState().cStr();
+  ComponentClientReturnType status = context.getParams().getStatus();
+
+  m_em.confirmComponentState(component, state, status);
 
   return kj::READY_NOW;
 }

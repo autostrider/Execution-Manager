@@ -2,6 +2,9 @@
 
 #include <csignal>
 #include <exception>
+#include <logger.hpp>
+#include <fstream>
+#include <thread>
 
 namespace ExecutionManager
 {
@@ -14,52 +17,47 @@ ApplicationHandler::ApplicationHandler(std::unique_ptr<IOsInterface> syscalls,
           m_syscalls{std::move(syscalls)}
 { }
 
-pid_t ApplicationHandler::startProcess(const ProcessInfo& process)
+void ApplicationHandler::startProcess(const std::string &serviceName)
 {
-  pid_t processId = m_syscalls->fork();
+  execProcess(serviceName, SYSTEMCTL_START);
+}
 
-  if (!processId)
+void ApplicationHandler::killProcess(const std::string &serviceName)
+{
+  execProcess(serviceName, SYSTEMCTL_STOP);
+}
+
+void ApplicationHandler::execProcess(const std::string &processName,
+                                const std::string& action) const
+{
+  pid_t process = m_syscalls->fork();
+
+  if (-1 == process)
   {
-    // child process
-    const auto processPath = corePath
-                           + process.createRelativePath();
-
-    auto arguments = getArgumentsList(process);
-    auto applicationArguments = convertToNullTerminatingArgv(arguments);
-    int res = m_syscalls->execv(processPath.c_str(),
-                                applicationArguments.data());
-
-    if (res)
-    {
-      throw runtime_error(std::string{"Error occured creating process: "}
-                          + process.processName
-                          + " "
-                          + strerror(errno));
-    }
+    LOG << "Error forking the process" << strerror(errno);
   }
-  return processId;
-}
+  else if (!process)
+  {
+    std::vector<std::string> arguments =
+    {
+      SYSTEMCTL,
+      USER,
+      action,
+      processName + SERVICE_EXTENSION
+    };
+     auto applicationArgs = convertToNullTerminatingArgv(arguments);
+     
+     int res = m_syscalls->execvp(SYSTEMCTL.c_str(),
+                      applicationArgs.data());
 
-void ApplicationHandler::killProcess(pid_t processId)
-{
- m_syscalls->kill(processId, SIGTERM);
-}
-
-std::vector<std::string> ApplicationHandler::getArgumentsList(const ProcessInfo& process) const
-{
-  std::vector<std::string> arguments;
-  arguments.reserve(process.startOptions.size() + 1);
-
-  // insert app name
-  arguments.push_back(process.processName);
-
-  std::transform(process.startOptions.cbegin(),
-                 process.startOptions.cend(),
-                 std::back_inserter(arguments),
-                 [](const StartupOption& option)
-                 { return option.makeCommandLineOption(); });
-
-  return arguments;
+     if (-1 == res)
+     {
+       LOG << std::string{"Error occured creating process: "}
+           << processName
+           << " "
+           << strerror(errno);
+     }
+  }
 }
 
 std::vector<char*>

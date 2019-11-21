@@ -41,8 +41,12 @@ void MachineStateManager::terminate()
                           std::placeholders::_1));
 }
 
-void
-MachineStateManager::transitToNextState(api::IAdaptiveApp::FactoryFunc nextState)
+void MachineStateManager::performAction()
+{
+
+}
+
+void MachineStateManager::transitToNextState(api::IAdaptiveApp::FactoryFunc nextState)
 {
     m_currentState->leave();
     m_currentState = nextState(*this);

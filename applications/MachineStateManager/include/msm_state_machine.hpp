@@ -16,6 +16,7 @@ public:
 
     virtual void enter() = 0;
     void leave() const override;
+    void performAction() override;
     api::ApplicationStateClient::ApplicationState getApplicationState() const;
 
 protected:
@@ -46,18 +47,13 @@ public:
     void enter() override;
 };
 
-class Suspend : public MsmState
-{
-public:
-    Suspend(MachineStateManager& msm);
-    void enter() override;
-};
 class MsmStateFactory : public api::IStateFactory
 {
 public:
     std::unique_ptr<api::IState> createInit(api::IAdaptiveApp& msm) const override;
     std::unique_ptr<api::IState> createRun(api::IAdaptiveApp& msm) const override;
     std::unique_ptr<api::IState> createShutDown(api::IAdaptiveApp& msm) const override;
+    std::unique_ptr<api::IState> createSuspend(api::IAdaptiveApp& msm) const override;
 };
 
 } // namespace MSM

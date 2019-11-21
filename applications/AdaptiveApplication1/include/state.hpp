@@ -10,8 +10,8 @@ class State : public api::IState
 public:
     State(AdaptiveApp& app, api::ApplicationStateClient::ApplicationState state, std::string stateName);
 
-    virtual void enter() = 0;
     void leave() const override;
+    virtual void performAction() override;
     api::ApplicationStateClient::ApplicationState getApplicationState() const;
 
 protected:
@@ -25,7 +25,6 @@ class Init : public State
 public:
     Init(AdaptiveApp& app);
     void enter() override;
-    void leave() const override;
 };
 
 class Run : public State
@@ -33,10 +32,7 @@ class Run : public State
 public:
     Run(AdaptiveApp& app);
     void enter() override;
-private:
-    api::ComponentState m_componentState;
-    api::ComponentClientReturnType handleTransition(api::ComponentState state);
-    void updateSubstate(const api::ComponentState& state, api::ComponentClientReturnType& confirm);
+    void performAction() override;
 };
 
 class ShutDown : public State
@@ -46,12 +42,21 @@ public:
     void enter() override;
 };
 
+class Suspend : public api::IState
+{
+public:
+    void enter() override;
+    void leave() const override;
+    virtual void performAction() override;
+};
+
 class StateFactory: public api::IStateFactory
 {
 public:
     std::unique_ptr<api::IState> createInit(api::IAdaptiveApp& app) const override;
     std::unique_ptr<api::IState> createRun(api::IAdaptiveApp& app) const override;
     std::unique_ptr<api::IState> createShutDown(api::IAdaptiveApp& app) const override;
+    std::unique_ptr<api::IState> createSuspend(api::IAdaptiveApp& app) const override;
 };
 
 #endif // STATE_HPP

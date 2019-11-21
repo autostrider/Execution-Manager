@@ -3,15 +3,14 @@
 
 #include <i_adaptive_app.hpp>
 #include <i_state_factory.hpp>
+#include <i_manifest_reader.hpp>
 #include <i_application_state_client_wrapper.hpp>
 #include <i_machine_state_client_wrapper.hpp>
-#include <i_manifest_reader.hpp>
 
 #include <iostream>
 #include <memory>
 #include <string>
 #include <sstream>
-#include <vector>
 #include <capnp/ez-rpc.h>
 
 namespace MSM
@@ -20,16 +19,15 @@ namespace MSM
 class MachineStateManager : public api::IAdaptiveApp
 {
 public:
-  MachineStateManager(
-          std::unique_ptr<api::IStateFactory> factory,
-          std::unique_ptr<api::IApplicationStateClientWrapper> appStateClient,
-          std::unique_ptr<api::IMachineStateClientWrapper> machineClient,
-          std::unique_ptr<ExecutionManager::IManifestReader> manifestReader);
-//  ~MachineStateManager() override = default;
+  MachineStateManager(std::unique_ptr<api::IStateFactory> factory,
+                      std::unique_ptr<api::IApplicationStateClientWrapper> appStateClient,
+                      std::unique_ptr<api::IMachineStateClientWrapper> machineClient,
+                      std::unique_ptr<ExecutionManager::IManifestReader> manifestReader);
 
   void init() override;
   void run() override;
   void terminate() override;
+  void performAction() override;
 
   api::MachineStateClient::StateError setMachineState(const std::string&);
   api::MachineStateClient::StateError registerMsm(const std::string&);

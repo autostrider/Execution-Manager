@@ -1,7 +1,7 @@
 language: cpp
 compiler:
   - gcc
-sudo: required
+sudo: required 
 dist: bionic
 os: linux
 git:
@@ -10,9 +10,11 @@ git:
 before_install:
 # - sudo apt-get update
 - sudo apt-get install -y ninja-build
+- sudo apt-get install cmake
 - git submodule update --init --remote --recursive
 
 script:
-  - mkdir build
-  - cd build
-  - cmake -GNinja .. && ninja
+- mkdir build
+- cd build
+- sudo cmake -GNinja .. && sudo ninja
+

@@ -35,9 +35,4 @@ static const std::string COMPONENT_STATE_OFF{"kOff"};
 
 using StateHandler = std::function<void()>;
 
-const std::map<int, api::ApplicationStateClient::ApplicationState> mapSignalToState
-{
-    {SIGTERM, api::ApplicationStateClient::ApplicationState::K_SHUTTINGDOWN},
-    {SIGINT, api::ApplicationStateClient::ApplicationState::SUSPEND}
-};
 #endif // CONSTANTS

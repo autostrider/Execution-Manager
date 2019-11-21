@@ -9,7 +9,7 @@
 static void signalHandler(int signo);
 using ApplicationState = api::ApplicationStateClient::ApplicationState;
 
-static std::atomic<ApplicationState> state{ApplicationState::K_INITIALIZING};
+static std::atomic<bool> isTerminated{false};
 
 int main(int argc, char **argv)
 {
@@ -23,23 +23,16 @@ int main(int argc, char **argv)
                                  std::make_unique<api::ApplicationStateClientWrapper>(),
                                  std::make_unique<api::MachineStateClientWrapper>());
 
-    const std::map<ApplicationState, StateHandler> dispatchMap
-    {
-        {ApplicationState::K_INITIALIZING, std::bind(&api::IAdaptiveApp::init, &msm)},
-        {ApplicationState::K_RUNNING, std::bind(&api::IAdaptiveApp::run, &msm)},
-        {ApplicationState::K_SHUTTINGDOWN, std::bind(&api::IAdaptiveApp::terminate, &msm)}
-    };
 
-    dispatchMap.at(state)();
-    state = ApplicationState::K_RUNNING;
+    msm.init();
 
-    while (ApplicationState::K_RUNNING == state)
+    while (false == isTerminated)
     {
-        dispatchMap.at(state)();
+        msm.run();
         std::this_thread::sleep_for(FIVE_SECONDS);
     }
 
-    dispatchMap.at(state)();
+    msm.terminate();
 
     ::exit(EXIT_SUCCESS);
 }
@@ -47,5 +40,5 @@ int main(int argc, char **argv)
 static void signalHandler(int signo)
 {
     LOG << "[msm] Received signal:" << sys_siglist[signo];
-    state = mapSignalToState.at(signo);
+    isTerminated = true;
 }

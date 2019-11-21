@@ -38,6 +38,6 @@ using StateHandler = std::function<void()>;
 const std::map<int, api::ApplicationStateClient::ApplicationState> mapSignalToState
 {
     {SIGTERM, api::ApplicationStateClient::ApplicationState::K_SHUTTINGDOWN},
-    {SIGINT, api::ApplicationStateClient::ApplicationState::K_SUSPEND}
+    {SIGINT, api::ApplicationStateClient::ApplicationState::SUSPEND}
 };
 #endif // CONSTANTS

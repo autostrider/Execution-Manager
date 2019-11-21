@@ -157,7 +157,7 @@ void ExecutionManager::changeComponentsState()
   {
     if(component.second != pendingComponentsState)
     {
-      m_componentPendingConfirmsToBeReceived.emplace(component.first);
+      m_componentPendingConfirms.emplace(component.first);
       component.second = pendingComponentsState;
     }
   }
@@ -172,17 +172,17 @@ ExecutionManager::reportApplicationState(pid_t processId, AppState state)
       << " received.";
 
   if (m_stateConfirmToBeReceived.empty() &&
-      m_componentPendingConfirmsToBeReceived.empty())
+      m_componentPendingConfirms.empty())
   {
     return;
   }
 
-  if (state != AppState::K_INITIALIZING)
+  if (state != AppState::kInitializing)
   {
     m_stateConfirmToBeReceived.erase(processId);
 
     if (m_stateConfirmToBeReceived.empty() &&
-        m_componentPendingConfirmsToBeReceived.empty())
+        m_componentPendingConfirms.empty())
     {
      confirmState(StateError::K_SUCCESS);
     }
@@ -230,7 +230,7 @@ ExecutionManager::setMachineState(std::string state)
   }
   
   if (!m_stateConfirmToBeReceived.empty() ||
-      !m_componentPendingConfirmsToBeReceived.empty())
+      !m_componentPendingConfirms.empty())
   {
     LOG << "Machine state change to \""
         << m_pendingState
@@ -262,22 +262,28 @@ ExecutionManager::getComponentState
   }
   else
   {
-    return ComponentClientReturnType::K_INVALID;
+    return ComponentClientReturnType::K_GENERAL_ERROR;
   }
 }
 
 void ExecutionManager::confirmComponentState
 (std::string component, ComponentState state, ComponentClientReturnType status)
 {
-  if (m_componentPendingConfirmsToBeReceived.empty())
+  if (m_componentPendingConfirms.empty())
   {
     return;
   }
 
-  m_componentPendingConfirmsToBeReceived.erase(component);
+  if (status == ComponentClientReturnType::K_GENERAL_ERROR ||
+      status == ComponentClientReturnType::K_INVALID)
+  {
+    LOG << "Confirm component state are faild with error: " << static_cast<int>(status);
+  }
+
+  m_componentPendingConfirms.erase(component);
 
   if (m_stateConfirmToBeReceived.empty() &&
-      m_componentPendingConfirmsToBeReceived.empty())
+      m_componentPendingConfirms.empty())
     {
      confirmState(StateError::K_SUCCESS);
     }

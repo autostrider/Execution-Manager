@@ -132,3 +132,15 @@ TEST_F(ComponentClientTest, ShouldSucceedToConfirmComponentState)
   EXPECT_EQ(testData.state, state);
   EXPECT_EQ(testData.status, status);
 }
+
+TEST_F(ComponentClientTest, ShouldConfirmComponentStateWithInvalidStatus)
+{
+  std::string state = "TestComponentState";
+  ComponentClientReturnType status = ComponentClientReturnType::K_INVALID;
+
+  cc.ConfirmComponentState(state, status);
+
+  EXPECT_EQ(testData.component, componentName);
+  EXPECT_EQ(testData.state, state);
+  EXPECT_EQ(testData.status, status);
+}

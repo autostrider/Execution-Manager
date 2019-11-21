@@ -133,7 +133,7 @@ TEST_F(ComponentClientTest, ShouldSucceedToConfirmComponentState)
   EXPECT_EQ(testData.status, status);
 }
 
-TEST_F(ComponentClientTest, ShouldConfirmComponentStateWithInvalidStatus)
+TEST_F(ComponentClientTest, ShouldSuccessfullyConfirmComponentStateWithInvalidStatus)
 {
   std::string state = "TestComponentState";
   ComponentClientReturnType status = ComponentClientReturnType::K_INVALID;

@@ -155,11 +155,7 @@ void ExecutionManager::changeComponentsState()
 
   for(auto& component : m_registeredComponents)
   {
-    if(component.second != pendingComponentsState)
-    {
-      m_componentPendingConfirms.emplace(component.first);
-      component.second = pendingComponentsState;
-    }
+    m_componentPendingConfirms.emplace(component);
   }
 }
 
@@ -208,10 +204,6 @@ ExecutionManager::setMachineState(std::string state)
   {
     return StateError::K_INVALID_STATE;
   }
-  // else if (m_stateConfirmToBeReceived.empty())
-  // {
-  //   return StateError::K_INVALID_REQUEST;
-  // }
   else if (state == m_currentState)
   {
     return StateError::K_INVALID_STATE;
@@ -246,7 +238,7 @@ ExecutionManager::setMachineState(std::string state)
 
 void ExecutionManager::registerComponent(std::string component)
 {
-  m_registeredComponents.emplace(std::make_pair(component, COMPONENT_STATE_ON));
+  m_registeredComponents.emplace(component);
 }
 
 ComponentClientReturnType
@@ -257,7 +249,15 @@ ExecutionManager::getComponentState
 
   if(iter != m_registeredComponents.cend())
   {
-    state = iter->second;
+    if(m_pendingState == MACHINE_STATE_SUSPEND)
+    {
+      state = COMPONENT_STATE_OFF;
+    }
+    else
+    {
+      state = COMPONENT_STATE_ON;
+    }
+    
     return ComponentClientReturnType::K_SUCCESS;
   }
   else

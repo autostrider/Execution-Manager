@@ -72,20 +72,20 @@ protected:
   const std::vector<MachineState> transitionStates =
     {MACHINE_STATE_STARTUP, MACHINE_STATE_RUNNING, MACHINE_STATE_LIVING, MACHINE_STATE_SUSPEND};
 
-  void expextGetAndConfirmComponentState(ExecutionManager::ExecutionManager&,
+  void expectGetAndConfirmComponentState(ExecutionManager::ExecutionManager&,
                                          ComponentTestData&,
                                          const std::string&);
 };
 
 void
-ExecutionManagerTest::expextGetAndConfirmComponentState(ExecutionManager::ExecutionManager& em,
+ExecutionManagerTest::expectGetAndConfirmComponentState(ExecutionManager::ExecutionManager& em,
                                                         ComponentTestData& compTestData,
-                                                        const std::string& expextState)
+                                                        const std::string& expectState)
 {
   em.getComponentState(compTestData.component, compTestData.state);
   em.confirmComponentState(compTestData.component, compTestData.state, compTestData.status);
 
-  EXPECT_EQ(expextState, compTestData.state);
+  EXPECT_EQ(expectState, compTestData.state);
 }
 
 TEST_F(ExecutionManagerTest, ShouldSucceedToSetStartingUpMachineState)
@@ -213,7 +213,7 @@ TEST_F(ExecutionManagerTest, ShouldKillAppAndTransitToNextState)
   em.reportApplicationState(appId, AppState::kRunning);
 
   em.setMachineState(MACHINE_STATE_RUNNING);
-  em.reportApplicationState(appId, AppState::kShuttingDoun);
+  em.reportApplicationState(appId, AppState::kShuttingDown);
 
   ASSERT_EQ(
     em.getMachineState(),
@@ -240,7 +240,7 @@ TEST_F(ExecutionManagerTest,
   em.setMachineState(MACHINE_STATE_STARTUP);
   em.reportApplicationState(appId, AppState::kRunning);
   em.setMachineState(MACHINE_STATE_RUNNING);
-  em.reportApplicationState(appId, AppState::kShuttingDoun);
+  em.reportApplicationState(appId, AppState::kShuttingDown);
   em.reportApplicationState(additionalAppId, AppState::kRunning);
 
   ASSERT_EQ(
@@ -291,8 +291,8 @@ TEST_F(ExecutionManagerTest, ShouldKillTwoAppsToTransitToNextState)
   em.reportApplicationState(additionalAppId, AppState::kRunning);
 
   em.setMachineState(MACHINE_STATE_RUNNING);
-  em.reportApplicationState(appId, AppState::kShuttingDoun);
-  em.reportApplicationState(additionalAppId, AppState::kShuttingDoun);
+  em.reportApplicationState(appId, AppState::kShuttingDown);
+  em.reportApplicationState(additionalAppId, AppState::kShuttingDown);
 
   ASSERT_EQ(
     em.getMachineState(),
@@ -318,10 +318,10 @@ TEST_F(ExecutionManagerTest, ShouldTransitToSuspendState)
   em.setMachineState(MACHINE_STATE_RUNNING);
   em.registerComponent(componentTestData.component);
   em.reportApplicationState(appId, AppState::kRunning);
-  expextGetAndConfirmComponentState(em, componentTestData, COMPONENT_STATE_ON);
+  expectGetAndConfirmComponentState(em, componentTestData, COMPONENT_STATE_ON);
 
   em.setMachineState(MACHINE_STATE_SUSPEND);
-  expextGetAndConfirmComponentState(em, componentTestData, COMPONENT_STATE_OFF);
+  expectGetAndConfirmComponentState(em, componentTestData, COMPONENT_STATE_OFF);
 
   ASSERT_EQ(em.getMachineState(), MACHINE_STATE_SUSPEND);
 }
@@ -329,10 +329,8 @@ TEST_F(ExecutionManagerTest, ShouldTransitToSuspendState)
 TEST_F(ExecutionManagerTest, ShouldKillAndTransitToSuspendState)
 {
   ComponentTestData componentTestData = {};
-  ComponentTestData componentTestDataForAdditionalApp = {};
 
   componentTestData.component = app.processName;
-  componentTestDataForAdditionalApp.component = additionalApp.processName;
 
   auto em = initEm(transitionStates,
                    {{MACHINE_STATE_RUNNING, {app}},
@@ -348,10 +346,10 @@ TEST_F(ExecutionManagerTest, ShouldKillAndTransitToSuspendState)
   em.setMachineState(MACHINE_STATE_RUNNING);
   em.registerComponent(componentTestData.component);
   em.reportApplicationState(appId, AppState::kRunning);
-  expextGetAndConfirmComponentState(em, componentTestData, COMPONENT_STATE_ON);
+  expectGetAndConfirmComponentState(em, componentTestData, COMPONENT_STATE_ON);
   
   em.setMachineState(MACHINE_STATE_SUSPEND);
-  em.reportApplicationState(appId, AppState::kShuttingDoun);
+  em.reportApplicationState(appId, AppState::kShuttingDown);
 
   ASSERT_EQ(em.getMachineState(), MACHINE_STATE_SUSPEND);
 }
@@ -379,15 +377,15 @@ TEST_F(ExecutionManagerTest, ShouldKillOneProcessAndTransitToSuspendState)
   em.setMachineState(MACHINE_STATE_RUNNING);
   em.registerComponent(componentTestData.component);
   em.reportApplicationState(appId, AppState::kRunning);
-  expextGetAndConfirmComponentState(em, componentTestData, COMPONENT_STATE_ON);
+  expectGetAndConfirmComponentState(em, componentTestData, COMPONENT_STATE_ON);
 
   em.registerComponent(componentTestDataForAdditionalApp.component);
   em.reportApplicationState(additionalAppId, AppState::kRunning);
-  expextGetAndConfirmComponentState(em, componentTestDataForAdditionalApp, COMPONENT_STATE_ON);
+  expectGetAndConfirmComponentState(em, componentTestDataForAdditionalApp, COMPONENT_STATE_ON);
   
   em.setMachineState(MACHINE_STATE_SUSPEND);
-  em.reportApplicationState(additionalAppId, AppState::kShuttingDoun);
-  expextGetAndConfirmComponentState(em, componentTestData, COMPONENT_STATE_OFF);
+  em.reportApplicationState(additionalAppId, AppState::kShuttingDown);
+  expectGetAndConfirmComponentState(em, componentTestData, COMPONENT_STATE_OFF);
 
   ASSERT_EQ(em.getMachineState(), MACHINE_STATE_SUSPEND);
 }
@@ -413,7 +411,7 @@ TEST_F(ExecutionManagerTest, ShouldStartAndTransitToSuspendState)
   em.setMachineState(MACHINE_STATE_SUSPEND);
   em.registerComponent(componentTestData.component);
   em.reportApplicationState(appId, AppState::kRunning);
-  expextGetAndConfirmComponentState(em, componentTestData, COMPONENT_STATE_ON);
+  expectGetAndConfirmComponentState(em, componentTestData, COMPONENT_STATE_ON);
 
   ASSERT_EQ(em.getMachineState(), MACHINE_STATE_SUSPEND);
 }
@@ -493,7 +491,7 @@ TEST_F(ExecutionManagerTest, ShouldConfirmSuccessComponentState)
   em.setMachineState(MACHINE_STATE_RUNNING);
   em.registerComponent(componentTestData.component);
   em.reportApplicationState(appId, AppState::kRunning);
-  expextGetAndConfirmComponentState(em, componentTestData, COMPONENT_STATE_ON);
+  expectGetAndConfirmComponentState(em, componentTestData, COMPONENT_STATE_ON);
 
   EXPECT_EQ(componentTestData.status, ComponentClientReturnType::K_SUCCESS);
 }
@@ -514,7 +512,7 @@ TEST_F(ExecutionManagerTest, ShouldConfirmSuccessComponentStateForSuspend)
   em.setMachineState(MACHINE_STATE_SUSPEND);
   em.registerComponent(componentTestData.component);
   em.reportApplicationState(appId, AppState::kRunning);
-  expextGetAndConfirmComponentState(em, componentTestData, COMPONENT_STATE_ON);
+  expectGetAndConfirmComponentState(em, componentTestData, COMPONENT_STATE_ON);
 
   EXPECT_EQ(componentTestData.status, ComponentClientReturnType::K_SUCCESS);
 }

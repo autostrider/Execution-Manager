@@ -25,6 +25,7 @@ ExecutionManager::ExecutionManager(
     m_allowedProcessesForState{reader->getStatesSupportedByApplication()},
     m_currentState{},
     m_pendingState{},
+    m_currentComponentState{},
     m_machineManifestStates{reader->getMachineStates()},
     m_rpcClient(std::move(client))
 {
@@ -142,16 +143,14 @@ void ExecutionManager::startApplication(const ProcessInfo& process)
 
 void ExecutionManager::changeComponentsState()
 {
-  ComponentState pendingComponentsState;
-
   if (m_pendingState == MACHINE_STATE_SUSPEND)
   {
-    pendingComponentsState = COMPONENT_STATE_OFF;
+    m_currentComponentState = COMPONENT_STATE_OFF;
   }
-  else if (m_pendingState == MACHINE_STATE_RUNNING)
+  else
   {
-    pendingComponentsState = COMPONENT_STATE_ON;
-  }  
+    m_currentComponentState = COMPONENT_STATE_ON;
+  }
 
   for(auto& component : m_registeredComponents)
   {
@@ -249,14 +248,7 @@ ExecutionManager::getComponentState
 
   if(iter != m_registeredComponents.cend())
   {
-    if(m_pendingState == MACHINE_STATE_SUSPEND)
-    {
-      state = COMPONENT_STATE_OFF;
-    }
-    else
-    {
-      state = COMPONENT_STATE_ON;
-    }
+    state = m_currentComponentState;
     
     return ComponentClientReturnType::K_SUCCESS;
   }

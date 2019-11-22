@@ -115,6 +115,8 @@ private:
    */
   MachineState m_pendingState;
 
+  ComponentState m_currentComponentState;
+
   /**
    * @brief Vector that holds state transitions.
    */

@@ -411,7 +411,7 @@ TEST_F(ExecutionManagerTest, ShouldStartAndTransitToSuspendState)
   em.setMachineState(MACHINE_STATE_SUSPEND);
   em.registerComponent(componentTestData.component);
   em.reportApplicationState(appId, AppState::kRunning);
-  expectGetAndConfirmComponentState(em, componentTestData, COMPONENT_STATE_ON);
+  expectGetAndConfirmComponentState(em, componentTestData, COMPONENT_STATE_OFF);
 
   ASSERT_EQ(em.getMachineState(), MACHINE_STATE_SUSPEND);
 }
@@ -421,8 +421,15 @@ TEST_F(ExecutionManagerTest, ShouldRegisterComponent)
   ComponentTestData componentTestData = {};
   componentTestData.component = app.processName;
 
-  auto em = initEm(transitionStates, {});
+  auto em = initEm({MACHINE_STATE_RUNNING}, {{MACHINE_STATE_RUNNING, {app}}});
+
+  {
+    InSequence seq;
+    EXPECT_CALL(*pAppHandler, startProcess(app)).WillOnce(Return(appId));
+    EXPECT_CALL(*pClient, confirm(StateError::K_SUCCESS));
+  }
   
+  em.setMachineState(MACHINE_STATE_RUNNING);
   em.reportApplicationState(appId, AppState::kRunning);
   em.registerComponent(componentTestData.component);
   em.getComponentState(componentTestData.component, componentTestData.state);
@@ -512,7 +519,7 @@ TEST_F(ExecutionManagerTest, ShouldConfirmSuccessComponentStateForSuspend)
   em.setMachineState(MACHINE_STATE_SUSPEND);
   em.registerComponent(componentTestData.component);
   em.reportApplicationState(appId, AppState::kRunning);
-  expectGetAndConfirmComponentState(em, componentTestData, COMPONENT_STATE_ON);
+  expectGetAndConfirmComponentState(em, componentTestData, COMPONENT_STATE_OFF);
 
   EXPECT_EQ(componentTestData.status, ComponentClientReturnType::K_SUCCESS);
 }

@@ -442,7 +442,7 @@ TEST_F(ExecutionManagerTest, ShouldNotGetComponentStateWhenComponentNotRegistere
   ComponentTestData componentTestData = {};
   componentTestData.component = app.processName;
 
-  auto em = initEm({MACHINE_STATE_SUSPEND}, {{MACHINE_STATE_SUSPEND, {app}}});
+  auto em = initEm({MACHINE_STATE_RUNNING}, {{MACHINE_STATE_RUNNING, {app}}});
   
   {
     InSequence seq;
@@ -450,7 +450,7 @@ TEST_F(ExecutionManagerTest, ShouldNotGetComponentStateWhenComponentNotRegistere
     EXPECT_CALL(*pClient, confirm(StateError::K_SUCCESS));
   }
 
-  em.setMachineState(MACHINE_STATE_SUSPEND);
+  em.setMachineState(MACHINE_STATE_RUNNING);
   em.reportApplicationState(appId, AppState::kRunning);
 
   auto result = em.getComponentState(componentTestData.component, componentTestData.state);

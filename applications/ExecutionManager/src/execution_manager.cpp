@@ -66,7 +66,6 @@ void ExecutionManager::startApplicationsForState()
       if (m_activeProcesses.find(executableToStart.processName) ==
           m_activeProcesses.cend())
       {
-
         try
         {
           startApplication(executableToStart);

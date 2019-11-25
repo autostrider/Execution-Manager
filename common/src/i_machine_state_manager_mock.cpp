@@ -1,4 +1,7 @@
 #include "mocks/i_machine_state_manager_mock.hpp"
+#include "i_manifest_reader.hpp"
+#include "i_state_factory.hpp"
+#include "i_application_state_client_wrapper.hpp"
 
 namespace MSM
 {

@@ -2,16 +2,25 @@
 #define MACHINE_STATE_MANAGER_HPP
 
 #include <i_adaptive_app.hpp>
-#include <i_state_factory.hpp>
-#include <i_manifest_reader.hpp>
-#include <i_application_state_client_wrapper.hpp>
+
 #include <i_machine_state_client_wrapper.hpp>
 
-#include <iostream>
-#include <memory>
-#include <string>
-#include <sstream>
 #include <capnp/ez-rpc.h>
+
+namespace ExecutionManager
+{
+
+class IManifestReader;
+
+}
+
+namespace api
+{
+
+class IStateFactory;
+class IApplicationStateClientWrapper;
+
+}
 
 namespace MSM
 {

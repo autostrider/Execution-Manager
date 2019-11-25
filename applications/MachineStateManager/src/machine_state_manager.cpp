@@ -1,4 +1,7 @@
 #include "machine_state_manager.hpp"
+#include <i_state_factory.hpp>
+#include <i_manifest_reader.hpp>
+#include <i_application_state_client_wrapper.hpp>
 #include <constants.hpp>
 
 namespace MSM {

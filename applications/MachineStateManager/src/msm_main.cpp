@@ -1,5 +1,6 @@
 #include "machine_state_manager.hpp"
 #include "msm_state_machine.hpp"
+#include <i_application_state_client_wrapper.hpp>
 #include <logger.hpp>
 #include <manifest_reader.hpp>
 #include <constants.hpp>

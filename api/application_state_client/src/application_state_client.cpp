@@ -1,5 +1,7 @@
 #include "application_state_client.h"
 #include <constants.hpp>
+#include <common.hpp>
+
 
 namespace api
 {
@@ -11,15 +13,14 @@ ApplicationStateClient::ApplicationStateClient()
 void ApplicationStateClient::ReportApplicationState(ApplicationState state)
 {
   auto& waitScope = m_client.getWaitScope();
-
   auto cap =
     m_client.getMain<ApplicationStateManagement>();
 
   auto request = cap.reportApplicationStateRequest();
   request.setState(state);
 
-  request.setPid(m_pid);
-
+  auto fullPath = getAppBinaryPath(m_pid);
+  request.setAppName(parseServiceName(fullPath));
   auto promise = request.send();
   promise.wait(waitScope);
 }

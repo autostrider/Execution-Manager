@@ -1,156 +1,91 @@
 #include "application_handler.hpp"
 #include <mocks/os_interface_mock.hpp>
 
-#include <memory>
-
 #include "gtest/gtest.h"
 #include "gmock/gmock.h"
 
-using namespace std;
 using namespace testing;
 
-namespace ApplicationHandlerTest
+namespace
 {  
-class ApplicationHandlerTest :
-  public ::testing::TestWithParam<ExecutionManager::StartupOptionKindEnum>
+
+  ACTION_P(CheckProcessName, fullProcName)
+  {
+    ASSERT_STREQ("systemctl", arg0);
+  }
+
+  ACTION_P(CheckArg, argData)
+  {
+    ASSERT_STREQ(argData.second, arg1[argData.first]);
+  }
+}
+
+class ApplicationHandlerTest : public Test
 {
 protected:
-  unique_ptr<OSInterfaceMock> m_iosmock = make_unique<OSInterfaceMock>();
+  void setupArgumentsCheck
+  (const std::string& serviceName, const std::string& action)
+  {
+    static const std::pair<int, const char*> procNameArg {0, SYSTEMCTL.c_str()};
+    static const std::pair<int, const char*> userArg{1, "--user"};
+    std::pair<int, const char*> systemctlAction {2, action.c_str()};
+    std::pair<int, const char*> suOptionArg {3, serviceName.c_str()};
+    static const std::pair<int, const char*> nullTerminatingArg {4, nullptr};
+
+    EXPECT_CALL(*m_iosmock, fork()).WillOnce(Return(childProcessId));
+    EXPECT_CALL(*m_iosmock, execvp(_, _))
+      .WillOnce(DoAll(CheckProcessName(SYSTEMCTL),
+                      CheckArg(procNameArg),
+                      CheckArg(userArg),
+                      CheckArg(systemctlAction),
+                      CheckArg(suOptionArg),
+                      CheckArg(nullTerminatingArg),
+                      Return(execvRes)));
+  }
+
+  const int childProcessId = 0;
+  const int execvRes = 0;
+  std::unique_ptr<OSInterfaceMock> m_iosmock = 
+    std::make_unique<StrictMock<OSInterfaceMock>>();
+  const std::string processName = "process";
+  const std::string serviceName = processName + SERVICE_EXTENSION;
 };
 
-TEST_F(ApplicationHandlerTest, ShouldStartChildProcess)                           
+TEST_F(ApplicationHandlerTest, ShouldFailToStartProcessWhenForkFailed)
 {
-  const int expectedValue = 0;
-  const int childProcessId = 0;
-
-  ExecutionManager::ProcessInfo pinfo;
-
-  EXPECT_CALL(*m_iosmock, fork()).WillOnce(Return(childProcessId));
-  EXPECT_CALL(*m_iosmock, execv(_,_)).WillOnce(Return(expectedValue));
+  EXPECT_CALL(*m_iosmock, fork())
+    .WillOnce(SetErrnoAndReturn(EAGAIN, -1));
 
   ExecutionManager::ApplicationHandler appHandler{std::move(m_iosmock)};
-  ASSERT_EQ(appHandler.startProcess(pinfo), expectedValue);
+  appHandler.startProcess(processName);
 }
 
-TEST_F(ApplicationHandlerTest, ShouldThrowExeptionIfFailedToCreateProcess)                              
+TEST_F(ApplicationHandlerTest, ShouldFailToStartProcessWhenExecvpFailed)
 {
-  const int execvRes = 1;
-  const int childProcessId = 0;
-
-  ExecutionManager::ProcessInfo pinfo;
-
-  EXPECT_CALL(*m_iosmock, fork()).WillOnce(Return(childProcessId));
-  EXPECT_CALL(*m_iosmock, execv(_,_)).WillOnce(Return(execvRes));
-
-	ExecutionManager::ApplicationHandler appHandler{std::move(m_iosmock)};
-
-  ASSERT_THROW(appHandler.startProcess(pinfo), runtime_error);
-}
-
-TEST_F(ApplicationHandlerTest, ShouldSucceedToKillProcess)
-{
-  pid_t processId = 5;
-
-  EXPECT_CALL(*m_iosmock, kill(_, _));
-
-	ExecutionManager::ApplicationHandler appHandler{std::move(m_iosmock)};
-
-  appHandler.killProcess(processId);
-}
-
-ACTION_P(CheckProcessName, fullProcName)
-{
-  ASSERT_STREQ(fullProcName.c_str(), arg0);
-}
-
-ACTION_P(CheckArg, argData)
-{
-  ASSERT_STREQ(argData.second, arg1[argData.first]);
-}
-
-TEST_F(ApplicationHandlerTest, ShouldSucceedToGetDataLongForm)
-{
-  const int execvRes = 0;
-  const int childProcessId = 0;
-
-  ExecutionManager::StartupOption suoption = {ExecutionManager::StartupOptionKindEnum::commandLineLongForm, "abc", "def"};
-  
-  ExecutionManager::ProcessInfo pinfo = {" ", " ", {suoption}};
-  std::string fullProcName = APPLICATIONS_PATH + pinfo.createRelativePath();
-  const std::string cmdOption = "--" + suoption.optionName + "=" + suoption.optionArg;
-
-  // Pairs containing argument info, first : position in arguments list, second : value.
-  std::pair<int, const char*> procNameArg {0, pinfo.processName.c_str()};
-  std::pair<int, const char*> suOptionArg {1, cmdOption.c_str()};
-  std::pair<int, const char*> nullTerminatingArg {2, nullptr};
-
-  EXPECT_CALL(*m_iosmock, fork()).WillOnce(Return(childProcessId));
-  EXPECT_CALL(*m_iosmock, execv(_, _))
-    .WillOnce(DoAll(CheckProcessName(fullProcName),
-  CheckArg(procNameArg),
-  CheckArg(suOptionArg),
-  CheckArg(nullTerminatingArg),
-  Return(execvRes)));
+  EXPECT_CALL(*m_iosmock, fork())
+    .WillOnce(Return(childProcessId));
+  EXPECT_CALL(*m_iosmock, execvp(_,_))
+    .WillOnce(SetErrnoAndReturn(EAGAIN, -1));
 
   ExecutionManager::ApplicationHandler appHandler{std::move(m_iosmock)};
-  ASSERT_EQ(appHandler.startProcess(pinfo), childProcessId);
+  appHandler.startProcess(processName);
 }
 
-TEST_F(ApplicationHandlerTest, ShouldSucceedToGetDataShortForm)
+
+TEST_F(ApplicationHandlerTest, ShouldSucceedToStartService)
 {
-  const int execvRes = 0;
-  const int childProcessId = 0;
-
-  ExecutionManager::StartupOption suoption = {ExecutionManager::StartupOptionKindEnum::commandLineShortForm, "abc", "def"};
-  
-  ExecutionManager::ProcessInfo pinfo = {" ", " ", {suoption}};
-  std::string fullProcName = APPLICATIONS_PATH + pinfo.createRelativePath();
-  const std::string cmdOption = "-" + suoption.optionName + " " + suoption.optionArg;
-
-  // Pairs containing argument info, first : position in arguments list, second : value.
-  std::pair<int, const char*> procNameArg {0, pinfo.processName.c_str()};
-  std::pair<int, const char*> suOptionArg {1, cmdOption.c_str()};
-  std::pair<int, const char*> nullTerminatingArg {2, nullptr};
-
-  EXPECT_CALL(*m_iosmock, fork()).WillOnce(Return(childProcessId));
-  EXPECT_CALL(*m_iosmock, execv(_, _))
-    .WillOnce(DoAll(CheckProcessName(fullProcName),
-  CheckArg(procNameArg),
-  CheckArg(suOptionArg),
-  CheckArg(nullTerminatingArg),
-  Return(execvRes)));
+  static const std::string start{"start"};
+  setupArgumentsCheck(serviceName, start);
 
   ExecutionManager::ApplicationHandler appHandler{std::move(m_iosmock)};
-  ASSERT_EQ(appHandler.startProcess(pinfo), childProcessId);
+  appHandler.startProcess(processName);
 }
 
-TEST_F(ApplicationHandlerTest, ShouldSucceedToGetDataSimpleForm)
+TEST_F(ApplicationHandlerTest, ShouldSucceedToStopService)
 {
-  const int execvRes = 0;
-  const int childProcessId = 0;
-
-  ExecutionManager::StartupOption suoption = {ExecutionManager::StartupOptionKindEnum::commandLineSimpleForm, "abc", "def"};
-  
-  ExecutionManager::ProcessInfo pinfo = {" ", " ", {suoption}};
-  std::string fullProcName = APPLICATIONS_PATH + pinfo.createRelativePath();
-  const std::string cmdOption = suoption.optionName;
-
-  // Pairs containing argument info, first : position in arguments list, second : value.
-  std::pair<int, const char*> procNameArg {0, pinfo.processName.c_str()};
-  std::pair<int, const char*> suOptionArg {1, cmdOption.c_str()};
-  std::pair<int, const char*> nullTerminatingArg {2, nullptr};
-
-  EXPECT_CALL(*m_iosmock, fork()).WillOnce(Return(childProcessId));
-  EXPECT_CALL(*m_iosmock, execv(_, _))
-    .WillOnce(DoAll(CheckProcessName(fullProcName),
-  CheckArg(procNameArg),
-  CheckArg(suOptionArg),
-  CheckArg(nullTerminatingArg),
-  Return(execvRes)));
+  static const std::string stop{"stop"};
+  setupArgumentsCheck(serviceName, stop);
 
   ExecutionManager::ApplicationHandler appHandler{std::move(m_iosmock)};
-  ASSERT_EQ(appHandler.startProcess(pinfo), childProcessId);
-}
-
-
+  appHandler.killProcess(processName);
 }

@@ -10,7 +10,7 @@
 #include "gtest/gtest.h"
 #include "gmock/gmock.h"
 
-using namespace std;
+using namespace ::testing;
 
 namespace ApplicationStateClientTest
 {
@@ -35,7 +35,8 @@ private:
     Data& m_sharedResource;
 };
 
-ApplicationStateClientServer::ApplicationStateClientServer (Data& sharedResource) : m_sharedResource{sharedResource}
+ApplicationStateClientServer::ApplicationStateClientServer(Data& sharedResource) 
+    : m_sharedResource{sharedResource}
 {
     LOG << "Application State Client server started...";
 }
@@ -44,31 +45,31 @@ ApplicationStateClientServer::ApplicationStateClientServer (Data& sharedResource
 ApplicationStateClientServer::reportApplicationState(ReportApplicationStateContext context)
 {
     m_sharedResource.m_state = context.getParams().getState();
-    m_sharedResource.m_appPid = context.getParams().getPid();
-         
+
     return kj::READY_NOW;
 }
 
-class ApplicationStateClientTest : public ::testing::Test 
+class ApplicationStateClientTest : public Test 
 {
 protected:
-    virtual ~ApplicationStateClientTest() noexcept(true) {}
+    ~ApplicationStateClientTest() noexcept(true) override {}
 
     ApplicationStateClientTest() {}
 
-	void SetUp() override
-	{
-		unlink(EM_SOCKET_NAME.c_str());
-	}
+  void SetUp() override
+  {
+    ::unlink(EM_SOCKET_NAME.c_str());
+  }
 
-	void TearDown() override
+  void TearDown() override
     {
-        unlink(EM_SOCKET_NAME.c_str());
+        ::unlink(EM_SOCKET_NAME.c_str());
     }
 
-    Data sharedResource;  
+    Data sharedResource;
     const std::string socketName{IPC_PROTOCOL + EM_SOCKET_NAME};
-    capnp::EzRpcServer server{kj::heap<ApplicationStateClientServer>(sharedResource), socketName}; 
+    capnp::EzRpcServer server
+    {kj::heap<ApplicationStateClientServer>(sharedResource), socketName}; 
 };
 
 TEST_F(ApplicationStateClientTest, ShouldSucceedToReportApplicationState)

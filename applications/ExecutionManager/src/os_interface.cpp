@@ -11,14 +11,9 @@ pid_t OsInterface::fork()
   return ::fork();
 }
 
-int OsInterface::execv(const char* path, char* argv[])
+int OsInterface::execvp(const char *file, char **argv)
 {
-  return ::execv(path, argv);
-}
-
-int OsInterface::kill(pid_t procId, int signal)
-{
-  return ::kill(procId, signal);
+  return ::execvp(file, argv);
 }
 
 }

@@ -1,7 +1,11 @@
 cmake_minimum_required(VERSION 3.9)
 project(common VERSION 0.0.1 LANGUAGES C CXX)
 
+add_subdirectory(test)
 file(GLOB_RECURSE COMMON_SRCS *.cpp)
+set(COMMON_INCLUDE ${CMAKE_CURRENT_SOURCE_DIR}/include)
+list(REMOVE_ITEM COMMON_INCLUDE ${CMAKE_CURRENT_SOURCE_DIR}/include/mocks)
+
 
 # Create major target
 add_library(common

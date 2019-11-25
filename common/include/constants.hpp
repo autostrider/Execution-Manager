@@ -15,7 +15,7 @@ static const std::string MSM_SOCKET_NAME{"/tmp/machine_management"};
 static const std::string MSM_TEST{"/tmp/msc_test"};
 static const std::string APPLICATIONS_PATH{"./bin/applications/"};
 
-constexpr std::uint32_t DEFAULT_RESPONSE_TIMEOUT{3000000};
+constexpr std::uint32_t DEFAULT_RESPONSE_TIMEOUT{30000000};
 constexpr std::uint32_t NO_TIMEOUT{0};
 constexpr std::chrono::seconds FIVE_SECONDS{5};
 
@@ -34,5 +34,12 @@ static const std::string COMPONENT_STATE_ON{"kOn"};
 static const std::string COMPONENT_STATE_OFF{"kOff"};
 
 using StateHandler = std::function<void()>;
+using ProcName = std::string;
 
+
+static const std::string SYSTEMCTL{"systemctl"};
+static const std::string SERVICE_EXTENSION{".service"};
+static const std::string USER{"--user"};
+static const std::string SYSTEMCTL_START{"start"};
+static const std::string SYSTEMCTL_STOP{"stop"};
 #endif // CONSTANTS

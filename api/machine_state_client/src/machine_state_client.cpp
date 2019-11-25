@@ -126,7 +126,6 @@ MachineStateClient::StateError
 MachineStateClient::waitForConfirm(std::uint32_t timeout)
 {
   std::future<StateError> future = m_promise.get_future();
-
   std::future_status status =
     future.wait_for(std::chrono::milliseconds(timeout));
 

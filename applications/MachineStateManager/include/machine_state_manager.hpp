@@ -21,7 +21,6 @@ public:
   MachineStateManager(std::unique_ptr<api::IStateFactory> factory,
                       std::unique_ptr<api::IApplicationStateClientWrapper> appStateClient,
                       std::unique_ptr<api::IMachineStateClientWrapper> machineClient);
-  ~MachineStateManager() override = default;
 
   void init() override;
   void run() override;

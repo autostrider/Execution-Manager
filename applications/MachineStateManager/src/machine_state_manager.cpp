@@ -14,20 +14,17 @@ using StateError = api::MachineStateClient::StateError;
 MachineStateManager::MachineStateManager(std::unique_ptr<api::IStateFactory> factory,
         std::unique_ptr<api::IApplicationStateClientWrapper> appStateClient,
         std::unique_ptr<api::IMachineStateClientWrapper> machineClient,
-        std::unique_ptr<ExecutionManager::IManifestReader> manifestReader,
-        std::unique_ptr<ISocketServer> socketServer) :
+        std::unique_ptr<ExecutionManager::IManifestReader> manifestReader) :
         m_machineStateClient(std::move(machineClient)),
         m_factory{std::move(factory)},
         m_currentState{nullptr},
         m_appStateClient{std::move(appStateClient)},
-        m_availableStates{manifestReader->getMachineStates()},
-        m_newStatesServer{std::move(socketServer)}
+        m_availableStates{manifestReader->getMachineStates()}
 {
 }
 
 void MachineStateManager::init()
 {
-    m_newStatesServer->startServer();
     m_currentState = m_factory->createInit(*this);
     m_currentState->enter();
 }

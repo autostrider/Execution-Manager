@@ -4,7 +4,6 @@
 #include <mocks/machine_state_client_mock.hpp>
 #include <mocks/i_machine_state_manager_mock.hpp>
 #include <mocks/manifest_reader_mock.hpp>
-#include <i_socket_server.hpp>
 
 #include "gtest/gtest.h"
 
@@ -27,8 +26,7 @@ protected:
         return new IMachineStateManagerMock{std::move(factoryMock),
                     std::move(appStateClientMock),
                     std::move(machineStateClientMock),
-                    std::move(manifestReaderMock),
-                    nullptr};
+                    std::move(manifestReaderMock)};
     }
 
    std::unique_ptr<AppStateClientMock> appStateClientMock =
@@ -52,7 +50,7 @@ TEST_F(MsmStateMachineTest, ShouldInitCallEnter)
 
     EXPECT_CALL(*msmMock, reportApplicationState(_)).WillOnce(Return());
 
-    std::unique_ptr<Init> state = std::make_unique<Init>(*msmMock);
+    std::unique_ptr<Init> state = std::make_unique<Init>(*msmMock, nullptr);
     state->enter();
 }
 
@@ -64,7 +62,7 @@ TEST_F(MsmStateMachineTest, UnsuccessfulRegistration)
 
     EXPECT_CALL(*msmMock, reportApplicationState(_)).WillOnce(Return());
 
-    std::unique_ptr<Init> state = std::make_unique<Init>(*msmMock);
+    std::unique_ptr<Init> state = std::make_unique<Init>(*msmMock, nullptr);
     state->enter();
 }
 
@@ -77,7 +75,7 @@ TEST_F(MsmStateMachineTest, ShouldRunCallEnter)
 
     msmMock = initIMsm();
 
-    std::unique_ptr<::Run> state = std::make_unique<::Run>(*msmMock);
+    std::unique_ptr<::Run> state = std::make_unique<::Run>(*msmMock, nullptr);
     state->enter();
 }
 
@@ -87,7 +85,7 @@ TEST_F(MsmStateMachineTest, ShouldInitCallLeave)
 
     EXPECT_CALL(*msmMock, reportApplicationState(_)).WillOnce(Return());
 
-    std::unique_ptr<Init> state = std::make_unique<Init>(*msmMock);
+    std::unique_ptr<Init> state = std::make_unique<Init>(*msmMock, nullptr);
     state->leave();
 }
 
@@ -97,7 +95,7 @@ TEST_F(MsmStateMachineTest, ShouldTerminateCallEnter)
 
     EXPECT_CALL(*msmMock, reportApplicationState(_)).WillOnce(Return());
 
-    std::unique_ptr<ShutDown> state = std::make_unique<ShutDown>(*msmMock);
+    std::unique_ptr<ShutDown> state = std::make_unique<ShutDown>(*msmMock, nullptr);
     state->enter();
 }
 
@@ -105,7 +103,7 @@ TEST_F(MsmStateMachineTest, ShouldTerminateCallLeave)
 {
     msmMock = initIMsm();
 
-    std::unique_ptr<ShutDown> state = std::make_unique<ShutDown>(*msmMock);
+    std::unique_ptr<ShutDown> state = std::make_unique<ShutDown>(*msmMock, nullptr);
     state->leave();
 }
 
@@ -113,7 +111,7 @@ TEST_F(MsmStateMachineTest, ShouldCreateInit)
 {
     msmMock = initIMsm();
 
-    std::unique_ptr<api::IState> expectedState = std::make_unique<Init>(*msmMock);
+    std::unique_ptr<api::IState> expectedState = std::make_unique<Init>(*msmMock, nullptr);
     std::unique_ptr<api::IState> createdState = factory.createInit(*msmMock);
 
     bool result = std::is_same<decltype (expectedState), decltype (createdState)>::value;

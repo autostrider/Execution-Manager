@@ -4,7 +4,6 @@
 #include <mocks/i_state_factory_mock.hpp>
 #include <mocks/i_state_mock.hpp>
 #include <mocks/manifest_reader_mock.hpp>
-#include <socket_server.hpp>
 #include <logger.hpp>
 
 #include "gtest/gtest.h"
@@ -50,9 +49,7 @@ protected:
                     std::move(factoryMock),
                     std::move(appStateClientMock),
                     std::move(machineStateClientMock),
-                    std::move(manifestReaderMock),
-                    nullptr
-        );
+                    std::move(manifestReaderMock));
     }
 };
 

@@ -4,6 +4,8 @@
 #include "machine_state_manager.hpp"
 #include <i_state_factory.hpp>
 
+class ISocketServer;
+
 namespace MSM
 {
 
@@ -12,7 +14,8 @@ class MsmState : public api::IState
 public:
     MsmState(MachineStateManager& msm, 
              api::ApplicationStateClient::ApplicationState state, 
-             std::string stateName);
+             std::string stateName,
+             std::shared_ptr<ISocketServer> server);
 
     virtual void enter() = 0;
     void leave() const override;
@@ -23,12 +26,13 @@ protected:
     MachineStateManager& m_msm;
     const api::ApplicationStateClient::ApplicationState m_msmState;
     const std::string m_stateName;
+    std::shared_ptr<ISocketServer> m_newStatesServer;
 };
 
 class Init : public MsmState
 {
 public:
-    Init(MachineStateManager& msm);
+    Init(MachineStateManager& msm, std::shared_ptr<ISocketServer> server);
     void enter() override;
     void leave() const override;
 };
@@ -36,14 +40,14 @@ public:
 class Run : public MsmState
 {
 public:
-    Run(MachineStateManager& msm);
+    Run(MachineStateManager& msm, std::shared_ptr<ISocketServer> server);
     void enter() override;
 };
 
 class ShutDown : public MsmState
 {
 public:
-    ShutDown(MachineStateManager& msm);
+    ShutDown(MachineStateManager& msm, std::shared_ptr<ISocketServer> server);
     void enter() override;
 };
 

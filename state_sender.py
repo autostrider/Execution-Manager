@@ -11,7 +11,6 @@ if __name__ == "__main__":
     try:
       while True:
           val = input()
-          print(val)
           sock_client.send(val.encode())
     except KeyboardInterrupt:
         print("Shutting down")

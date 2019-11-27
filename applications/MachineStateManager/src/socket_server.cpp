@@ -3,6 +3,8 @@
 #include <i_socket_interface.hpp>
 
 #include <sys/socket.h>
+#include <stdexcept>
+#include <exception>
 
 namespace MSM
 {
@@ -16,13 +18,12 @@ SocketServer::SocketServer
     m_serverAddress{},
     m_worker{}
 {
-  ::unlink(path.c_str());
   m_serverAddress.sun_family = AF_UNIX;
   path.copy(m_serverAddress.sun_path, path.length());
 
-  if (m_socketfd)
+  if (m_socketfd < 0)
   {
-    LOG << "Error opening socket";
+     LOG << "Error opening socket " << strerror(errno);
   }
 }
 
@@ -35,27 +36,34 @@ void SocketServer::dataListener()
 
   constexpr int BUFFER_SIZE = 128;
   char buff[BUFFER_SIZE];
+  int resfd = m_socket->accept(m_socketfd, (struct sockaddr*)&cli, &cliSize);
+  LOG << "Client connected successfully";
   do
   {
-    LOG << "New promise set";
+    bzero(buff, BUFFER_SIZE);
     auto newStatePromise = std::promise<std::string>();
     m_newState = newStatePromise.get_future();
-    LOG << "before accept";
-    int resfd = m_socket->accept(m_socketfd, (struct sockaddr*)&cli, &cliSize);
-    bzero(buff, BUFFER_SIZE);
-    m_socket->recv(resfd, buff, sizeof(buff), 0);
+    int resRecv = m_socket->recv(resfd, buff, BUFFER_SIZE, 0);
+    if (resRecv <= 0)
+    {
+      try
+      {
+        throw std::runtime_error("Connection closed");
+      }
+      catch (...)
+      {
+        newStatePromise.set_exception(std::current_exception());
+      }
+      break;
+    }
     newStatePromise.set_value(std::string{buff});
-    LOG << "data was set";
   } while (m_isAlive);
 }
 
 std::string SocketServer::recv()
 {
-  LOG << "before";
-  while (!m_newState.valid()) {
-
-  }
-  LOG << "here";
+  while (!m_newState.valid())
+  { }
   return m_newState.get();
 }
 
@@ -83,7 +91,7 @@ SocketServer::~SocketServer()
   {
     m_worker.join();
   }
-
+  ::unlink(m_serverAddress.sun_path);
   close(m_socketfd);
 }
 

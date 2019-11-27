@@ -10,9 +10,9 @@ namespace MSM
 SocketServer::SocketServer
 (std::unique_ptr<ISocketInterface> socket, const std::string& path)
   : m_socket{std::move(socket)},
-    m_newState{std::promise<std::string>()},
     m_isAlive{true},
     m_socketfd{m_socket->socket(AF_UNIX, SOCK_STREAM, 0)},
+    m_newState{},
     m_serverAddress{},
     m_worker{}
 {
@@ -38,17 +38,22 @@ void SocketServer::dataListener()
   char buff[BUFFER_SIZE];
   do
   {
-      m_newState = std::promise<std::string>();
+    LOG << "1";
+      auto newStatePromise = std::promise<std::string>();
+      LOG << "2";
+      m_newState = newStatePromise.get_future();
+      LOG << "#";
       bzero(buff, BUFFER_SIZE);
       read(m_socketfd, buff, sizeof(buff));
-      m_newState.set_value(std::string{buff});
+      LOG << "4";
+      newStatePromise.set_value(std::string{buff});
+      LOG << "5";
   } while (m_isAlive);
 }
 
 std::string SocketServer::recv()
 {
-  auto result = m_newState.get_future();
-  return result.get();
+  return m_newState.get();
 }
 
 void SocketServer::closeServer()
@@ -66,6 +71,14 @@ void SocketServer::startServer()
   }
 
   m_worker = std::thread(&SocketServer::dataListener, this);
+}
+
+SocketServer::~SocketServer()
+{
+  if (m_worker.joinable())
+  {
+    m_worker.join();
+  }
 }
 
 } // namespace MachineStateManager

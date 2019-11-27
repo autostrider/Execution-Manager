@@ -20,13 +20,15 @@ public:
   std::string recv() override;
   void closeServer() override;
   void startServer() override;
+
+  ~SocketServer() override;
 private:
   void dataListener();
 private:
   std::unique_ptr<ISocketInterface> m_socket;
-  std::promise<std::string> m_newState;
   bool m_isAlive;
   int m_socketfd;
+  std::future<std::string> m_newState;
   struct sockaddr_un m_serverAddress;
   std::thread m_worker;
 };

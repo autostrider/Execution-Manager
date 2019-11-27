@@ -27,6 +27,7 @@ MachineStateManager::MachineStateManager(std::unique_ptr<api::IStateFactory> fac
 
 void MachineStateManager::init()
 {
+    m_newStatesServer->startServer();
     m_currentState = m_factory->createInit(*this);
     m_currentState->enter();
 }

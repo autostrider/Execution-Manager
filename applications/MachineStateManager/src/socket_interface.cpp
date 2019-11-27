@@ -21,3 +21,8 @@ int SocketInterface::listen(int sockfd, int backlog)
 {
   return ::listen(sockfd, backlog);
 }
+
+int SocketInterface::recv(int sockfd, void *buf, size_t len, int flags)
+{
+  return ::recv(sockfd, buf, len, flags);
+}

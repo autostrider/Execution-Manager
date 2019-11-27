@@ -1,4 +1,4 @@
-#include "socket_server.hpp"
+﻿#include "socket_server.hpp"
 #include <logger.hpp>
 #include <i_socket_interface.hpp>
 
@@ -16,6 +16,7 @@ SocketServer::SocketServer
     m_serverAddress{},
     m_worker{}
 {
+  ::unlink(path.c_str());
   m_serverAddress.sun_family = AF_UNIX;
   path.copy(m_serverAddress.sun_path, path.length());
 
@@ -27,10 +28,8 @@ SocketServer::SocketServer
 
 void SocketServer::dataListener()
 {
-  m_socket->listen(m_socketfd, 1);
   struct sockaddr_un cli;
   unsigned int cliSize =  sizeof(cli);
-  m_socket->accept(m_socketfd, (struct sockaddr*)&cli, &cliSize);
 
   LOG << "State receiver server started...";
 
@@ -38,21 +37,25 @@ void SocketServer::dataListener()
   char buff[BUFFER_SIZE];
   do
   {
-    LOG << "1";
-      auto newStatePromise = std::promise<std::string>();
-      LOG << "2";
-      m_newState = newStatePromise.get_future();
-      LOG << "#";
-      bzero(buff, BUFFER_SIZE);
-      read(m_socketfd, buff, sizeof(buff));
-      LOG << "4";
-      newStatePromise.set_value(std::string{buff});
-      LOG << "5";
+    LOG << "New promise set";
+    auto newStatePromise = std::promise<std::string>();
+    m_newState = newStatePromise.get_future();
+    LOG << "before accept";
+    int resfd = m_socket->accept(m_socketfd, (struct sockaddr*)&cli, &cliSize);
+    bzero(buff, BUFFER_SIZE);
+    m_socket->recv(resfd, buff, sizeof(buff), 0);
+    newStatePromise.set_value(std::string{buff});
+    LOG << "data was set";
   } while (m_isAlive);
 }
 
 std::string SocketServer::recv()
 {
+  LOG << "before";
+  while (!m_newState.valid()) {
+
+  }
+  LOG << "here";
   return m_newState.get();
 }
 
@@ -69,6 +72,7 @@ void SocketServer::startServer()
   {
     LOG << "Error binding data";
   }
+  m_socket->listen(m_socketfd, 5);
 
   m_worker = std::thread(&SocketServer::dataListener, this);
 }
@@ -79,6 +83,8 @@ SocketServer::~SocketServer()
   {
     m_worker.join();
   }
+
+  close(m_socketfd);
 }
 
 } // namespace MachineStateManager

@@ -4,6 +4,7 @@
 #include <mocks/machine_state_client_mock.hpp>
 #include <mocks/i_machine_state_manager_mock.hpp>
 #include <mocks/manifest_reader_mock.hpp>
+#include <i_socket_server.hpp>
 
 #include "gtest/gtest.h"
 
@@ -26,7 +27,8 @@ protected:
         return new IMachineStateManagerMock{std::move(factoryMock),
                     std::move(appStateClientMock),
                     std::move(machineStateClientMock),
-                    std::move(manifestReaderMock)};
+                    std::move(manifestReaderMock),
+                    nullptr};
     }
 
    std::unique_ptr<AppStateClientMock> appStateClientMock =

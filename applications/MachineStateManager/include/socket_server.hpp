@@ -6,10 +6,11 @@
 #include <memory>
 #include <future>
 #include <thread>
+#include <sys/un.h>
 
 class ISocketInterface;
 
-namespace MachineStateManager
+namespace MSM
 {
 
 class SocketServer final: public ISocketServer
@@ -17,15 +18,16 @@ class SocketServer final: public ISocketServer
 public:
   SocketServer(std::unique_ptr<ISocketInterface> socket, const std::string& path);
   std::string recv() override;
+  void closeServer() override;
+  void startServer() override;
 private:
-  void dataListener(
-    std::promise<std::string> newState, 
-    int socketfd,
-    std::unique_ptr<ISocketInterface> socket
-  );
+  void dataListener();
 private:
   std::unique_ptr<ISocketInterface> m_socket;
+  std::promise<std::string> m_newState;
+  bool m_isAlive;
   int m_socketfd;
+  struct sockaddr_un m_serverAddress;
   std::thread m_worker;
 };
 

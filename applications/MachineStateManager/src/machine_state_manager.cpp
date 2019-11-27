@@ -1,4 +1,5 @@
 #include "machine_state_manager.hpp"
+#include "socket_server.hpp"
 #include <i_state_factory.hpp>
 #include <i_manifest_reader.hpp>
 #include <i_application_state_client_wrapper.hpp>
@@ -13,12 +14,14 @@ using StateError = api::MachineStateClient::StateError;
 MachineStateManager::MachineStateManager(std::unique_ptr<api::IStateFactory> factory,
         std::unique_ptr<api::IApplicationStateClientWrapper> appStateClient,
         std::unique_ptr<api::IMachineStateClientWrapper> machineClient,
-        std::unique_ptr<ExecutionManager::IManifestReader> manifestReader) :
+        std::unique_ptr<ExecutionManager::IManifestReader> manifestReader,
+        std::unique_ptr<ISocketServer> socketServer) :
         m_machineStateClient(std::move(machineClient)),
         m_factory{std::move(factory)},
         m_currentState{nullptr},
         m_appStateClient{std::move(appStateClient)},
-        m_availableStates{manifestReader->getMachineStates()}
+        m_availableStates{manifestReader->getMachineStates()},
+        m_newStatesServer{std::move(socketServer)}
 {
 }
 

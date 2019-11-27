@@ -17,7 +17,9 @@ public:
             std::unique_ptr<api::IStateFactory> factory,
             std::unique_ptr<api::IApplicationStateClientWrapper> appClient,
             std::unique_ptr<api::IMachineStateClientWrapper> machineClient,
-            std::unique_ptr<ExecutionManager::IManifestReader> manifestReader);
+            std::unique_ptr<ExecutionManager::IManifestReader> manifestReader,
+            std::unique_ptr<ISocketServer> socketServer
+    );
 
     MOCK_METHOD(void, init, ());
     MOCK_METHOD(void, run, ());

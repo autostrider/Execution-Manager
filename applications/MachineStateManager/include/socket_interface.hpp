@@ -3,6 +3,9 @@
 
 #include <i_socket_interface.hpp>
 
+namespace MSM
+{
+
 class SocketInterface: public ISocketInterface
 {
 public:
@@ -12,5 +15,7 @@ public:
   int listen(int sockfd, int backlog) override;
   int recv(int sockfd, void *buf, size_t len, int flags) override;
 };
+
+}
 
 #endif // SOCKET_INTERFACE_HPP

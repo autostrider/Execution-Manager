@@ -1,5 +1,8 @@
 #include "socket_interface.hpp"
 
+namespace MSM
+{
+
 int 
 SocketInterface::bind(int sockfd, const struct sockaddr* addr, socklen_t addrlen)
 { 
@@ -25,4 +28,6 @@ int SocketInterface::listen(int sockfd, int backlog)
 int SocketInterface::recv(int sockfd, void *buf, size_t len, int flags)
 {
   return ::recv(sockfd, buf, len, flags);
+}
+
 }

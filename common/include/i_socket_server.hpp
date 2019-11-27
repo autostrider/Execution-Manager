@@ -7,6 +7,8 @@ class ISocketServer
 {
 public:
   virtual std::string recv() = 0;
+  virtual void startServer() = 0;
+  virtual void closeServer() = 0;
   virtual ~ISocketServer() = default;
 };
 

@@ -4,6 +4,8 @@
 #include <logger.hpp>
 #include <manifest_reader.hpp>
 #include <constants.hpp>
+#include "socket_server.hpp"
+#include "socket_interface.hpp"
 
 #include <thread>
 #include <atomic>
@@ -23,11 +25,13 @@ int main(int argc, char **argv)
     {
         LOG << "[msm] Error while registering signal.";
     }
+    auto socketHandler = std::make_unique<MSM::SocketInterface>();
     MSM::MachineStateManager msm(
                 std::make_unique<MSM::MsmStateFactory>(),
                 std::make_unique<api::ApplicationStateClientWrapper>(),
                 std::make_unique<api::MachineStateClientWrapper>(),
-                std::make_unique<ExecutionManager::ManifestReader>());
+                std::make_unique<ExecutionManager::ManifestReader>(),
+                std::make_unique<MSM::SocketServer>(std::move(socketHandler), "/tmp/state_setter"));
 
     const std::map<ApplicationState, StateHandler> dispatchMap
     {

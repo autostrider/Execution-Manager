@@ -2,66 +2,70 @@
 #include <logger.hpp>
 #include <i_socket_interface.hpp>
 
-#include <stdio.h>
-#include <string.h>
-#include <sys/types.h>
 #include <sys/socket.h>
-#include <sys/un.h>
 
-namespace MachineStateManager
+namespace MSM
 {
 
 SocketServer::SocketServer
 (std::unique_ptr<ISocketInterface> socket, const std::string& path)
-  : m_socket{std::move(socket)}
+  : m_socket{std::move(socket)},
+    m_newState{std::promise<std::string>()},
+    m_isAlive{true},
+    m_socketfd{m_socket->socket(AF_UNIX, SOCK_STREAM, 0)},
+    m_serverAddress{},
+    m_worker{}
 {
-  struct sockaddr_un servAddr;
-  servAddr.sun_family = AF_UNIX;
-  path.copy(servAddr.sun_path, path.length());
+  m_serverAddress.sun_family = AF_UNIX;
+  path.copy(m_serverAddress.sun_path, path.length());
 
-  m_socketfd = m_socket->socket(AF_UNIX, SOCK_STREAM, 0);
   if (m_socketfd)
   {
     LOG << "Error opening socket";
   }
-
-  int res = bind(m_socketfd, (struct sockaddr*)&servAddr, sizeof(servAddr));
-
-  if (-1 == res) 
-  {
-    LOG << "Error binding data";
-  }
-  auto promise = std::promise<std::string>();
-  auto data = promise.get_future();
-  m_worker = std::thread{dataListener, std::move(promise), m_socketfd, std::move(m_socket)};
 }
 
-void SocketServer::dataListener(
-    std::promise<std::string> newState, 
-    int socketfd, 
-    std::unique_ptr<ISocketInterface> socket)
+void SocketServer::dataListener()
 {
-  socket->listen(socketfd, 1);
+  m_socket->listen(m_socketfd, 1);
   struct sockaddr_un cli;
   unsigned int cliSize =  sizeof(cli);
-  socket->accept(socketfd, (struct sockaddr*)&cli, &cliSize);
+  m_socket->accept(m_socketfd, (struct sockaddr*)&cli, &cliSize);
 
   LOG << "State receiver server started...";
 
- constexpr int MAX = 128;
- char buff[MAX];
-  for (;;) 
-  { 
-      bzero(buff, MAX); 
-      read(socketfd, buff, sizeof(buff));
-
-      newState.set_value(std::string{buff});
-  }
+  constexpr int BUFFER_SIZE = 128;
+  char buff[BUFFER_SIZE];
+  do
+  {
+      m_newState = std::promise<std::string>();
+      bzero(buff, BUFFER_SIZE);
+      read(m_socketfd, buff, sizeof(buff));
+      m_newState.set_value(std::string{buff});
+  } while (m_isAlive);
 }
 
 std::string SocketServer::recv()
 {
-  return "";
+  auto result = m_newState.get_future();
+  return result.get();
+}
+
+void SocketServer::closeServer()
+{
+    m_isAlive = false;
+}
+
+void SocketServer::startServer()
+{
+  int res = bind(m_socketfd, (struct sockaddr*)&m_serverAddress, sizeof(m_serverAddress));
+
+  if (-1 == res)
+  {
+    LOG << "Error binding data";
+  }
+
+  m_worker = std::thread(&SocketServer::dataListener, this);
 }
 
 } // namespace MachineStateManager

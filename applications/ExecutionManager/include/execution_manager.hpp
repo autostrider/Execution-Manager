@@ -61,7 +61,7 @@ private:
 
   void startApplication(const ProcName &process);
 
-  void startApplicationsForState();
+  bool startApplicationsForState();
 
   void killProcessesForState();
 

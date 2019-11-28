@@ -61,19 +61,33 @@ protected:
   const std::string app{"app_app"};
   const std::string additionalApp{
       "additionalApp_additionalApp"};
+  const std::string criticalApp{"msm"};
 };
 
 TEST_F(ExecutionManagerTest, ShouldSucceedToSetStartingUpMachineState)
 {
-  auto em = initEm(transitionStates, {});
+  auto em = initEm({startingUpState}, {{startingUpState, {criticalApp}}});
 
   EXPECT_CALL(*pClient, confirm(StateError::K_SUCCESS)).Times(1);
+  EXPECT_CALL(*pAppHandler, startProcess(_));
+  EXPECT_CALL(*pAppHandler, isActiveProcess(_)).WillRepeatedly(Return(true));
   ASSERT_EQ(em.setMachineState(startingUpState), StateError::K_SUCCESS);
 
+  em.reportApplicationState(criticalApp, AppState::RUNNING);
   ASSERT_EQ(
     em.getMachineState(),
     startingUpState
   );
+}
+
+TEST_F(ExecutionManagerTest,
+       ShouldNotToSetStartingUpMachineStateWhenCriticalAppIsNotRunning)
+{
+  auto em = initEm({startingUpState}, {{startingUpState, {criticalApp}}});
+
+  EXPECT_CALL(*pAppHandler, startProcess(_));
+  EXPECT_CALL(*pAppHandler, isActiveProcess(_)).WillRepeatedly(Return(false));
+  ASSERT_EQ(em.setMachineState(startingUpState), StateError::K_INVALID_REQUEST);
 }
 
 TEST_F(ExecutionManagerTest,

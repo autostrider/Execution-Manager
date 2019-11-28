@@ -19,15 +19,18 @@ int main()
         LOG << "[aa_main] Error while registering signal.";
     }
 
+    std::this_thread::sleep_for(FIVE_SECONDS);
+
     const std::string componentName{"proc1"};
     AdaptiveApp app(std::make_unique<StateFactory>(),
                     std::make_unique<api::ApplicationStateClientWrapper>(),
                     std::make_unique<api::ComponentClientWrapper>(componentName),
                     std::make_unique<MeanCalculator>());
 
-    app.init();
-    app.run();
 
+    app.init();
+
+    app.run();
     while (false == isTerminated)
     {
         app.performAction();

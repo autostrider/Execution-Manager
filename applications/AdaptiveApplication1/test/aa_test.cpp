@@ -37,8 +37,8 @@ protected:
     AdaptiveApp app{std::move(factoryMock), std::move(stateClientMock),
                 std::move(compStateMock), std::move(meanCalculatorMock)};
 
-    const api::ComponentState expectedStateKOn = api::ComponentStateKOn;
-    const api::ComponentState expectedStateKOff = api::ComponentStateKOff;
+    const api::ComponentState expectedStateKOn = COMPONENT_STATE_ON;
+    const api::ComponentState expectedStateKOff = COMPONENT_STATE_OFF;
     const api::ComponentState expectedStateInvalid = "invalidState";
 
     void expectGetComponentState(const api::ComponentState &expectedState,

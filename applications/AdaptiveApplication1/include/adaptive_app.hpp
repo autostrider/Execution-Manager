@@ -3,6 +3,7 @@
 
 #include <i_adaptive_app.hpp>
 #include <i_component_client_wrapper.hpp>
+#include <constants.hpp>
 
 #include <memory>
 #include <atomic>
@@ -40,7 +41,7 @@ private:
     bool shouldResume(const api::ComponentState& state) const;
     bool shouldSuspend(const api::ComponentState& state) const;
 
-    api::ComponentState m_componentState = api::ComponentStateKOn;
+    api::ComponentState m_componentState = COMPONENT_STATE_ON;
 
     std::unique_ptr<api::IStateFactory> m_factory;
     std::unique_ptr<api::IState> m_currentState;

@@ -1,10 +1,11 @@
 #include "application_state_client.h"
-
-#include <capnp/ez-rpc.h>
 #include <constants.hpp>
-#include <execution_management.capnp.h>
 #include <iostream>
 #include <unistd.h>
+#include <logger.hpp>
+
+#include <capnp/ez-rpc.h>
+#include <execution_management.capnp.h>
 
 #include "gtest/gtest.h"
 #include "gmock/gmock.h"
@@ -37,7 +38,7 @@ private:
 ApplicationStateClientServer::ApplicationStateClientServer(Data& sharedResource) 
     : m_sharedResource{sharedResource}
 {
-    std::cout << "Application State Client server started..." << std::endl;
+    LOG << "Application State Client server started...";
 }
 
 ::kj::Promise<void>
@@ -73,7 +74,7 @@ protected:
 
 TEST_F(ApplicationStateClientTest, ShouldSucceedToReportApplicationState)
 {
-	api::ApplicationStateClient asc; 
+	api::ApplicationStateClient asc;
 	asc.ReportApplicationState(ApplicationState::K_RUNNING);
 
 	ASSERT_EQ(ApplicationState::K_RUNNING, sharedResource.m_state);

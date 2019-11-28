@@ -1,9 +1,8 @@
 #include "execution_manager.hpp"
 #include <constants.hpp>
-#include <common.hpp>
+#include <logger.hpp>
 
 #include <iostream>
-#include <logger.hpp>
 
 namespace ExecutionManager
 {
@@ -26,6 +25,7 @@ ExecutionManager::ExecutionManager(
     m_allowedProcessesForState{reader->getStatesSupportedByApplication()},
     m_currentState{},
     m_pendingState{},
+    m_currentComponentState{},
     m_machineManifestStates{reader->getMachineStates()},
     m_rpcClient(std::move(client))
 {
@@ -66,7 +66,14 @@ void ExecutionManager::startApplicationsForState()
       if (m_activeProcesses.find(executableToStart) ==
           m_activeProcesses.cend())
       {
+        try
+        {
           startApplication(executableToStart);
+        }
+        catch (const runtime_error& err)
+        {
+          LOG << err.what() << ".";
+        }
       }
     }
   }
@@ -136,17 +143,18 @@ void ExecutionManager::checkAndSendConfirm()
 
 void ExecutionManager::changeComponentsState()
 {
-  ComponentState pendingComponentsState =
-    (m_pendingState == MACHINE_STATE_SUSPEND) ? COMPONENT_STATE_OFF :
-                                                COMPONENT_STATE_ON;
+  if (m_pendingState == MACHINE_STATE_SUSPEND)
+  {
+    m_currentComponentState = COMPONENT_STATE_OFF;
+  }
+  else
+  {
+    m_currentComponentState = COMPONENT_STATE_ON;
+  }
 
   for(auto& component : m_registeredComponents)
   {
-    if(component.second != pendingComponentsState)
-    {
-      m_componentConfirmToBeReceived.emplace(component.first);
-      component.second = pendingComponentsState;
-    }
+    m_componentPendingConfirms.emplace(component);
   }
 }
 
@@ -155,16 +163,16 @@ ExecutionManager::reportApplicationState(
     const std::string& appName, AppState state)
 {
   LOG << "State \"" << applicationStateNames[static_cast<uint16_t>(state)]
-      << "\" for application " << appName
+      << "\" for application "
+      << appName
       << " received.";
-
+  
   switch (state)
   {
-  case AppState::SHUTTINGDOWN:
+  case AppState::kShuttingDown:
     m_activeProcesses.erase(appName);
     break;
-  case AppState::RUNNING:
-  case AppState::SUSPEND:
+  case AppState::kRunning:
     m_activeProcesses.insert(appName);
     break;
   default:
@@ -203,11 +211,15 @@ ExecutionManager::setMachineState(std::string state)
   killProcessesForState();
 
   startApplicationsForState();
-
-  changeComponentsState();
-
+  
+  if (m_pendingState == MACHINE_STATE_SUSPEND ||
+      m_pendingState == MACHINE_STATE_RUNNING)
+  {
+    changeComponentsState();
+  }
+  
   if (!isConfirmAvailable() ||
-      !m_componentConfirmToBeReceived.empty())
+      !m_componentPendingConfirms.empty())
   {
     LOG << "Machine state change to \""
         << m_pendingState
@@ -225,7 +237,7 @@ ExecutionManager::setMachineState(std::string state)
 
 void ExecutionManager::registerComponent(std::string component)
 {
-  m_registeredComponents.emplace(std::make_pair(component, COMPONENT_STATE_ON));
+  m_registeredComponents.emplace(component);
 }
 
 ComponentClientReturnType
@@ -236,27 +248,34 @@ ExecutionManager::getComponentState
 
   if(iter != m_registeredComponents.cend())
   {
-    state = iter->second;
+    state = m_currentComponentState;
     return ComponentClientReturnType::K_SUCCESS;
   }
   else
   {
-    return ComponentClientReturnType::K_INVALID;
+    return ComponentClientReturnType::K_GENERAL_ERROR;
   }
 }
 
 void ExecutionManager::confirmComponentState
 (std::string component, ComponentState state, ComponentClientReturnType status)
 {
-  if (m_componentConfirmToBeReceived.empty())
+  if (m_componentPendingConfirms.empty())
   {
     return;
   }
 
-  m_componentConfirmToBeReceived.erase(component);
+  if (status == ComponentClientReturnType::K_GENERAL_ERROR ||
+      status == ComponentClientReturnType::K_INVALID)
+  {
+    LOG << "Confirm component state are faild with error: "
+        << static_cast<int>(status) << ".";
+  }
+
+  m_componentPendingConfirms.erase(component);
 
   if (isConfirmAvailable() &&
-      m_componentConfirmToBeReceived.empty())
+      m_componentPendingConfirms.empty())
     {
      confirmState(StateError::K_SUCCESS);
     }

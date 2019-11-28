@@ -36,11 +36,6 @@ static const std::string COMPONENT_STATE_OFF{"kOff"};
 using StateHandler = std::function<void()>;
 using ProcName = std::string;
 
-const std::map<int, api::ApplicationStateClient::ApplicationState> mapSignalToState
-{
-    {SIGTERM, api::ApplicationStateClient::ApplicationState::K_SHUTTINGDOWN},
-    {SIGINT, api::ApplicationStateClient::ApplicationState::K_SUSPEND}
-};
 
 static const std::string SYSTEMCTL{"systemctl"};
 static const std::string SERVICE_EXTENSION{".service"};

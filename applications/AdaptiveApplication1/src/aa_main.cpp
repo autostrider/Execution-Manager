@@ -28,7 +28,7 @@ int main()
                     std::make_unique<api::ComponentClientWrapper>(componentName,
                                                                   componentStateUpdateMode),
                     std::make_unique<MeanCalculator>(),
-                    componentStateUpdateMode);
+                    true);
 
     app.init();
     app.run();

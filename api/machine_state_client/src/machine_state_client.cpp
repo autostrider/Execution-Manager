@@ -2,6 +2,7 @@
 
 #include <thread>
 #include <chrono>
+#include <logger.hpp>
 
 using std::string;
 
@@ -189,7 +190,7 @@ MachineStateServer::confirmStateTransition
   auto result = context.getParams().getResult();
 
   m_promise.set_value(result);
-
+  
   return kj::READY_NOW;
 }
 

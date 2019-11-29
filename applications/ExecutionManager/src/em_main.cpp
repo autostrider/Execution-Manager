@@ -26,8 +26,9 @@ int main(int argc, char **argv)
            std::make_unique<ExecutionManager::OsInterface>()
            ),
        std::make_unique<ExecutionManagerClient::ExecutionManagerClient>
-        (IPC_PROTOCOL + MSM_SOCKET_NAME, io,
-         IPC_PROTOCOL + COMPONENT_SOCKET_NAME));
+        (IPC_PROTOCOL + MSM_SOCKET_NAME,
+         IPC_PROTOCOL + COMPONENT_SOCKET_NAME,
+         io));
 
     capnp::TwoPartyServer server(
       kj::heap<ExecutionManagerServer::ExecutionManagerServer>

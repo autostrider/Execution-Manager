@@ -126,6 +126,7 @@ private:
 
   std::map<std::string, ComponentState> m_registeredComponents;
   std::set<std::string> m_componentConfirmToBeReceived;
+  std::vector<std::string> m_componentStateUpdateSbscrs;
 
   std::unique_ptr<ExecutionManagerClient::IExecutionManagerClient> m_rpcClient;
 };

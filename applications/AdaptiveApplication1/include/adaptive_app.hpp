@@ -22,7 +22,7 @@ public:
                 std::unique_ptr<api::IApplicationStateClientWrapper> appClient,
                 std::unique_ptr<api::IComponentClientWrapper> compClient,
                 std::unique_ptr<IMeanCalculator> meanCalculator,
-                api::StateUpdateMode updateMode = api::StateUpdateMode::K_POLL);
+                bool eventModeEnabled = false);
     virtual ~AdaptiveApp() override = default;
 
     void init() override;

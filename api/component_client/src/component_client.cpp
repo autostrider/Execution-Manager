@@ -6,20 +6,43 @@
 namespace api
 {
 ComponentClient::ComponentClient
-(const std::string &s, StateUpdateMode mode) noexcept
-: m_client(IPC_PROTOCOL + EM_SOCKET_NAME), 
-  m_componentName(s),
+(const std::string& componentName, 
+ StateUpdateMode mode) noexcept
+: m_rpcClient(IPC_PROTOCOL + EM_SOCKET_NAME),
+  m_componentName(componentName),
   m_updateMode(mode),
-  m_promise(std::promise<ComponentClientReturnType>())
+  m_eventPromise{std::promise<ComponentState>()},
+  m_serverStopPromise{kj::Promise<void>(nullptr)},
+  m_stateManagementCap{m_rpcClient.getMain<StateManagement>()}
 {
-  auto cap =
-    m_client.getMain<StateManagement>();
-
-  auto request = cap.registerComponentRequest();
+  auto request = m_stateManagementCap.registerComponentRequest();
   request.setComponent(m_componentName);
   request.setMode(m_updateMode);
+  request.send().wait(m_rpcClient.getWaitScope());
+}
 
-  request.send().wait(m_client.getWaitScope());
+ComponentClient::~ComponentClient()
+{
+  if (!m_listenFulfiller.get())
+  {
+    return;
+  }
+ 
+  const kj::Executor* exec;
+  {
+    auto lock = m_serverExecutor.lockExclusive();
+    lock.wait([&](kj::Maybe<const kj::Executor&> value)
+    {
+      return value != nullptr;
+    });
+
+    exec = &KJ_ASSERT_NONNULL(*lock);
+  }
+
+  exec->executeSync([&]()
+  {
+    m_listenFulfiller->fulfill();
+  });
 }
 
 ComponentClientReturnType
@@ -27,7 +50,8 @@ ComponentClient::SetStateUpdateHandler
 (std::function<void(ComponentState const&)> f) noexcept
 {
   m_stateUpdateHandler = f;
-  m_serverThread = startServer();
+
+  startServer();
 
   return ComponentClientReturnType::K_SUCCESS;
 }
@@ -36,14 +60,10 @@ ComponentClientReturnType
 ComponentClient::GetComponentState
 (ComponentState& state) noexcept
 {
-  auto cap =
-    m_client.getMain<StateManagement>();
-
-  auto request = cap.getComponentStateRequest();
+  auto request = m_stateManagementCap.getComponentStateRequest();
   request.setComponent(m_componentName);
 
-  auto result = request.send().wait(m_client.getWaitScope());
-
+  auto result = request.send().wait(m_rpcClient.getWaitScope());
   state = result.getState();
 
   return result.getResult();
@@ -53,35 +73,47 @@ void
 ComponentClient::ConfirmComponentState
 (ComponentState state, ComponentClientReturnType status) noexcept
 {
-  auto cap =
-    m_client.getMain<StateManagement>();
-
-  auto request = cap.confirmComponentStateRequest();
+  auto request = m_stateManagementCap.confirmComponentStateRequest();
 
   request.setComponent(m_componentName);
   request.setState(state);
   request.setStatus(status);
 
-  request.send().wait(m_client.getWaitScope());
+  request.send().wait(m_rpcClient.getWaitScope());
+ }
+
+bool ComponentClient::eventReceived(std::future<ComponentState>& stateFuture)
+{
+  return stateFuture.wait_for(std::chrono::seconds(0)) == std::future_status::ready; 
 }
 
-// =================================================================================================================================
+void ComponentClient::checkIfAnyEventsAvailable()
+{
+  auto stateFuture = m_eventPromise.get_future(); 
+   
+  if (eventReceived(stateFuture))
+  {
+    m_stateUpdateHandler(stateFuture.get());
+  }
 
-kj::Own<kj::Thread> ComponentClient::startServer()
+  m_eventPromise = std::promise<ComponentState>();
+}
+
+void ComponentClient::startServer()
 {
   std::promise<void> startUpPromise;
-
   ::unlink((COMPONENT_SOCKET_NAME + m_componentName).c_str());
 
-  auto sThread = kj::heap<kj::Thread>([&]() noexcept
+  m_serverThread = kj::heap<kj::Thread>(
+  [&]()
   {
-    auto ioContext = kj::setupAsyncIo();
+    auto io = kj::setupAsyncIo();
 
-    capnp::TwoPartyServer server(kj::heap<ComponentServer>(m_stateUpdateHandler));
+    capnp::TwoPartyServer server(kj::heap<ComponentServer>(m_eventPromise));
 
-    auto address = ioContext.provider->getNetwork()
+    auto address = io.provider->getNetwork()
                    .parseAddress(IPC_PROTOCOL + COMPONENT_SOCKET_NAME + m_componentName)
-                   .wait(ioContext.waitScope);
+                   .wait(io.waitScope);
 
     auto listener = address->listen();
     auto listenPromise = server.listen(*listener);
@@ -90,24 +122,23 @@ kj::Own<kj::Thread> ComponentClient::startServer()
 
     auto exitPaf = kj::newPromiseAndFulfiller<void>();
     auto exitPromise = listenPromise.exclusiveJoin(kj::mv(exitPaf.promise));
-
     m_listenFulfiller = kj::mv(exitPaf.fulfiller);
 
     startUpPromise.set_value();
-    exitPromise.wait(ioContext.waitScope);
+
+    exitPromise.wait(io.waitScope);
 
     std::this_thread::sleep_for(std::chrono::milliseconds(10));
   });
 
   startUpPromise.get_future().wait();
-
-  return sThread;
 }
 
 ComponentServer::ComponentServer
-(std::function<void(ComponentState const&)> f)
-  : m_stateUpdateHandler(f)
-{}
+  (std::promise<ComponentState>& promise)
+  : m_eventPromise(promise)
+{
+}
 
 ::kj::Promise<void>
 ComponentServer::setComponentState
@@ -115,10 +146,10 @@ ComponentServer::setComponentState
 {
   auto state = context.getParams().getState().cStr();
 
-  LOG << "StateUpdate event received, new state : " << state; 
+  LOG << "StateUpdate event received, new state : " << state;
 
-  m_stateUpdateHandler(state);
-  
+  m_eventPromise.set_value(state);
+
   return kj::READY_NOW;
 }
 

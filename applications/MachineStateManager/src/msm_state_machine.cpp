@@ -100,7 +100,7 @@ void Run::enter()
         {
             if (!((StateError::K_TIMEOUT == result) && (MACHINE_STATE_SHUTTINGDOWN == state)))
             {
-                LOG << "Failed to set machine state " << state << ".";
+                LOG << "Failed to set machine state : " << state << ". result = " << static_cast<uint32_t>(result);
             }
         }
     }

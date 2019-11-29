@@ -3,6 +3,7 @@
 #include <kj/async-io.h>
 #include <string>
 #include <iostream>
+#include <logger.hpp>
 
 namespace ExecutionManagerServer
 {
@@ -16,8 +17,6 @@ ExecutionManagerServer::ExecutionManagerServer
   : m_em{application},
     m_msmHandler{msmHandler}
 {
-  std::cout << "Execution Manager server started..." << std::endl;
-
   m_em.start();
 }
 

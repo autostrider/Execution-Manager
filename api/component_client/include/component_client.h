@@ -32,12 +32,12 @@ class ComponentServer
 {
 public:
   using StateError = StateManagement::ComponentClientReturnType;
-  ComponentServer(std::function<void(ComponentState const&)> callback);
+  ComponentServer(std::promise<ComponentState>&);
 private:
  ::kj::Promise<void> setComponentState(SetComponentStateContext context);
 
 private:
-  std::function<void(ComponentState const&)> m_stateUpdateHandler;
+  std::promise<ComponentState>& m_eventPromise;
 };
 
 class ComponentClient
@@ -55,21 +55,30 @@ public:
   void ConfirmComponentState
   (ComponentState state, ComponentClientReturnType status) noexcept;
 
+  void checkIfAnyEventsAvailable();
+
+  ~ComponentClient();
 private:  
-  kj::Own<kj::Thread> startServer();
-
+  void startServer();
+  bool eventReceived(std::future<ComponentState>& stateFuture);
+ 
 private:
-  capnp::EzRpcClient m_client;
-
+  capnp::EzRpcClient m_rpcClient;
   const std::string m_componentName;
 
   const StateUpdateMode m_updateMode;
   std::function<void(ComponentState const&)> m_stateUpdateHandler;
 
+  StateManagement::Client m_stateManagementCap;
+
   kj::Own<kj::Thread> m_serverThread;
   kj::Own<kj::PromiseFulfiller<void>> m_listenFulfiller;
   kj::MutexGuarded<kj::Maybe<const kj::Executor&>> m_serverExecutor;
-  std::promise<ComponentClientReturnType> m_promise;
+  std::promise<ComponentState> m_eventPromise;
+
+  kj::Promise<void> m_serverStopPromise;
+
+  kj::AsyncIoProvider::PipeThread m_event;
 };
 
 } // namespace api

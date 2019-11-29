@@ -26,6 +26,7 @@ ExecutionManager::ExecutionManager(
     m_currentState{},
     m_pendingState{},
     m_machineManifestStates{reader->getMachineStates()},
+    m_componentStateUpdateSbscrs{},
     m_rpcClient(std::move(client))
 {
   filterStates();
@@ -107,6 +108,12 @@ void ExecutionManager::killProcessesForState()
 
       app = m_activeProcesses.erase(currentApp);
       m_registeredComponents.erase(currentApp->first);
+
+      m_componentStateUpdateSbscrs.erase(std::remove_if(m_componentStateUpdateSbscrs.begin(), 
+                                                        m_componentStateUpdateSbscrs.end(),
+                                                        [&](const std::string& currsubscr)
+                                                        {return currsubscr == currentApp->first;}), 
+                                                        m_componentStateUpdateSbscrs.end());
     }
     else
     {
@@ -146,18 +153,19 @@ void ExecutionManager::changeComponentsState()
   ComponentState pendingComponentsState =
     (m_pendingState == MACHINE_STATE_SUSPEND) ? COMPONENT_STATE_OFF :
                                                 COMPONENT_STATE_ON;
-/*
-  std::string componentName{"proc1"};
-  m_rpcClient->SetComponentState(pendingComponentsState, componentName);
-*/
 
-  for(auto& component : m_registeredComponents)
+  for (auto& component : m_registeredComponents)
   {
-    if(component.second != pendingComponentsState)
+    if (component.second != pendingComponentsState)
     {
       m_componentConfirmToBeReceived.emplace(component.first);
       component.second = pendingComponentsState;
     }
+  }
+
+  for (auto subscriber : m_componentStateUpdateSbscrs)
+  {
+    m_rpcClient->SetComponentState(pendingComponentsState, subscriber);
   }
 }
 
@@ -238,9 +246,15 @@ ExecutionManager::setMachineState(std::string state)
   return StateError::K_SUCCESS;
 }
 
-void ExecutionManager::registerComponent(std::string component, StateUpdateMode updateMode)
+void ExecutionManager::registerComponent(std::string component,
+                                         StateUpdateMode updateMode)
 {
   m_registeredComponents.emplace(std::make_pair(component, COMPONENT_STATE_ON));
+
+  if (updateMode == StateUpdateMode::K_EVENT)
+  {
+    m_componentStateUpdateSbscrs.push_back(component);
+  }
 }
 
 ComponentClientReturnType
@@ -272,9 +286,9 @@ void ExecutionManager::confirmComponentState
 
   if (m_stateConfirmToBeReceived.empty() &&
       m_componentConfirmToBeReceived.empty())
-    {
-     confirmState(StateError::K_SUCCESS);
-    }
+  {
+    confirmState(StateError::K_SUCCESS);
+  }
 }
 
 } // namespace ExecutionManager

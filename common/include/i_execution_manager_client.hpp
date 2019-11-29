@@ -13,7 +13,8 @@ class IExecutionManagerClient
 {
 public:
   virtual void confirm(StateError status) = 0;
-  virtual StateManagement::ComponentClientReturnType SetComponentState(std::string& state, std::string& componentName) {return StateManagement::ComponentClientReturnType::K_SUCCESS;};
+  virtual StateManagement::ComponentClientReturnType SetComponentState(std::string& state, 
+                                                                       std::string& componentName) = 0;
   virtual ~IExecutionManagerClient() noexcept(false) {};
 };
 

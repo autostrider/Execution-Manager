@@ -33,4 +33,9 @@ ComponentClientWrapper::ConfirmComponentState
   m_client.ConfirmComponentState(state, status);
 }
 
+void ComponentClientWrapper::CheckIfAnyEventsAvailable() noexcept
+{
+  m_client.checkIfAnyEventsAvailable();
+}
+
 } // namespace api

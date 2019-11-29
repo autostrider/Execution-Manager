@@ -12,8 +12,8 @@ class ExecutionManagerClient : public IExecutionManagerClient
 {
 public:
   ExecutionManagerClient(const std::string& msmAddress, 
-                         kj::AsyncIoContext& context, 
-                         std::string m_componentAddress);
+                         const std::string& m_componentAddress,
+                         kj::AsyncIoContext& context);
                          
   void confirm(StateError status);
 
@@ -22,10 +22,8 @@ public:
   ~ExecutionManagerClient() override = default;
 private:
   const std::string m_msmAddress;
-  kj::AsyncIoContext& m_ioContext;
-
   const std::string m_componentAddress;
-
+  kj::AsyncIoContext& m_ioContext;
   kj::AsyncIoProvider::PipeThread m_sendThread;
 };
 

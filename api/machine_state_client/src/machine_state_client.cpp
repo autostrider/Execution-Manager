@@ -2,6 +2,7 @@
 
 #include <thread>
 #include <chrono>
+#include <logger.hpp>
 
 using std::string;
 
@@ -137,6 +138,8 @@ MachineStateClient::waitForConfirm(std::uint32_t timeout)
 
   auto val = future.get();
 
+  std::cout << "------------------> waitForConfirm reseting promise" << std::endl;
+
   m_promise = std::promise<StateError>();
   return val;
 }
@@ -188,7 +191,17 @@ MachineStateServer::confirmStateTransition
 {
   auto result = context.getParams().getResult();
 
-  m_promise.set_value(result);
+  try
+  {
+    m_promise.set_value(result);
+  }
+  catch(const std::exception& e)
+  {
+    std::cerr << "HHHEEEEEEEERRRRRRRREEE4 :" << e.what() << '\n';
+  }
+  
+
+  LOG << "~~~~~~~~~~~~ MachineStateServer::confirmStateTransition  received result = " << static_cast<uint32_t>(result);
 
   return kj::READY_NOW;
 }

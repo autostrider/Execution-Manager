@@ -12,17 +12,17 @@ AdaptiveApp::AdaptiveApp(std::unique_ptr<api::IStateFactory> factory,
                          std::unique_ptr<api::IApplicationStateClientWrapper> appClient,
                          std::unique_ptr<api::IComponentClientWrapper> compClient,
                          std::unique_ptr<IMeanCalculator> meanCalculator,
-                         api::StateUpdateMode updateMode) :
+                         bool eventModeEnabled) :
     m_factory{std::move(factory)},
     m_currentState{nullptr},
     m_appClient{std::move(appClient)},
     m_componentClient{std::move(compClient)},
     m_meanCalculator{std::move(meanCalculator)},
-    m_eventModeEnabled{updateMode == api::StateUpdateMode::K_EVENT}
+    m_eventModeEnabled{eventModeEnabled}
 {
     if (m_eventModeEnabled)
     {
-        m_componentClient->SetStateUpdateHandler(std::bind(&AdaptiveApp::setComponentState,
+        m_componentClient->SetStateUpdateHandler(std::bind(&AdaptiveApp::stateUpdateHandler,
                                                            this, 
                                                            std::placeholders::_1));
     }
@@ -61,11 +61,16 @@ void AdaptiveApp::suspend()
 
 void AdaptiveApp::stateUpdateHandler(api::ComponentState const& state)
 {
+
+    LOG << "........................stateUpdateHandler called...................." ;
     m_componentClient->ConfirmComponentState(state, setComponentState(state));
+    // setComponentState(state);
 }
 
 void AdaptiveApp::pollComponentState()
 {
+        LOG << "........................pollComponentState...................." ;
+
     api::ComponentState state;
     auto result = m_componentClient->GetComponentState(state);
     
@@ -100,16 +105,21 @@ api::ComponentClientReturnType AdaptiveApp::setComponentState(api::ComponentStat
     {
         setStateResult = api::ComponentClientReturnType::K_INVALID;
     }
-    
+  
     return setStateResult;
 }
 
 void AdaptiveApp::performAction()
 {
-    if (!m_eventModeEnabled)
+    if (m_eventModeEnabled)
+    {
+        m_componentClient->CheckIfAnyEventsAvailable();
+    }
+    else
     {
         pollComponentState();
     }
+    
 
     m_currentState->performAction();
 }

@@ -17,6 +17,9 @@ public:
     virtual void ConfirmComponentState
     (ComponentState, ComponentClientReturnType) noexcept = 0;
 
+
+    virtual void CheckIfAnyEventsAvailable() noexcept {};
+
     virtual ~IComponentClientWrapper() noexcept {}
 };
 
@@ -33,6 +36,8 @@ public:
 
     ComponentClientReturnType GetComponentState
     (ComponentState& state) noexcept override;
+
+    void CheckIfAnyEventsAvailable() noexcept override;
 
     void ConfirmComponentState
     (ComponentState state, ComponentClientReturnType status) noexcept override;

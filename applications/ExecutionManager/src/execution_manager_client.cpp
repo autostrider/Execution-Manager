@@ -1,16 +1,16 @@
 #include "execution_manager_client.hpp"
 
 #include <capnp/rpc-twoparty.h>
-
+#include <logger.hpp>
 namespace ExecutionManagerClient
 {
 
 ExecutionManagerClient::ExecutionManagerClient(const std::string& msmAddress,
-  kj::AsyncIoContext& context,
-  std::string m_componentAddress)
+                                               const std::string& m_componentAddress,
+                                               kj::AsyncIoContext& context)
 : m_msmAddress(msmAddress),
-  m_ioContext(context),
-  m_componentAddress(m_componentAddress)
+  m_componentAddress(m_componentAddress),
+  m_ioContext(context)
 {}
 
 void
@@ -27,6 +27,7 @@ ExecutionManagerClient::confirm(StateError status)
 
     auto connection = address->connect().wait(waitScope);
     capnp::TwoPartyClient client(*connection);
+
     auto capability = client.bootstrap()
       .castAs<MachineStateManagement::MachineStateManager>();
 
@@ -61,6 +62,9 @@ ExecutionManagerClient::SetComponentState(std::string& state,
     request.setState(state);
 
     request.send().ignoreResult().wait(waitScope);
+
+    LOG << "???????????????  EROSBEK : SetComponentState DONE";
+
   });
 
   return StateManagement::ComponentClientReturnType::K_SUCCESS;

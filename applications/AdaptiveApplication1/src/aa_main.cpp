@@ -23,12 +23,14 @@ int main()
     const std::string componentName{"proc1"};
     auto componentStateUpdateMode = api::StateUpdateMode::K_EVENT;
 
+    LOG << "########### Starting PROC1";
+
     AdaptiveApp app(std::make_unique<StateFactory>(),
                     std::make_unique<api::ApplicationStateClientWrapper>(),
                     std::make_unique<api::ComponentClientWrapper>(componentName,
                                                                   componentStateUpdateMode),
                     std::make_unique<MeanCalculator>(),
-                    componentStateUpdateMode);
+                    true);
 
     app.init();
     app.run();

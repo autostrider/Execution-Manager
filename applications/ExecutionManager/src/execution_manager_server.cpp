@@ -3,6 +3,7 @@
 #include <kj/async-io.h>
 #include <string>
 #include <iostream>
+#include <logger.hpp>
 
 namespace ExecutionManagerServer
 {
@@ -67,8 +68,13 @@ ExecutionManagerServer::getMachineState(GetMachineStateContext context)
 ::kj::Promise<void>
 ExecutionManagerServer::setMachineState(SetMachineStateContext context)
 {
+
+  LOG << "~~~~~~~~~~~~~ ExecutionManagerServer::setMachineState ";
   string state = context.getParams().getState().cStr();
   pid_t applicationPid = context.getParams().getPid();
+
+  LOG << "~~~~~~~~~~~~~ ExecutionManagerServer::setMachineState : state :" << state;
+  LOG << "~~~~~~~~~~~~~ ExecutionManagerServer::setMachineState : applicationPid :" << applicationPid;
 
   if (!m_msmHandler.checkMsm(applicationPid))
   {
@@ -111,7 +117,12 @@ ExecutionManagerServer::confirmComponentState
   ComponentState state = context.getParams().getState().cStr();
   ComponentClientReturnType status = context.getParams().getStatus();
 
+  LOG << "################# ExecutionManagerServer::confirmComponentState  1"; 
+
   m_em.confirmComponentState(component, state, status);
+
+  LOG << "################# ExecutionManagerServer::confirmComponentState  Done"; 
+
 
   return kj::READY_NOW;
 }

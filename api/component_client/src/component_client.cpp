@@ -8,8 +8,7 @@ ComponentClient::ComponentClient
 (const std::string &s, StateUpdateMode mode) noexcept
 : m_client(IPC_PROTOCOL + EM_SOCKET_NAME), componentName(s), updateMode(mode)
 {
-  auto cap =
-    m_client.getMain<StateManagement>();
+  auto cap = m_client.getMain<StateManagement>();
 
   auto request = cap.registerComponentRequest();
   request.setComponent(componentName);
@@ -29,8 +28,7 @@ ComponentClientReturnType
 ComponentClient::GetComponentState
 (ComponentState& state) noexcept
 {
-  auto cap =
-    m_client.getMain<StateManagement>();
+  auto cap = m_client.getMain<StateManagement>();
 
   auto request = cap.getComponentStateRequest();
   request.setComponent(componentName);
@@ -46,8 +44,7 @@ void
 ComponentClient::ConfirmComponentState
 (ComponentState state, ComponentClientReturnType status) noexcept
 {
-  auto cap =
-    m_client.getMain<StateManagement>();
+  auto cap = m_client.getMain<StateManagement>();
 
   auto request = cap.confirmComponentStateRequest();
 

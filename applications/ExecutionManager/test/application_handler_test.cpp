@@ -27,10 +27,11 @@ namespace ApplicationHandlerTest
   {
       std::memcpy(std::get<uIndex>(args), pData, uiDataSize);
   }
+
 class ApplicationHandlerTest : public ::testing::Test
 {
 protected:
-  void setupArgumetnsCheck
+  void setupArgumentsCheck
   (const std::string& serviceName, const std::string& action)
   {
     static const std::pair<int, const char*> procNameArg {0, SYSTEMCTL.c_str()};
@@ -42,17 +43,18 @@ protected:
     EXPECT_CALL(*m_iosmock, fork()).WillOnce(Return(childProcessId));
     EXPECT_CALL(*m_iosmock, execvp(_, _))
       .WillOnce(DoAll(CheckProcessName(SYSTEMCTL),
-    CheckArg(procNameArg),
-    CheckArg(userArg),
-    CheckArg(systemctlAction),
-    CheckArg(suOptionArg),
-    CheckArg(nullTerminatingArg),
-    Return(execvRes)));
+                      CheckArg(procNameArg),
+                      CheckArg(userArg),
+                      CheckArg(systemctlAction),
+                      CheckArg(suOptionArg),
+                      CheckArg(nullTerminatingArg),
+                      Return(execvRes)));
   }
 
   const int childProcessId = 0;
   const int execvRes = 0;
-  unique_ptr<OSInterfaceMock> m_iosmock = make_unique<OSInterfaceMock>();
+  std::unique_ptr<OSInterfaceMock> m_iosmock = 
+    std::make_unique<StrictMock<OSInterfaceMock>>();
   OSInterfaceMock* m_iosMockPtr = m_iosmock.get();
   const std::string processName = "process";
   const std::string serviceName = processName + SERVICE_EXTENSION;
@@ -71,7 +73,6 @@ TEST_F(ApplicationHandlerTest, ShouldFailToStartProcessWhenForkFailed)
 
 TEST_F(ApplicationHandlerTest, ShouldFailToStartProcessWhenExecvpFailed)
 {
-
   EXPECT_CALL(*m_iosmock, fork())
     .WillOnce(Return(childProcessId));
   EXPECT_CALL(*m_iosmock, execvp(_,_))
@@ -84,7 +85,8 @@ TEST_F(ApplicationHandlerTest, ShouldFailToStartProcessWhenExecvpFailed)
 
 TEST_F(ApplicationHandlerTest, ShouldSucceedToStartService)
 {
-  setupArgumetnsCheck(serviceName, SYSTEMCTL_START);
+  static const std::string start{"start"};
+  setupArgumentsCheck(serviceName, start);
 
   ExecutionManager::ApplicationHandler appHandler{std::move(m_iosmock)};
   appHandler.startProcess(processName);
@@ -92,7 +94,8 @@ TEST_F(ApplicationHandlerTest, ShouldSucceedToStartService)
 
 TEST_F(ApplicationHandlerTest, ShouldSucceedToStopService)
 {
-  setupArgumetnsCheck(serviceName, SYSTEMCTL_STOP);
+  static const std::string stop{"stop"};
+  setupArgumentsCheck(serviceName, stop);
 
   ExecutionManager::ApplicationHandler appHandler{std::move(m_iosmock)};
   appHandler.killProcess(processName);

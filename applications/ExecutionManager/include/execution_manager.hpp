@@ -25,20 +25,18 @@ struct ApplicationManifest;
 
 enum class AppState : uint16_t
 {
-  INITIALIZING,
-  RUNNING,
-  SHUTTINGDOWN,
-  SUSPEND
+  kInitializing,
+  kRunning,
+  kShuttingDown
 };
 
 class ExecutionManager
 {
 public:
-  ExecutionManager(
-    std::unique_ptr<IManifestReader> reader,
-    std::unique_ptr<IApplicationHandler> applicationHandler,
-    std::unique_ptr<ExecutionManagerClient::IExecutionManagerClient> client
-  );
+  ExecutionManager(std::unique_ptr<IManifestReader> reader,
+                   std::unique_ptr<IApplicationHandler> applicationHandler,
+                   std::unique_ptr<ExecutionManagerClient::IExecutionManagerClient> client);
+
 
   void start();
 
@@ -74,7 +72,7 @@ private:
 
   inline bool isConfirmAvailable();
 
-  inline void changeComponentsState();
+  void changeComponentsState();
 
 private:
   std::unique_ptr<IApplicationHandler> m_appHandler;
@@ -89,12 +87,14 @@ private:
 
   MachineState m_pendingState;
 
+  ComponentState m_currentComponentState;
+
   std::vector<MachineState> m_machineManifestStates;
 
   std::set<pid_t> m_stateConfirmToBeReceived;
 
-  std::map<std::string, ComponentState> m_registeredComponents;
-  std::set<std::string> m_componentConfirmToBeReceived;
+  std::set<std::string> m_registeredComponents;
+  std::set<std::string> m_componentPendingConfirms;
 
   std::unique_ptr<ExecutionManagerClient::IExecutionManagerClient> m_rpcClient;
 };

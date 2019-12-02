@@ -5,6 +5,7 @@
 #include "constants.hpp"
 
 #include <map>
+#include <set>
 #include <vector>
 
 namespace ExecutionManager
@@ -13,7 +14,7 @@ namespace ExecutionManager
 class IManifestReader
 {
 public:
-  virtual std::map<MachineState, ProcessesList>
+  virtual std::map<MachineState, std::set<ProcName>>
   getStatesSupportedByApplication() = 0;
 
   virtual std::vector<MachineState> getMachineStates() = 0;

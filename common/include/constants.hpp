@@ -8,7 +8,6 @@
 #include <string>
 #include <chrono>
 #include <map>
-#include <set>
 
 static const std::string IPC_PROTOCOL{"unix:"};
 static const std::string EM_SOCKET_NAME{"/tmp/execution_management"};
@@ -36,13 +35,7 @@ static const std::string COMPONENT_STATE_OFF{"kOff"};
 
 using StateHandler = std::function<void()>;
 using ProcName = std::string;
-using ProcessesList = std::set<ProcName>;
 
-const std::map<int, api::ApplicationStateClient::ApplicationState> mapSignalToState
-{
-    {SIGTERM, api::ApplicationStateClient::ApplicationState::K_SHUTTINGDOWN},
-    {SIGINT, api::ApplicationStateClient::ApplicationState::K_SUSPEND}
-};
 
 static const std::string SYSTEMCTL{"systemctl"};
 static const std::string SERVICE_EXTENSION{".service"};

@@ -109,7 +109,7 @@ MachineStateClient::SetMachineState(string state, std::uint32_t timeout)
   auto result = promise.then([&](auto&& res)
     {
       auto _result = res.getResult();
-      if(res.getResult() == StateError::K_SUCCESS)
+      if (_result == StateError::K_SUCCESS)
       {
         return waitForConfirm(timeout);
       }

@@ -55,7 +55,7 @@ void Init::enter()
     if (StateError::K_SUCCESS == result)
     {
         LOG << "Successful registration as a MSM.";
-        std::this_thread::sleep_for(FIVE_SECONDS);
+        std::this_thread::sleep_for(TWO_SECONDS * 2);
     }
     else
     {
@@ -88,7 +88,7 @@ void Run::enter()
 
     for (auto& state : states)
     {
-        std::this_thread::sleep_for(FIVE_SECONDS);
+        std::this_thread::sleep_for(TWO_SECONDS * 2);
 
         LOG << "Setting machine state to "
             << state

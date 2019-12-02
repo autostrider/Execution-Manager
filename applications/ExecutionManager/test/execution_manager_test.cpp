@@ -87,12 +87,12 @@ ExecutionManagerTest::expectGetAndConfirmComponentState(ExecutionManager::Execut
 
 TEST_F(ExecutionManagerTest, ShouldSucceedToSetStartingUpMachineState)
 {
-  auto em = initEm({startingUpState}, {{startingUpState, {criticalApp}}});
+  auto em = initEm({MACHINE_STATE_STARTUP}, {{MACHINE_STATE_STARTUP, {criticalApp}}});
 
   EXPECT_CALL(*pClient, confirm(StateError::K_SUCCESS)).Times(1);
   EXPECT_CALL(*pAppHandler, startProcess(_));
   EXPECT_CALL(*pAppHandler, isActiveProcess(_)).WillRepeatedly(Return(true));
-  ASSERT_EQ(em.setMachineState(startingUpState), StateError::K_SUCCESS);
+  ASSERT_EQ(em.setMachineState(MACHINE_STATE_STARTUP), StateError::K_SUCCESS);
 
   em.reportApplicationState(criticalApp, AppState::kRunning);
   ASSERT_EQ(
@@ -104,11 +104,11 @@ TEST_F(ExecutionManagerTest, ShouldSucceedToSetStartingUpMachineState)
 TEST_F(ExecutionManagerTest,
        ShouldNotToSetStartingUpMachineStateWhenCriticalAppIsNotRunning)
 {
-  auto em = initEm({startingUpState}, {{startingUpState, {criticalApp}}});
+  auto em = initEm({MACHINE_STATE_STARTUP}, {{MACHINE_STATE_STARTUP, {criticalApp}}});
 
   EXPECT_CALL(*pAppHandler, startProcess(_));
   EXPECT_CALL(*pAppHandler, isActiveProcess(_)).WillRepeatedly(Return(false));
-  ASSERT_EQ(em.setMachineState(startingUpState), StateError::K_INVALID_REQUEST);
+  ASSERT_EQ(em.setMachineState(MACHINE_STATE_STARTUP), StateError::K_INVALID_REQUEST);
 }
 
 TEST_F(ExecutionManagerTest,
@@ -173,20 +173,20 @@ TEST_F(ExecutionManagerTest, ShouldTransitToNextStateWhenNoAppInBoth)
   auto em = initEm(transitionStates, {});
 
   EXPECT_CALL(*pClient, confirm(StateError::K_SUCCESS)).Times(2);
-  em.setMachineState(MACHINE_STATE_STARTUP);
   em.setMachineState(MACHINE_STATE_RUNNING);
+  em.setMachineState(MACHINE_STATE_LIVING);
 
   ASSERT_EQ(
     em.getMachineState(),
-    MACHINE_STATE_RUNNING
+    MACHINE_STATE_LIVING
   );
 }
 
 TEST_F(ExecutionManagerTest, ShouldStartAppAndTransitToNextState)
 {
   auto em = initEm(transitionStates,
-                   {{MACHINE_STATE_STARTUP, {}},
-                    {MACHINE_STATE_RUNNING, {app}}});
+                   {{MACHINE_STATE_RUNNING, {}},
+                    {MACHINE_STATE_LIVING, {app}}});
   {
     InSequence seq;
 
@@ -194,22 +194,22 @@ TEST_F(ExecutionManagerTest, ShouldStartAppAndTransitToNextState)
     EXPECT_CALL(*pAppHandler, startProcess(app));
     EXPECT_CALL(*pClient, confirm(StateError::K_SUCCESS));
   }
-  em.setMachineState(MACHINE_STATE_STARTUP);
-
   em.setMachineState(MACHINE_STATE_RUNNING);
+
+  em.setMachineState(MACHINE_STATE_LIVING);
   em.reportApplicationState(app, AppState::kRunning);
 
   ASSERT_EQ(
     em.getMachineState(),
-    MACHINE_STATE_RUNNING
+    MACHINE_STATE_LIVING
   );
 }
 
 TEST_F(ExecutionManagerTest, ShouldKillAppAndTransitToNextState)
 {
   auto em = initEm(transitionStates,
-                   {{MACHINE_STATE_STARTUP, {app}},
-                    {MACHINE_STATE_RUNNING, emptyAvailableApps}});
+                   {{MACHINE_STATE_RUNNING, {app}},
+                    {MACHINE_STATE_LIVING, emptyAvailableApps}});
   {
     InSequence seq;
     EXPECT_CALL(*pAppHandler, startProcess(app));
@@ -218,23 +218,23 @@ TEST_F(ExecutionManagerTest, ShouldKillAppAndTransitToNextState)
     EXPECT_CALL(*pClient, confirm(StateError::K_SUCCESS));
   }
 
-  em.setMachineState(MACHINE_STATE_STARTUP);
+  em.setMachineState(MACHINE_STATE_RUNNING);
   em.reportApplicationState(app, AppState::kRunning);
 
-  em.setMachineState(MACHINE_STATE_RUNNING);
+  em.setMachineState(MACHINE_STATE_LIVING);
   em.reportApplicationState(app, AppState::kShuttingDown);
 
   ASSERT_EQ(
     em.getMachineState(),
-    MACHINE_STATE_RUNNING
+    MACHINE_STATE_LIVING
   );
 }
 
 TEST_F(ExecutionManagerTest, ShouldKillOneAppStartAnotherAndTransitToNextState)
 {
   auto em = initEm(transitionStates,
-                   {{MACHINE_STATE_STARTUP, {app}},
-                    {MACHINE_STATE_RUNNING, {additionalApp}}});
+                   {{MACHINE_STATE_RUNNING, {app}},
+                    {MACHINE_STATE_LIVING, {additionalApp}}});
   {
     InSequence seq;
 
@@ -245,44 +245,44 @@ TEST_F(ExecutionManagerTest, ShouldKillOneAppStartAnotherAndTransitToNextState)
     EXPECT_CALL(*pClient, confirm(StateError::K_SUCCESS));
   }
  
-  em.setMachineState(MACHINE_STATE_STARTUP);
-  em.reportApplicationState(app, AppState::kRunning);
   em.setMachineState(MACHINE_STATE_RUNNING);
+  em.reportApplicationState(app, AppState::kRunning);
+  em.setMachineState(MACHINE_STATE_LIVING);
   em.reportApplicationState(app, AppState::kShuttingDown);
   em.reportApplicationState(additionalApp, AppState::kRunning);
 
   ASSERT_EQ(
     em.getMachineState(),
-    secondState
+    MACHINE_STATE_LIVING
   );
 }
 
 TEST_F(ExecutionManagerTest, ShouldNotKillAppToTransitState)
 {
   auto em = initEm(transitionStates,
-                   {{MACHINE_STATE_STARTUP, {app}},
-                    {MACHINE_STATE_RUNNING, {app}}});
+                   {{MACHINE_STATE_RUNNING, {app}},
+                    {MACHINE_STATE_LIVING, {app}}});
   {
     InSequence seq;
     EXPECT_CALL(*pAppHandler, startProcess(app));
     EXPECT_CALL(*pClient, confirm(StateError::K_SUCCESS));
     EXPECT_CALL(*pClient, confirm(StateError::K_SUCCESS));
   }
-  em.setMachineState(MACHINE_STATE_STARTUP);
-  em.reportApplicationState(app, AppState::kRunning);
   em.setMachineState(MACHINE_STATE_RUNNING);
+  em.reportApplicationState(app, AppState::kRunning);
+  em.setMachineState(MACHINE_STATE_LIVING);
 
   ASSERT_EQ(
     em.getMachineState(),
-    MACHINE_STATE_RUNNING
+    MACHINE_STATE_LIVING
   );
 }
 
 TEST_F(ExecutionManagerTest, ShouldKillTwoAppsToTransitToNextState)
 {
     auto em = initEm(transitionStates,
-                   {{MACHINE_STATE_STARTUP, {app, additionalApp}},
-                    {MACHINE_STATE_RUNNING, {}}});
+                   {{MACHINE_STATE_RUNNING, {app, additionalApp}},
+                    {MACHINE_STATE_LIVING, {}}});
   {
     InSequence seq;
     EXPECT_CALL(*pAppHandler, startProcess(additionalApp));
@@ -293,17 +293,17 @@ TEST_F(ExecutionManagerTest, ShouldKillTwoAppsToTransitToNextState)
     EXPECT_CALL(*pClient, confirm(StateError::K_SUCCESS));
   }
 
-  em.setMachineState(MACHINE_STATE_STARTUP);
+  em.setMachineState(MACHINE_STATE_RUNNING);
   em.reportApplicationState(app, AppState::kRunning);
   em.reportApplicationState(additionalApp, AppState::kRunning);
 
-  em.setMachineState(MACHINE_STATE_RUNNING);
+  em.setMachineState(MACHINE_STATE_LIVING);
   em.reportApplicationState(app, AppState::kShuttingDown);
   em.reportApplicationState(additionalApp, AppState::kShuttingDown);
 
   ASSERT_EQ(
     em.getMachineState(),
-    MACHINE_STATE_RUNNING
+    MACHINE_STATE_LIVING
   );
 }
 

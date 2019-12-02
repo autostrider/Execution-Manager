@@ -21,7 +21,7 @@ int main(int argc, char **argv)
     {
         LOG << "[msm] Error while registering signal.";
     }
-    std::this_thread::sleep_for(FIVE_SECONDS);
+    std::this_thread::sleep_for(TWO_SECONDS);
 
     MSM::MachineStateManager msm(std::make_unique<MSM::MsmStateFactory>(),
                                  std::make_unique<api::ApplicationStateClientWrapper>(),
@@ -33,7 +33,7 @@ int main(int argc, char **argv)
     while (false == isTerminated)
     {
         msm.run();
-        std::this_thread::sleep_for(FIVE_SECONDS);
+        std::this_thread::sleep_for(TWO_SECONDS);
     }
 
     msm.terminate();

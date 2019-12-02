@@ -17,7 +17,7 @@ static const std::string APPLICATIONS_PATH{"./bin/applications/"};
 
 constexpr std::uint32_t DEFAULT_RESPONSE_TIMEOUT{30000000};
 constexpr std::uint32_t NO_TIMEOUT{0};
-constexpr std::chrono::seconds FIVE_SECONDS{5};
+constexpr std::chrono::seconds TWO_SECONDS{2};
 
 static const std::string AA_STATE_INIT{"Initializing"};
 static const std::string AA_STATE_RUNNING{"Running"};

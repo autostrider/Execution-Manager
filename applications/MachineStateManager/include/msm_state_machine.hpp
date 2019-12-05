@@ -14,8 +14,7 @@ class MsmState : public api::IState
 public:
     MsmState(MachineStateManager& msm, 
              api::ApplicationStateClient::ApplicationState state, 
-             std::string stateName,
-             std::shared_ptr<ISocketServer> server);
+             std::string stateName);
 
     virtual void enter() = 0;
     void leave() const override;
@@ -26,13 +25,12 @@ protected:
     MachineStateManager& m_msm;
     const api::ApplicationStateClient::ApplicationState m_msmState;
     const std::string m_stateName;
-    std::shared_ptr<ISocketServer> m_newStatesServer;
 };
 
 class Init : public MsmState
 {
 public:
-    Init(MachineStateManager& msm, std::shared_ptr<ISocketServer> server);
+    Init(MachineStateManager& msm);
     void enter() override;
     void leave() const override;
 };
@@ -40,14 +38,14 @@ public:
 class Run : public MsmState
 {
 public:
-    Run(MachineStateManager& msm, std::shared_ptr<ISocketServer> server);
+    Run(MachineStateManager& msm);
     void enter() override;
 };
 
 class ShutDown : public MsmState
 {
 public:
-    ShutDown(MachineStateManager& msm, std::shared_ptr<ISocketServer> server);
+    ShutDown(MachineStateManager& msm);
     void enter() override;
 };
 

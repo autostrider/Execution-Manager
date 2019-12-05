@@ -50,7 +50,7 @@ TEST_F(MsmStateMachineTest, ShouldInitCallEnter)
 
     EXPECT_CALL(*msmMock, reportApplicationState(_)).WillOnce(Return());
 
-    std::unique_ptr<Init> state = std::make_unique<Init>(*msmMock, nullptr);
+    std::unique_ptr<Init> state = std::make_unique<Init>(*msmMock);
     state->enter();
 }
 
@@ -62,7 +62,7 @@ TEST_F(MsmStateMachineTest, UnsuccessfulRegistration)
 
     EXPECT_CALL(*msmMock, reportApplicationState(_)).WillOnce(Return());
 
-    std::unique_ptr<Init> state = std::make_unique<Init>(*msmMock, nullptr);
+    std::unique_ptr<Init> state = std::make_unique<Init>(*msmMock);
     state->enter();
 }
 
@@ -75,7 +75,7 @@ TEST_F(MsmStateMachineTest, ShouldRunCallEnter)
 
     msmMock = initIMsm();
 
-    std::unique_ptr<::Run> state = std::make_unique<::Run>(*msmMock, nullptr);
+    std::unique_ptr<::Run> state = std::make_unique<::Run>(*msmMock);
     state->enter();
 }
 
@@ -85,7 +85,7 @@ TEST_F(MsmStateMachineTest, ShouldInitCallLeave)
 
     EXPECT_CALL(*msmMock, reportApplicationState(_)).WillOnce(Return());
 
-    std::unique_ptr<Init> state = std::make_unique<Init>(*msmMock, nullptr);
+    std::unique_ptr<Init> state = std::make_unique<Init>(*msmMock);
     state->leave();
 }
 
@@ -95,7 +95,7 @@ TEST_F(MsmStateMachineTest, ShouldTerminateCallEnter)
 
     EXPECT_CALL(*msmMock, reportApplicationState(_)).WillOnce(Return());
 
-    std::unique_ptr<ShutDown> state = std::make_unique<ShutDown>(*msmMock, nullptr);
+    std::unique_ptr<ShutDown> state = std::make_unique<ShutDown>(*msmMock);
     state->enter();
 }
 
@@ -103,7 +103,7 @@ TEST_F(MsmStateMachineTest, ShouldTerminateCallLeave)
 {
     msmMock = initIMsm();
 
-    std::unique_ptr<ShutDown> state = std::make_unique<ShutDown>(*msmMock, nullptr);
+    std::unique_ptr<ShutDown> state = std::make_unique<ShutDown>(*msmMock);
     state->leave();
 }
 
@@ -111,7 +111,7 @@ TEST_F(MsmStateMachineTest, ShouldCreateInit)
 {
     msmMock = initIMsm();
 
-    std::unique_ptr<api::IState> expectedState = std::make_unique<Init>(*msmMock, nullptr);
+    std::unique_ptr<api::IState> expectedState = std::make_unique<Init>(*msmMock);
     std::unique_ptr<api::IState> createdState = factory.createInit(*msmMock);
 
     bool result = std::is_same<decltype (expectedState), decltype (createdState)>::value;

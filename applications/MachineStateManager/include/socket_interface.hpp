@@ -13,7 +13,7 @@ public:
   int socket(int domain, int type, int protocol) override;
   int accept(int sockfd, struct sockaddr* addr, socklen_t* addrlen) override;
   int listen(int sockfd, int backlog) override;
-  int recv(int sockfd, void *buf, size_t len, int flags) override;
+  ssize_t recv(int sockfd, void *buf, size_t len, int flags) override;
 };
 
 }

@@ -13,11 +13,10 @@ namespace MSM
 
 MsmState::MsmState(MachineStateManager& msm,
                    ApplicationState state,
-                   std::string stateName, std::shared_ptr<ISocketServer> server) :
+                   std::string stateName) :
                    m_msm{msm},
                    m_msmState{state},
-                   m_stateName{std::move(stateName)},
-                   m_newStatesServer{std::move(server)}
+                   m_stateName{std::move(stateName)}
 {
     LOG << "Enter " << m_stateName << " state.";
 }
@@ -36,8 +35,8 @@ void MsmState::performAction()
 
 }
 
-Init::Init(MachineStateManager& msm, std::shared_ptr<ISocketServer> server)
-    : MsmState (msm, ApplicationState::K_INITIALIZING, AA_STATE_INIT, server)
+Init::Init(MachineStateManager& msm)
+    : MsmState (msm, ApplicationState::K_INITIALIZING, AA_STATE_INIT)
 {
 }
 
@@ -51,7 +50,6 @@ void Init::enter()
     LOG << "Machine State Manager started...";
 
     std::string applicationName{"MSM"};
-    m_newStatesServer->startServer();
 
     StateError result = m_msm.registerMsm(applicationName);
 
@@ -74,38 +72,38 @@ void Init::leave() const
     m_msm.reportApplicationState(ApplicationState::K_RUNNING);
 }
 
-Run::Run(MachineStateManager& msm, std::shared_ptr<ISocketServer> server)
-    : MsmState (msm, ApplicationState::K_RUNNING, AA_STATE_RUNNING, server)
+Run::Run(MachineStateManager& msm)
+    : MsmState (msm, ApplicationState::K_RUNNING, AA_STATE_RUNNING)
 {
 }
 
 void Run::enter()
 {
-    StateError result;
+//    StateError result;
 
-    std::string state;
-    do
-    {
-       state = m_newStatesServer->recv();
+//    std::string state;
+//    do
+//    {
+//       state = m_newStatesServer->recv();
 
-        LOG << "Setting machine state to "
-            << state
-            << "...";
+//        LOG << "Setting machine state to "
+//            << state
+//            << "...";
 
-        result = m_msm.setMachineState(state);
+//        result = m_msm.setMachineState(state);
 
-        if (StateError::K_SUCCESS != result)
-        {
-            if (!((StateError::K_TIMEOUT == result) && (MACHINE_STATE_SHUTTINGDOWN == state)))
-            {
-                LOG << "Failed to set machine state " << state << ".";
-            }
-        }
-    } while (state != AA_STATE_SHUTDOWN);
+//        if (StateError::K_SUCCESS != result)
+//        {
+//            if (!((StateError::K_TIMEOUT == result) && (MACHINE_STATE_SHUTTINGDOWN == state)))
+//            {
+//                LOG << "Failed to set machine state " << state << ".";
+//            }
+//        }
+//    } while (state != AA_STATE_SHUTDOWN);
 }
 
-ShutDown::ShutDown(MachineStateManager& msm, std::shared_ptr<ISocketServer> server)
-    : MsmState (msm, ApplicationState::K_SHUTTINGDOWN, AA_STATE_SHUTDOWN, server)
+ShutDown::ShutDown(MachineStateManager& msm)
+    : MsmState (msm, ApplicationState::K_SHUTTINGDOWN, AA_STATE_SHUTDOWN)
 {
 }
 
@@ -113,7 +111,6 @@ void ShutDown::enter()
 {
     LOG << "Reporting state "
         << m_stateName << ".";
-    m_newStatesServer->closeServer();
     m_msm.reportApplicationState(getApplicationState());
 }
 

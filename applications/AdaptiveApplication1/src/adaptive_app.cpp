@@ -39,7 +39,7 @@ void AdaptiveApp::run()
     transitToNextState(
                 std::bind(&api::IStateFactory::createRun, m_factory.get(), std::placeholders::_1)
                 );
-    m_componentState = api::ComponentStateKOn;
+    m_componentState = COMPONENT_STATE_ON;
     LOG << "ComponentState updated to: " << m_componentState;
 }
 
@@ -55,7 +55,7 @@ void AdaptiveApp::suspend()
     transitToNextState(
                 std::bind(&api::IStateFactory::createSuspend, m_factory.get(), std::placeholders::_1)
                 );
-    m_componentState = api::ComponentStateKOff;
+    m_componentState = COMPONENT_STATE_OFF;
     LOG << "ComponentState updated to: " << m_componentState;
 }
 
@@ -138,17 +138,17 @@ bool AdaptiveApp::shouldChange(const api::ComponentState &state) const
 
 bool AdaptiveApp::isValid(const api::ComponentState &state) const
 {
-    return api::ComponentStateKOn == state || api::ComponentStateKOff == state;
+    return COMPONENT_STATE_ON == state || COMPONENT_STATE_OFF == state;
 }
 
 bool AdaptiveApp::shouldResume(const api::ComponentState& state) const
 {
-    return (m_componentState != state && api::ComponentStateKOn == state);
+    return (m_componentState != state && COMPONENT_STATE_ON == state);
 }
 
 bool AdaptiveApp::shouldSuspend(const api::ComponentState& state) const
 {
-    return (m_componentState != state && api::ComponentStateKOff == state);
+    return (m_componentState != state && COMPONENT_STATE_OFF == state);
 }
 
 void AdaptiveApp::reportApplicationState(api::ApplicationStateClient::ApplicationState state)

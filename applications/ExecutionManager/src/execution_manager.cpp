@@ -1,8 +1,8 @@
 #include "execution_manager.hpp"
 #include <constants.hpp>
+#include <logger.hpp>
 
 #include <iostream>
-#include <logger.hpp>
 
 namespace ExecutionManager
 {
@@ -20,11 +20,12 @@ ExecutionManager::ExecutionManager(
   std::unique_ptr<IManifestReader> reader,
   std::unique_ptr<IApplicationHandler> applicationHandler,
   std::unique_ptr<ExecutionManagerClient::IExecutionManagerClient> client)
-  : appHandler{std::move(applicationHandler)},
+  : m_appHandler{std::move(applicationHandler)},
     m_activeProcesses{},
     m_allowedProcessesForState{reader->getStatesSupportedByApplication()},
     m_currentState{},
     m_pendingState{},
+    m_currentComponentState{},
     m_machineManifestStates{reader->getMachineStates()},
     m_componentStateUpdateSbscrs{},
     m_rpcClient(std::move(client))
@@ -39,14 +40,14 @@ void ExecutionManager::start()
 
 void ExecutionManager::filterStates()
 {
-  for (auto app = m_activeProcesses.begin();
-       app != m_activeProcesses.end();)
+  for (auto app = m_allowedProcessesForState.begin();
+       app != m_allowedProcessesForState.end();)
   {
     if (std::find(m_machineManifestStates.cbegin(),
                   m_machineManifestStates.cend(),
                   app->first) == m_machineManifestStates.cend())
     {
-      app = m_activeProcesses.erase(app);
+      app = m_allowedProcessesForState.erase(app);
     }
     else
     {
@@ -63,10 +64,9 @@ void ExecutionManager::startApplicationsForState()
   {
     for (const auto& executableToStart: allowedApps->second)
     {
-      if (m_activeProcesses.find(executableToStart.processName) ==
+      if (m_activeProcesses.find(executableToStart) ==
           m_activeProcesses.cend())
       {
-
         try
         {
           startApplication(executableToStart);
@@ -97,102 +97,102 @@ void ExecutionManager::killProcessesForState()
 {
   auto allowedApps = m_allowedProcessesForState.find(m_pendingState);
 
-  for (auto app = m_activeProcesses.cbegin(); app != m_activeProcesses.cend();)
+  for (auto app = m_activeProcesses.cbegin();
+       app != m_activeProcesses.cend();
+       app++)
   {
     if (allowedApps == m_allowedProcessesForState.cend() ||
-        processToBeKilled(app->first, allowedApps->second))
+        processToBeKilled(*app, allowedApps->second))
     {
-      auto currentApp = app;
-      appHandler->killProcess(currentApp->second);
-      m_stateConfirmToBeReceived.insert(currentApp->second);
-
-      app = m_activeProcesses.erase(currentApp);
-      m_registeredComponents.erase(currentApp->first);
+      m_appHandler->killProcess(*app);
 
       m_componentStateUpdateSbscrs.erase(std::remove_if(m_componentStateUpdateSbscrs.begin(), 
                                                         m_componentStateUpdateSbscrs.end(),
-                                                        [&](const std::string& currsubscr)
-                                                        {return currsubscr == currentApp->first;}), 
+                                                        [&](const std::string& currSubscr)
+                                                        {return currSubscr == *app;}), 
                                                         m_componentStateUpdateSbscrs.end());
-    }
-    else
-    {
-      app++;
+ 
     }
   }
 }
 
-bool ExecutionManager::processToBeKilled(
-  const std::string& app,
-  const std::vector<ProcessInfo>& allowedApps)
+bool ExecutionManager::processToBeKilled(const std::string& app,
+  const std::set<ProcName> &allowedApps)
 {
   auto it = std::find_if(allowedApps.cbegin(),
                      allowedApps.cend(),
                      [&app](auto& listItem)
-    { return app == listItem.processName; });
+    { return app == listItem; });
 
   return (it  == allowedApps.cend());
 };
 
-void ExecutionManager::startApplication(const ProcessInfo& process)
+void ExecutionManager::startApplication(const ProcName& process)
 {
-  pid_t processId = appHandler->startProcess(process);
-  m_activeProcesses.insert({process.processName, processId});
-
-  m_stateConfirmToBeReceived.insert(processId);
+  m_appHandler->startProcess(process);
 
   LOG << "Adaptive aplication \""
-      << process.applicationName
-      << "\" with pid "
-      << processId
-      << " started.";
+      << process
+      << "\" was started by systemctl.";
+}
+
+bool ExecutionManager::isConfirmAvailable()
+{
+  return m_activeProcesses == m_allowedProcessesForState[m_pendingState];
+}
+
+void ExecutionManager::checkAndSendConfirm()
+{
+  if (isConfirmAvailable())
+  {
+    confirmState(StateError::K_SUCCESS);
+  }
 }
 
 void ExecutionManager::changeComponentsState()
 {
-  ComponentState pendingComponentsState =
-    (m_pendingState == MACHINE_STATE_SUSPEND) ? COMPONENT_STATE_OFF :
-                                                COMPONENT_STATE_ON;
-
-  for (auto& component : m_registeredComponents)
+  if (m_pendingState == MACHINE_STATE_SUSPEND)
   {
-    if (component.second != pendingComponentsState)
-    {
-      m_componentConfirmToBeReceived.emplace(component.first);
-      component.second = pendingComponentsState;
-    }
+    m_currentComponentState = COMPONENT_STATE_OFF;
+  }
+  else
+  {
+    m_currentComponentState = COMPONENT_STATE_ON;
+  }
+
+  for(auto& component : m_registeredComponents)
+  {
+    m_componentPendingConfirms.emplace(component);
   }
 
   for (auto subscriber : m_componentStateUpdateSbscrs)
   {
-    m_rpcClient->SetComponentState(pendingComponentsState, subscriber);
+    m_rpcClient->SetComponentState(m_currentComponentState, subscriber);
   }
 }
 
 void
-ExecutionManager::reportApplicationState(pid_t processId, AppState state)
+ExecutionManager::reportApplicationState(
+    const std::string& appName, AppState state)
 {
   LOG << "State \"" << applicationStateNames[static_cast<uint16_t>(state)]
-      << "\" for application with pid "
-      << processId
+      << "\" for application "
+      << appName
       << " received.";
-
-  if (m_stateConfirmToBeReceived.empty() &&
-      m_componentConfirmToBeReceived.empty())
+  
+  switch (state)
   {
-    return;
+  case AppState::kShuttingDown:
+    m_activeProcesses.erase(appName);
+    break;
+  case AppState::kRunning:
+    m_activeProcesses.insert(appName);
+    break;
+  default:
+    break;
   }
 
-  if (AppState::INITIALIZING != state)
-  {
-    m_stateConfirmToBeReceived.erase(processId);
-
-    if (m_stateConfirmToBeReceived.empty() &&
-        m_componentConfirmToBeReceived.empty())
-    {
-     confirmState(StateError::K_SUCCESS);
-    }
-  }
+  checkAndSendConfirm();
 }
 
 MachineState
@@ -214,10 +214,6 @@ ExecutionManager::setMachineState(std::string state)
   {
     return StateError::K_INVALID_STATE;
   }
-  // else if (m_stateConfirmToBeReceived.empty())
-  // {
-  //   return StateError::K_INVALID_REQUEST;
-  // }
   else if (state == m_currentState)
   {
     return StateError::K_INVALID_STATE;
@@ -228,11 +224,15 @@ ExecutionManager::setMachineState(std::string state)
   killProcessesForState();
 
   startApplicationsForState();
-
-  changeComponentsState();
-
-  if (!m_stateConfirmToBeReceived.empty() ||
-      !m_componentConfirmToBeReceived.empty())
+  
+  if (m_pendingState == MACHINE_STATE_SUSPEND ||
+      m_pendingState == MACHINE_STATE_RUNNING)
+  {
+    changeComponentsState();
+  }
+  
+  if (!isConfirmAvailable() ||
+      !m_componentPendingConfirms.empty())
   {
     LOG << "Machine state change to \""
         << m_pendingState
@@ -240,8 +240,10 @@ ExecutionManager::setMachineState(std::string state)
   }
   else
   {
-    confirmState(StateError::K_SUCCESS);
+    startApplicationsForState();
   }
+
+  checkAndSendConfirm();
 
   return StateError::K_SUCCESS;
 }
@@ -249,7 +251,7 @@ ExecutionManager::setMachineState(std::string state)
 void ExecutionManager::registerComponent(std::string component,
                                          StateUpdateMode updateMode)
 {
-  m_registeredComponents.emplace(std::make_pair(component, COMPONENT_STATE_ON));
+  m_registeredComponents.emplace(component);
 
   if (updateMode == StateUpdateMode::K_EVENT)
   {
@@ -265,30 +267,37 @@ ExecutionManager::getComponentState
 
   if(iter != m_registeredComponents.cend())
   {
-    state = iter->second;
+    state = m_currentComponentState;
     return ComponentClientReturnType::K_SUCCESS;
   }
   else
   {
-    return ComponentClientReturnType::K_INVALID;
+    return ComponentClientReturnType::K_GENERAL_ERROR;
   }
 }
 
 void ExecutionManager::confirmComponentState
 (std::string component, ComponentState state, ComponentClientReturnType status)
 {
-  if (m_componentConfirmToBeReceived.empty())
+  if (m_componentPendingConfirms.empty())
   {
     return;
   }
 
-  m_componentConfirmToBeReceived.erase(component);
-
-  if (m_stateConfirmToBeReceived.empty() &&
-      m_componentConfirmToBeReceived.empty())
+  if (status == ComponentClientReturnType::K_GENERAL_ERROR ||
+      status == ComponentClientReturnType::K_INVALID)
   {
-    confirmState(StateError::K_SUCCESS);
+    LOG << "Confirm component state are faild with error: "
+        << static_cast<int>(status) << ".";
   }
+
+  m_componentPendingConfirms.erase(component);
+
+  if (isConfirmAvailable() &&
+      m_componentPendingConfirms.empty())
+    {
+     confirmState(StateError::K_SUCCESS);
+    }
 }
 
 } // namespace ExecutionManager

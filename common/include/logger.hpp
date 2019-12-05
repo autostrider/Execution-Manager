@@ -22,6 +22,6 @@ namespace Logger
                                   << " " \
                                   << Logger::getThreadId() \
                                   << " (" << getpid() << ") " \
-                                  << "[" << Logger::getApplicationName(std::string{__FILE__}) << "] \t")
+                                  << "[" << Logger::getApplicationName(std::string{__FILE__}) << ":" << __LINE__ << "]\t")
 
 #endif

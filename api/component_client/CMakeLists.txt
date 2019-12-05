@@ -27,4 +27,4 @@ target_include_directories(component_client
       $<INSTALL_INTERFACE:${CMAKE_CURRENT_SOURCE_DIR}/include>
 )
 
-# add_subdirectory(test)
+add_subdirectory(test)

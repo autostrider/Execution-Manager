@@ -8,8 +8,8 @@ interface ApplicationStateManagement
     kInitializing @0;
     kRunning @1;
     kShuttingdown @2;
-    kSuspend @3;
+    suspend @3;
   }
 
-  reportApplicationState @0 (pid :Int32, state :ApplicationState);
+  reportApplicationState @0 (appName :Text, state :ApplicationState);
 }

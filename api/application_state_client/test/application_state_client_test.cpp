@@ -10,7 +10,7 @@
 #include "gtest/gtest.h"
 #include "gmock/gmock.h"
 
-using namespace std;
+using namespace ::testing;
 
 namespace ApplicationStateClientTest
 {
@@ -35,51 +35,48 @@ private:
     Data& m_sharedResource;
 };
 
-ApplicationStateClientServer::ApplicationStateClientServer (Data& sharedResource) : m_sharedResource{sharedResource}
+ApplicationStateClientServer::ApplicationStateClientServer(Data& sharedResource) 
+    : m_sharedResource{sharedResource}
 {
-    cout << "Application State Client server started..." << endl;
+    LOG << "Application State Client server started...";
 }
 
 ::kj::Promise<void>
 ApplicationStateClientServer::reportApplicationState(ReportApplicationStateContext context)
 {
     m_sharedResource.m_state = context.getParams().getState();
-    m_sharedResource.m_appPid = context.getParams().getPid();
-         
+
     return kj::READY_NOW;
 }
 
-class ApplicationStateClientTest : public ::testing::Test 
+class ApplicationStateClientTest : public Test 
 {
 protected:
-    virtual ~ApplicationStateClientTest() noexcept(true) {}
+    ~ApplicationStateClientTest() noexcept(true) override {}
 
     ApplicationStateClientTest() {}
 
-	virtual void SetUp()
-	{
-		unlink(EM_SOCKET_NAME.c_str());
-	}
+  void SetUp() override
+  {
+    ::unlink(EM_SOCKET_NAME.c_str());
+  }
 
-	virtual void TearDown()
+  void TearDown() override
     {
-        unlink(EM_SOCKET_NAME.c_str());
+        ::unlink(EM_SOCKET_NAME.c_str());
     }
 
-    Data sharedResource;  
+    Data sharedResource;
     const std::string socketName{IPC_PROTOCOL + EM_SOCKET_NAME};
-    capnp::EzRpcServer server{kj::heap<ApplicationStateClientServer>(sharedResource), socketName}; 
+    capnp::EzRpcServer server
+    {kj::heap<ApplicationStateClientServer>(sharedResource), socketName}; 
 };
 
 TEST_F(ApplicationStateClientTest, ShouldSucceedToReportApplicationState)
 {
-    LOG << "Test Start";
 	api::ApplicationStateClient asc;
-    LOG << "ApplicationStateClient";
 	asc.ReportApplicationState(ApplicationState::K_RUNNING);
-    LOG << "ReportApplicationState";
 
 	ASSERT_EQ(ApplicationState::K_RUNNING, sharedResource.m_state);
-    LOG << "Test DONE";
 }
 } //namespace

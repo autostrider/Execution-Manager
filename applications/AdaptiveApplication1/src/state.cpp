@@ -57,7 +57,6 @@ void Suspend::enter()
 
 void Suspend::leave() const
 {
-
 }
 
 void Suspend::performAction()

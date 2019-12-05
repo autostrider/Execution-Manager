@@ -1,0 +1,4 @@
+[Unit]
+Description=Machine state manager
+[Service]
+Type=forking

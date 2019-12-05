@@ -1,4 +1,5 @@
 #include "manifest_reader.hpp"
+#include <common.hpp>
 
 #include <dirent.h>
 #include <json.hpp>
@@ -26,10 +27,10 @@ ManifestReader::ManifestReader(const ManifestReaderConf &conf)
   : conf(conf)
 { }
 
-std::map<MachineState, std::vector<ProcessInfo> > ManifestReader::getStatesSupportedByApplication()
+std::map<MachineState, std::set<ProcName>> ManifestReader::getStatesSupportedByApplication()
 {
   const auto& applicationNames = getListOfApplications();
-  std::map<MachineState, std::vector<ProcessInfo>> res;
+  std::map<MachineState, std::set<ProcName>> res;
   const static std::string manifestFile = "/manifest.json";
 
   for (auto file: applicationNames)
@@ -49,9 +50,7 @@ std::map<MachineState, std::vector<ProcessInfo> > ManifestReader::getStatesSuppo
           if (mode.functionGroup == machineStateFunctionGroup)
           {
             res[mode.mode]
-              .push_back({manifest.manifest.manifestId,
-                          process.name,
-                          conf.startupOptions});
+              .insert(getServiceName(manifest.manifest.manifestId, process.name));
           }
         }
       }
@@ -88,10 +87,10 @@ std::vector<MachineState> ManifestReader::getMachineStates()
   return res;
 }
 
-std::set<std::string> ManifestReader::getListOfApplications()
+std::set<ProcName> ManifestReader::getListOfApplications()
 {
   DIR* dp = nullptr;
-  std::set<std::string> fileNames;
+  std::set<ProcName> fileNames;
 
   if ((dp = opendir(conf.pathToApplicationsFolder.c_str())) == nullptr)
   {

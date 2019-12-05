@@ -2,14 +2,11 @@
 #define SOCKET_SERVER_HPP
 
 #include <i_socket_server.hpp>
+#include <string_safe_queue.hpp>
 
 #include <atomic>
 #include <memory>
 #include <future>
-#include <mutex>
-#include <condition_variable>
-#include <thread>
-#include <queue>
 #include <sys/un.h>
 
 class ISocketInterface;
@@ -31,9 +28,7 @@ private:
 private:
   std::unique_ptr<ISocketInterface> m_socket;
   std::atomic<bool> m_isAlive;
-  std::queue<std::string> m_dataReceived;
-  std::mutex m_mut;
-  std::condition_variable m_condVar;
+  StringSafeQueue m_receivedData;
   int m_socketfd;
   std::future<std::string> m_newState;
   struct sockaddr_un m_serverAddress;

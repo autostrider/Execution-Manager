@@ -64,6 +64,6 @@ TEST_F(SocketServerTest, ShouldSuccessfulyRunServer)
 
   MSM::SocketServer ss(std::move(socket), socketPath);
   ss.startServer();
-  ASSERT_EQ(ss.recv(), recvValue);
+  ASSERT_EQ(ss.getData(), recvValue);
   ss.closeServer();
 }

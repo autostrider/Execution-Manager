@@ -18,7 +18,7 @@ class SocketServer final: public ISocketServer
 {
 public:
   SocketServer(std::unique_ptr<ISocketInterface> socket, const std::string& path);
-  std::string recv() override;
+  std::string getData() override;
   void closeServer() override;
   void startServer() override;
 

@@ -73,7 +73,7 @@ void SocketServer::dataListener()
   m_socket->close(clientfd);
 }
 
-std::string SocketServer::recv()
+std::string SocketServer::getData()
 {
   return m_receivedData.pop();
 }

@@ -79,27 +79,23 @@ Run::Run(MachineStateManager& msm)
 
 void Run::enter()
 {
-//    StateError result;
+    for (auto state: m_msm.states())
+    {
 
-//    std::string state;
-//    do
-//    {
-//       state = m_newStatesServer->recv();
+        LOG << "Setting machine state to "
+            << state
+            << "...";
 
-//        LOG << "Setting machine state to "
-//            << state
-//            << "...";
+        StateError result = m_msm.setMachineState(state);
 
-//        result = m_msm.setMachineState(state);
-
-//        if (StateError::K_SUCCESS != result)
-//        {
-//            if (!((StateError::K_TIMEOUT == result) && (MACHINE_STATE_SHUTTINGDOWN == state)))
-//            {
-//                LOG << "Failed to set machine state " << state << ".";
-//            }
-//        }
-//    } while (state != AA_STATE_SHUTDOWN);
+        if (StateError::K_SUCCESS != result)
+        {
+            if (!((StateError::K_TIMEOUT == result) && (MACHINE_STATE_SHUTTINGDOWN == state)))
+            {
+                LOG << "Failed to set machine state " << state << ".";
+            }
+        }
+    }
 }
 
 ShutDown::ShutDown(MachineStateManager& msm)

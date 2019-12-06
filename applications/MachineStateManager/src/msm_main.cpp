@@ -27,60 +27,43 @@ int main(int argc, char **argv)
 
     if (::signal(SIGTERM, signalHandler) == SIG_ERR
             ||
-        ::signal(SIGINT, signalHandler) == SIG_ERR
-            ||
-        ::signal(SIGSEGV, segfaultHalt) == SIG_ERR
-            ||
-        ::signal(SIGPIPE, segfaultHalt) == SIG_ERR)
+        ::signal(SIGINT, signalHandler) == SIG_ERR)
     {
         LOG << "[msm] Error while registering signal.";
     }
-    auto socketHandler = std::make_unique<MSM::SocketInterface>();
-    auto server = std::make_shared<MSM::SocketServer>(std::move(socketHandler), "/tmp/state_setter");
-    server->startServer();
-    LOG << "Server recv data";
-    std::string d = server->recv();
-    std::cout << d << std::endl;
-    std::this_thread::sleep_for(std::chrono::seconds{15});
-    for (int i = 0; i < 7; i++)
+
+    MSM::MachineStateManager msm(
+                std::make_unique<MSM::MsmStateFactory>(),
+                std::make_unique<api::ApplicationStateClientWrapper>(),
+                std::make_unique<api::MachineStateClientWrapper>(),
+                std::make_unique<ExecutionManager::ManifestReader>());
+
+    const std::map<ApplicationState, StateHandler> dispatchMap
     {
-      d = server->recv();
-      std::cout << d << std::endl;
+        {
+            ApplicationState::K_INITIALIZING,
+            std::bind(&api::IAdaptiveApp::init, &msm)
+        },
+        {
+            ApplicationState::K_RUNNING,
+            std::bind(&api::IAdaptiveApp::run, &msm)
+        },
+        {
+            ApplicationState::K_SHUTTINGDOWN,
+            std::bind(&api::IAdaptiveApp::terminate, &msm)
+        }
+    };
+
+    dispatchMap.at(state)();
+    state = ApplicationState::K_RUNNING;
+
+    while (ApplicationState::K_RUNNING == state)
+    {
+        dispatchMap.at(state)();
+        std::this_thread::sleep_for(FIVE_SECONDS);
     }
-    LOG << "recv data finished";
-    server->closeServer();
-//    MSM::MachineStateManager msm(
-//                std::make_unique<MSM::MsmStateFactory>(),
-//                std::make_unique<api::ApplicationStateClientWrapper>(),
-//                std::make_unique<api::MachineStateClientWrapper>(),
-//                std::make_unique<ExecutionManager::ManifestReader>());
 
-//    const std::map<ApplicationState, StateHandler> dispatchMap
-//    {
-//        {
-//            ApplicationState::K_INITIALIZING,
-//            std::bind(&api::IAdaptiveApp::init, &msm)
-//        },
-//        {
-//            ApplicationState::K_RUNNING,
-//            std::bind(&api::IAdaptiveApp::run, &msm)
-//        },
-//        {
-//            ApplicationState::K_SHUTTINGDOWN,
-//            std::bind(&api::IAdaptiveApp::terminate, &msm)
-//        }
-//    };
-
-//    dispatchMap.at(state)();
-//    state = ApplicationState::K_RUNNING;
-
-//    while (ApplicationState::K_RUNNING == state)
-//    {
-//        dispatchMap.at(state)();
-//        std::this_thread::sleep_for(FIVE_SECONDS);
-//    }
-
-//    dispatchMap.at(state)();
+    dispatchMap.at(state)();
 
     ::exit(EXIT_SUCCESS);
 }

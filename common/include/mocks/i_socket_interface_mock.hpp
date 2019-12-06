@@ -7,6 +7,7 @@
 
 class SocketInterfaceMock: public ISocketInterface
 {
+public:
   SocketInterfaceMock() = default;
   MOCK_METHOD(int, bind, 
   (int sockfd, const struct sockaddr *addr, socklen_t addrlen));
@@ -14,7 +15,8 @@ class SocketInterfaceMock: public ISocketInterface
   MOCK_METHOD(int, accept, 
   (int sockfd, struct sockaddr *addr, socklen_t *addrlen));
   MOCK_METHOD(int, listen, (int sockfd, int backlog));
-  MOCK_METHOD(int, recv, (int sockfd, void *buf, size_t len, int flags));
+  MOCK_METHOD(ssize_t, recv, (int sockfd, char *buf, size_t len, int flags));
+  MOCK_METHOD(int, close, (int fd));
 };
 
 #endif // I_SOCKET_INTERFACE_MOCK_HPP

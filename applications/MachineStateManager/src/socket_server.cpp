@@ -27,6 +27,22 @@ SocketServer::SocketServer
   {
      LOG << "Error opening socket " << strerror(errno);
   }
+
+  int res = m_socket->bind(m_socketfd,
+                 (struct sockaddr*)&m_serverAddress,
+                 sizeof(m_serverAddress));
+
+  if (-1 == res)
+  {
+    LOG << "Error binding data";
+  }
+
+  res = m_socket->listen(m_socketfd, 5);
+
+  if (-1 == res)
+  {
+    LOG << "Error listening in socket";
+  }
 }
 
 void SocketServer::dataListener()
@@ -54,7 +70,7 @@ void SocketServer::dataListener()
       m_receivedData.push(res);
     }
   } while (m_isAlive);
-  close(clientfd);
+  m_socket->close(clientfd);
 }
 
 std::string SocketServer::recv()
@@ -69,20 +85,6 @@ void SocketServer::closeServer()
 
 void SocketServer::startServer()
 {
-  int res = bind(m_socketfd, (struct sockaddr*)&m_serverAddress, sizeof(m_serverAddress));
-
-  if (-1 == res)
-  {
-    LOG << "Error binding data";
-  }
-
-  res = m_socket->listen(m_socketfd, 5);
-
-  if (-1 == res)
-  {
-    LOG << "Error listening in socket";
-  }
-
   m_worker = std::thread(&SocketServer::dataListener, this);
 }
 
@@ -93,7 +95,7 @@ SocketServer::~SocketServer()
     m_worker.join();
   }
   LOG << "closing server on: " << m_serverAddress.sun_path;
-  close(m_socketfd);
+  m_socket->close(m_socketfd);
   ::unlink(m_serverAddress.sun_path);
 }
 

@@ -1,11 +1,9 @@
 #include "machine_state_manager.hpp"
 #include "msm_state_machine.hpp"
-#include <i_application_state_client_wrapper.hpp>
 #include <logger.hpp>
-#include <manifest_reader.hpp>
 #include <constants.hpp>
-#include "socket_server.hpp"
-#include "socket_interface.hpp"
+#include <manifest_reader.hpp>
+#include <i_application_state_client_wrapper.hpp>
 
 #include <thread>
 #include <atomic>
@@ -13,13 +11,7 @@
 static void signalHandler(int signo);
 using ApplicationState = api::ApplicationStateClient::ApplicationState;
 
-static std::atomic<ApplicationState> state{ApplicationState::K_INITIALIZING};
-
-static void segfaultHalt(int signo)
-{
-    LOG << "segfault: " << strerror(errno) << " " << sys_siglist[signo];
-    exit(3);
-}
+static std::atomic<bool> isTerminated{false};
 
 int main(int argc, char **argv)
 {
@@ -31,39 +23,20 @@ int main(int argc, char **argv)
     {
         LOG << "[msm] Error while registering signal.";
     }
+    MSM::MachineStateManager msm(std::make_unique<MSM::MsmStateFactory>(),
+                                 std::make_unique<api::ApplicationStateClientWrapper>(),
+                                 std::make_unique<api::MachineStateClientWrapper>(),
+                                 std::make_unique<ExecutionManager::ManifestReader>());
 
-    MSM::MachineStateManager msm(
-                std::make_unique<MSM::MsmStateFactory>(),
-                std::make_unique<api::ApplicationStateClientWrapper>(),
-                std::make_unique<api::MachineStateClientWrapper>(),
-                std::make_unique<ExecutionManager::ManifestReader>());
-
-    const std::map<ApplicationState, StateHandler> dispatchMap
+    msm.init();
+    msm.run();
+    while (false == isTerminated)
     {
-        {
-            ApplicationState::K_INITIALIZING,
-            std::bind(&api::IAdaptiveApp::init, &msm)
-        },
-        {
-            ApplicationState::K_RUNNING,
-            std::bind(&api::IAdaptiveApp::run, &msm)
-        },
-        {
-            ApplicationState::K_SHUTTINGDOWN,
-            std::bind(&api::IAdaptiveApp::terminate, &msm)
-        }
-    };
-
-    dispatchMap.at(state)();
-    state = ApplicationState::K_RUNNING;
-
-    while (ApplicationState::K_RUNNING == state)
-    {
-        dispatchMap.at(state)();
+        msm.performAction();
         std::this_thread::sleep_for(FIVE_SECONDS);
     }
 
-    dispatchMap.at(state)();
+    msm.terminate();
 
     ::exit(EXIT_SUCCESS);
 }
@@ -71,5 +44,5 @@ int main(int argc, char **argv)
 static void signalHandler(int signo)
 {
     LOG << "[msm] Received signal:" << sys_siglist[signo];
-    state = mapSignalToState.at(signo);
+    isTerminated = true;
 }

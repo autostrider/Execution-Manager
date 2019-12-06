@@ -5,6 +5,8 @@
 #include <iostream>
 #include <logger.hpp>
 
+#include <common.hpp>
+
 namespace ExecutionManagerServer
 {
 using ApplicationState = ::ApplicationStateManagement::ApplicationState;
@@ -19,7 +21,28 @@ ExecutionManagerServer::ExecutionManagerServer
 {
     LOG << "Execution Manager server started..." << std::endl;
 
-    m_em.start();
+    isRunning = true;
+
+    threadsMap[THREADS::EM_SERVER]->addMethod(
+                std::bind(&ExecutionManager::ExecutionManager::setMachineState,
+                          &m_em, MACHINE_STATE_STARTUP));
+
+    m_setMachineStateThread = std::thread([&]()
+    {
+        while (isRunning)
+        {
+            threadsMap.at(THREADS::EM_SERVER)->getExecutor();
+        }
+    });
+}
+
+ExecutionManagerServer::~ExecutionManagerServer()
+{
+    isRunning = false;
+    if (m_setMachineStateThread.joinable())
+    {
+        m_setMachineStateThread.join();
+    }
 }
 
 ::kj::Promise<void>
@@ -74,8 +97,9 @@ ExecutionManagerServer::setMachineState(SetMachineStateContext context)
         return kj::READY_NOW;
     }
 
-    m_em.setMachineState(state);
-
+    threadsMap.at(THREADS::EM_SERVER)->addMethod(
+                std::bind(&ExecutionManager::ExecutionManager::setMachineState,
+                          &m_em, state));
     return kj::READY_NOW;
 }
 

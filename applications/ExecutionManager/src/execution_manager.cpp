@@ -36,11 +36,6 @@ ExecutionManager::ExecutionManager(
     filterStates();
 }
 
-void ExecutionManager::start()
-{
-    setMachineState(MACHINE_STATE_STARTUP);
-}
-
 void ExecutionManager::filterStates()
 {
     for (auto app = m_allowedProcessesForState.begin();
@@ -113,14 +108,7 @@ bool ExecutionManager::startApplicationsForState()
 void
 ExecutionManager::confirmState(StateError status)
 {
-    m_currentState = m_pendingState;
-
     m_rpcClient->confirm(status);
-
-    LOG  << "Machine state changed successfully to "
-         << m_pendingState << ".";
-
-    m_pendingState.clear();
 }
 
 void ExecutionManager::killProcessesForState()
@@ -158,16 +146,13 @@ void ExecutionManager::startApplication(const ProcName& process)
 
 bool ExecutionManager::isConfirmAvailable()
 {
-    return m_activeProcesses == m_allowedProcessesForState[m_pendingState];
-}
-
-void ExecutionManager::checkAndSendConfirm()
-{
-    //while(!isConfirmAvailable()){}
-    if (isConfirmAvailable())
+    bool result = false;
     {
-        confirmState(StateError::K_SUCCESS);
+        std::lock_guard<std::mutex> lk(m_activeProcessesMutex);
+        result = (m_activeProcesses == m_allowedProcessesForState[m_pendingState]);
     }
+    m_readyToTransitToNextState = result;
+    return result;
 }
 
 void ExecutionManager::changeComponentsState()
@@ -181,6 +166,7 @@ void ExecutionManager::changeComponentsState()
         m_currentComponentState = COMPONENT_STATE_ON;
     }
 
+    std::lock_guard<std::mutex> lk(m_componentPendingConfirmsMutex);
     for(auto& component : m_registeredComponents)
     {
         m_componentPendingConfirms.emplace(component);
@@ -199,16 +185,20 @@ ExecutionManager::reportApplicationState(
     switch (state)
     {
     case AppState::kShuttingDown:
+    {
+        std::lock_guard<std::mutex> lk(m_activeProcessesMutex);
         m_activeProcesses.erase(appName);
+    }
         break;
     case AppState::kRunning:
+    {
+        std::lock_guard<std::mutex> lk(m_activeProcessesMutex);
         m_activeProcesses.insert(appName);
+    }
         break;
     default:
         break;
     }
-
-    checkAndSendConfirm();
 }
 
 MachineState
@@ -222,6 +212,9 @@ ExecutionManager::getMachineState() const
 StateError
 ExecutionManager::setMachineState(std::string state)
 {
+    m_readyToTransitToNextState = false;
+    m_componentConfirmsReceived = false;
+
     auto stateIt = std::find(m_machineManifestStates.cbegin(),
                              m_machineManifestStates.cend(),
                              state);
@@ -245,25 +238,41 @@ ExecutionManager::setMachineState(std::string state)
         return StateError::K_INVALID_REQUEST;
     }
 
-    if (m_pendingState == MACHINE_STATE_SUSPEND ||
-            m_pendingState == MACHINE_STATE_RUNNING)
-    {
-        changeComponentsState();
-    }
+    changeComponentsState();
 
     if (!isConfirmAvailable() ||
             !m_componentPendingConfirms.empty())
     {
         LOG << "Machine state change to \""
-            << m_pendingState
+            << state
             << "\" requested.";
+    }
+
+    LOG << "-----Waiting for confirmation----";
+
+    if (m_pendingState == MACHINE_STATE_SUSPEND ||
+            m_pendingState == MACHINE_STATE_RUNNING)
+    {
+        while ((!m_readyToTransitToNextState)
+               && ! m_componentConfirmsReceived)
+        {
+            m_readyToTransitToNextState = isConfirmAvailable();
+            m_componentConfirmsReceived = m_componentPendingConfirms.empty();
+        }
     }
     else
     {
-        startApplicationsForState();
+        while (!m_readyToTransitToNextState)
+        {
+            m_readyToTransitToNextState = isConfirmAvailable();
+        }
     }
 
-    //checkAndSendConfirm();
+    confirmState(StateError::K_SUCCESS);
+    LOG << "-----Confirmation received------";
+    m_currentState = m_pendingState;
+    LOG  << "Machine state changed successfully to "
+         << m_currentState << ".";
 
     return StateError::K_SUCCESS;
 }
@@ -293,24 +302,22 @@ ExecutionManager::getComponentState
 void ExecutionManager::confirmComponentState
 (std::string component, ComponentState state, ComponentClientReturnType status)
 {
+
     if (m_componentPendingConfirms.empty())
     {
+        m_componentConfirmsReceived = true;
         return;
     }
-
     if (status == ComponentClientReturnType::K_GENERAL_ERROR ||
             status == ComponentClientReturnType::K_INVALID)
     {
-        LOG << "Confirm component state are faild with error: "
+        LOG << "Confirm component state are failed with error: "
             << static_cast<int>(status) << ".";
     }
-
-    m_componentPendingConfirms.erase(component);
-
-    if (isConfirmAvailable() &&
-            m_componentPendingConfirms.empty())
-    {
-        confirmState(StateError::K_SUCCESS);
+    else {
+        std::lock_guard<std::mutex> lk(m_componentPendingConfirmsMutex);
+        m_componentPendingConfirms.erase(component);
+        m_componentConfirmsReceived = m_componentPendingConfirms.empty();
     }
 }
 

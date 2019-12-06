@@ -32,9 +32,10 @@ int main()
     while (false == isTerminated)
     {
         app2.performAction();
-        std::this_thread::sleep_for(TWO_SECONDS);
+        std::this_thread::sleep_for(FIVE_SECONDS);
     }
 
+    std::this_thread::sleep_for(2*FIVE_SECONDS);
     app2.terminate();
     return 0;
 }

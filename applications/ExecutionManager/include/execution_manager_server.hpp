@@ -4,6 +4,9 @@
 #include "execution_manager.hpp"
 #include "msm_handler.hpp"
 
+#include <thread>
+#include <atomic>
+
 namespace ExecutionManagerServer
 {
 
@@ -17,7 +20,7 @@ public:
   ExecutionManagerServer
     (ExecutionManager::ExecutionManager& application,
      ExecutionManager::MsmHandler msmHandler);
-
+  ~ExecutionManagerServer();
 private:
   ::kj::Promise<void>
   reportApplicationState(ReportApplicationStateContext context) override;
@@ -43,6 +46,8 @@ private:
 private:
   ExecutionManager::ExecutionManager& m_em;
   ExecutionManager::MsmHandler m_msmHandler;
+  std::thread m_setMachineStateThread;
+  std::atomic<bool> isRunning{false};
 };
 
 } // namespace ExecutionManagerServer

@@ -4,6 +4,7 @@
 #include <mocks/i_state_factory_mock.hpp>
 #include <mocks/i_state_mock.hpp>
 #include <mocks/manifest_reader_mock.hpp>
+#include <mocks/socket_server_mock.hpp>
 #include <logger.hpp>
 
 #include "gtest/gtest.h"
@@ -30,6 +31,8 @@ protected:
            std::make_unique<NiceMock<StateMock>>();
    std::unique_ptr<NiceMock<StateMock>> stateTermMock =
            std::make_unique<NiceMock<StateMock>>();
+   std::unique_ptr<NiceMock<SocketServerMock>> sockServerMock =
+           std::make_unique<NiceMock<SocketServerMock>>();
 
    StateFactoryMock* pFactoryMock = factoryMock.get();
 //   NiceMock<ExecutionManager::ManifestReaderMock*> pManifestReaderMock =
@@ -46,10 +49,11 @@ protected:
     MachineStateManager initMsm()
     {
         return MachineStateManager(
-                    std::move(factoryMock),
-                    std::move(appStateClientMock),
-                    std::move(machineStateClientMock),
-                    std::move(manifestReaderMock));
+                std::move(factoryMock),
+                std::move(appStateClientMock),
+                std::move(machineStateClientMock),
+                std::move(manifestReaderMock),
+                std::move(sockServerMock));
     }
 };
 

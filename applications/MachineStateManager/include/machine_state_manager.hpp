@@ -7,6 +7,8 @@
 
 #include <capnp/ez-rpc.h>
 
+class ISocketServer;
+
 namespace ExecutionManager
 {
 
@@ -28,12 +30,11 @@ namespace MSM
 class MachineStateManager : public api::IAdaptiveApp
 {
 public:
-  MachineStateManager(
-          std::unique_ptr<api::IStateFactory> factory,
-          std::unique_ptr<api::IApplicationStateClientWrapper> appStateClient,
-          std::unique_ptr<api::IMachineStateClientWrapper> machineClient,
-          std::unique_ptr<ExecutionManager::IManifestReader> manifestReader
-  );
+  MachineStateManager(std::unique_ptr<api::IStateFactory> factory,
+                      std::unique_ptr<api::IApplicationStateClientWrapper> appStateClient,
+                      std::unique_ptr<api::IMachineStateClientWrapper> machineClient,
+                      std::unique_ptr<ExecutionManager::IManifestReader> manifestReader,
+                      std::unique_ptr<ISocketServer> socketServer);
 
   void init() override;
   void run() override;
@@ -41,6 +42,9 @@ public:
   void performAction() override;
 
   api::MachineStateClient::StateError setMachineState(const std::string&);
+  void startServer();
+  void closeServer();
+  std::string getNewState();
   api::MachineStateClient::StateError registerMsm(const std::string&);
   void
   reportApplicationState(api::ApplicationStateClient::ApplicationState) override;
@@ -55,6 +59,7 @@ private:
   std::unique_ptr<api::IStateFactory> m_factory;
   std::unique_ptr<api::IState> m_currentState;
   std::unique_ptr<api::IApplicationStateClientWrapper> m_appStateClient;
+  std::unique_ptr<ISocketServer> m_newStatesProvider;
   std::vector<std::string> m_availableStates;
 };
 

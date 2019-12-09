@@ -30,11 +30,13 @@ namespace MSM
 class MachineStateManager : public api::IAdaptiveApp
 {
 public:
-  MachineStateManager(std::unique_ptr<api::IStateFactory> factory,
-                      std::unique_ptr<api::IApplicationStateClientWrapper> appStateClient,
-                      std::unique_ptr<api::IMachineStateClientWrapper> machineClient,
-                      std::unique_ptr<ExecutionManager::IManifestReader> manifestReader,
-                      std::unique_ptr<ISocketServer> socketServer);
+  MachineStateManager(
+          std::unique_ptr<api::IStateFactory> factory,
+          std::unique_ptr<api::IApplicationStateClientWrapper> appStateClient,
+          std::unique_ptr<api::IMachineStateClientWrapper> machineClient,
+          std::unique_ptr<ExecutionManager::IManifestReader> manifestReader,
+          std::unique_ptr<ISocketServer> socketServer
+  );
 
   void init() override;
   void run() override;

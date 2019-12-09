@@ -63,6 +63,7 @@ void SocketServer::dataListener()
     if (resRecv <= 0)
     {
       LOG << "Error occurred receiving data from client";
+      break;
     }
     else
     {

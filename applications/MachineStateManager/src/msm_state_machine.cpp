@@ -98,7 +98,7 @@ void Run::enter()
             LOG << "Failed to set machine state " << state << ".";
         }
     }
-  } while (state != AA_STATE_SHUTDOWN);
+  } while (state != MACHINE_STATE_SHUTTINGDOWN);
 }
 
 ShutDown::ShutDown(MachineStateManager& msm)

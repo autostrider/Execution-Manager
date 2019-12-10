@@ -61,11 +61,6 @@ void MachineStateManager::transitToNextState(api::IAdaptiveApp::FactoryFunc next
     m_currentState->enter();
 }
 
-std::vector<std::string> MachineStateManager::states() const
-{
-    return m_availableStates;
-}
-
 void MachineStateManager::reportApplicationState(ApplicationState state)
 {
     m_appStateClient->ReportApplicationState(state);

@@ -22,8 +22,6 @@ protected:
 
     IMachineStateManagerMock* initIMsm()
     {
-//        ON_CALL(*pManifestReaderMock, getMachineStates())
-//                .WillByDefault(Return(std::vector<std::string>{}));
         return new IMachineStateManagerMock{std::move(factoryMock),
                     std::move(appStateClientMock),
                     std::move(machineStateClientMock),
@@ -43,7 +41,6 @@ protected:
            std::make_unique<NiceMock<SocketServerMock>>();
    MsmStateFactory factory;
    IMachineStateManagerMock* msmMock;
-//   ExecutionManager::ManifestReaderMock* pManifestReaderMock;
 };
 
 TEST_F(MsmStateMachineTest, ShouldInitCallEnter)
@@ -72,18 +69,42 @@ TEST_F(MsmStateMachineTest, UnsuccessfulRegistration)
     state->enter();
 }
 
-// TODO: fix the test
-//TEST_F(MsmStateMachineTest, ShouldRunCallEnter)
-//{
-//    EXPECT_CALL(*machineStateClientMock, SetMachineState(_,_))
-//        .Times(5)
-//        .WillRepeatedly(Return(StateError::K_SUCCESS));
-//
-//    msmMock = initIMsm();
-//
-//    std::unique_ptr<::Run> state = std::make_unique<::Run>(*msmMock);
-//    state->enter();
-//}
+TEST_F(MsmStateMachineTest, ShouldRunCallEnter)
+{
+    EXPECT_CALL(*manifestReaderMock, getMachineStates())
+      .WillOnce(Return(std::vector<std::string>{"start", "two", "Shuttingdown"}));
+    EXPECT_CALL(*socketServerMock, getData())
+      .WillOnce(Return("start"))
+      .WillOnce(Return("two"))
+      .WillOnce(Return("Shuttingdown"));
+    EXPECT_CALL(*machineStateClientMock, SetMachineState(_,_))
+        .Times(3)
+        .WillRepeatedly(Return(StateError::K_SUCCESS));
+
+    msmMock = initIMsm();
+
+    std::unique_ptr<::Run> state = std::make_unique<::Run>(*msmMock);
+    state->enter();
+}
+
+TEST_F(MsmStateMachineTest, ShouldDiscardNotExistingStatesWhenProvided)
+{
+  EXPECT_CALL(*manifestReaderMock, getMachineStates())
+          .WillOnce(Return(std::vector<std::string>{"start", "two", "Shuttingdown"}));
+  EXPECT_CALL(*socketServerMock, getData())
+          .WillOnce(Return("start"))
+          .WillOnce(Return("randomState"))
+          .WillOnce(Return("two"))
+          .WillOnce(Return("Shuttingdown"));
+  EXPECT_CALL(*machineStateClientMock, SetMachineState(_,_))
+          .Times(3)
+          .WillRepeatedly(Return(StateError::K_SUCCESS));
+
+  msmMock = initIMsm();
+
+  std::unique_ptr<::Run> state = std::make_unique<::Run>(*msmMock);
+  state->enter();
+}
 
 TEST_F(MsmStateMachineTest, ShouldInitCallLeave)
 {

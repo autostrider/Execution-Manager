@@ -51,8 +51,6 @@ public:
   void
   reportApplicationState(api::ApplicationStateClient::ApplicationState) override;
 
-  std::vector<std::string> states() const;
-
 private:
   void transitToNextState(api::IAdaptiveApp::FactoryFunc nextState) override;
 

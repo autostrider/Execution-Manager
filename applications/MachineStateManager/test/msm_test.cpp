@@ -31,19 +31,15 @@ protected:
            std::make_unique<NiceMock<StateMock>>();
    std::unique_ptr<NiceMock<StateMock>> stateTermMock =
            std::make_unique<NiceMock<StateMock>>();
-   std::unique_ptr<NiceMock<SocketServerMock>> sockServerMock =
-           std::make_unique<NiceMock<SocketServerMock>>();
+   std::unique_ptr<StrictMock<SocketServerMock>> sockServerMock =
+           std::make_unique<StrictMock<SocketServerMock>>();
 
    StateFactoryMock* pFactoryMock = factoryMock.get();
-//   NiceMock<ExecutionManager::ManifestReaderMock*> pManifestReaderMock =
-//           manifestReaderMock.get();
 
    void SetUp() override
    {
        EXPECT_CALL(*pFactoryMock, createInit((_)))
            .WillOnce(Return(ByMove(std::move(stateInitMock))));
-//       ON_CALL(*pManifestReaderMock, getMachineStates())
-//               .WillByDefault(Return(std::vector<std::string>{}));
    }
 
     MachineStateManager initMsm()

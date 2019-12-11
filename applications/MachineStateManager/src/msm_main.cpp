@@ -25,6 +25,7 @@ int main(int argc, char **argv)
     {
         LOG << "[msm] Error while registering signal.";
     }
+    std::this_thread::sleep_for(FIVE_SECONDS);
 
     auto socket = std::make_unique<MSM::SocketInterface>();
     MSM::MachineStateManager msm(std::make_unique<MSM::MsmStateFactory>(),

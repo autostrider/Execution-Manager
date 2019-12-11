@@ -23,6 +23,8 @@ public:
 
   void killProcess(const std::string& serviceName) override;
 
+  bool isActiveProcess(const std::string& serviceName) override;
+
   ~ApplicationHandler() override = default;
 
 private:

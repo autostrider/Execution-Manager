@@ -1,12 +1,15 @@
 #include "application_handler.hpp"
 #include <mocks/os_interface_mock.hpp>
 
+#include <memory>
+
 #include "gtest/gtest.h"
 #include "gmock/gmock.h"
 
+using namespace std;
 using namespace testing;
 
-namespace
+namespace ApplicationHandlerTest
 {  
 
   ACTION_P(CheckProcessName, fullProcName)
@@ -18,9 +21,14 @@ namespace
   {
     ASSERT_STREQ(argData.second, arg1[argData.first]);
   }
-}
 
-class ApplicationHandlerTest : public Test
+  ACTION_TEMPLATE(SetArgNPointeeTo, HAS_1_TEMPLATE_PARAMS(unsigned, uIndex),
+                  AND_2_VALUE_PARAMS(pData, uiDataSize))
+  {
+      std::memcpy(std::get<uIndex>(args), pData, uiDataSize);
+  }
+
+class ApplicationHandlerTest : public ::testing::Test
 {
 protected:
   void setupArgumentsCheck
@@ -47,12 +55,15 @@ protected:
   const int execvRes = 0;
   std::unique_ptr<OSInterfaceMock> m_iosmock = 
     std::make_unique<StrictMock<OSInterfaceMock>>();
+  OSInterfaceMock* m_iosMockPtr = m_iosmock.get();
   const std::string processName = "process";
   const std::string serviceName = processName + SERVICE_EXTENSION;
 };
 
 TEST_F(ApplicationHandlerTest, ShouldFailToStartProcessWhenForkFailed)
 {
+  constexpr int forkRes = -1;
+
   EXPECT_CALL(*m_iosmock, fork())
     .WillOnce(SetErrnoAndReturn(EAGAIN, -1));
 
@@ -88,4 +99,32 @@ TEST_F(ApplicationHandlerTest, ShouldSucceedToStopService)
 
   ExecutionManager::ApplicationHandler appHandler{std::move(m_iosmock)};
   appHandler.killProcess(processName);
+}
+
+TEST_F(ApplicationHandlerTest, ShouldReturnTrueIfAppIsAlive)
+{
+    const std::string someRealSystemApp("bash");
+    char data[] = "1234";
+    size_t data_size = sizeof (data);
+    auto someFile = std::make_unique<FILE>();
+    EXPECT_CALL(*m_iosMockPtr, popen(_, _)).WillOnce(Return(someFile.get()));
+    EXPECT_CALL(*m_iosMockPtr, fread(_, _, _, _)).WillOnce(DoAll(SetArgNPointeeTo<0>(std::begin(data), data_size)));
+    EXPECT_CALL(*m_iosMockPtr, pclose(_));
+    ExecutionManager::ApplicationHandler appHandler{std::move(m_iosmock)};
+    ASSERT_TRUE(appHandler.isActiveProcess(someRealSystemApp));
+}
+
+TEST_F(ApplicationHandlerTest, ShouldReturnFalseIfAppIsNotAlive)
+{
+    const std::string someRealSystemApp("bash");
+    char data[] = "qwerty";
+    size_t data_size = sizeof (data);
+    auto someFile = std::make_unique<FILE>();
+    EXPECT_CALL(*m_iosMockPtr, popen(_, _)).WillOnce(Return(someFile.get()));
+    EXPECT_CALL(*m_iosMockPtr, fread(_, _, _, _)).WillOnce(DoAll(SetArgNPointeeTo<0>(std::begin(data), data_size)));
+    EXPECT_CALL(*m_iosMockPtr, pclose(_));
+    ExecutionManager::ApplicationHandler appHandler{std::move(m_iosmock)};
+    ASSERT_FALSE(appHandler.isActiveProcess(someRealSystemApp));
+}
+
 }

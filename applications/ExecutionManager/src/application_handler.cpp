@@ -30,17 +30,18 @@ void ApplicationHandler::killProcess(const std::string &serviceName)
 bool ApplicationHandler::isActiveProcess(const std::string &serviceName)
 {
     const size_t maxPidLen = 128;
+    const size_t size = 1;
     char pidline[maxPidLen];
     ::bzero(pidline, maxPidLen);
     int pidno = -1;
 
     auto pos = serviceName.find_first_of('_');
-    std::string appName = serviceName.substr(pos+1);
+    std::string appName = serviceName.substr(pos+size);
 
     const std::string cmd = "pidof " + appName;
 
     FILE *fp = m_syscalls->popen(cmd.data(), "r");
-    m_syscalls->fread(pidline, 1, maxPidLen, fp);
+    m_syscalls->fread(pidline, size, maxPidLen, fp);
     pidno = ::atoi(pidline);
     m_syscalls->pclose(fp);
 

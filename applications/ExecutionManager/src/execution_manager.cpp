@@ -75,9 +75,10 @@ bool ExecutionManager::startApplicationsForState()
         std::future<bool> isMsmAlive = std::async(std::launch::async, [this, &appsToBeStarted]()
         {
             const int timesToPollApps = 6;
+            const std::chrono::seconds oneSecond{1};
             for (int i = 0; i < timesToPollApps; ++i)
             {
-                std::this_thread::sleep_for(std::chrono::seconds{1});
+                std::this_thread::sleep_for(oneSecond);
                 for (const auto& executableToStart : appsToBeStarted)
                 {
                     if (m_appHandler->isActiveProcess(executableToStart) &&

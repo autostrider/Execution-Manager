@@ -1,8 +1,6 @@
 #ifndef ISTATE_HPP
 #define ISTATE_HPP
 
-#include<application_state_client.h>
-
 namespace api
 {
 

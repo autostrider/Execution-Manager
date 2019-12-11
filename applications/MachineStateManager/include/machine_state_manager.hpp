@@ -2,15 +2,27 @@
 #define MACHINE_STATE_MANAGER_HPP
 
 #include <i_adaptive_app.hpp>
-#include <i_state_factory.hpp>
-#include <i_application_state_client_wrapper.hpp>
+
 #include <i_machine_state_client_wrapper.hpp>
 
-#include <iostream>
-#include <memory>
-#include <string>
-#include <sstream>
 #include <capnp/ez-rpc.h>
+
+class ISocketServer;
+
+namespace ExecutionManager
+{
+
+class IManifestReader;
+
+}
+
+namespace api
+{
+
+class IStateFactory;
+class IApplicationStateClientWrapper;
+
+}
 
 namespace MSM
 {
@@ -18,9 +30,13 @@ namespace MSM
 class MachineStateManager : public api::IAdaptiveApp
 {
 public:
-  MachineStateManager(std::unique_ptr<api::IStateFactory> factory,
-                      std::unique_ptr<api::IApplicationStateClientWrapper> appStateClient,
-                      std::unique_ptr<api::IMachineStateClientWrapper> machineClient);
+  MachineStateManager(
+          std::unique_ptr<api::IStateFactory> factory,
+          std::unique_ptr<api::IApplicationStateClientWrapper> appStateClient,
+          std::unique_ptr<api::IMachineStateClientWrapper> machineClient,
+          std::unique_ptr<ExecutionManager::IManifestReader> manifestReader,
+          std::unique_ptr<ISocketServer> socketServer
+  );
 
   void init() override;
   void run() override;
@@ -28,8 +44,12 @@ public:
   void performAction() override;
 
   api::MachineStateClient::StateError setMachineState(const std::string&);
+  void startServer();
+  void closeServer();
+  std::string getNewState();
   api::MachineStateClient::StateError registerMsm(const std::string&);
-  void reportApplicationState(api::ApplicationStateClient::ApplicationState) override;
+  void
+  reportApplicationState(api::ApplicationStateClient::ApplicationState) override;
 
 private:
   void transitToNextState(api::IAdaptiveApp::FactoryFunc nextState) override;
@@ -39,6 +59,8 @@ private:
   std::unique_ptr<api::IStateFactory> m_factory;
   std::unique_ptr<api::IState> m_currentState;
   std::unique_ptr<api::IApplicationStateClientWrapper> m_appStateClient;
+  std::unique_ptr<ISocketServer> m_newStatesProvider;
+  std::vector<std::string> m_availableStates;
 };
 
 } // namespace MSM

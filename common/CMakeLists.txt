@@ -5,6 +5,7 @@ add_subdirectory(test)
 file(GLOB_RECURSE COMMON_SRCS *.cpp)
 set(COMMON_INCLUDE ${CMAKE_CURRENT_SOURCE_DIR}/include)
 list(REMOVE_ITEM COMMON_INCLUDE ${CMAKE_CURRENT_SOURCE_DIR}/include/mocks)
+list(REMOVE_ITEM COMMON_SRCS ${CMAKE_CURRENT_SOURCE_DIR}/test/)
 
 
 # Create major target

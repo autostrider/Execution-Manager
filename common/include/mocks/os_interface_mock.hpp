@@ -8,7 +8,7 @@
 class OSInterfaceMock : public IOsInterface
 {
 public:
-    OSInterfaceMock(){};
+    OSInterfaceMock() = default;
 
     MOCK_METHOD(pid_t, fork, ());
     MOCK_METHOD(int, execv, (const char* path, char* argv[]));

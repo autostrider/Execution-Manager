@@ -49,12 +49,12 @@ ExecutionManagerClient::SetComponentState(std::string& state,
     auto address = ioProvider.getNetwork()
       .parseAddress(m_componentAddress + componentName)
         .wait(waitScope);
-  
+
     auto connection = address->connect().wait(waitScope);
     capnp::TwoPartyClient client(*connection);
     auto capability = client.bootstrap()
       .castAs<StateManagement::StateManager>();
-    
+
     auto request = capability.setComponentStateRequest();
 
     request.setState(state);

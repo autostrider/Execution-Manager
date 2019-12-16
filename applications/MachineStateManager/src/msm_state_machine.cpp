@@ -1,6 +1,7 @@
 #include "msm_state_machine.hpp"
 #include <logger.hpp>
 #include <constants.hpp>
+#include <i_socket_server.hpp>
 
 #include <thread>
 
@@ -34,7 +35,7 @@ void MsmState::performAction()
 
 }
 
-Init::Init(MachineStateManager& msm) 
+Init::Init(MachineStateManager& msm)
     : MsmState (msm, ApplicationState::K_INITIALIZING, AA_STATE_INIT)
 {
 }
@@ -51,6 +52,7 @@ void Init::enter()
     std::string applicationName{"MSM"};
 
     StateError result = m_msm.registerMsm(applicationName);
+    m_msm.startServer();
 
     if (StateError::K_SUCCESS == result)
     {
@@ -78,32 +80,25 @@ Run::Run(MachineStateManager& msm)
 
 void Run::enter()
 {
-    const std::vector<std::string> states{MACHINE_STATE_RUNNING,
-                                          MACHINE_STATE_SUSPEND,
-                                          MACHINE_STATE_RUNNING,
-                                          MACHINE_STATE_LIVING,
-                                          MACHINE_STATE_SHUTTINGDOWN};
+  std::string state;
+  do
+  {
+    state = m_msm.getNewState();
 
-    StateError result;
+    LOG << "Setting machine state to "
+        << state
+        << "...";
 
-    for (auto& state : states)
+    StateError result = m_msm.setMachineState(state);
+
+    if (StateError::K_SUCCESS != result)
     {
-        std::this_thread::sleep_for(FIVE_SECONDS);
-
-        LOG << "Setting machine state to "
-            << state
-            << "...";
-
-        result = m_msm.setMachineState(state);
-
-        if (StateError::K_SUCCESS != result)
+        if (!((StateError::K_TIMEOUT == result) && (MACHINE_STATE_SHUTTINGDOWN == state)))
         {
-            if (!((StateError::K_TIMEOUT == result) && (MACHINE_STATE_SHUTTINGDOWN == state)))
-            {
-                LOG << "Failed to set machine state : " << state << ". result = " << static_cast<uint32_t>(result);
-            }
+            LOG << "Failed to set machine state " << state << ".";
         }
     }
+  } while (state != MACHINE_STATE_SHUTTINGDOWN);
 }
 
 ShutDown::ShutDown(MachineStateManager& msm)
@@ -115,7 +110,7 @@ void ShutDown::enter()
 {
     LOG << "Reporting state "
         << m_stateName << ".";
-
+    m_msm.closeServer();
     m_msm.reportApplicationState(getApplicationState());
 }
 

@@ -38,6 +38,7 @@ int main()
         std::this_thread::sleep_for(FIVE_SECONDS);
     }
 
+    std::this_thread::sleep_for(2*FIVE_SECONDS);
     app3.terminate();
     return 0;
 }

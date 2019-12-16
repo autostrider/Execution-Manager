@@ -19,6 +19,8 @@ int main()
         LOG << "[aa_main] Error while registering signal.";
     }
 
+    std::this_thread::sleep_for(FIVE_SECONDS);
+
     const std::string componentName{"proc1"};
     auto componentStateUpdateMode = api::StateUpdateMode::K_EVENT;
 
@@ -29,9 +31,10 @@ int main()
                     std::make_unique<MeanCalculator>(),
                     true);
 
-    app.init();
-    app.run();
 
+    app.init();
+
+    app.run();
     while (false == isTerminated)
     {
         app.performAction();

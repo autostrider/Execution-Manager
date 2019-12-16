@@ -10,6 +10,9 @@
 #include <string>
 #include <vector>
 #include <set>
+#include <mutex>
+#include <condition_variable>
+#include <atomic>
 
 namespace ExecutionManager
 {
@@ -38,9 +41,6 @@ public:
                    std::unique_ptr<IApplicationHandler> applicationHandler,
                    std::unique_ptr<ExecutionManagerClient::IExecutionManagerClient> client);
 
-
-  void start();
-
   void reportApplicationState(const std::string& appName, AppState state);
 
   MachineState getMachineState() const;
@@ -60,7 +60,7 @@ private:
 
   void startApplication(const ProcName &process);
 
-  void startApplicationsForState();
+  bool startApplicationsForState();
 
   void killProcessesForState();
 
@@ -69,8 +69,6 @@ private:
 
   void confirmState(StateError status);
 
-  inline void checkAndSendConfirm();
-
   inline bool isConfirmAvailable();
 
   void changeComponentsState();
@@ -78,7 +76,11 @@ private:
 private:
   std::unique_ptr<IApplicationHandler> m_appHandler;
 
+  std::mutex m_activeProcessesMutex;
   std::set<ProcName> m_activeProcesses;
+
+  std::atomic<bool> m_readyToTransitToNextState{false};
+  std::atomic<bool> m_componentConfirmsReceived{false};
 
   std::map<MachineState, std::set<ProcName>> m_allowedProcessesForState;
 
@@ -95,6 +97,8 @@ private:
   std::set<pid_t> m_stateConfirmToBeReceived;
 
   std::set<std::string> m_registeredComponents;
+
+  std::mutex m_componentPendingConfirmsMutex;
   std::set<std::string> m_componentPendingConfirms;
   std::vector<std::string> m_componentStateUpdateSbscrs;
 

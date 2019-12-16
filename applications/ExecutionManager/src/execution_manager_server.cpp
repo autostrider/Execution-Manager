@@ -1,9 +1,11 @@
 #include "execution_manager_server.hpp"
 #include "msm_handler.hpp"
+#include <common.hpp>
+#include <logger.hpp>
+
 #include <kj/async-io.h>
 #include <string>
 #include <iostream>
-#include <logger.hpp>
 
 namespace ExecutionManagerServer
 {
@@ -19,17 +21,39 @@ ExecutionManagerServer::ExecutionManagerServer
 {
   LOG << "Execution Manager server started..." << std::endl;
 
-  m_em.start();
+    isRunning = true;
+
+    threadsMap[THREADS::EM_SERVER]->addMethod(
+                std::bind(&ExecutionManager::ExecutionManager::setMachineState,
+                          &m_em, MACHINE_STATE_STARTUP));
+
+    m_setMachineStateThread = std::thread([&]()
+    {
+        while (isRunning)
+        {
+            threadsMap.at(THREADS::EM_SERVER)->getExecutor();
+        }
+    });
+}
+
+ExecutionManagerServer::~ExecutionManagerServer()
+{
+    isRunning = false;
+    if (m_setMachineStateThread.joinable())
+    {
+        m_setMachineStateThread.join();
+    }
 }
 
 ::kj::Promise<void>
 ExecutionManagerServer::reportApplicationState
-  (ReportApplicationStateContext context)
+(ReportApplicationStateContext context)
 {
   ApplicationState state = context.getParams().getState();
   std::string appName = context.getParams().getAppName().cStr();
+
   m_em.reportApplicationState(appName,
-    static_cast<ExecutionManager::AppState>(state));
+                              static_cast<ExecutionManager::AppState>(state));
 
   return kj::READY_NOW;
 }
@@ -55,8 +79,6 @@ ExecutionManagerServer::register_(RegisterContext context)
 ::kj::Promise<void>
 ExecutionManagerServer::getMachineState(GetMachineStateContext context)
 {
-  // pid_t applicationPid = context.getParams().getPid();
-
   context.getResults().setState(m_em.getMachineState());
 
   context.getResults().setResult(StateError::K_SUCCESS);
@@ -75,7 +97,9 @@ ExecutionManagerServer::setMachineState(SetMachineStateContext context)
     return kj::READY_NOW;
   }
 
-  m_em.setMachineState(state);
+  threadsMap.at(THREADS::EM_SERVER)->addMethod(
+              std::bind(&ExecutionManager::ExecutionManager::setMachineState,
+                        &m_em, state));
 
   return kj::READY_NOW;
 }

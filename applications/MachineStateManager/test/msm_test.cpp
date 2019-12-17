@@ -49,7 +49,7 @@ protected:
                 std::move(appStateClientMock),
                 std::move(machineStateClientMock),
                 std::move(manifestReaderMock),
-                std::move(sockServerMock));
+                std::move(sockServerMock), nullptr);
     }
 };
 

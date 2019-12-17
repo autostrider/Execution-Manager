@@ -4,6 +4,7 @@
 #include <i_manifest_reader.hpp>
 #include <i_application_state_client_wrapper.hpp>
 #include <constants.hpp>
+#include <keyvaluestorage.h>
 #include <logger.hpp>
 
 namespace MSM {
@@ -17,7 +18,8 @@ MachineStateManager::MachineStateManager(
         std::unique_ptr<api::IApplicationStateClientWrapper> appStateClient,
         std::unique_ptr<api::IMachineStateClientWrapper> machineClient,
         std::unique_ptr<ExecutionManager::IManifestReader> manifestReader,
-        std::unique_ptr<ISocketServer> socketServer) :
+        std::unique_ptr<ISocketServer> socketServer,
+        std::unique_ptr<per::KeyValueStorageBase> persistentStorage) :
         m_machineStateClient(std::move(machineClient)),
         m_factory{std::move(factory)},
         m_currentState{nullptr},

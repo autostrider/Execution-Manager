@@ -7,6 +7,9 @@
 #include "socket_interface.hpp"
 #include <i_application_state_client_wrapper.hpp>
 
+#include <keyvaluestorage.h>
+#include <kvstype.h>
+
 #include <thread>
 #include <atomic>
 
@@ -32,7 +35,9 @@ int main(int argc, char **argv)
                                  std::make_unique<api::ApplicationStateClientWrapper>(),
                                  std::make_unique<api::MachineStateClientWrapper>(),
                                  std::make_unique<ExecutionManager::ManifestReader>(),
-                                 std::make_unique<MSM::SocketServer>(std::move(socket), MSM_STATES_SERVER));
+                                 std::make_unique<MSM::SocketServer>(
+                                         std::move(socket), MSM_STATES_SERVER),
+                                 nullptr);
 
     msm.init();
     msm.run();

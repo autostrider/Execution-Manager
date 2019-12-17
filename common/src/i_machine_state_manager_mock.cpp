@@ -17,7 +17,7 @@ IMachineStateManagerMock::IMachineStateManagerMock(
                           std::move(appClient),
                           std::move(machineClient),
                           std::move(manifestReader),
-                          std::move(socketServer))
+                          std::move(socketServer), nullptr)
 {}
 
 } // namespace MSM

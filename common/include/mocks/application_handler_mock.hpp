@@ -11,8 +11,8 @@ namespace ExecutionManager
 class ApplicationHandlerMock : public IApplicationHandler
 {
 public:
-  MOCK_METHOD(void, startProcess, (const std::string& application));
-  MOCK_METHOD(void, killProcess, (const std::string& processId));
+  MOCK_METHOD(bool, startProcess, (const std::string& application));
+  MOCK_METHOD(bool, killProcess, (const std::string& processId));
   MOCK_METHOD(bool, isActiveProcess, (const std::string& serviceName));
 };
 

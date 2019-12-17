@@ -231,80 +231,68 @@ ExecutionManager::getMachineState() const
 StateError
 ExecutionManager::setMachineState(std::string state)
 {
-    m_readyToTransitToNextState = false;
-    m_componentConfirmsReceived = false;
+  m_readyToTransitToNextState = false;
+  m_componentConfirmsReceived = false;
 
-    auto stateIt = std::find(m_machineManifestStates.cbegin(),
-                             m_machineManifestStates.cend(),
-                             state);
+  auto stateIt = std::find(m_machineManifestStates.cbegin(),
+                           m_machineManifestStates.cend(),
+                           state);
 
-    if (stateIt == m_machineManifestStates.end())
-    {
-        return StateError::K_INVALID_STATE;
-    }
-    else if (state == m_currentState)
-    {
-        return StateError::K_INVALID_STATE;
-    }
+  if (stateIt == m_machineManifestStates.end())
+  {
+    return StateError::K_INVALID_STATE;
+  }
+  else if (state == m_currentState)
+  {
+    return StateError::K_INVALID_STATE;
+  }
 
-    m_pendingState = state;
+  m_pendingState = state;
 
-    killProcessesForState();
+  killProcessesForState();
 
-    if (!startApplicationsForState())
-    {
-        LOG << "Failed to start critical App!!!";
-        return StateError::K_INVALID_REQUEST;
-    }
+  if (!startApplicationsForState())
+  {
+    LOG << "Failed to start critical App!!!";
+    return StateError::K_INVALID_REQUEST;
+  }
 
-    changeComponentsState();
-  
+  changeComponentsState();
+
   if (!isConfirmAvailable() ||
       !m_componentPendingConfirms.empty())
   {
     LOG << "Machine state change to \""
-        << m_pendingState
+        << state
         << "\" requested.";
+  }
+
+  LOG << "-----Waiting for confirmation----";
+
+  if (m_pendingState == MACHINE_STATE_SUSPEND ||
+      m_pendingState == MACHINE_STATE_RUNNING)
+  {
+    while ((!m_readyToTransitToNextState) &&
+            ! m_componentConfirmsReceived)
+    {
+      m_readyToTransitToNextState = isConfirmAvailable();
+      m_componentConfirmsReceived = m_componentPendingConfirms.empty();
+    }
   }
   else
   {
-    startApplicationsForState();
+    while (!m_readyToTransitToNextState)
+    {
+      m_readyToTransitToNextState = isConfirmAvailable();
+    }
   }
 
-    if (!isConfirmAvailable() ||
-            !m_componentPendingConfirms.empty())
-    {
-        LOG << "Machine state change to \""
-            << state
-            << "\" requested.";
-    }
+  confirmState(StateError::K_SUCCESS);
+  m_currentState = m_pendingState;
+  LOG  << "Machine state changed successfully to "
+       << m_currentState << ".";
 
-    LOG << "-----Waiting for confirmation----";
-
-    if (m_pendingState == MACHINE_STATE_SUSPEND ||
-            m_pendingState == MACHINE_STATE_RUNNING)
-    {
-        while ((!m_readyToTransitToNextState)
-               && ! m_componentConfirmsReceived)
-        {
-            m_readyToTransitToNextState = isConfirmAvailable();
-            m_componentConfirmsReceived = m_componentPendingConfirms.empty();
-        }
-    }
-    else
-    {
-        while (!m_readyToTransitToNextState)
-        {
-            m_readyToTransitToNextState = isConfirmAvailable();
-        }
-    }
-
-    confirmState(StateError::K_SUCCESS);
-    m_currentState = m_pendingState;
-    LOG  << "Machine state changed successfully to "
-         << m_currentState << ".";
-
-    return StateError::K_SUCCESS;
+  return StateError::K_SUCCESS;
 }
 
 void ExecutionManager::registerComponent(std::string component,

@@ -124,12 +124,13 @@ std::string MachineStateManager::getNewStateForStartRun()
   if (firstRun)
   {
     firstRun = false;
-    auto lastState = m_persistentStorage->GetValue("state");
-    std::string lastStateValue = lastState.GetString();
+    auto lastState = m_persistentStorage->GetValue(STATE_KEY);
 
-    if (MACHINE_STATE_SHUTTINGDOWN != lastStateValue)
+    if (per::KvsType::Type::kString == lastState.GetType()
+          &&
+        MACHINE_STATE_SHUTTINGDOWN != lastState.GetString())
     {
-      return lastStateValue;
+      return lastState.GetString();
     }
   }
 

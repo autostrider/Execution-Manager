@@ -21,7 +21,7 @@ int main()
 
     std::this_thread::sleep_for(FIVE_SECONDS);
 
-    const std::string componentName{"proc1"};
+    const std::string componentName{"AdaptiveApplication1_proc1"};
     auto componentStateUpdateMode = api::StateUpdateMode::K_EVENT;
 
     AdaptiveApp app(std::make_unique<StateFactory>(),

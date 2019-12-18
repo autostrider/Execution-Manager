@@ -20,7 +20,7 @@ int main()
         LOG << "[proc3] Error while registering signal.";
     }
 
-    const std::string componentName{"proc3"};
+    const std::string componentName{"AdaptiveApplication2_proc3"};
     auto updateMode = api::StateUpdateMode::K_POLL;
 
     AdaptiveApp app3(std::make_unique<StateFactory>(),
@@ -38,7 +38,6 @@ int main()
         std::this_thread::sleep_for(FIVE_SECONDS);
     }
 
-    std::this_thread::sleep_for(2*FIVE_SECONDS);
     app3.terminate();
     return 0;
 }

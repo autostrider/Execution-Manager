@@ -101,7 +101,6 @@ void ComponentClient::checkIfAnyEventsAvailable()
 
 void ComponentClient::startServer()
 {
-  LOG << "startServer";
   std::promise<void> startUpPromise;
   ::unlink((COMPONENT_SOCKET_NAME + m_componentName).c_str());
 
@@ -133,7 +132,6 @@ void ComponentClient::startServer()
   });
 
   startUpPromise.get_future().wait();
-  LOG << "startServer END";
 }
 
 ComponentServer::ComponentServer

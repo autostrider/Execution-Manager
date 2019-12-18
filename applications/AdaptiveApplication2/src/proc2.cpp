@@ -20,7 +20,7 @@ int main()
         LOG << "[proc2] Error while registering signal.";
     }
 
-    const std::string componentName{"proc2"};
+    const std::string componentName{"AdaptiveApplication2_proc2"};
     auto componentStateUpdateMode = api::StateUpdateMode::K_POLL;
 
     AdaptiveApp app2(std::make_unique<StateFactory>(),

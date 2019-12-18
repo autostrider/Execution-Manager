@@ -130,8 +130,8 @@ void ExecutionManager::killProcessesForState()
       m_componentStateUpdateSbscrs.erase(std::remove_if(m_componentStateUpdateSbscrs.begin(), 
                                                         m_componentStateUpdateSbscrs.end(),
                                                         [&](const std::string& currSubscr)
-                                                        {return currSubscr == *app;}), 
-                                                        m_componentStateUpdateSbscrs.end());
+                                                        {return currSubscr == *app;}),
+                                         m_componentStateUpdateSbscrs.end());
     }
   }
 }
@@ -182,13 +182,9 @@ void ExecutionManager::changeComponentsState()
     m_componentPendingConfirms.emplace(component);
   }
 
-  if (m_pendingState == MACHINE_STATE_SUSPEND ||
-      m_pendingState == MACHINE_STATE_RUNNING)
+  for (auto subscriber : m_componentStateUpdateSbscrs)
   {
-    for (auto subscriber : m_componentStateUpdateSbscrs)
-    {
-      m_rpcClient->SetComponentState(m_currentComponentState, subscriber);
-    }
+    m_rpcClient->SetComponentState(m_currentComponentState, subscriber);
   }
 }
 
@@ -273,7 +269,7 @@ ExecutionManager::setMachineState(std::string state)
       m_pendingState == MACHINE_STATE_RUNNING)
   {
     while ((!m_readyToTransitToNextState) &&
-            ! m_componentConfirmsReceived)
+            !m_componentConfirmsReceived)
     {
       m_readyToTransitToNextState = isConfirmAvailable();
       m_componentConfirmsReceived = m_componentPendingConfirms.empty();
@@ -312,7 +308,7 @@ ExecutionManager::getComponentState
 {
   auto iter = m_registeredComponents.find(component);
 
-  if(iter != m_registeredComponents.cend())
+  if (iter != m_registeredComponents.cend())
   {
     state = m_currentComponentState;
     return ComponentClientReturnType::K_SUCCESS;

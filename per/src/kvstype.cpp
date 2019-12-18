@@ -22,13 +22,14 @@ per::KvsType::KvsType(std::string value)
 
 }
 
-void per::KvsType::SetKey(const std::string &name) noexcept
+per::KvsType::KvsType()
+  : m_status{Status::kNotFound},
+    m_type{Type::kNotSet}
 {
-  m_key = name;
+
 }
 
-per::KvsType::KvsType()
-  : m_status{Status::kNotFound}
+per::KvsType::Type per::KvsType::GetType() const noexcept
 {
-
+  return m_type;
 }

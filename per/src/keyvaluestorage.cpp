@@ -2,6 +2,7 @@
 #include "kvstype.h"
 #include <logger.hpp>
 
+#include <map>
 #include <fstream>
 
 namespace per
@@ -22,19 +23,13 @@ void from_json(const json& jsonObject, KvsType& kvsType)
 
 bool KeyValueStorage::HasKey(const std::string &key) const noexcept
 {
-  return m_data.find(key) == m_data.cend();
+  return m_data.find(key) != m_data.cend();
 }
 
 void KeyValueStorage::SetValue(const std::string& key,
                                const KvsType& value) noexcept(false)
 {
   m_data[key] = value;
-}
-
-KvsType
-KeyValueStorage::GetDefaultValue(const std::string& key) const noexcept
-{
-  return per::KvsType();
 }
 
 KvsType

@@ -3,6 +3,8 @@ project(per_memory VERSION 0.0.1 LANGUAGES C CXX)
 
 # Collect all source files into variable
 file(GLOB_RECURSE PM_SRC src/*.cpp)
+set(PM_INCLUDE ${CMAKE_CURRENT_SOURCE_DIR}/include)
+
 
 # Create major target
 add_library(per_memory
@@ -27,3 +29,5 @@ target_include_directories(per_memory
    $<BUILD_INTERFACE:${CMAKE_CURRENT_SOURCE_DIR}/include>
    $<INSTALL_INTERFACE:${CMAKE_CURRENT_SOURCE_DIR}/include>
 )
+
+add_subdirectory(test)

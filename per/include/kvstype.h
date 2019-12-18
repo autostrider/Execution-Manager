@@ -9,18 +9,6 @@ namespace per
 class KvsType
 {
 public:
-  KvsType(const KvsType&) = delete;
-  KvsType& operator=(const KvsType&) = delete;
-
-  KvsType(KvsType&&) = default;
-  KvsType& operator=(KvsType&&) = default;
-  KvsType(std::string value);
-  KvsType();
-  ~KvsType() = default;
-
-  void SetKey(const std::string& name) noexcept;
-  std::string GetString() const noexcept(false);
-public:
   enum class Type : uint8_t
   {
     KNotSupported = 0,
@@ -37,11 +25,23 @@ public:
     kGeneralError
   };
 
+public:
+  KvsType(const KvsType&) = delete;
+
+  KvsType& operator=(const KvsType&) = delete;
+  KvsType(KvsType&&) = default;
+  KvsType& operator=(KvsType&&) = default;
+  KvsType(std::string value);
+  KvsType();
+
+  ~KvsType() = default;
+  Type GetType() const noexcept;
+  std::string GetString() const noexcept(false);
+
 private:
   Status m_status;
   Type m_type;
   std::string m_value;
-  std::string m_key;
 };
 
 }

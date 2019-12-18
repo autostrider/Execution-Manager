@@ -7,12 +7,12 @@
 namespace per
 {
 
-void to_json(json &jsonObject, const KvsType &kvsType)
+void to_json(json& jsonObject, const KvsType& kvsType)
 {
   jsonObject = json{{"value", kvsType.GetString()}};
 }
 
-void from_json(const json &jsonObject, KvsType &kvsType)
+void from_json(const json& jsonObject, KvsType& kvsType)
 {
   std::string result;
   jsonObject.at("value").get_to(result);
@@ -25,20 +25,20 @@ bool KeyValueStorage::HasKey(const std::string &key) const noexcept
   return m_data.find(key) == m_data.cend();
 }
 
-void KeyValueStorage::SetValue(const std::string &key,
-                                    const KvsType &value) noexcept(false)
+void KeyValueStorage::SetValue(const std::string& key,
+                               const KvsType& value) noexcept(false)
 {
   m_data[key] = value;
 }
 
 KvsType
-KeyValueStorage::GetDefaultValue(const std::string &key) const noexcept
+KeyValueStorage::GetDefaultValue(const std::string& key) const noexcept
 {
   return per::KvsType();
 }
 
 KvsType
-KeyValueStorage::GetValue(const std::string &key) const noexcept
+KeyValueStorage::GetValue(const std::string& key) const noexcept
 {
     return m_data[key];
 }
@@ -54,7 +54,7 @@ void KeyValueStorage::SyncToStorage() const noexcept(false)
   file << m_data;
 }
 
-KeyValueStorage::KeyValueStorage(const std::string &db)
+KeyValueStorage::KeyValueStorage(const std::string& db)
         : dbLocation{db}
 {
   std::ifstream checker{dbLocation};

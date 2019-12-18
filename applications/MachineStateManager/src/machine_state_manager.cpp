@@ -5,7 +5,13 @@
 #include <i_application_state_client_wrapper.hpp>
 #include <constants.hpp>
 #include <keyvaluestorage.h>
+#include <kvstype.h>
 #include <logger.hpp>
+
+namespace
+{
+  const std::string STATE_KEY = "state";
+}
 
 namespace MSM {
 
@@ -25,6 +31,7 @@ MachineStateManager::MachineStateManager(
         m_currentState{nullptr},
         m_appStateClient{std::move(appStateClient)},
         m_newStatesProvider{std::move(socketServer)},
+        m_persistentStorage{std::move(persistentStorage)},
         m_availableStates{manifestReader->getMachineStates()}
 {
 }
@@ -86,7 +93,7 @@ StateError MachineStateManager::registerMsm(const std::string& applicationName)
 
 std::string MachineStateManager::getNewState()
 {
-  std::string newState = m_newStatesProvider->getData();
+  std::string newState = getNewStateForStartRun();
 
   while(m_availableStates.cend() ==
           std::find(m_availableStates.cbegin(),
@@ -108,6 +115,33 @@ void MachineStateManager::startServer()
 void MachineStateManager::closeServer()
 {
   m_newStatesProvider->closeServer();
+}
+
+std::string MachineStateManager::getNewStateForStartRun()
+{
+  static bool firstRun = true;
+
+  if (firstRun)
+  {
+    firstRun = false;
+    auto lastState = m_persistentStorage->GetValue("state");
+    std::string lastStateValue = lastState.GetString();
+
+    if (MACHINE_STATE_SHUTTINGDOWN != lastStateValue)
+    {
+      return lastStateValue;
+    }
+  }
+
+  return m_newStatesProvider->getData();
+}
+
+void MachineStateManager::saveReceivedState(const std::string &state)
+{
+  std::async(std::launch::async, [&] {
+      m_persistentStorage->SetValue(STATE_KEY, per::KvsType(state));
+      m_persistentStorage->SyncToStorage();
+  });
 }
 
 } // namespace MSM

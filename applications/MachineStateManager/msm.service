@@ -2,3 +2,4 @@
 Description=Machine state manager
 [Service]
 Type=forking
+TimeoutStartSec=infinity

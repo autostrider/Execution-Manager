@@ -39,10 +39,8 @@ KeyValueStorage::GetValue(const std::string& key) const noexcept
     {
       return m_data[key];
     }
-    else
-    {
-      return KvsType();
-    }
+      
+		return KvsType();
 }
 
 void KeyValueStorage::RemoveAllKeys() noexcept

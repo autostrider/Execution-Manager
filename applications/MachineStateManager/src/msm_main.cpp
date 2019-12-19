@@ -37,7 +37,7 @@ int main(int argc, char **argv)
                                  std::make_unique<ExecutionManager::ManifestReader>(),
                                  std::make_unique<MSM::SocketServer>(
                                          std::move(socket), MSM_STATES_SERVER),
-                                 std::make_unique<per::KeyValueStorage>("/tmp/data.json"));
+                                 std::make_unique<per::KeyValueStorage>(MSM_STATE_PROVIDER));
 
     msm.init();
     msm.run();

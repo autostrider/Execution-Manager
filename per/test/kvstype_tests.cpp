@@ -9,7 +9,7 @@ using namespace per;
 class KvsTypeTests : public Test
 {
 protected:
-  std::string data = "some_data";
+  const std::string data = "some_data";
 };
 
 TEST_F(KvsTypeTests, ShouldReturnCorrectTypesForObjectsWithAndWithoutData)

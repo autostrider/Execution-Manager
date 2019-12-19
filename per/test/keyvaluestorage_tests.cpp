@@ -9,8 +9,8 @@ using namespace per;
 class KeyValueStorageTests : public Test
 {
 protected:
-  std::string key = "key";
-  std::string value = "value";
+  const  std::string key = "key";
+  const std::string value = "value";
   KvsType kvs = KvsType{value};
 };
 

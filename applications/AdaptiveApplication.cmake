@@ -37,10 +37,12 @@ function(add_adaptive_application)
 
         add_dependencies(${PROCESS} ${APP_NAME}_manifest)
         
-        set(SUDO_PATH "/etc/systemd/user/")
 				set(ENV_PATH "$ENV{XDG_RUNTIME_DIR}/systemd/user/")
+				if (NOT EXISTS ${ENV_PATH})
+					file(MAKE_DIRECTORY ${ENV_PATH})
+				endif()
+
         set(SERVICE_INPUT "${CMAKE_CURRENT_SOURCE_DIR}/${PROCESS}.service")
-        set(SERVICE_OUTPUT "${SUDO_PATH}${APP_NAME}_${PROCESS}.service")
 
         file(READ ${CMAKE_CURRENT_SOURCE_DIR}/${PROCESS}.service files)
         string(APPEND files "\nWorkingDirectory=${CMAKE_BINARY_DIR}\nExecStart=${CMAKE_BINARY_DIR}/bin/applications/${APP_NAME}/processes/${PROCESS}")

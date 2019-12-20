@@ -12,12 +12,17 @@ protected:
   const std::string data = "some_data";
 };
 
-TEST_F(KvsTypeTests, ShouldReturnCorrectTypesForObjectsWithAndWithoutData)
+TEST_F(KvsTypeTests,ShouldReturnCorrectTypeForObjectWithData)
 {
-  KvsType emptyObj = KvsType{};
   KvsType kvs = KvsType{data};
 
   ASSERT_EQ(KvsType::Type::kString, kvs.GetType());
+}
+
+TEST_F(KvsTypeTests, ShouldReturnNotSetForObjectWithoutData)
+{
+  KvsType emptyObj = KvsType{};
+
   ASSERT_EQ(KvsType::Type::kNotSet, emptyObj.GetType());
 }
 

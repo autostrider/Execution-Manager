@@ -26,6 +26,7 @@ ExecutionManager::ExecutionManager(
         std::unique_ptr<ExecutionManagerClient::IExecutionManagerClient> client)
     : m_appHandler{std::move(applicationHandler)},
       m_activeProcesses{},
+			m_failedApps{},
       m_allowedProcessesForState{reader->getStatesSupportedByApplication()},
       m_currentState{},
       m_pendingState{},
@@ -320,6 +321,18 @@ void ExecutionManager::confirmComponentState
         m_componentPendingConfirms.erase(component);
         m_componentConfirmsReceived = m_componentPendingConfirms.empty();
     }
+}
+
+void ExecutionManager::removeFailedToStartApp(const ProcName& app)
+{
+	std::lock_guard<std::mutex> lk{m_failedAppsMutex};
+	m_failedApps.insert(app);
+}
+
+void ExecutionManager::removeFailedApp(const ProcName& app)
+{
+	std::lock_guard<std::mutex> ls{m_activeProcessesMutex};
+	m_activeProcesses.erase(app);
 }
 
 } // namespace ExecutionManager

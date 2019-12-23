@@ -54,6 +54,10 @@ public:
   void confirmComponentState
   (std::string component, ComponentState state, ComponentClientReturnType status);
 
+	void removeFailedToStartApp(const ProcName& app);
+
+	void removeFailedApp(const ProcName& app);
+
 private:
   void filterStates();
 
@@ -77,6 +81,9 @@ private:
 
   std::mutex m_activeProcessesMutex;
   std::set<ProcName> m_activeProcesses;
+
+	std::mutex m_failedAppsMutex;
+	std::set<ProcName> m_failedApps;
 
   std::atomic<bool> m_readyToTransitToNextState{false};
   std::atomic<bool> m_componentConfirmsReceived{false};

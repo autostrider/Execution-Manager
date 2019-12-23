@@ -149,10 +149,14 @@ void ExecutionManager::startApplication(const ProcName& process)
 bool ExecutionManager::isConfirmAvailable()
 {
     bool result = false;
+		std::set<ProcName> sumProcesses;
     {
         std::lock_guard<std::mutex> lk(m_activeProcessesMutex);
-        result = (m_activeProcesses == m_allowedProcessesForState[m_pendingState]);
-    }
+				std::set_union(m_activeProcesses.begin(), m_activeProcesses.end(),
+						m_failedApps.begin(), m_failedApps.end(),
+						std::inserter(sumProcesses, sumProcesses.begin()));
+		}
+		result = (sumProcesses == m_allowedProcessesForState[m_pendingState]);
     m_readyToTransitToNextState = result;
     return result;
 }

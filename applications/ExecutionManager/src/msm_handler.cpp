@@ -45,4 +45,9 @@ pid_t MsmHandler::msmPid() const
   return m_msmPId;
 }
 
+void MsmHandler::clearMsm()
+{
+	m_msmPId = -1;
+}
+
 } // namespace ExecutionManager

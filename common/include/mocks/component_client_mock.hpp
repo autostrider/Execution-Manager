@@ -18,6 +18,8 @@ public:
 
     MOCK_METHOD(void, ConfirmComponentState,
                 (api::ComponentState state, api::ComponentClientReturnType status), (noexcept));
+
+    MOCK_METHOD(void, CheckIfAnyEventsAvailable, (), (noexcept));
 };
 
 } //namespace api

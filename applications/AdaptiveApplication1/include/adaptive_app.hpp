@@ -37,7 +37,6 @@ public:
 private:
     void suspend();
     void transitToNextState(IAdaptiveApp::FactoryFunc nextState) override;
-    bool shouldChange(const api::ComponentState& state) const;
     bool isValid(const api::ComponentState& state) const;
     bool shouldResume(const api::ComponentState& state) const;
     bool shouldSuspend(const api::ComponentState& state) const;

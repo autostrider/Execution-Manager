@@ -84,7 +84,7 @@ ComponentClient::ConfirmComponentState
 
 bool ComponentClient::eventReceived(std::future<ComponentState>& stateFuture)
 {
-  return stateFuture.wait_for(std::chrono::seconds(0)) == std::future_status::ready; 
+  return stateFuture.wait_for(std::chrono::seconds(0)) == std::future_status::ready;
 }
 
 void ComponentClient::checkIfAnyEventsAvailable()

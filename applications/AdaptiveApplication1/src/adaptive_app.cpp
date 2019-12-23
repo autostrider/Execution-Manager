@@ -131,11 +131,6 @@ void AdaptiveApp::transitToNextState(api::IAdaptiveApp::FactoryFunc nextState)
     m_currentState->enter();
 }
 
-bool AdaptiveApp::shouldChange(const api::ComponentState &state) const
-{
-    return m_componentState != state;
-}
-
 bool AdaptiveApp::isValid(const api::ComponentState &state) const
 {
     return COMPONENT_STATE_ON == state || COMPONENT_STATE_OFF == state;

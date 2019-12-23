@@ -33,3 +33,26 @@ TEST_F(MsmRegistrerTest, ShouldCorrectCheckForMsmPid)
   ASSERT_TRUE(registrer.checkMsm(correctPid));
   ASSERT_FALSE(registrer.checkMsm(invalidPid));
 }
+
+TEST_F(MsmRegistrerTest, ShouldSuccessfulyClearMsm)
+{
+	registrer.registerMsm(correctPid, msmName);
+	registrer.clearMsm();
+
+	ASSERT_EQ(registrer.msmPid(), -1);
+}
+
+TEST_F(MsmRegistrerTest, ShouldReturnTrueWhenMsmRegistered)
+{
+	registrer.registerMsm(correctPid, msmName);
+
+	ASSERT_TRUE(registrer.exists());
+}
+
+TEST_F(MsmRegistrerTest, ShouldReturnFalseWhenMsmWasCleared)
+{
+	registrer.registerMsm(correctPid, msmName);
+	registrer.clearMsm();
+
+	ASSERT_FALSE(registrer.exists());
+}

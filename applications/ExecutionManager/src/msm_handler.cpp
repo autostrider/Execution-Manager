@@ -10,7 +10,7 @@ MsmHandler::MsmHandler()
 
 bool MsmHandler::registerMsm(pid_t processId, const std::string& appName)
 {
-   if ((m_msmPId == -1 ||
+   if ((!exists() ||
       m_msmPId == processId) &&
       !appName.empty())
   {
@@ -48,6 +48,11 @@ pid_t MsmHandler::msmPid() const
 void MsmHandler::clearMsm()
 {
 	m_msmPId = -1;
+}
+
+bool MsmHandler::exists() const
+{
+	return m_msmPId != -1;
 }
 
 } // namespace ExecutionManager

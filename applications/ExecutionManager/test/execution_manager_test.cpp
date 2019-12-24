@@ -657,9 +657,6 @@ TEST_F(ExecutionManagerTest, ShouldConfirmSuccessComponentStateForSuspend)
 
 TEST_F(ExecutionManagerTest, ShouldNotToSetMachineState)
 {
-  ComponentTestData componentTestData = {};
-  componentTestData.component = app;
-
   auto em = initEm({},
                    {{MACHINE_STATE_RUNNING, {additionalApp}}});
 

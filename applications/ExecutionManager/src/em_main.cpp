@@ -30,9 +30,10 @@ int main(int argc, char **argv)
         (IPC_PROTOCOL + MSM_SOCKET_NAME, io)
        );
 
+    ExecutionManager::MsmHandler handler;
     capnp::TwoPartyServer server(
       kj::heap<ExecutionManagerServer::ExecutionManagerServer>
-      (executionManager, ExecutionManager::MsmHandler{}));
+      (executionManager, handler));
 
     auto address = io.provider->getNetwork()
         .parseAddress(IPC_PROTOCOL + EM_SOCKET_NAME).wait(io.waitScope);

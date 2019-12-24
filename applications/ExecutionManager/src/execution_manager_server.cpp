@@ -15,7 +15,7 @@ using std::string;
 
 ExecutionManagerServer::ExecutionManagerServer
 (ExecutionManager::ExecutionManager& application,
- ExecutionManager::MsmHandler msmHandler)
+ ExecutionManager::MsmHandler& msmHandler)
     : m_em{application},
       m_msmHandler{msmHandler}
 {

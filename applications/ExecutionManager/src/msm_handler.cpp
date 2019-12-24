@@ -1,20 +1,24 @@
 #include "msm_handler.hpp"
 #include <logger.hpp>
 
+#include <functional>
+
 namespace ExecutionManager
 {
 
 MsmHandler::MsmHandler()
   : m_msmPId{-1}
-{ }
+{
+  auto failureHandler = [&] (const std::string& app) { clearMsm(); };  
+  m_observer.subscribe(failureHandler);
+}
 
 bool MsmHandler::registerMsm(pid_t processId, const std::string& appName)
 {
-   if ((!exists() ||
-      m_msmPId == processId) &&
-      !appName.empty())
+   if ((!exists() || checkMsm(processId)) && !appName.empty())
   {
     m_msmPId = processId;
+    m_observer.observe(appName);
 
     LOG << "State Machine Client \""
         << appName
@@ -37,7 +41,12 @@ bool MsmHandler::registerMsm(pid_t processId, const std::string& appName)
 
 bool MsmHandler::checkMsm(pid_t processId) const
 {
-  return processId == m_msmPId;
+  if (exists())
+  {
+    return processId == m_msmPId;
+  }
+
+  return true;
 }
 
 pid_t MsmHandler::msmPid() const

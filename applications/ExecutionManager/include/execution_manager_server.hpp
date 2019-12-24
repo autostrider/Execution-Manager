@@ -19,7 +19,7 @@ public:
   explicit
   ExecutionManagerServer
     (ExecutionManager::ExecutionManager& application,
-     ExecutionManager::MsmHandler msmHandler);
+     ExecutionManager::MsmHandler& msmHandler);
   ~ExecutionManagerServer();
 private:
   ::kj::Promise<void>
@@ -45,7 +45,7 @@ private:
 
 private:
   ExecutionManager::ExecutionManager& m_em;
-  ExecutionManager::MsmHandler m_msmHandler;
+  ExecutionManager::MsmHandler& m_msmHandler;
   std::thread m_setMachineStateThread;
   std::atomic<bool> isRunning{false};
 };

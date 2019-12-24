@@ -66,14 +66,14 @@ private:
   const StateUpdateMode m_updateMode;
   std::function<void(ComponentState const&)> m_stateUpdateHandler;
 
-  StateManagement::Client m_stateManagementCap;
-
   kj::Own<kj::Thread> m_serverThread;
   kj::Own<kj::PromiseFulfiller<void>> m_listenFulfiller;
   kj::MutexGuarded<kj::Maybe<const kj::Executor&>> m_serverExecutor;
   std::promise<ComponentState> m_eventPromise;
 
   kj::Promise<void> m_serverStopPromise;
+
+  StateManagement::Client m_stateManagementCap;
 
   kj::AsyncIoProvider::PipeThread m_event;
 };

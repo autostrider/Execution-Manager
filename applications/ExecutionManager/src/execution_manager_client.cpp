@@ -1,7 +1,7 @@
 #include "execution_manager_client.hpp"
 
 #include <capnp/rpc-twoparty.h>
-#include <logger.hpp>
+
 namespace ExecutionManagerClient
 {
 

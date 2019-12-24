@@ -339,4 +339,9 @@ void ExecutionManager::removeFailedApp(const ProcName& app)
 	m_activeProcesses.erase(app);
 }
 
+std::set<ProcName> ExecutionManager::getActiveApps() const
+{
+  return m_activeProcesses;
+}
+
 } // namespace ExecutionManager

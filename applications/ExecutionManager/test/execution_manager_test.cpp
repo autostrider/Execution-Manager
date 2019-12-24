@@ -655,3 +655,18 @@ TEST_F(ExecutionManagerTest, ShouldConfirmSuccessComponentStateForSuspend)
   ASSERT_EQ(componentTestData.status, ComponentClientReturnType::K_SUCCESS);
 }
 
+TEST_F(ExecutionManagerTest, ShouldNotToSetMachineState)
+{
+  ComponentTestData componentTestData = {};
+  componentTestData.component = app;
+
+  auto em = initEm({},
+                   {{MACHINE_STATE_RUNNING, {additionalApp}}});
+
+  auto res = std::async(std::launch::async, [&]()
+  {
+      return  em->setMachineState(MACHINE_STATE_RUNNING);
+  });
+
+  ASSERT_EQ(res.get(), StateError::K_INVALID_STATE);
+}

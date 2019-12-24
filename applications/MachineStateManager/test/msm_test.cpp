@@ -25,8 +25,8 @@ protected:
            std::make_unique<MachineStateClientMock>();
    std::unique_ptr<ExecutionManager::ManifestReaderMock> manifestReaderMock =
            std::make_unique<NiceMock<ExecutionManager::ManifestReaderMock>>();
-   std::unique_ptr<NiceMock<KeyValueStorageMock>> storageMock =
-           std::make_unique<NiceMock<KeyValueStorageMock>>();
+   std::unique_ptr<StrictMock<KeyValueStorageMock>> storageMock =
+           std::make_unique<StrictMock<KeyValueStorageMock>>();
 
    std::unique_ptr<NiceMock<StateMock>> stateInitMock =
            std::make_unique<NiceMock<StateMock>>();

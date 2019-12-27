@@ -16,7 +16,7 @@ namespace ExecutionManager
 class ApplicationHandler : public IApplicationHandler
 {
 public:
-  explicit ApplicationHandler(std::unique_ptr<IOsInterface> syscalls,
+  ApplicationHandler(std::unique_ptr<IOsInterface> syscalls,
                               std::string path = APPLICATIONS_PATH);
 
   void startProcess(const std::string& serviceName) override;

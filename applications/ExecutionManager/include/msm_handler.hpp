@@ -1,8 +1,6 @@
 #ifndef MSM_HANDLER_HPP
 #define MSM_HANDLER_HPP
 
-#include "msm_observer.hpp"
-
 #include <string>
 
 namespace ExecutionManager
@@ -19,7 +17,6 @@ public:
 	void clearMsm();
 private:
   pid_t m_msmPId;
-  MsmObserver m_observer;
 };
 
 } // namespace ExecutionManager

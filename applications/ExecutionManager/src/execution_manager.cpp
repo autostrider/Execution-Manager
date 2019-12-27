@@ -1,6 +1,7 @@
 #include "execution_manager.hpp"
 #include <constants.hpp>
 #include <common.hpp>
+#include <i_os_interface.hpp>
 
 #include <iostream>
 #include <logger.hpp>
@@ -20,19 +21,21 @@ const std::vector<std::string> applicationStateNames{AA_STATE_INIT,
             AA_STATE_SUSPEND};
 } // anonymous namespace
 
-ExecutionManager::ExecutionManager(
-        std::unique_ptr<IManifestReader> reader,
+ExecutionManager::ExecutionManager(std::unique_ptr<IManifestReader> reader,
         std::unique_ptr<IApplicationHandler> applicationHandler,
-        std::unique_ptr<ExecutionManagerClient::IExecutionManagerClient> client)
+        std::unique_ptr<ExecutionManagerClient::IExecutionManagerClient> client,
+        std::unique_ptr<IOsInterface> os)
     : m_appHandler{std::move(applicationHandler)},
       m_activeProcesses{},
-			m_failedApps{},
+      m_failedApps{},
       m_allowedProcessesForState{reader->getStatesSupportedByApplication()},
       m_currentState{},
       m_pendingState{},
       m_currentComponentState{},
       m_machineManifestStates{reader->getMachineStates()},
-      m_rpcClient(std::move(client))
+      m_rpcClient(std::move(client)),
+      m_aliveAppsObserver{std::make_unique<IOsInterface>(*os)},
+      m_newAppObserver{std::move(os)}
 {
     filterStates();
 }

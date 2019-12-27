@@ -46,7 +46,7 @@ private:
 
 private:
   ExecutionManager::ExecutionManager& m_em;
-  ExecutionManager::MsmHandler m_msmHandler;
+  ExecutionManager::MsmHandler& m_msmHandler;
   std::thread m_setMachineStateThread;
   std::atomic<bool> isRunning{false};
 };

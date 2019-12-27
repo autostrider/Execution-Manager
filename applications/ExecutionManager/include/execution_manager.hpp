@@ -4,6 +4,7 @@
 #include <i_execution_manager_client.hpp>
 #include <i_manifest_reader.hpp>
 #include <i_application_handler.hpp>
+#include "app_observer.hpp"
 
 #include <map>
 #include <memory>
@@ -13,6 +14,8 @@
 #include <mutex>
 #include <condition_variable>
 #include <atomic>
+
+class IOsInterface;
 
 namespace ExecutionManager
 {
@@ -38,7 +41,8 @@ class ExecutionManager
 public:
   ExecutionManager(std::unique_ptr<IManifestReader> reader,
                    std::unique_ptr<IApplicationHandler> applicationHandler,
-                   std::unique_ptr<ExecutionManagerClient::IExecutionManagerClient> client);
+                   std::unique_ptr<ExecutionManagerClient::IExecutionManagerClient> client,
+                   std::unique_ptr<IOsInterface> os);
 
   void reportApplicationState(const std::string& appName, AppState state);
 
@@ -110,6 +114,9 @@ private:
   std::set<std::string> m_componentPendingConfirms;
 
   std::unique_ptr<ExecutionManagerClient::IExecutionManagerClient> m_rpcClient;
+
+  AppObserver m_aliveAppsObserver;
+  AppObserver m_newAppObserver;
 };
 
 } // namespace ExecutionManager

@@ -6,9 +6,12 @@
 namespace ExecutionManager
 {
 
-MsmHandler::MsmHandler()
-  : m_msmPId{-1}
+MsmHandler::MsmHandler(std::unique_ptr<IOsInterface> os)
+  : m_msmPId{-1},
+    m_msmObserver{std::move(os)}
 {
+    auto handler = [&](const std::string& app) { clearMsm(); };
+    m_msmObserver.subscribe(handler);
 }
 
 bool MsmHandler::registerMsm(pid_t processId, const std::string& appName)
@@ -16,6 +19,7 @@ bool MsmHandler::registerMsm(pid_t processId, const std::string& appName)
    if ((!exists() || checkMsm(processId)) && !appName.empty())
   {
     m_msmPId = processId;
+    m_msmObserver.observe(appName);
 
     LOG << "State Machine Client \""
         << appName

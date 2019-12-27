@@ -24,7 +24,8 @@ const std::vector<std::string> applicationStateNames{AA_STATE_INIT,
 ExecutionManager::ExecutionManager(std::unique_ptr<IManifestReader> reader,
         std::unique_ptr<IApplicationHandler> applicationHandler,
         std::unique_ptr<ExecutionManagerClient::IExecutionManagerClient> client,
-        std::unique_ptr<IOsInterface> os)
+        std::unique_ptr<IOsInterface> newAppsSycalls,
+        std::unique_ptr<IOsInterface> aliveAppsSyscalls)
     : m_appHandler{std::move(applicationHandler)},
       m_activeProcesses{},
       m_failedApps{},
@@ -34,8 +35,8 @@ ExecutionManager::ExecutionManager(std::unique_ptr<IManifestReader> reader,
       m_currentComponentState{},
       m_machineManifestStates{reader->getMachineStates()},
       m_rpcClient(std::move(client)),
-      m_aliveAppsObserver{std::make_unique<IOsInterface>(*os)},
-      m_newAppObserver{std::move(os)}
+      m_aliveAppsObserver{std::move(aliveAppsSyscalls)},
+      m_newAppObserver{std::move(newAppsSycalls)}
 {
     filterStates();
 }
@@ -334,12 +335,14 @@ void ExecutionManager::removeFailedToStartApp(const ProcName& app)
 {
 	std::lock_guard<std::mutex> lk{m_failedAppsMutex};
 	m_failedApps.insert(app);
+    m_newAppObserver.detach(app);
 }
 
 void ExecutionManager::removeFailedApp(const ProcName& app)
 {
 	std::lock_guard<std::mutex> ls{m_activeProcessesMutex};
 	m_activeProcesses.erase(app);
+    m_aliveAppsObserver.detach(app);
 }
 
 std::set<ProcName> ExecutionManager::getActiveApps() const

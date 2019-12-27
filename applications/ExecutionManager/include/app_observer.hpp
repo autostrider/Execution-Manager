@@ -1,8 +1,8 @@
 #ifndef APP_OBSERVER_HPP
 #define APP_OBSERVER_HPP
 
-#include <string>
-#include <functional>
+#include "i_app_observer.hpp"
+
 #include <memory>
 #include <set>
 #include <list>
@@ -14,20 +14,18 @@ class IOsInterface;
 namespace ExecutionManager
 {
 
-using Listener = std::function<void(const std::string&)>;
-
 class AppObserver
 {
 public:
   AppObserver(std::unique_ptr<IOsInterface> os);
-  void observe(const std::string& app); 
-  void subscribe(Listener object); 
+  void observe(const std::string& app);
+  void subscribe(Listener object);
   void detach(const std::string& app);
 
   ~AppObserver();
-private:
-  void run(std::unique_ptr<IOsInterface> os);
-private: 
+protected:
+  virtual void run(std::unique_ptr<IOsInterface> os);
+protected:
   std::atomic<bool> m_isRunning;
   std::thread m_worker;
   std::set<std::string> m_appsToObserve;

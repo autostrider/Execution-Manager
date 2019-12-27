@@ -35,7 +35,9 @@ protected:
         return std::make_unique<ExecutionManager::ExecutionManager>(
                     std::move(manifestMock),
                     std::move(applicationHandler),
-                    std::move(client));
+                    std::move(client),
+                    nullptr,
+                    nullptr);
     }
 
     void setupManifestData(const std::vector<MachineState>& machineStates,

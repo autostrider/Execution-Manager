@@ -5,6 +5,7 @@
 #include <i_manifest_reader.hpp>
 #include <i_application_handler.hpp>
 #include "app_observer.hpp"
+#include "new_app_observer.hpp"
 
 #include <map>
 #include <memory>
@@ -42,7 +43,8 @@ public:
   ExecutionManager(std::unique_ptr<IManifestReader> reader,
                    std::unique_ptr<IApplicationHandler> applicationHandler,
                    std::unique_ptr<ExecutionManagerClient::IExecutionManagerClient> client,
-                   std::unique_ptr<IOsInterface> os);
+                   std::unique_ptr<IOsInterface> newAppsSycalls,
+                   std::unique_ptr<IOsInterface> aliveAppsSyscalls);
 
   void reportApplicationState(const std::string& appName, AppState state);
 
@@ -116,7 +118,7 @@ private:
   std::unique_ptr<ExecutionManagerClient::IExecutionManagerClient> m_rpcClient;
 
   AppObserver m_aliveAppsObserver;
-  AppObserver m_newAppObserver;
+  NewAppObserver m_newAppObserver;
 };
 
 } // namespace ExecutionManager

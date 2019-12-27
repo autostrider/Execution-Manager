@@ -20,14 +20,15 @@ int main(int argc, char **argv)
     ::unlink(EM_SOCKET_NAME.c_str());
     
     auto io = kj::setupAsyncIo();
-
     ExecutionManager::ExecutionManager executionManager
       (std::make_unique<ExecutionManager::ManifestReader>(),
           std::make_unique<ExecutionManager::ApplicationHandler>(
            std::make_unique<ExecutionManager::OsInterface>()
            ),
        std::make_unique<ExecutionManagerClient::ExecutionManagerClient>
-        (IPC_PROTOCOL + MSM_SOCKET_NAME, io)
+        (IPC_PROTOCOL + MSM_SOCKET_NAME, io),
+       std::make_unique<ExecutionManager::OsInterface>(),
+       std::make_unique<ExecutionManager::OsInterface>()
        );
 
     ExecutionManager::MsmHandler handler;

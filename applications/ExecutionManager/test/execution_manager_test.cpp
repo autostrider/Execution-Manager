@@ -655,7 +655,7 @@ TEST_F(ExecutionManagerTest, ShouldConfirmSuccessComponentStateForSuspend)
   ASSERT_EQ(componentTestData.status, ComponentClientReturnType::K_SUCCESS);
 }
 
-TEST_F(ExecutionManagerTest, ShouldNotToSetMachineState)
+TEST_F(ExecutionManagerTest, ShouldNotSetMachineState)
 {
   auto em = initEm({},
                    {{MACHINE_STATE_RUNNING, {additionalApp}}});

@@ -19,6 +19,7 @@ target_link_libraries(common
       api::application_state_client
       api::machine_state_client
       api::component_client
+      per::per_memory
       nlohmann_json::nlohmann_json
       gmock
 )

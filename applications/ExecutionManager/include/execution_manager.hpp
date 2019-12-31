@@ -4,8 +4,8 @@
 #include <i_execution_manager_client.hpp>
 #include <i_manifest_reader.hpp>
 #include <i_application_handler.hpp>
-#include "app_observer.hpp"
-#include "new_app_observer.hpp"
+#include "running_app_observer.hpp"
+#include "initializing_app_observer.hpp"
 
 #include <map>
 #include <memory>
@@ -117,8 +117,8 @@ private:
 
   std::unique_ptr<ExecutionManagerClient::IExecutionManagerClient> m_rpcClient;
 
-  AppObserver m_aliveAppsObserver;
-  NewAppObserver m_newAppObserver;
+  RunningAppObserver m_aliveAppsObserver;
+  InitializingAppObserver m_newAppObserver;
 };
 
 } // namespace ExecutionManager

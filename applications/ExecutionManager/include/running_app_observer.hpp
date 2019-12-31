@@ -1,29 +1,29 @@
 #ifndef APP_OBSERVER_HPP
 #define APP_OBSERVER_HPP
 
-#include "i_app_observer.hpp"
-
 #include <memory>
 #include <set>
 #include <list>
 #include <atomic>
 #include <thread>
-
+#include <functional>
 
 namespace ExecutionManager
 {
 
 class IApplicationHandler;
 
-class AppObserver
+using Listener = std::function<void(const std::string&)>;
+
+class RunningAppObserver
 {
 public:
-  AppObserver(std::unique_ptr<IApplicationHandler> appHandler);
+  RunningAppObserver(std::unique_ptr<IApplicationHandler> appHandler);
   void observe(const std::string& app);
   void subscribe(Listener object);
   void detach(const std::string& app);
 
-  ~AppObserver();
+  virtual ~RunningAppObserver();
 protected:
   virtual void run(std::unique_ptr<IApplicationHandler> appHandler);
 protected:

@@ -1,31 +1,31 @@
-#include "app_observer.hpp"
+#include "running_app_observer.hpp"
 
 #include "application_handler.hpp"
 
 namespace ExecutionManager
 {
 
-AppObserver::AppObserver(std::unique_ptr<IApplicationHandler> appHandler)
+RunningAppObserver::RunningAppObserver(std::unique_ptr<IApplicationHandler> appHandler)
   : m_isRunning{true},
-    m_worker{std::thread{&AppObserver::run, this, std::move(appHandler)}}
+    m_worker{std::thread{&RunningAppObserver::run, this, std::move(appHandler)}}
 { }
 
-void AppObserver::detach(const std::string& app)
+void RunningAppObserver::detach(const std::string& app)
 {
   m_appsToObserve.insert(app);
 }
 
-void AppObserver::observe(const std::string& app)
+void RunningAppObserver::observe(const std::string& app)
 {
   m_appsToObserve.insert(app);
 }
 
-void AppObserver::subscribe(Listener object)
+void RunningAppObserver::subscribe(Listener object)
 {
   m_listeners.push_back(object);
 }
 
-void AppObserver::run(std::unique_ptr<IApplicationHandler> appHandler)
+void RunningAppObserver::run(std::unique_ptr<IApplicationHandler> appHandler)
 {
   while(m_isRunning)
   {
@@ -43,7 +43,7 @@ void AppObserver::run(std::unique_ptr<IApplicationHandler> appHandler)
   }
 }
 
-AppObserver::~AppObserver()
+RunningAppObserver::~RunningAppObserver()
 {
   m_isRunning = false;
   if (m_worker.joinable())

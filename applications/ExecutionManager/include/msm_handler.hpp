@@ -1,7 +1,7 @@
 #ifndef MSM_HANDLER_HPP
 #define MSM_HANDLER_HPP
 
-#include "app_observer.hpp"
+#include "running_app_observer.hpp"
 #include "application_handler.hpp"
 #include "os_interface.hpp"
 #include <string>
@@ -22,7 +22,7 @@ public:
   void clearMsm();
 private:
   pid_t m_msmPId;
-  AppObserver m_msmObserver;
+  RunningAppObserver m_msmObserver;
 };
 
 } // namespace ExecutionManager

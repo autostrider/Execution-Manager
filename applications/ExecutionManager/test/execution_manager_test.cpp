@@ -36,8 +36,8 @@ protected:
                     std::move(manifestMock),
                     std::move(applicationHandler),
                     std::move(client),
-                    nullptr,
-                    nullptr);
+                    std::move(newAppHandler),
+                    std::move(activeAppHandler));
     }
 
     void setupManifestData(const std::vector<MachineState>& machineStates,
@@ -56,12 +56,18 @@ protected:
             std::make_unique<StrictMock<ApplicationHandlerMock>>();
     std::unique_ptr<ExecutionManagerClient::ExecutionManagerClientMock> client =
             std::make_unique<StrictMock<ExecutionManagerClient::ExecutionManagerClientMock>>();
+    std::unique_ptr<ApplicationHandlerMock> newAppHandler =
+            std::make_unique<StrictMock<ApplicationHandlerMock>>();
+    std::unique_ptr<ApplicationHandlerMock> activeAppHandler =
+            std::make_unique<StrictMock<ApplicationHandlerMock>>();
 
     const std::chrono::seconds oneSecond{1};
     const int appId{1};
     const int additionalAppId{2};
     ExecutionManagerClient::ExecutionManagerClientMock* pClient = client.get();
     ApplicationHandlerMock* pAppHandler = applicationHandler.get();
+    ApplicationHandlerMock* pNewAppHandler = newAppHandler.get();
+    ApplicationHandlerMock* pActiveAppHandler = activeAppHandler.get();
     const std::string wrongMachineState{"WrongMachineState"};
     const std::string testState{"TestState"};
 
@@ -657,3 +663,64 @@ TEST_F(ExecutionManagerTest, ShouldConfirmSuccessComponentStateForSuspend)
   ASSERT_EQ(componentTestData.status, ComponentClientReturnType::K_SUCCESS);
 }
 
+TEST_F(ExecutionManagerTest, ShouldTransitToNewStateWhenAppFailed)
+{
+    auto em = initEm(transitionStates,
+    {{MACHINE_STATE_RUNNING, {app}},
+     {MACHINE_STATE_LIVING, {app}}});
+    {
+        InSequence seq;
+        EXPECT_CALL(*pAppHandler, startProcess(app));
+        EXPECT_CALL(*pClient, confirm(StateError::K_SUCCESS));
+        ON_CALL(*pActiveAppHandler, isActiveProcess(app))
+                .WillByDefault(Return(false));
+        EXPECT_CALL(*pClient, confirm(StateError::K_SUCCESS));
+    }
+
+    auto res = std::async(std::launch::async, [&]()
+    {
+        return  em->setMachineState(MACHINE_STATE_RUNNING);
+    });
+    std::this_thread::sleep_for(oneSecond);
+    em->reportApplicationState(app, AppState::kRunning);
+
+    ASSERT_EQ(res.get(), StateError::K_SUCCESS);
+
+    em->setMachineState(MACHINE_STATE_LIVING);
+
+    ASSERT_EQ(
+                em->getMachineState(),
+                MACHINE_STATE_LIVING
+                );
+}
+
+TEST_F(ExecutionManagerTest, ShouldTransitToNewStateWhenAppFailedToStart)
+{
+    auto em = initEm(transitionStates,
+    {{MACHINE_STATE_RUNNING, {app}},
+     {MACHINE_STATE_LIVING, {app}}});
+    {
+        InSequence seq;
+        EXPECT_CALL(*pAppHandler, startProcess(app));
+        ON_CALL(*pNewAppHandler, isActiveProcess(app))
+                .WillByDefault(Return(false));
+        EXPECT_CALL(*pClient, confirm(StateError::K_SUCCESS))
+                .Times(2);
+    }
+
+    auto res = std::async(std::launch::async, [&]()
+    {
+        return  em->setMachineState(MACHINE_STATE_RUNNING);
+    });
+    std::this_thread::sleep_for(oneSecond);
+    em->reportApplicationState(app, AppState::kRunning);
+
+    ASSERT_EQ(res.get(), StateError::K_SUCCESS);
+
+    em->setMachineState(MACHINE_STATE_LIVING);
+
+    ASSERT_EQ(
+                em->getMachineState(),
+                MACHINE_STATE_LIVING
+                );
+}

@@ -19,16 +19,16 @@ public:
   ApplicationHandler(std::unique_ptr<IOsInterface> syscalls,
                               std::string path = APPLICATIONS_PATH);
 
-  void startProcess(const std::string& serviceName) override;
+  bool startProcess(const std::string& serviceName) override;
 
-  void killProcess(const std::string& serviceName) override;
+  bool killProcess(const std::string& serviceName) override;
 
   bool isActiveProcess(const std::string& serviceName) override;
 
   ~ApplicationHandler() override = default;
 
 private:
-  void
+  bool
   execProcess(const std::string& processName, const std::string& action) const;
 
   std::vector<char*>

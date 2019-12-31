@@ -9,9 +9,9 @@ namespace ExecutionManager {
 
 class IApplicationHandler {
 public:
-    virtual void startProcess(const std::string& service) = 0;
+    virtual bool startProcess(const std::string& service) = 0;
 
-    virtual void killProcess(const std::string& service) = 0;
+    virtual bool killProcess(const std::string& service) = 0;
 
     virtual bool isActiveProcess(const std::string& service) = 0;
 

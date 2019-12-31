@@ -6,6 +6,7 @@
 #include <mocks/manifest_reader_mock.hpp>
 #include <mocks/socket_server_mock.hpp>
 #include <logger.hpp>
+#include <mocks/persistent_storage_mock.hpp>
 
 #include "gtest/gtest.h"
 
@@ -24,6 +25,8 @@ protected:
            std::make_unique<MachineStateClientMock>();
    std::unique_ptr<ExecutionManager::ManifestReaderMock> manifestReaderMock =
            std::make_unique<NiceMock<ExecutionManager::ManifestReaderMock>>();
+   std::unique_ptr<StrictMock<KeyValueStorageMock>> storageMock =
+           std::make_unique<StrictMock<KeyValueStorageMock>>();
 
    std::unique_ptr<NiceMock<StateMock>> stateInitMock =
            std::make_unique<NiceMock<StateMock>>();
@@ -49,7 +52,8 @@ protected:
                 std::move(appStateClientMock),
                 std::move(machineStateClientMock),
                 std::move(manifestReaderMock),
-                std::move(sockServerMock));
+                std::move(sockServerMock),
+                std::move(storageMock));
     }
 };
 

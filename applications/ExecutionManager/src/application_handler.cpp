@@ -17,47 +17,50 @@ ApplicationHandler::ApplicationHandler(std::unique_ptr<IOsInterface> syscalls,
           m_syscalls{std::move(syscalls)}
 { }
 
-void ApplicationHandler::startProcess(const std::string &serviceName)
+bool ApplicationHandler::startProcess(const std::string &serviceName)
 {
-  execProcess(serviceName, SYSTEMCTL_START);
+  return execProcess(serviceName, SYSTEMCTL_START);
 }
 
-void ApplicationHandler::killProcess(const std::string &serviceName)
+bool ApplicationHandler::killProcess(const std::string &serviceName)
 {
-    execProcess(serviceName, SYSTEMCTL_STOP);
+  return execProcess(serviceName, SYSTEMCTL_STOP);
 }
 
 bool ApplicationHandler::isActiveProcess(const std::string &serviceName)
 {
-    const size_t maxPidLen = 128;
-    const size_t size = 1;
-    char pidline[maxPidLen];
-    ::bzero(pidline, maxPidLen);
-    int pidno = -1;
+  const size_t maxPidLen = 128;
+  const size_t size = 1;
+  char pidline[maxPidLen];
+  ::bzero(pidline, maxPidLen);
+  int pidno = -1;
 
-    auto pos = serviceName.find_first_of('_');
-    std::string appName = serviceName.substr(pos+size);
+  auto pos = serviceName.find_first_of('_');
+  std::string appName = serviceName.substr(pos+size);
 
-    const std::string cmd = "pidof " + appName;
+  const std::string cmd = "pidof " + appName;
 
-    FILE *fp = m_syscalls->popen(cmd.data(), "r");
-    m_syscalls->fread(pidline, size, maxPidLen, fp);
-    pidno = ::atoi(pidline);
-    m_syscalls->pclose(fp);
+  FILE *fp = m_syscalls->popen(cmd.data(), "r");
+  m_syscalls->fread(pidline, size, maxPidLen, fp);
+  pidno = ::atoi(pidline);
+  m_syscalls->pclose(fp);
 
-    return pidno > 1;
+  return pidno > 1;
 }
 
-void ApplicationHandler::execProcess(const std::string &processName,
-                                const std::string& action) const
+bool ApplicationHandler::execProcess(const std::string &processName,
+                                     const std::string& action) const
 {
+  bool result{false};
   pid_t process = m_syscalls->fork();
 
   if (-1 == process)
   {
     LOG << "Error forking the process" << strerror(errno);
+    return result;
   }
-  else if (!process)
+
+  if (!process)
   {
     std::vector<std::string> arguments =
     {
@@ -78,7 +81,10 @@ void ApplicationHandler::execProcess(const std::string &processName,
            << " "
            << strerror(errno);
      }
+     result = -1 == res;
   }
+
+  return result;
 }
 
 std::vector<char*>

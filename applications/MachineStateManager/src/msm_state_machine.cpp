@@ -84,6 +84,7 @@ void Run::enter()
   do
   {
     state = m_msm.getNewState();
+    m_msm.saveReceivedState(state);
 
     LOG << "Setting machine state to "
         << state

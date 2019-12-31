@@ -2,6 +2,7 @@
 #define MSM_HANDLER_HPP
 
 #include "app_observer.hpp"
+#include "application_handler.hpp"
 #include "os_interface.hpp"
 #include <string>
 #include <memory>
@@ -12,7 +13,8 @@ namespace ExecutionManager
 class MsmHandler
 {
 public:
-  MsmHandler(std::unique_ptr<IOsInterface> os = std::make_unique<OsInterface>());
+  MsmHandler(std::unique_ptr<IApplicationHandler> appHandler =
+          std::make_unique<ApplicationHandler>(std::make_unique<OsInterface>()));
   bool registerMsm(pid_t processId, const std::string& appName);
   bool checkMsm(pid_t processId) const;
   pid_t msmPid() const;

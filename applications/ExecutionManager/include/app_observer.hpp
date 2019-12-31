@@ -9,22 +9,23 @@
 #include <atomic>
 #include <thread>
 
-class IOsInterface;
 
 namespace ExecutionManager
 {
 
+class IApplicationHandler;
+
 class AppObserver
 {
 public:
-  AppObserver(std::unique_ptr<IOsInterface> os);
+  AppObserver(std::unique_ptr<IApplicationHandler> appHandler);
   void observe(const std::string& app);
   void subscribe(Listener object);
   void detach(const std::string& app);
 
   ~AppObserver();
 protected:
-  virtual void run(std::unique_ptr<IOsInterface> os);
+  virtual void run(std::unique_ptr<IApplicationHandler> appHandler);
 protected:
   std::atomic<bool> m_isRunning;
   std::thread m_worker;

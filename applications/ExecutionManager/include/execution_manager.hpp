@@ -43,8 +43,8 @@ public:
   ExecutionManager(std::unique_ptr<IManifestReader> reader,
                    std::unique_ptr<IApplicationHandler> applicationHandler,
                    std::unique_ptr<ExecutionManagerClient::IExecutionManagerClient> client,
-                   std::unique_ptr<IOsInterface> newAppsSycalls,
-                   std::unique_ptr<IOsInterface> aliveAppsSyscalls);
+                   std::unique_ptr<IApplicationHandler> newAppsHandler,
+                   std::unique_ptr<IApplicationHandler> aliveAppsHandler);
 
   void reportApplicationState(const std::string& appName, AppState state);
 

@@ -24,8 +24,8 @@ const std::vector<std::string> applicationStateNames{AA_STATE_INIT,
 ExecutionManager::ExecutionManager(std::unique_ptr<IManifestReader> reader,
         std::unique_ptr<IApplicationHandler> applicationHandler,
         std::unique_ptr<ExecutionManagerClient::IExecutionManagerClient> client,
-        std::unique_ptr<IOsInterface> newAppsSycalls,
-        std::unique_ptr<IOsInterface> aliveAppsSyscalls)
+        std::unique_ptr<IApplicationHandler> newAppsHandler,
+        std::unique_ptr<IApplicationHandler> aliveAppsHandler)
     : m_appHandler{std::move(applicationHandler)},
       m_activeProcesses{},
       m_failedApps{},
@@ -35,8 +35,8 @@ ExecutionManager::ExecutionManager(std::unique_ptr<IManifestReader> reader,
       m_currentComponentState{},
       m_machineManifestStates{reader->getMachineStates()},
       m_rpcClient(std::move(client)),
-      m_aliveAppsObserver{std::move(aliveAppsSyscalls)},
-      m_newAppObserver{std::move(newAppsSycalls)}
+      m_aliveAppsObserver{std::move(aliveAppsHandler)},
+      m_newAppObserver{std::move(newAppsHandler)}
 {
     filterStates();
 }

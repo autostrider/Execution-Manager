@@ -4,8 +4,6 @@
 #include <string>
 #include <functional>
 
-class IOsInterface;
-
 namespace ExecutionManager
 {
 

@@ -6,9 +6,9 @@
 namespace ExecutionManager
 {
 
-MsmHandler::MsmHandler(std::unique_ptr<IOsInterface> os)
+MsmHandler::MsmHandler(std::unique_ptr<IApplicationHandler> appHandler)
   : m_msmPId{-1},
-    m_msmObserver{std::move(os)}
+    m_msmObserver{std::move(appHandler)}
 {
     auto handler = [&](const std::string& app) { clearMsm(); };
     m_msmObserver.subscribe(handler);

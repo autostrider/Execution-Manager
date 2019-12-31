@@ -1,14 +1,13 @@
 #include "app_observer.hpp"
 
-#include <i_os_interface.hpp>
 #include "application_handler.hpp"
 
 namespace ExecutionManager
 {
 
-AppObserver::AppObserver(std::unique_ptr<IOsInterface> os)
+AppObserver::AppObserver(std::unique_ptr<IApplicationHandler> appHandler)
   : m_isRunning{true},
-    m_worker{std::thread{&AppObserver::run, this, std::move(os)}}
+    m_worker{std::thread{&AppObserver::run, this, std::move(appHandler)}}
 { }
 
 void AppObserver::detach(const std::string& app)
@@ -26,14 +25,13 @@ void AppObserver::subscribe(Listener object)
   m_listeners.push_back(object);
 }
 
-void AppObserver::run(std::unique_ptr<IOsInterface> os)
+void AppObserver::run(std::unique_ptr<IApplicationHandler> appHandler)
 {
-  ApplicationHandler handler{std::move(os)};
   while(m_isRunning)
   {
     for (const auto& app: m_appsToObserve)
     {
-      if (!handler.isActiveProcess(app))
+      if (!appHandler->isActiveProcess(app))
       {
         for (auto& listener: m_listeners)
         {
@@ -41,6 +39,7 @@ void AppObserver::run(std::unique_ptr<IOsInterface> os)
         }
       }
     }
+    std::this_thread::sleep_for(std::chrono::seconds{1});
   }
 }
 

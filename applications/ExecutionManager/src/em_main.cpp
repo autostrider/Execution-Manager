@@ -27,8 +27,12 @@ int main(int argc, char **argv)
            ),
        std::make_unique<ExecutionManagerClient::ExecutionManagerClient>
         (IPC_PROTOCOL + MSM_SOCKET_NAME, io),
-       std::make_unique<ExecutionManager::OsInterface>(),
-       std::make_unique<ExecutionManager::OsInterface>()
+       std::make_unique<ExecutionManager::ApplicationHandler>(
+        std::make_unique<ExecutionManager::OsInterface>()
+        ),
+       std::make_unique<ExecutionManager::ApplicationHandler>(
+        std::make_unique<ExecutionManager::OsInterface>()
+        )
        );
 
     ExecutionManager::MsmHandler handler;

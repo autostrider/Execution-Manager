@@ -117,8 +117,8 @@ private:
 
   std::unique_ptr<ExecutionManagerClient::IExecutionManagerClient> m_rpcClient;
 
-  RunningAppObserver m_aliveAppsObserver;
-  InitializingAppObserver m_newAppObserver;
+  RunningAppObserver m_runningAppsObserver;
+  InitializingAppObserver m_initializingAppsObserver;
 };
 
 } // namespace ExecutionManager

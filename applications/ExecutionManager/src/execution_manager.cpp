@@ -35,8 +35,8 @@ ExecutionManager::ExecutionManager(std::unique_ptr<IManifestReader> reader,
       m_currentComponentState{},
       m_machineManifestStates{reader->getMachineStates()},
       m_rpcClient(std::move(client)),
-      m_aliveAppsObserver{std::move(aliveAppsHandler)},
-      m_newAppObserver{std::move(newAppsHandler)}
+      m_runningAppsObserver{std::move(aliveAppsHandler)},
+      m_initializingAppsObserver{std::move(newAppsHandler)}
 {
     filterStates();
 }
@@ -148,6 +148,7 @@ void ExecutionManager::startApplication(const ProcName& process)
 {
     LOG << "Trying to start: " << process;
     m_appHandler->startProcess(process);
+    m_initializingAppsObserver.observe(process);
 }
 
 bool ExecutionManager::isConfirmAvailable()
@@ -198,11 +199,14 @@ ExecutionManager::reportApplicationState(
     {
         std::lock_guard<std::mutex> lk(m_activeProcessesMutex);
         m_activeProcesses.erase(appName);
+        m_runningAppsObserver.detach(appName);
     }
         break;
     case AppState::kRunning:
     {
         std::lock_guard<std::mutex> lk(m_activeProcessesMutex);
+        m_runningAppsObserver.observe(appName);
+        m_initializingAppsObserver.detach(appName);
         m_activeProcesses.insert(appName);
     }
         break;
@@ -335,14 +339,14 @@ void ExecutionManager::removeFailedToStartApp(const ProcName& app)
 {
 	std::lock_guard<std::mutex> lk{m_failedAppsMutex};
 	m_failedApps.insert(app);
-    m_newAppObserver.detach(app);
+    m_initializingAppsObserver.detach(app);
 }
 
 void ExecutionManager::removeFailedApp(const ProcName& app)
 {
 	std::lock_guard<std::mutex> ls{m_activeProcessesMutex};
 	m_activeProcesses.erase(app);
-    m_aliveAppsObserver.detach(app);
+    m_runningAppsObserver.detach(app);
 }
 
 std::set<ProcName> ExecutionManager::getActiveApps() const

@@ -64,8 +64,6 @@ public:
 
 	void removeFailedApp(const ProcName& app);
 
-  std::set<ProcName> getActiveApps() const;
-
 private:
   void filterStates();
 

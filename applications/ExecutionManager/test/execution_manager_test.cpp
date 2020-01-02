@@ -57,9 +57,9 @@ protected:
     std::unique_ptr<ExecutionManagerClient::ExecutionManagerClientMock> client =
             std::make_unique<StrictMock<ExecutionManagerClient::ExecutionManagerClientMock>>();
     std::unique_ptr<ApplicationHandlerMock> newAppHandler =
-            std::make_unique<StrictMock<ApplicationHandlerMock>>();
+            std::make_unique<NiceMock<ApplicationHandlerMock>>();
     std::unique_ptr<ApplicationHandlerMock> activeAppHandler =
-            std::make_unique<StrictMock<ApplicationHandlerMock>>();
+            std::make_unique<NiceMock<ApplicationHandlerMock>>();
 
     const std::chrono::seconds oneSecond{1};
     const int appId{1};

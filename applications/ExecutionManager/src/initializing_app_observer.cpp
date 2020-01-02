@@ -1,5 +1,6 @@
 #include "initializing_app_observer.hpp"
 #include "application_handler.hpp"
+#include <logger.hpp>
 
 namespace ExecutionManager
 {
@@ -18,11 +19,12 @@ void InitializingAppObserver::run(std::unique_ptr<IApplicationHandler> appHandle
         std::this_thread::sleep_for(oneSecond);
         for (const auto& app : m_appsToObserve)
         {
-            bool started = false;
+            bool started = m_appsToObserve.empty();
             for (int i = 0; i < timesToPollApps; ++i)
             {
                 if (appHandler->isActiveProcess(app))
                 {
+                    LOG << "WTF APP " << app << " ACTIVE";
                     started = true;
                     break;
                 }
@@ -30,6 +32,8 @@ void InitializingAppObserver::run(std::unique_ptr<IApplicationHandler> appHandle
 
             if (!started)
             {
+                LOG << "WTF APP NOT STARTED" << app;
+//                std::lock_guard<std::mutex> lk{m_appsMutex};
                 for (const auto& listener: m_listeners)
                 {
                     listener(app);

@@ -48,6 +48,11 @@ protected:
 
         ON_CALL(*manifestMock, getStatesSupportedByApplication())
                 .WillByDefault(Return(appsForState));
+
+        ON_CALL(*pNewAppHandler, isActiveProcess(_))
+                .WillByDefault(Return(true));
+        ON_CALL(*pActiveAppHandler, isActiveProcess(_))
+                .WillByDefault(Return(true));
     }
 
     std::unique_ptr<ManifestReaderMock> manifestMock =
@@ -734,7 +739,10 @@ TEST_F(ExecutionManagerTest, ShouldTransitToNewStateWhenAppFailed)
 
     ASSERT_EQ(res.get(), StateError::K_SUCCESS);
 
-    em->setMachineState(MACHINE_STATE_LIVING);
+    res = std::async(std::launch::async, [&]()
+    {
+        return  em->setMachineState(MACHINE_STATE_LIVING);
+    });
 
     ASSERT_EQ(
                 em->getMachineState(),
@@ -761,11 +769,13 @@ TEST_F(ExecutionManagerTest, ShouldTransitToNewStateWhenAppFailedToStart)
         return  em->setMachineState(MACHINE_STATE_RUNNING);
     });
     std::this_thread::sleep_for(oneSecond);
-    em->reportApplicationState(app, AppState::kRunning);
 
     ASSERT_EQ(res.get(), StateError::K_SUCCESS);
 
-    em->setMachineState(MACHINE_STATE_LIVING);
+    res = std::async(std::launch::async, [&]()
+    {
+        return  em->setMachineState(MACHINE_STATE_RUNNING);
+    });
 
     ASSERT_EQ(
                 em->getMachineState(),

@@ -7,6 +7,7 @@
 #include <atomic>
 #include <thread>
 #include <functional>
+#include <mutex>
 
 namespace ExecutionManager
 {
@@ -18,19 +19,20 @@ using Listener = std::function<void(const std::string&)>;
 class RunningAppObserver
 {
 public:
-  RunningAppObserver(std::unique_ptr<IApplicationHandler> appHandler);
-  void observe(const std::string& app);
-  void subscribe(Listener object);
-  void detach(const std::string& app);
+    RunningAppObserver(std::unique_ptr<IApplicationHandler> appHandler);
+    void observe(const std::string& app);
+    void subscribe(Listener object);
+    void detach(const std::string& app);
 
-  virtual ~RunningAppObserver();
+    virtual ~RunningAppObserver();
 protected:
-  virtual void run(std::unique_ptr<IApplicationHandler> appHandler);
+    virtual void run(std::unique_ptr<IApplicationHandler> appHandler);
 protected:
-  std::atomic<bool> m_isRunning;
-  std::thread m_worker;
-  std::set<std::string> m_appsToObserve;
-  std::list<Listener> m_listeners;
+    std::atomic<bool> m_isRunning;
+    std::thread m_worker;
+    std::mutex m_appsMutex;
+    std::set<std::string> m_appsToObserve;
+    std::list<Listener> m_listeners;
 };
 
 }

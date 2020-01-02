@@ -42,12 +42,7 @@ bool MsmHandler::registerMsm(pid_t processId, const std::string& appName)
 
 bool MsmHandler::checkMsm(pid_t processId) const
 {
-  if (exists())
-  {
     return processId == m_msmPId;
-  }
-
-  return true;
 }
 
 pid_t MsmHandler::msmPid() const

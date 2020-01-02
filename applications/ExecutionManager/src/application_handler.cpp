@@ -19,6 +19,7 @@ ApplicationHandler::ApplicationHandler(std::unique_ptr<IOsInterface> syscalls,
 
 bool ApplicationHandler::startProcess(const std::string &serviceName)
 {
+  LOG << "WTF STARTING PROCESS " << serviceName;
   return execProcess(serviceName, SYSTEMCTL_START);
 }
 
@@ -60,6 +61,8 @@ bool ApplicationHandler::execProcess(const std::string &processName,
     return result;
   }
 
+  LOG << "WTF EXEC PROCESS " << processName << " " << action;
+
   if (!process)
   {
     std::vector<std::string> arguments =
@@ -73,7 +76,7 @@ bool ApplicationHandler::execProcess(const std::string &processName,
      
      int res = m_syscalls->execvp(SYSTEMCTL.c_str(),
                       applicationArgs.data());
-
+     LOG << "WTF EXEC ANOTHER PROCESS";
      if (res)
      {
        LOG << std::string{"Error occured creating process: "}

@@ -14,6 +14,7 @@ target_link_libraries(${TEST_NAME}_test
   gmock
   api::application_state_client
   api::machine_state_client
+  per::per_memory
   common
 )
 

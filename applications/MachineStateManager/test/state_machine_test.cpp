@@ -5,6 +5,7 @@
 #include <mocks/i_machine_state_manager_mock.hpp>
 #include <mocks/manifest_reader_mock.hpp>
 #include <mocks/socket_server_mock.hpp>
+#include <mocks/persistent_storage_mock.hpp>
 
 #include "gtest/gtest.h"
 
@@ -26,7 +27,8 @@ protected:
                     std::move(appStateClientMock),
                     std::move(machineStateClientMock),
                     std::move(manifestReaderMock),
-                    std::move(socketServerMock)};
+                    std::move(socketServerMock),
+                    std::move(storageMock)};
     }
 
    std::unique_ptr<AppStateClientMock> appStateClientMock =
@@ -39,6 +41,8 @@ protected:
            std::make_unique<NiceMock<ExecutionManager::ManifestReaderMock>>();
    std::unique_ptr<NiceMock<SocketServerMock>> socketServerMock =
            std::make_unique<NiceMock<SocketServerMock>>();
+   std::unique_ptr<NiceMock<KeyValueStorageMock>> storageMock =
+           std::make_unique<NiceMock<KeyValueStorageMock>>();
    MsmStateFactory factory;
    IMachineStateManagerMock* msmMock;
 };
@@ -73,6 +77,8 @@ TEST_F(MsmStateMachineTest, ShouldRunCallEnter)
 {
     EXPECT_CALL(*manifestReaderMock, getMachineStates())
       .WillOnce(Return(std::vector<std::string>{"start", "two", "Shuttingdown"}));
+    EXPECT_CALL(*storageMock, GetValue("state"))
+      .WillOnce(Return(ByMove(KvsType("Shuttingdown"))));
     EXPECT_CALL(*socketServerMock, getData())
       .WillOnce(Return("start"))
       .WillOnce(Return("two"))

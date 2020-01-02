@@ -7,6 +7,7 @@
 #include <constants.hpp>
 
 #include <future>
+
 #include "gtest/gtest.h"
 
 
@@ -16,43 +17,43 @@ using namespace ::testing;
 
 struct ComponentTestData
 {
-  std::string component;
-  std::string state;
-  ComponentClientReturnType status;
+    std::string component;
+    std::string state;
+    ComponentClientReturnType status;
 };
 
 
 class ExecutionManagerTest : public ::testing::Test
 {
 protected:
-  std::unique_ptr<ExecutionManager::ExecutionManager> initEm(
-          const std::vector<MachineState>& machineStates,
-          const std::map<MachineState, std::set<ProcName>>& appsForState
-          )
-  {
-    setupManifestData(machineStates, appsForState);
-    return std::make_unique<ExecutionManager::ExecutionManager>(
-                std::move(manifestMock),
-                std::move(applicationHandler),
-                std::move(client));
-  }
+    std::unique_ptr<ExecutionManager::ExecutionManager> initEm(
+            const std::vector<MachineState>& machineStates,
+            const std::map<MachineState, std::set<ProcName>>& appsForState
+            )
+    {
+        setupManifestData(machineStates, appsForState);
+        return std::make_unique<ExecutionManager::ExecutionManager>(
+                    std::move(manifestMock),
+                    std::move(applicationHandler),
+                    std::move(client));
+    }
 
-  void setupManifestData(const std::vector<MachineState>& machineStates,
-    const std::map<MachineState, std::set<ProcName>>& appsForState)
-  {
-    ON_CALL(*manifestMock, getMachineStates())
-      .WillByDefault(Return(machineStates));
+    void setupManifestData(const std::vector<MachineState>& machineStates,
+                           const std::map<MachineState, std::set<ProcName>>& appsForState)
+    {
+        ON_CALL(*manifestMock, getMachineStates())
+                .WillByDefault(Return(machineStates));
 
-    ON_CALL(*manifestMock, getStatesSupportedByApplication())
-      .WillByDefault(Return(appsForState));
-  }
+        ON_CALL(*manifestMock, getStatesSupportedByApplication())
+                .WillByDefault(Return(appsForState));
+    }
 
-  std::unique_ptr<ManifestReaderMock> manifestMock =
-    std::make_unique<NiceMock<ManifestReaderMock>>();
-  std::unique_ptr<ApplicationHandlerMock> applicationHandler =
-    std::make_unique<StrictMock<ApplicationHandlerMock>>();
-  std::unique_ptr<ExecutionManagerClient::ExecutionManagerClientMock> client =
-    std::make_unique<StrictMock<ExecutionManagerClient::ExecutionManagerClientMock>>();
+    std::unique_ptr<ManifestReaderMock> manifestMock =
+            std::make_unique<NiceMock<ManifestReaderMock>>();
+    std::unique_ptr<ApplicationHandlerMock> applicationHandler =
+            std::make_unique<StrictMock<ApplicationHandlerMock>>();
+    std::unique_ptr<ExecutionManagerClient::ExecutionManagerClientMock> client =
+            std::make_unique<StrictMock<ExecutionManagerClient::ExecutionManagerClientMock>>();
 
     const std::chrono::seconds oneSecond{1};
     const int appId{1};
@@ -81,10 +82,10 @@ ExecutionManagerTest::expectGetAndConfirmComponentState(ExecutionManager::Execut
                                                         ComponentTestData& compTestData,
                                                         const std::string& expectState)
 {
-  em.getComponentState(compTestData.component, compTestData.state);
-  em.confirmComponentState(compTestData.component, compTestData.state, compTestData.status);
+    em.getComponentState(compTestData.component, compTestData.state);
+    em.confirmComponentState(compTestData.component, compTestData.state, compTestData.status);
 
-  EXPECT_EQ(expectState, compTestData.state);
+    EXPECT_EQ(expectState, compTestData.state);
 }
 
 TEST_F(ExecutionManagerTest, ShouldSucceedToSetStartingUpMachineState)
@@ -137,60 +138,60 @@ TEST_F(ExecutionManagerTest,
 
 TEST_F(ExecutionManagerTest, ShouldReturnEmptyStateWhenNoSetStateOccured)
 {
-  const std::string emptyState{""};
+    const std::string emptyState{""};
 
-  auto em = initEm({testState}, {{testState, emptyAvailableApps}});
+    auto em = initEm({testState}, {{testState, emptyAvailableApps}});
 
-  ASSERT_EQ(
-    emptyState,
-    em->getMachineState()
-  );
+    ASSERT_EQ(
+                emptyState,
+                em->getMachineState()
+                );
 }
 
 TEST_F(ExecutionManagerTest, ShouldFailToSetInvalidMachineState)
 {
-  auto em = initEm({testState}, {{testState, emptyAvailableApps}});
+    auto em = initEm({testState}, {{testState, emptyAvailableApps}});
 
-  EXPECT_NE(
-    em->setMachineState(wrongMachineState),
-    StateError::K_SUCCESS
-  );
+    EXPECT_NE(
+                em->setMachineState(wrongMachineState),
+                StateError::K_SUCCESS
+                );
 }
 
 TEST_F(ExecutionManagerTest, ShouldSuccessfullyReportWhenNoSetStateOccured)
 {
-  auto em = initEm({testState}, {{testState, {app}}});
+    auto em = initEm({testState}, {{testState, {app}}});
 
-  em->reportApplicationState(app, AppState::kRunning);
+    em->reportApplicationState(app, AppState::kRunning);
 }
 
 TEST_F(ExecutionManagerTest, ShouldFailToSetSameMachineState)
 {
-  EXPECT_CALL(*client, confirm(StateError::K_SUCCESS));
-  auto em = initEm({testState}, {{testState, emptyAvailableApps}});
-  em->setMachineState(testState);
+    EXPECT_CALL(*client, confirm(StateError::K_SUCCESS));
+    auto em = initEm({testState}, {{testState, emptyAvailableApps}});
+    em->setMachineState(testState);
 
-  EXPECT_NE(
-    em->setMachineState(testState),
-    StateError::K_SUCCESS);
+    EXPECT_NE(
+                em->setMachineState(testState),
+                StateError::K_SUCCESS);
 
-  EXPECT_EQ(em->getMachineState(),
-            testState);
+    EXPECT_EQ(em->getMachineState(),
+              testState);
 }
 
 TEST_F(ExecutionManagerTest, ShouldTransitToNextStateWhenNoAppInBoth)
 {
-  auto em = initEm(transitionStates, {});
+    auto em = initEm(transitionStates, {});
 
-  EXPECT_CALL(*pClient, confirm(StateError::K_SUCCESS)).Times(2);
+    EXPECT_CALL(*pClient, confirm(StateError::K_SUCCESS)).Times(2);
 
-  em->setMachineState(MACHINE_STATE_RUNNING);
-  em->setMachineState(MACHINE_STATE_LIVING);
+    em->setMachineState(MACHINE_STATE_RUNNING);
+    em->setMachineState(MACHINE_STATE_LIVING);
 
-  ASSERT_EQ(
-    em->getMachineState(),
-    MACHINE_STATE_LIVING
-  );
+    ASSERT_EQ(
+                em->getMachineState(),
+                MACHINE_STATE_LIVING
+                );
 }
 
 TEST_F(ExecutionManagerTest, ShouldTransitToNextStateAndStartApp)
@@ -671,7 +672,7 @@ TEST_F(ExecutionManagerTest, ShouldSetMachineStateWithApplicationThatHasEventMod
     EXPECT_CALL(*pClient, SetComponentState(setState, componentTestData.component));
     EXPECT_CALL(*pClient, confirm(StateError::K_SUCCESS));
   }
-  
+
   auto res = std::async(std::launch::async, [&]()
   {
       return em->setMachineState(MACHINE_STATE_SUSPEND);
@@ -692,4 +693,52 @@ TEST_F(ExecutionManagerTest, ShouldSetMachineStateWithApplicationThatHasEventMod
 
   ASSERT_EQ(res.get(), StateError::K_SUCCESS);
   ASSERT_EQ(res1.get(), StateError::K_SUCCESS);
+}
+
+TEST_F(ExecutionManagerTest, ShouldNotSetMachineState)
+{
+  auto em = initEm({},
+                   {{MACHINE_STATE_RUNNING, {additionalApp}}});
+
+  StateError result = em->setMachineState(MACHINE_STATE_RUNNING);
+
+  ASSERT_EQ(result, StateError::K_INVALID_STATE);
+}
+
+TEST_F(ExecutionManagerTest, ShouldNotTransitToInvalidNextState)
+{
+  std::string invalidState = "invalidState";
+
+  ComponentTestData componentTestData = {};
+  componentTestData.component = app;
+
+  auto em = initEm(transitionStates,
+                   {{MACHINE_STATE_RUNNING, {app}},
+                    {invalidState, {additionalApp}}});
+
+  {
+    InSequence seq;
+    EXPECT_CALL(*pAppHandler, startProcess(app));
+    EXPECT_CALL(*pClient, confirm(StateError::K_SUCCESS));
+  }
+
+  auto res = std::async(std::launch::async, [&]()
+  {
+      return  em->setMachineState(MACHINE_STATE_RUNNING);
+  });
+  std::this_thread::sleep_for(oneSecond);
+
+  em->registerComponent(componentTestData.component, StateUpdateMode::K_POLL);
+  em->reportApplicationState(app, AppState::kRunning);
+  expectGetAndConfirmComponentState(*em, componentTestData, COMPONENT_STATE_ON);
+
+  ASSERT_EQ(res.get(), StateError::K_SUCCESS);
+  ASSERT_EQ(componentTestData.status, ComponentClientReturnType::K_SUCCESS);
+
+  auto res1 = std::async(std::launch::async, [&]()
+  {
+      return  em->setMachineState(invalidState);
+  });
+
+  ASSERT_EQ(res1.get(), StateError::K_INVALID_STATE);
 }

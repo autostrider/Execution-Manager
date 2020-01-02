@@ -13,19 +13,19 @@ RunningAppObserver::RunningAppObserver(std::unique_ptr<IApplicationHandler> appH
 
 void RunningAppObserver::detach(const std::string& app)
 {
-//    std::lock_guard<std::mutex> lk{m_appsMutex};
+    std::lock_guard<std::mutex> lk{m_appsMutex};
     m_appsToObserve.erase(app);
 }
 
 void RunningAppObserver::observe(const std::string& app)
 {
-//    std::lock_guard<std::mutex> lk{m_appsMutex};
+    std::lock_guard<std::mutex> lk{m_appsMutex};
     m_appsToObserve.insert(app);
 }
 
 void RunningAppObserver::subscribe(Listener object)
 {
-//    std::lock_guard<std::mutex> lk{m_appsMutex};
+    std::lock_guard<std::mutex> lk{m_appsMutex};
     m_listeners.push_back(object);
 }
 

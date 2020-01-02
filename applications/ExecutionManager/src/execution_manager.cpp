@@ -68,12 +68,13 @@ bool ExecutionManager::startApplicationsForState()
 
     if (allowedApps != m_allowedProcessesForState.cend())
     {
-//        std::lock_guard<std::mutex> ls{m_activeProcessesMutex};
         for (const auto& executableToStart: allowedApps->second)
         {
+            std::unique_lock<std::mutex> ls{m_activeProcessesMutex};
             if (m_activeProcesses.find(executableToStart) ==
                     m_activeProcesses.cend())
             {
+                ls.unlock();
                 appsToBeStarted.push_back(executableToStart);
             }
         }
@@ -124,7 +125,7 @@ void ExecutionManager::killProcessesForState()
 {
     auto allowedApps = m_allowedProcessesForState.find(m_pendingState);
 
-//    std::lock_guard<std::mutex> ls{m_activeProcessesMutex};
+    std::lock_guard<std::mutex> ls{m_activeProcessesMutex};
     for (auto app = m_activeProcesses.cbegin();
          app != m_activeProcesses.cend();
          app++)
@@ -181,7 +182,7 @@ void ExecutionManager::changeComponentsState()
         m_currentComponentState = COMPONENT_STATE_ON;
     }
 
-//    std::lock_guard<std::mutex> lk(m_componentPendingConfirmsMutex);
+    std::lock_guard<std::mutex> lk(m_componentPendingConfirmsMutex);
     for(auto& component : m_registeredComponents)
     {
         m_componentPendingConfirms.emplace(component);
@@ -203,7 +204,7 @@ ExecutionManager::reportApplicationState(
     {
         m_runningAppsObserver.detach(appName);
         {
-//            std::lock_guard<std::mutex> lk(m_activeProcessesMutex);
+            std::lock_guard<std::mutex> lk(m_activeProcessesMutex);
             m_activeProcesses.erase(appName);
         }
     }
@@ -213,7 +214,7 @@ ExecutionManager::reportApplicationState(
         m_initializingAppsObserver.detach(appName);
         LOG << "WTF 1";
         {
-//            std::lock_guard<std::mutex> lk(m_activeProcessesMutex);
+            std::lock_guard<std::mutex> lk(m_activeProcessesMutex);
             m_activeProcesses.insert(appName);
             LOG << "WTF 2";
         }
@@ -300,7 +301,7 @@ ExecutionManager::setMachineState(std::string state)
          << m_currentState << ".";
 
     {
-//        std::lock_guard<std::mutex> lk{m_failedAppsMutex};
+        std::lock_guard<std::mutex> lk{m_failedAppsMutex};
         m_failedApps.clear();
     }
 
@@ -345,8 +346,10 @@ void ExecutionManager::confirmComponentState
             << static_cast<int>(status) << ".";
     }
     else {
-//        std::lock_guard<std::mutex> lk(m_componentPendingConfirmsMutex);
+        {
+        std::lock_guard<std::mutex> lk(m_componentPendingConfirmsMutex);
         m_componentPendingConfirms.erase(component);
+    }
         m_componentConfirmsReceived = m_componentPendingConfirms.empty();
     }
 }
@@ -354,7 +357,7 @@ void ExecutionManager::confirmComponentState
 void ExecutionManager::removeFailedToStartApp(const ProcName& app)
 {
     {
-//        std::lock_guard<std::mutex> lk{m_failedAppsMutex};
+       std::lock_guard<std::mutex> lk{m_failedAppsMutex};
         m_failedApps.insert(app);
     }
     m_initializingAppsObserver.detach(app);
@@ -363,7 +366,7 @@ void ExecutionManager::removeFailedToStartApp(const ProcName& app)
 void ExecutionManager::removeFailedApp(const ProcName& app)
 {
     {
-//        std::lock_guard<std::mutex> ls{m_activeProcessesMutex};
+        std::lock_guard<std::mutex> ls{m_activeProcessesMutex};
         m_activeProcesses.erase(app);
     }
     m_runningAppsObserver.detach(app);

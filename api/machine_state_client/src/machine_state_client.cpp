@@ -117,7 +117,7 @@ MachineStateClient::SetMachineState(string state, std::uint32_t timeout)
       {
         return _result;
       }
-    }, exceptionLambda).wait(m_client.getWaitScope());
+    }).wait(m_client.getWaitScope());
 
   return result;
 }

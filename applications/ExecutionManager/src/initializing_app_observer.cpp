@@ -17,14 +17,27 @@ void InitializingAppObserver::run(std::unique_ptr<IApplicationHandler> appHandle
         constexpr int timesToPollApps = 6;
         constexpr std::chrono::seconds oneSecond{1};
         std::this_thread::sleep_for(oneSecond);
+
+
+
+        std::string tmp;
+
+        for (const auto& app : m_appsToObserve)
+        {
+          tmp +=   "\"" + app + "\", ";
+        }
+        LOG << "EROSBEK m_appsToObserve size : " << m_appsToObserve.size() << ", contents : " << tmp;
+        tmp.clear();
+
         for (const auto& app : m_appsToObserve)
         {
             bool started = m_appsToObserve.empty();
+          
             for (int i = 0; i < timesToPollApps; ++i)
             {
                 if (appHandler->isActiveProcess(app))
                 {
-                    LOG << "WTF APP " << app << " ACTIVE";
+                    //LOG << "WTF APP " << "\"" << app  << "\""<< " ACTIVE";
                     started = true;
                     break;
                 }
@@ -32,7 +45,7 @@ void InitializingAppObserver::run(std::unique_ptr<IApplicationHandler> appHandle
 
             if (!started)
             {
-                LOG << "WTF APP NOT STARTED" << app;
+                LOG << "WTF APP NOT STARTED, listeners size = " << m_listeners.size() << app;
 //                std::lock_guard<std::mutex> lk{m_appsMutex};
                 for (const auto& listener: m_listeners)
                 {

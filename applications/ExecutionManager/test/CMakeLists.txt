@@ -12,7 +12,6 @@ target_link_libraries(${TEST_NAME}_test
   gtest
   gmock
   gtest_main
-  gmock
   nlohmann_json::nlohmann_json
   api::application_state_client
   api::machine_state_client

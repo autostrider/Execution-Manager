@@ -2,7 +2,6 @@
 
 #include <thread>
 #include <chrono>
-#include <logger.hpp>
 
 using std::string;
 

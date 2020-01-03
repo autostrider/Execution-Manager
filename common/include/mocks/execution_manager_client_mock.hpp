@@ -15,6 +15,7 @@ class ExecutionManagerClientMock :
 {
 public:
   MOCK_METHOD(void, confirm, (StateError status));
+  MOCK_METHOD(StateManagement::ComponentClientReturnType, SetComponentState, (std::string& state, std::string& componentName));
 };
 
 } // namespace ExecutionManagerClient

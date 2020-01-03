@@ -138,7 +138,7 @@ public:
         kj::heap<ExecutionManagementTestServer>(testData));
 
       auto address = ioContext.provider->getNetwork()
-          .parseAddress(std::string{em_address})
+          .parseAddress(std::string{msm_address})
             .wait(ioContext.waitScope);
 
       auto listener = address->listen();
@@ -189,9 +189,9 @@ public:
   TestData testData;
   kj::Own<kj::PromiseFulfiller<void>> listenFulfiller;
   kj::MutexGuarded<kj::Maybe<const kj::Executor&>> executor;
-  const std::string em_address{IPC_PROTOCOL + MSM_TEST};
+  const std::string msm_address{IPC_PROTOCOL + MSM_TEST};
 
-  MachineStateClient msc{em_address};
+  MachineStateClient msc{msm_address};
 };
 
 TEST_F(MachineStateClientTest, ShouldSucceedToRegister)

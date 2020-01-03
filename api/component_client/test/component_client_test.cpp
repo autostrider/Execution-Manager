@@ -88,26 +88,46 @@ class ComponentClientTest
 		unlink(EM_SOCKET_NAME.c_str());
   }
 
+  void expectSetStateUpdateHandler();
+  void expectCheckIfAnyEventsAvailable();
+
   const uint32_t defaultTimeout{666};
 
   TestData testData;
-  api::StateUpdateMode mode = api::StateUpdateMode::kPoll;
+  api::StateUpdateMode mode = api::StateUpdateMode::K_POLL;
+  api::StateUpdateMode eventMode = api::StateUpdateMode::K_EVENT;
   std::string componentName = "TestName";
+  std::string eventComponentName = "ComponentWithEventMode";
   ExecutionManagementTestServer emServer {testData};
   
   const std::string socketName{IPC_PROTOCOL + EM_SOCKET_NAME};
   capnp::EzRpcServer server{kj::heap<ExecutionManagementTestServer>(testData), socketName}; 
 
   ComponentClient cc {componentName, mode};
+  ComponentClient ccEventMode {eventComponentName, eventMode};
 };
+
+void ComponentClientTest::expectSetStateUpdateHandler()
+{
+  std::function<void(std::string const&)> f;
+  const auto result = ccEventMode.SetStateUpdateHandler(f);
+  EXPECT_EQ(result, ComponentClientReturnType::K_SUCCESS);
+}
+
+void ComponentClientTest::expectCheckIfAnyEventsAvailable()
+{
+  ccEventMode.checkIfAnyEventsAvailable();
+}
 
 TEST_F(ComponentClientTest, ShouldSucceedToSetStateUpdateHandler)
 {
-  std::function<void(std::string const&)> f;
+  expectSetStateUpdateHandler();
+}
 
-	const auto result = cc.SetStateUpdateHandler(f);
-
-  EXPECT_EQ(result, ComponentClientReturnType::K_SUCCESS);
+TEST_F(ComponentClientTest, ShouldEnterCheckIfAnyEventsAvailable)
+{
+  expectSetStateUpdateHandler();
+  expectCheckIfAnyEventsAvailable();
 }
 
 TEST_F(ComponentClientTest, ShouldSucceedToGetComponentClientState)

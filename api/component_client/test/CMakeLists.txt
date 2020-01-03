@@ -17,13 +17,14 @@ target_link_libraries(${TEST_NAME}_test
   api::machine_state_client
   gen::execution_management
   CapnProto::capnp-rpc
+  common
 )
 
 target_compile_definitions(${TEST_NAME}_test PUBLIC -DUNIT_TEST)
 add_custom_target(${TEST_NAME}_test_run
   COMMAND ${TEST_NAME}_test `printenv TESTFLAGS`
   WORKING_DIRECTORY ${CMAKE_CURRENT_SOURCE_DIR}
-  COMMENT "Run application state client tests"
+  COMMENT "Run component client tests"
 )
 
 # =============================================
@@ -44,6 +45,7 @@ target_link_libraries(${COVERAGE_BUILD}
   api::machine_state_client
   gen::execution_management
   CapnProto::capnp-rpc
+  common
 )
 
 target_compile_definitions(${COVERAGE_BUILD} PUBLIC -DUNIT_TEST)

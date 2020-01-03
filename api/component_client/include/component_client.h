@@ -6,23 +6,39 @@
 #include <functional>
 #include <string>
 #include <map>
+#include <future>
+#include <kj/async-io.h>
+#include <capnp/rpc-twoparty.h>
 
 namespace api {
 
 using ComponentState = std::string;
 
 using ComponentClientReturnType = StateManagement::ComponentClientReturnType;
-
-enum class StateUpdateMode : uint8_t
-{
-  kPoll = 0,
-  kEvent
-};
+using StateUpdateMode = StateManagement::StateUpdateMode;
 
 enum class ComponentStates: uint8_t
 {
     kOn = 0,
     kOff
+};
+
+static const ComponentState ComponentStateKOn = "kOn";
+static const ComponentState ComponentStateKOff = "kOff";
+
+class ComponentClient;
+
+class ComponentServer
+  : public StateManagement::StateManager::Server
+{
+public:
+  using StateError = StateManagement::ComponentClientReturnType;
+  ComponentServer(std::promise<ComponentState>&);
+private:
+ ::kj::Promise<void> setComponentState(SetComponentStateContext context);
+
+private:
+  std::promise<ComponentState>& m_eventPromise;
 };
 
 class ComponentClient
@@ -35,13 +51,31 @@ public:
   ComponentClientReturnType GetComponentState (ComponentState& state) noexcept;
 
   void ConfirmComponentState (ComponentState state, ComponentClientReturnType status) noexcept;
+
+  void checkIfAnyEventsAvailable();
+
+  ~ComponentClient();
+private:  
+  void startServer();
+  bool eventReceived(std::future<ComponentState>& stateFuture);
+ 
 private:
-   capnp::EzRpcClient m_client;
+  capnp::EzRpcClient m_rpcClient;
+  const std::string m_componentName;
 
-   const std::string componentName;
+  const StateUpdateMode m_updateMode;
+  std::function<void(ComponentState const&)> m_stateUpdateHandler;
 
-   const StateUpdateMode updateMode;
-   std::function<void(ComponentState const&)> updateHandler;
+  kj::Own<kj::Thread> m_serverThread;
+  kj::Own<kj::PromiseFulfiller<void>> m_listenFulfiller;
+  kj::MutexGuarded<kj::Maybe<const kj::Executor&>> m_serverExecutor;
+  std::promise<ComponentState> m_eventPromise;
+
+  kj::Promise<void> m_serverStopPromise;
+
+  StateManagement::Client m_stateManagementCap;
+
+  kj::AsyncIoProvider::PipeThread m_event;
 };
 
 } // namespace api

@@ -22,7 +22,8 @@ public:
     AdaptiveApp(std::unique_ptr<api::IStateFactory> factory,
                 std::unique_ptr<api::IApplicationStateClientWrapper> appClient,
                 std::unique_ptr<api::IComponentClientWrapper> compClient,
-                std::unique_ptr<IMeanCalculator> meanCalculator);
+                std::unique_ptr<IMeanCalculator> meanCalculator,
+                bool eventModeEnabled = false);
     virtual ~AdaptiveApp() override = default;
 
     void init() override;
@@ -36,11 +37,13 @@ public:
 private:
     void suspend();
     void transitToNextState(IAdaptiveApp::FactoryFunc nextState) override;
-    bool shouldChange(const api::ComponentState& state) const;
     bool isValid(const api::ComponentState& state) const;
     bool shouldResume(const api::ComponentState& state) const;
     bool shouldSuspend(const api::ComponentState& state) const;
+    void stateUpdateHandler(api::ComponentState const& state);
+    void pollComponentState();
 
+    api::ComponentClientReturnType setComponentState(api::ComponentState const& state);
     api::ComponentState m_componentState = COMPONENT_STATE_ON;
 
     std::unique_ptr<api::IStateFactory> m_factory;
@@ -48,5 +51,6 @@ private:
     std::unique_ptr<api::IApplicationStateClientWrapper> m_appClient;
     std::unique_ptr<api::IComponentClientWrapper> m_componentClient;
     std::unique_ptr<IMeanCalculator> m_meanCalculator;
+    bool m_eventModeEnabled;
 };
 #endif

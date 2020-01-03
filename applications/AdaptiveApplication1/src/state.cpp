@@ -48,7 +48,7 @@ void Run::enter()
 
 void Run::performAction()
 {
-    LOG << "Mean: " << m_app.mean() << ".";
+   LOG << "Mean: " << m_app.mean() << ".";
 }
 
 void Suspend::enter()

@@ -22,6 +22,7 @@ using ComponentState = std::string;
 using ProcName = std::string;
 using StateError = ::MachineStateManagement::StateError;
 using ComponentClientReturnType = ::StateManagement::ComponentClientReturnType;
+using StateUpdateMode = ::StateManagement::StateUpdateMode;
 using std::pair;
 
 struct ApplicationManifest;
@@ -46,7 +47,7 @@ public:
 
   StateError setMachineState(std::string state);
 
-  void registerComponent(std::string component);
+  void registerComponent(std::string component, StateUpdateMode updateMode);
 
   ComponentClientReturnType
   getComponentState(std::string component, ComponentState& state) const;
@@ -99,6 +100,7 @@ private:
 
   std::mutex m_componentPendingConfirmsMutex;
   std::set<std::string> m_componentPendingConfirms;
+  std::vector<std::string> m_componentStateUpdateSbscrs;
 
   std::unique_ptr<ExecutionManagerClient::IExecutionManagerClient> m_rpcClient;
 };

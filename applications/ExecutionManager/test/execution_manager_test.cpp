@@ -391,7 +391,7 @@ TEST_F(ExecutionManagerTest, ShouldTransitToSuspendState)
       return em->setMachineState(MACHINE_STATE_RUNNING);
   });
   std::this_thread::sleep_for(oneSecond);
-  em->registerComponent(componentTestData.component);
+  em->registerComponent(componentTestData.component, StateUpdateMode::K_POLL);
   em->reportApplicationState(app, AppState::kRunning);
   expectGetAndConfirmComponentState(*em, componentTestData, COMPONENT_STATE_ON);
   ASSERT_EQ(res.get(), StateError::K_SUCCESS);
@@ -429,7 +429,7 @@ TEST_F(ExecutionManagerTest, ShouldKillAndTransitToSuspendState)
       return em->setMachineState(MACHINE_STATE_RUNNING);
   });
   std::this_thread::sleep_for(oneSecond);
-  em->registerComponent(componentTestData.component);
+  em->registerComponent(componentTestData.component, StateUpdateMode::K_POLL);
   em->reportApplicationState(app, AppState::kRunning);
   expectGetAndConfirmComponentState(*em, componentTestData, COMPONENT_STATE_ON);
   
@@ -470,11 +470,11 @@ TEST_F(ExecutionManagerTest, ShouldKillOneProcessAndTransitToSuspendState)
       return  em->setMachineState(MACHINE_STATE_RUNNING);
   });
   std::this_thread::sleep_for(oneSecond);
-  em->registerComponent(componentTestData.component);
+  em->registerComponent(componentTestData.component, StateUpdateMode::K_POLL);
   em->reportApplicationState(app, AppState::kRunning);
   expectGetAndConfirmComponentState(*em, componentTestData, COMPONENT_STATE_ON);
 
-  em->registerComponent(componentTestDataForAdditionalApp.component);
+  em->registerComponent(componentTestDataForAdditionalApp.component, StateUpdateMode::K_POLL);
   em->reportApplicationState(additionalApp, AppState::kRunning);
   expectGetAndConfirmComponentState(*em, componentTestDataForAdditionalApp, COMPONENT_STATE_ON);
   ASSERT_EQ(res.get(), StateError::K_SUCCESS);
@@ -514,7 +514,7 @@ TEST_F(ExecutionManagerTest, ShouldTransitToSuspendStateAndStartApp)
       return em->setMachineState(MACHINE_STATE_SUSPEND);
   });
   std::this_thread::sleep_for(oneSecond);
-  em->registerComponent(componentTestData.component);
+  em->registerComponent(componentTestData.component, StateUpdateMode::K_POLL);
   em->reportApplicationState(app, AppState::kRunning);
   expectGetAndConfirmComponentState(*em, componentTestData, COMPONENT_STATE_OFF);
 
@@ -541,7 +541,7 @@ TEST_F(ExecutionManagerTest, ShouldRegisterComponent)
   });
   std::this_thread::sleep_for(oneSecond);
   em->reportApplicationState(app, AppState::kRunning);
-  em->registerComponent(componentTestData.component);
+  em->registerComponent(componentTestData.component, StateUpdateMode::K_POLL);
   em->getComponentState(componentTestData.component, componentTestData.state);
 
   ASSERT_EQ(res.get(), StateError::K_SUCCESS);
@@ -592,7 +592,7 @@ TEST_F(ExecutionManagerTest, ShouldGetComponentStateWhenComponentRegistered)
       return  em->setMachineState(MACHINE_STATE_RUNNING);
   });
   std::this_thread::sleep_for(oneSecond);
-  em->registerComponent(componentTestData.component);
+  em->registerComponent(componentTestData.component, StateUpdateMode::K_POLL);
   em->reportApplicationState(app, AppState::kRunning);
 
   auto result = em->getComponentState(componentTestData.component, componentTestData.state);
@@ -620,7 +620,7 @@ TEST_F(ExecutionManagerTest, ShouldConfirmSuccessComponentState)
       return  em->setMachineState(MACHINE_STATE_RUNNING);
   });
   std::this_thread::sleep_for(oneSecond);
-  em->registerComponent(componentTestData.component);
+  em->registerComponent(componentTestData.component, StateUpdateMode::K_POLL);
   em->reportApplicationState(app, AppState::kRunning);
   expectGetAndConfirmComponentState(*em, componentTestData, COMPONENT_STATE_ON);
 
@@ -647,12 +647,52 @@ TEST_F(ExecutionManagerTest, ShouldConfirmSuccessComponentStateForSuspend)
   });
   std::this_thread::sleep_for(oneSecond);
 
-  em->registerComponent(componentTestData.component);
+  em->registerComponent(componentTestData.component, StateUpdateMode::K_POLL);
   em->reportApplicationState(app, AppState::kRunning);
   expectGetAndConfirmComponentState(*em, componentTestData, COMPONENT_STATE_OFF);
 
   ASSERT_EQ(res.get(), StateError::K_SUCCESS);
   ASSERT_EQ(componentTestData.status, ComponentClientReturnType::K_SUCCESS);
+}
+
+TEST_F(ExecutionManagerTest, ShouldSetMachineStateWithApplicationThatHasEventMode)
+{
+  ComponentTestData componentTestData = {};
+  componentTestData.component = app;
+  std::string setState = "kOn";
+
+  auto em = initEm({MACHINE_STATE_SUSPEND, MACHINE_STATE_RUNNING},
+                   {{MACHINE_STATE_SUSPEND, {app}},
+                    {MACHINE_STATE_RUNNING, {app}}});
+
+  {
+    InSequence seq;
+    EXPECT_CALL(*pAppHandler, startProcess(app));
+    EXPECT_CALL(*pClient, confirm(StateError::K_SUCCESS));
+    EXPECT_CALL(*pClient, SetComponentState(setState, componentTestData.component));
+    EXPECT_CALL(*pClient, confirm(StateError::K_SUCCESS));
+  }
+
+  auto res = std::async(std::launch::async, [&]()
+  {
+      return em->setMachineState(MACHINE_STATE_SUSPEND);
+  });
+  std::this_thread::sleep_for(oneSecond);
+
+  em->registerComponent(componentTestData.component, StateUpdateMode::K_EVENT);
+  em->reportApplicationState(app, AppState::kRunning);
+  expectGetAndConfirmComponentState(*em, componentTestData, COMPONENT_STATE_OFF);
+
+  auto res1 = std::async(std::launch::async, [&]()
+  {
+      return  em->setMachineState(MACHINE_STATE_RUNNING);
+  });
+  std::this_thread::sleep_for(oneSecond);
+  
+  expectGetAndConfirmComponentState(*em, componentTestData, COMPONENT_STATE_ON);
+
+  ASSERT_EQ(res.get(), StateError::K_SUCCESS);
+  ASSERT_EQ(res1.get(), StateError::K_SUCCESS);
 }
 
 TEST_F(ExecutionManagerTest, ShouldNotSetMachineState)
@@ -688,7 +728,7 @@ TEST_F(ExecutionManagerTest, ShouldNotTransitToInvalidNextState)
   });
   std::this_thread::sleep_for(oneSecond);
 
-  em->registerComponent(componentTestData.component);
+  em->registerComponent(componentTestData.component, StateUpdateMode::K_POLL);
   em->reportApplicationState(app, AppState::kRunning);
   expectGetAndConfirmComponentState(*em, componentTestData, COMPONENT_STATE_ON);
 

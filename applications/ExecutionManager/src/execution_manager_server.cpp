@@ -19,7 +19,7 @@ ExecutionManagerServer::ExecutionManagerServer
   : m_em{application},
     m_msmHandler{msmHandler}
 {
-  LOG << "Execution Manager server started..." << std::endl;
+  LOG << "Execution Manager server started...";
 
     isRunning = true;
 

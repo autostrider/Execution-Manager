@@ -1,7 +1,7 @@
 #ifndef MACHINE_STATE_CLIENT_WRAPPER_H
 #define MACHINE_STATE_CLIENT_WRAPPER_H
 
-#include <machine_state_client.h>
+#include "machine_state_client.h"
 #include <machine_state_management.capnp.h>
 
 namespace api {

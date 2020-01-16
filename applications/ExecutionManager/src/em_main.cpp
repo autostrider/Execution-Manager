@@ -41,7 +41,7 @@ int main(int argc, char **argv)
     auto listener = address->listen();
     auto listenPromise = server.listen(*listener);
 
-    server.drain().wait(io.waitScope);
+    //server.drain().wait(io.waitScope);
 
     listenPromise.wait(io.waitScope);
 

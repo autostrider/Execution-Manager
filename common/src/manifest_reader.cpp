@@ -2,9 +2,10 @@
 #include <common.hpp>
 
 #include <dirent.h>
-#include <json.hpp>
+#include <nlohmann/json.hpp>
 #include <fstream>
 #include <algorithm>
+#include <logger.hpp>
 
 namespace ExecutionManager {
 
@@ -37,6 +38,7 @@ std::map<MachineState, std::set<ProcName>> ManifestReader::getStatesSupportedByA
   {
     file = conf.pathToApplicationsFolder + "/" + file + manifestFile;
 
+    LOG << "Going to parse file : " << file;
     json content = getJsonData(file);
 
     ApplicationManifest manifest = content.get<ApplicationManifest>();

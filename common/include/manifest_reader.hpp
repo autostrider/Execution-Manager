@@ -1,11 +1,7 @@
 #ifndef MANIFEST_HANDLER_HPP
 #define MANIFEST_HANDLER_HPP
 
-#include "manifests.hpp"
 #include <i_manifest_reader.hpp>
-
-#include <string>
-#include <set>
 
 namespace ExecutionManager
 {
@@ -14,7 +10,7 @@ using MachineState = std::string;
 
 struct ManifestReaderConf
 {
-  const std::string pathToApplicationsFolder{"./bin/applications"};
+  const std::string pathToApplicationsFolder{"../applications"};
   const std::string machineManifestFilePath{"../applications/ExecutionManager/machine_manifest.json"};
 };
 

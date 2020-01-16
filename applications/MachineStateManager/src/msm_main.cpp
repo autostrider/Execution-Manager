@@ -9,7 +9,7 @@
 
 #include <keyvaluestorage.h>
 #include <kvstype.h>
-
+#include <csignal>
 #include <thread>
 #include <atomic>
 

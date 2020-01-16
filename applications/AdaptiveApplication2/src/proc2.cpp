@@ -5,7 +5,7 @@
 #include <mean_calculator.hpp>
 #include <i_application_state_client_wrapper.hpp>
 
-
+#include <csignal>
 #include <thread>
 
 static void signalHandler(int signo);

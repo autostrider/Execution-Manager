@@ -68,7 +68,7 @@ private:
 
   kj::Own<kj::Thread> m_serverThread;
   kj::Own<kj::PromiseFulfiller<void>> m_listenFulfiller;
-  kj::MutexGuarded<kj::Maybe<const kj::Executor&>> m_serverExecutor;
+  //kj::MutexGuarded<kj::Maybe<const kj::Executor&>> m_serverExecutor;
   std::promise<ComponentState> m_eventPromise;
 
   kj::Promise<void> m_serverStopPromise;

@@ -4,16 +4,15 @@
 
 #include <string>
 #include <vector>
-#include <json.hpp>
-#include <application_state_client.h>
-
+#include <nlohmann/json.hpp>
+//#include <application_state_management.capnp.h>
 
 namespace ExecutionManager
 {
 
 using nlohmann::json;
 using MachineState = std::string;
-using ApplicationState = ::ApplicationStateManagement::ApplicationState;
+//using ApplicationState = ::ApplicationStateManagement::ApplicationState;
 
 struct MachineInstanceMode
 {

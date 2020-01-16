@@ -32,6 +32,8 @@ MachineStateClient::MachineStateClient(string path)
 
 MachineStateClient::~MachineStateClient()
 {
+
+  /*
   if(m_listenFulfiller.get() == nullptr)
   {
     return;
@@ -51,6 +53,7 @@ MachineStateClient::~MachineStateClient()
   {
     m_listenFulfiller->fulfill();
   });
+  */
 }
 
 MachineStateClient::StateError
@@ -158,7 +161,7 @@ MachineStateClient::startServer()
     auto listener = address->listen();
     auto listenPromise = server.listen(*listener);
 
-    *m_serverExecutor.lockExclusive() = kj::getCurrentThreadExecutor();
+    //*m_serverExecutor.lockExclusive() = kj::getCurrentThreadExecutor();
 
     auto exitPaf = kj::newPromiseAndFulfiller<void>();
     auto exitPromise = listenPromise.exclusiveJoin(kj::mv(exitPaf.promise));

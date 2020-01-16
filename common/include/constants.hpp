@@ -1,13 +1,9 @@
 #ifndef CONSTANTS
 #define CONSTANTS
 
-#include <application_state_client.h>
-
 #include <functional>
-#include <csignal>
 #include <string>
 #include <chrono>
-#include <map>
 
 static const std::string IPC_PROTOCOL{"unix:"};
 static const std::string MSM_STATE_PROVIDER{"/tmp/data.json"};
@@ -16,7 +12,7 @@ static const std::string MSM_STATES_SERVER{"/tmp/state_setter"};
 static const std::string MSM_SOCKET_NAME{"/tmp/machine_management"};
 static const std::string COMPONENT_SOCKET_NAME{"/tmp/component_management"};
 static const std::string MSM_TEST{"/tmp/msc_test"};
-static const std::string APPLICATIONS_PATH{"./bin/applications/"};
+static const std::string APPLICATIONS_PATH{"../applications/"};
 
 constexpr std::uint32_t DEFAULT_RESPONSE_TIMEOUT{30000000};
 constexpr std::uint32_t NO_TIMEOUT{0};

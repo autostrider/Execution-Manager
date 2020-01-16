@@ -53,7 +53,7 @@ private:
 
   kj::Own<kj::Thread> m_serverThread;
   kj::Own<kj::PromiseFulfiller<void>> m_listenFulfiller;
-  kj::MutexGuarded<kj::Maybe<const kj::Executor&>> m_serverExecutor;
+  //kj::MutexGuarded<kj::Maybe<const kj::Executor&>> m_serverExecutor;
 
   pid_t m_pid;
   std::promise<StateError> m_promise;

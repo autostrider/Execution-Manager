@@ -1,0 +1,8 @@
+subdir('mocks')
+#subdir('AdaptiveApplication')
+subdir('ApplicationStateClient')
+#subdir('Common')
+#subdir('ComponentClient')
+subdir('ExecutionManager')
+#subdir('MachineStateClient')
+#subdir('MachineStateManager')

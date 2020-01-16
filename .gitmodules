@@ -1,9 +1,3 @@
-[submodule "tools/googletest"]
-	path = tools/googletest
-	url = https://github.com/google/googletest.git
-[submodule "tools/capnproto"]
-	path = tools/capnproto
-	url = https://github.com/capnproto/capnproto.git
-[submodule "tools/lcov"]
-	path = tools/lcov
-	url = https://github.com/linux-test-project/lcov.git
+[submodule "subprojects/json"]
+	path = subprojects/json
+	url = https://github.com/nlohmann/json.git

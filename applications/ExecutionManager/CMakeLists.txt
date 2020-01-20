@@ -6,8 +6,6 @@ project (em VERSION 1.0
 file(GLOB_RECURSE EM_SRC src/*.cpp)
 list(REMOVE_ITEM EM_SRC ${CMAKE_CURRENT_SOURCE_DIR}/src/em_main.cpp)
 
-add_subdirectory(test)
-
 add_executable(em src/em_main.cpp ${EM_SRC})
 
 target_link_libraries(em

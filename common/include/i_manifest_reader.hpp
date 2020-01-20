@@ -6,7 +6,6 @@
 
 #include <map>
 #include <set>
-#include <vector>
 
 namespace ExecutionManager
 {

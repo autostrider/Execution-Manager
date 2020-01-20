@@ -1,7 +1,7 @@
 #ifndef COMPONENT_CLIENT_WRAPPER_H
 #define COMPONENT_CLIENT_WRAPPER_H
 
-#include <component_client.h>
+#include "component_client.h"
 
 namespace api {
 

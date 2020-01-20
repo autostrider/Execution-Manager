@@ -1,9 +1,6 @@
 #ifndef IAPPLICATION_HANDLER_HPP
 #define IAPPLICATION_HANDLER_HPP
 
-#include "manifests.hpp"
-
-#include <vector>
 
 namespace ExecutionManager {
 

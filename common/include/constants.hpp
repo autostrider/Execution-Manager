@@ -1,13 +1,9 @@
 #ifndef CONSTANTS
 #define CONSTANTS
 
-#include <application_state_client.h>
-
 #include <functional>
-#include <csignal>
 #include <string>
 #include <chrono>
-#include <map>
 
 static const std::string IPC_PROTOCOL{"unix:"};
 static const std::string MSM_STATE_PROVIDER{"/tmp/data.json"};

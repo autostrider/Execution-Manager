@@ -1,0 +1,28 @@
+syntax = "proto3";
+
+import "enums.proto";
+
+package StateManagement;
+
+message registerComponent
+{
+    string component = 1;
+    enums.StateUpdateMode mode = 2;
+}
+
+message getComponentState
+{
+    string component = 1;
+}
+
+message confirmComponentState
+{
+    string component = 1;
+    string state = 2;
+    enums.ComponentClientReturnType status = 3;
+}
+
+message resultSetComponentState
+{
+    enums.ComponentClientReturnType result = 1;
+}

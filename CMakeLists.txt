@@ -18,7 +18,6 @@ endif()
 
 add_subdirectory(tools/json)
 add_subdirectory(tools/googletest)
-add_subdirectory(tools/capnproto)
 add_subdirectory(gen)
 add_subdirectory(api)
 add_subdirectory(per)

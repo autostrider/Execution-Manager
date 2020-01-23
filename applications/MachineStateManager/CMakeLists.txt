@@ -13,7 +13,7 @@ target_link_libraries(msm
       api::application_state_client
       api::machine_state_client
       per::per_memory
-      CapnProto::capnp-rpc
+      ${Protobuf_LIBRARIES}
       common
 )
 

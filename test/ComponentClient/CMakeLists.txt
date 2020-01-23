@@ -15,8 +15,8 @@ target_link_libraries(${TEST_NAME}_test
   api::application_state_client
   api::component_client
   api::machine_state_client
-  gen::execution_management
-  CapnProto::capnp-rpc
+  gen::proto_generated
+  ${Protobuf_LIBRARIES}
   common
 )
 
@@ -43,8 +43,8 @@ target_link_libraries(${COVERAGE_BUILD}
   api::application_state_client
   api::component_client
   api::machine_state_client
-  gen::execution_management
-  CapnProto::capnp-rpc
+  gen::proto_generated
+  ${Protobuf_LIBRARIES}
   common
 )
 

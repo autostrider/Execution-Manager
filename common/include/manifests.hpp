@@ -2,6 +2,7 @@
 #define MANIFESTS_HPP
 
 #include <application_state_management.capnp.h>
+//#include <application_state_management.pb.h>
 
 #include <string>
 #include <vector>

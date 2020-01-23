@@ -14,8 +14,8 @@ target_link_libraries(${TEST_NAME}_test
   gmock
   api::application_state_client
   api::machine_state_client
-  gen::execution_management
-  CapnProto::capnp-rpc
+  gen::proto_generated
+  ${Protobuf_LIBRARIES}
 )
 
 target_compile_definitions(${TEST_NAME}_test PUBLIC -DUNIT_TEST)
@@ -40,8 +40,8 @@ target_link_libraries(${COVERAGE_BUILD}
   gmock
   api::machine_state_client
   api::application_state_client
-  gen::execution_management
-  CapnProto::capnp-rpc
+  gen::proto_generated
+  ${Protobuf_LIBRARIES}
 )
 
 target_compile_definitions(${COVERAGE_BUILD} PUBLIC -DUNIT_TEST)

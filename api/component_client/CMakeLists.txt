@@ -18,6 +18,8 @@ target_link_libraries(component_client
     PUBLIC
       CapnProto::capnp-rpc
       gen::component_state_management
+      # ${Protobuf_LIBRARIES}
+      # gen::proto_generated
       common
 )
 # Specify include directory

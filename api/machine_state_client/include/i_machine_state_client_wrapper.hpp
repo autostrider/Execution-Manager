@@ -3,6 +3,7 @@
 
 #include "machine_state_client.h"
 #include <machine_state_management.capnp.h>
+//#include <machine_state_management.pb.h>
 
 namespace api {
 

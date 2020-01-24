@@ -1,0 +1,26 @@
+syntax = "proto3";
+
+package enums;
+
+enum ComponentClientReturnType
+{
+    kSuccess = 0;
+    kGeneralError = 1;
+    kPending = 2;
+    kInvalid = 3;
+    kUnchanged = 4;
+}
+
+enum StateUpdateMode
+{
+    kPoll = 0;
+    kEvent = 1;
+}
+
+enum ApplicationState
+{
+    kInitializing = 0;
+    kRunning = 1;
+    kShuttingdown = 2;
+    suspend = 3;
+}

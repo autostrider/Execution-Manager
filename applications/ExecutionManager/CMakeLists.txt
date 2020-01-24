@@ -12,8 +12,10 @@ target_link_libraries(em
     PUBLIC
     nlohmann_json::nlohmann_json
       gen::execution_management
+      # gen::proto_generated
       api::application_state_client
       CapnProto::capnp-rpc
+      # ${Protobuf_LIBRARIES}
       common
 )
 

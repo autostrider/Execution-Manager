@@ -1,0 +1,45 @@
+syntax = "proto3";
+
+import "enums.proto";
+
+package ExecutionManagement;
+
+enum StateError
+{
+    kSuccess = 0;
+    kInvalidState = 1;
+    kInvalidRequest = 2;
+    kTimeout = 3;
+}
+
+message setComponentState
+{
+    string state = 1;
+}
+
+message confirmStateTransition
+{
+    StateError result = 1;
+}
+
+message resultGetComponentState
+{
+    string state = 1;
+    enums.ComponentClientReturnType resualt = 2;
+}
+
+message resultRegisterComponent
+{
+    StateError result = 1;
+}
+
+message resultGetMachineState
+{
+    string state = 1;
+    StateError result = 2;
+}
+
+message resultSetMachineState
+{
+    StateError result = 1;
+}

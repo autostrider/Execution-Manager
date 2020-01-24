@@ -18,6 +18,8 @@ target_link_libraries(machine_state_client
     PUBLIC
       gen::machine_state_management
       CapnProto::capnp-rpc
+      # gen::proto_generated
+      # ${Protobuf_LIBRARIES}
       common
 )
 

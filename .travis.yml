@@ -16,7 +16,7 @@ before_install:
 
 install:
  - curl -L https://github.com/google/protobuf/releases/download/v3.11.2/protoc-3.11.2.tar.gz -o /tmp/protoc.tar
- - tar -xf /tmp/protoc.tar -d "$HOME"/protoc
+ - tar -xvzf /tmp/protoc.tar -d "$HOME"/protoc
  - cd protobuf-3.11.2
  - ./configure && make && sudo make install 
 

@@ -7,7 +7,6 @@
 
 #include <capnp/ez-rpc.h>
 #include <execution_management.capnp.h>
-//#include <execution_management.pb.h>
 
 #include "gtest/gtest.h"
 #include "gmock/gmock.h"

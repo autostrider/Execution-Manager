@@ -3,7 +3,6 @@
 
 #include <application_state_client.h>
 #include <application_state_management.capnp.h>
-//#include <application_state_management.pb.h>
 
 namespace api {
 

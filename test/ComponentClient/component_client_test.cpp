@@ -7,7 +7,6 @@
 #include <unistd.h>
 
 #include <execution_management.capnp.h>
-//#include <execution_management.pb.h>
 #include <capnp/rpc-twoparty.h>
 #include <kj/async-io.h>
 #include <kj/exception.c++>

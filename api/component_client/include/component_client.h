@@ -9,7 +9,6 @@
 #include <future>
 #include <kj/async-io.h>
 #include <capnp/rpc-twoparty.h>
-//#include <component_state_management.pb.h>
 
 namespace api {
 

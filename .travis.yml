@@ -20,7 +20,9 @@ install:
  - cd "$HOME"/protoc
  - pwd
  - ls -l "$HOME"/protoc/protobuf-3.11.2
- - ./configure && make && sudo make install 
+ - ./configure
+ - make
+ - sudo make install 
 
 env:
  - PATH=$HOME/protoc/bin:$PATH

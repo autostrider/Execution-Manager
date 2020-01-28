@@ -19,7 +19,7 @@ install:
  - unzip /tmp/protoc.zip -d "$HOME"/protoc
  - cd "$HOME"/protoc
  - pwd
- - ls -l "$HOME"/protoc
+ - ls -l "$HOME"/protoc/protobuf-3.11.2
  - ./configure && make && sudo make install 
 
 env:

@@ -20,14 +20,14 @@ install:
  - cd "$HOME"/protoc/protobuf-3.11.2
  - pwd
  - ls -l "$HOME"/protoc/protobuf-3.11.2
- - ./configure
- - make
- - sudo make install 
+ - ./configure && make && sudo make install 
 
 env:
  - PATH=$HOME/protoc/bin:$PATH
 
 script:
-- mkdir build
-- cd build
-- sudo cmake -GNinja .. && sudo ninja
+- cd "$HOME"
+- ls -l
+# - mkdir build
+# - cd build
+# - sudo cmake -GNinja .. && sudo ninja

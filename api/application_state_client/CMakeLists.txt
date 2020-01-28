@@ -11,7 +11,7 @@ add_library(application_state_client
 )
 # Lib target alias
 add_library(${API_NAMESPACE_NAME}::application_state_client 
-            ALIAS                  application_state_client)
+            ALIAS                  application_state_client )
 
 # Link needed libraries
 target_link_libraries(application_state_client

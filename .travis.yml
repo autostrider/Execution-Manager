@@ -17,8 +17,8 @@ before_install:
 install:
  - curl -L https://github.com/protocolbuffers/protobuf/releases/download/v3.11.2/protobuf-all-3.11.2.zip -o /tmp/protoc.zip
  - unzip /tmp/protoc.zip -d "$HOME"/protoc
- - cd "$HOME"/protoc/protobuf-3.11.2
  - pwd
+ - cd "$HOME"/protoc/protobuf-3.11.2
  - ls -l "$HOME"/protoc/protobuf-3.11.2
  - ./configure && make && sudo make install 
 
@@ -27,7 +27,7 @@ env:
 
 script:
 # - cd autostrider/Execution-Manager 
-- ls -l "$HOME"
+# - ls -l "$HOME"
 # - mkdir build
 # - cd build
 # - sudo cmake -GNinja .. && sudo ninja

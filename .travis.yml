@@ -27,7 +27,7 @@ env:
 
 script:
 - cd autostrider/Execution-Manager 
-- ls -l
+- ls -l "$HOME"
 # - mkdir build
 # - cd build
 # - sudo cmake -GNinja .. && sudo ninja

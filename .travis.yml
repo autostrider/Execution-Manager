@@ -26,8 +26,8 @@ env:
  - PATH=$HOME/protoc/bin:$PATH
 
 script:
-- cd "$HOME"
-- ls -l "$HOME"
+- cd autostrider/Execution-Manager 
+- ls -l
 # - mkdir build
 # - cd build
 # - sudo cmake -GNinja .. && sudo ninja

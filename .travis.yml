@@ -9,12 +9,12 @@ git:
   submodules: false
 
 before_install:
+- sudo apt update
 - sudo docker pull suliana/rpoto-buf-template
 - sudo docker ps -a
 - sudo docker container run -d -it suliana/rpoto-buf-template
-- apt-get update
-- apt-get install -y ninja-build
-- apt-get install cmake
+- apt install -y ninja-build
+- apt install cmake
 - git submodule update --init --remote --recursive
 
 script:

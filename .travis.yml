@@ -9,16 +9,16 @@ git:
   submodules: false
 
 before_install:
-- sudo apt-get update
-- sudo apt-get install -y ninja-build
-- sudo apt-get install cmake
-- git submodule update --init --remote --recursive
 - sudo docker pull suliana/rpoto-buf-template
 - sudo docker ps -a
 - sudo docker container run -d -it suliana/rpoto-buf-template
+- apt-get update
+- apt-get install -y ninja-build
+- apt-get install cmake
+- git submodule update --init --remote --recursive
 
 script:
 - cd /home/travis/build/autostrider/Execution-Manager
 - mkdir build
 - cd build
-- sudo cmake -GNinja .. && sudo ninja
+- cmake -GNinja .. && ninja

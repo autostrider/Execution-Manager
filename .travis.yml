@@ -4,26 +4,18 @@ compiler:
 sudo: required 
 dist: bionic
 os: linux
+services: docker
 git:
   submodules: false
 
 before_install:
-# - sudo apt-get update
+- sudo apt-get update
 - sudo apt-get install -y ninja-build
 - sudo apt-get install cmake
 - git submodule update --init --remote --recursive
-
-
-install:
- - curl -L https://github.com/protocolbuffers/protobuf/releases/download/v3.11.2/protobuf-all-3.11.2.zip -o /tmp/protoc.zip
- - unzip /tmp/protoc.zip -d "$HOME"/protoc
- - pwd
- - cd "$HOME"/protoc/protobuf-3.11.2
- - ls -l "$HOME"/protoc/protobuf-3.11.2
- - ./configure && make && sudo make install 
-
-env:
- - PATH=$HOME/protoc/bin:$PATH
+- sudo docker pull suliana/rpoto-buf-template
+- sudo docker ps -a
+- sudo docker container run -d -it suliana/rpoto-buf-template
 
 script:
 - cd /home/travis/build/autostrider/Execution-Manager

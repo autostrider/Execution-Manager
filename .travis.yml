@@ -13,7 +13,9 @@ before_install:
 - sudo apt-get install cmake
 - git submodule update --init --remote --recursive
 - curl -L https://github.com/protocolbuffers/protobuf/releases/download/v3.11.2/protobuf-all-3.11.2.tar.gz -o /tmp/protoc.tar.gz
-- tar xvzf /tmp/protoc.tar.gz -C ~/protoc
+- cd /tmp
+- ls
+- tar xvzf protoc.tar.gz -C ~/protoc
 - cd ~/protoc/protobuf-3.11.2
 - ./configure && make && sudo make install
 

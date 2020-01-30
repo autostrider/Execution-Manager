@@ -7,8 +7,6 @@ git:
 
 before_install:
 - sudo apt update
-- sudo apt install -y ninja-build
-- sudo apt install cmake
 - git submodule update --init --remote --recursive
 - sudo docker pull suliana/rpoto-buf-template
 - sudo docker ps -a

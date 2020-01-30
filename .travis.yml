@@ -9,8 +9,8 @@ before_install:
 - sudo apt update
 - git submodule update --init --remote --recursive
 - sudo docker pull suliana/rpoto-buf-template
-- sudo docker ps -a
-- sudo docker container run -d -it suliana/rpoto-buf-template
+
+os: suliana/rpoto-buf-template
 
 script:
 - cd /home/travis/build/autostrider/Execution-Manager

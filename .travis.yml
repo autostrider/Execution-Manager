@@ -1,7 +1,5 @@
-language: cpp
-compiler:
-  - gcc
-sudo: required
+language: cpp
+sudo: required 
 dist: bionic
 services: docker
 git:

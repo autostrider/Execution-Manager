@@ -1,19 +1,24 @@
 language: cpp
+compiler:
+  - gcc
 sudo: required 
 dist: bionic
-services: docker
+os: linux
 git:
   submodules: false
 
 before_install:
-- sudo apt update
+- sudo apt-get update
+- sudo apt-get install -y ninja-build
+- sudo apt-get install cmake
 - git submodule update --init --remote --recursive
-- sudo docker pull suliana/rpoto-buf-template
-
-os: suliana/rpoto-buf-template
+- curl -L https://github.com/protocolbuffers/protobuf/releases/download/v3.11.2/protobuf-all-3.11.2.tar.gz -o /tmp/protoc.tar.gz
+- tar xvzf /tmp/protoc.tar.gz -C ~/protoc
+- cd ~/protoc/protobuf-3.11.2
+- ./configure && make && sudo make install
 
 script:
 - cd /home/travis/build/autostrider/Execution-Manager
 - mkdir build
 - cd build
-- cmake -GNinja .. && ninja
+- sudo cmake -GNinja .. && sudo ninja

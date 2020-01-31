@@ -11,13 +11,13 @@ before_install:
 - sudo apt-get update
 - sudo apt-get install -y ninja-build
 - sudo apt-get install cmake
-- sudo ldconfig
 - git submodule update --init --remote --recursive
 - curl -L https://github.com/protocolbuffers/protobuf/releases/download/v3.11.2/protobuf-all-3.11.2.tar.gz -o /tmp/protoc.tar.gz
 - mkdir ~/protoc
 - tar xvzf /tmp/protoc.tar.gz -C ~/protoc
 - cd ~/protoc/protobuf-3.11.2
 - ./configure && make && sudo make install
+- sudo ldconfig
 
 script:
 - cd /home/travis/build/autostrider/Execution-Manager

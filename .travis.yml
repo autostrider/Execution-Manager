@@ -17,7 +17,7 @@ before_install:
 - tar xvzf /tmp/protoc.tar.gz -C ~/protoc
 - cd ~/protoc/protobuf-3.11.2
 - ./configure && make && sudo make install
-- export LD_LIBRARY_PATH=/usr/local/lib
+- sudo ldconfig
 
 script:
 - cd /home/travis/build/autostrider/Execution-Manager

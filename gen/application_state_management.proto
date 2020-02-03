@@ -1,0 +1,11 @@
+syntax = "proto3";
+
+import "enums.proto";
+
+package ApplicationStateManagement;
+
+message registerComponent
+{
+    string appName = 1;
+    enums.ApplicationState state = 2;
+}

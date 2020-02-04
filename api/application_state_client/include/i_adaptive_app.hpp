@@ -1,6 +1,8 @@
 #ifndef IADAPTIVE_APP_HPP
 #define IADAPTIVE_APP_HPP
 
+#include <application_state_client.h>
+
 #include <functional>
 #include <vector>
 #include <memory>

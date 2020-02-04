@@ -3,6 +3,7 @@ project(socket_handler VERSION 0.0.1 LANGUAGES C CXX)
 
 # Collect all source files into variable
 file(GLOB_RECURSE SH_SRC src/*.cpp)
+SET(CMAKE_CXX_FLAGS -pthread)
 
 # Create major target
 add_library(socket_handler
@@ -13,12 +14,14 @@ add_library(socket_handler
 add_library(${API_NAMESPACE_NAME}::socket_handler
         ALIAS                  socket_handler)
 
+
 # Link needed libraries
 target_link_libraries(socket_handler
         PUBLIC
+        CapnProto::capnp-rpc
         common
         )
-
+add_executable(socket  src/socket.cpp  src/socket_client.cpp src/socket_server.cpp ${SS_SRC})
 # Specify include directory
 target_include_directories(socket_handler
         PUBLIC

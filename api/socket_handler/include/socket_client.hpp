@@ -13,18 +13,19 @@
 class SocketClient : public Socket
 {
 private:
-   struct sockaddr_un addr_un{};
-    bool ready, connected;
+    struct sockaddr_un addr_un{};
+    int  addr_un_len;
+    bool  connected;
     std::string path;
 
-    void assignSocket(const std::string& path);
 
 public:
-   explicit SocketClient(const std::string& path);
-  
-    void connect();
-    bool isReady();
+    explicit SocketClient(const std::string& path);
+    ~SocketClient();
     bool isConnected();
+    bool sendRequest(const std::string &message);
+    int recvMessage(int fd, std::string &message) const ;
+
 };
 
 #endif //EXECUTION_MANAGER_SOCKET_CLIENT_HPP

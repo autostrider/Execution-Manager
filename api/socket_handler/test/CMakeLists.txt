@@ -12,9 +12,9 @@ target_link_libraries(${TEST_NAME}_test
         gtest
         gtest_main
         common
-#        api::machine_state_client
-#        gen::machine_state_management
-#        gen::execution_management
+        api::machine_state_client
+        gen::machine_state_management
+        gen::execution_management
         )
 
 target_compile_definitions(${TEST_NAME}_test PUBLIC -DUNIT_TEST)

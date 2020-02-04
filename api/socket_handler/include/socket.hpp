@@ -7,17 +7,13 @@ class Socket
 {
 private:
     bool fd_created;
-
 protected:
     int fd, temp_socket;
-    bool isOk();
+    bool isCreated();
 
 public:
     Socket();
-    
     ~Socket();
-    void operator>>(std::string&);
-    void operator<<(std::string&);
-    void close();
+   // void close();
 };
 #endif //EXECUTION_MANAGER_SOCKET_HPP

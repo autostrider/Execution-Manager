@@ -1,8 +1,6 @@
 #ifndef CONSTANTS
 #define CONSTANTS
 
-#include <application_state_client.h>
-
 #include <functional>
 #include <csignal>
 #include <string>
@@ -45,4 +43,10 @@ static const std::string SERVICE_EXTENSION{".service"};
 static const std::string USER{"--user"};
 static const std::string SYSTEMCTL_START{"start"};
 static const std::string SYSTEMCTL_STOP{"stop"};
+static const int TIMEOUT_FOR_SOCKET = 500;
+static const  std::size_t RECV_BUFFER_SIZE = 512;
+static const std::size_t NUMBER_RESERVED_CONNECTIONS = 16;
+
+
+
 #endif // CONSTANTS

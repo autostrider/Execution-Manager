@@ -1,11 +1,7 @@
 #ifndef MANIFEST_HANDLER_HPP
 #define MANIFEST_HANDLER_HPP
 
-#include "manifests.hpp"
 #include <i_manifest_reader.hpp>
-
-#include <string>
-#include <set>
 
 namespace ExecutionManager
 {

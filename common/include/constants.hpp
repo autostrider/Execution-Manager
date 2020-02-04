@@ -2,10 +2,8 @@
 #define CONSTANTS
 
 #include <functional>
-#include <csignal>
 #include <string>
 #include <chrono>
-#include <map>
 
 static const std::string IPC_PROTOCOL{"unix:"};
 static const std::string MSM_STATE_PROVIDER{"/tmp/data.json"};
@@ -43,7 +41,7 @@ static const std::string SERVICE_EXTENSION{".service"};
 static const std::string USER{"--user"};
 static const std::string SYSTEMCTL_START{"start"};
 static const std::string SYSTEMCTL_STOP{"stop"};
-static const int TIMEOUT_FOR_SOCKET = 500;
+static const int SERVER_TIMEOUT = 500;
 static const  std::size_t RECV_BUFFER_SIZE = 512;
 static const std::size_t NUMBER_RESERVED_CONNECTIONS = 16;
 

@@ -1,0 +1,20 @@
+syntax = "proto3";
+
+package MachineStateManagement;
+
+message registerApp
+{
+    int32 pid = 1;
+    string appName = 2;
+}
+
+message getMachineState
+{
+    int32 pid = 1;
+}
+
+message setMachineState
+{
+    int32 pid = 1;
+    string state = 2;
+}

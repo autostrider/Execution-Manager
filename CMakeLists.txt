@@ -24,6 +24,7 @@ add_subdirectory(api)
 add_subdirectory(per)
 add_subdirectory(applications)
 add_subdirectory(common)
+add_subdirectory(test)
 
 # =============================================
 # Coverage

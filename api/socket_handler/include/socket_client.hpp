@@ -8,7 +8,6 @@
 #include <sys/types.h>
 #include <sys/un.h>
 #include <unistd.h>
-#include <cstring>
 
 class SocketClient : public Socket
 {

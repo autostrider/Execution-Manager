@@ -1,7 +1,7 @@
 cmake_minimum_required(VERSION 3.9)
 project (socket_handler_test)
 
-set(TEST_NAME socket_handler)
+set(TEST_NAME socket_handler_test)
 
 file(GLOB_RECURSE SRCS *.cpp)
 

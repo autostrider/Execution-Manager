@@ -1,7 +1,6 @@
 #include "../include/socket.hpp"
 #include <unistd.h>
 #include <sys/socket.h>
-#include <logger.hpp>
 
 
 Socket::Socket() : fd_created(false)//, temp_socket(0)
@@ -24,11 +23,3 @@ bool Socket::isCreated()
 {
     return fd_created;
 }
-
-//void Socket::close()
-//{
-//    if (temp_socket) {
-//        ::close(temp_socket);
-//    }
-//    temp_socket=0;
-//}

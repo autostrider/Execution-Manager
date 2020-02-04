@@ -1,9 +1,8 @@
 #include "../include/socket_server.hpp"
-#include "../../../common/include/constants.hpp"
+#include <constants.hpp>
 #include <iostream>
 #include <zconf.h>
 #include <fcntl.h>
-
 
 SocketServer::SocketServer(const std::string &path) : Socket(), isRunning(false), path(path) {
     if (isCreated()) {
@@ -11,9 +10,9 @@ SocketServer::SocketServer(const std::string &path) : Socket(), isRunning(false)
         path.copy(addr_un.sun_path, path.size() + 1);
         addr_un_len = sizeof(addr_un);
         if (::bind(fd, (struct sockaddr *) &addr_un, addr_un_len) == -1)
-            perror("error on bind()");
+            LOG << "SocketServer: error on bind()";
         if (::listen(fd, 1) == -1)
-            perror("error on listen()");
+            LOG << "SocketServer: error on listen()";
     }
 }
 
@@ -21,22 +20,22 @@ SocketServer::~SocketServer()
 {
     stop();
     if (::close(fd) == -1)
-        perror("error on close()");
+      LOG << "SocketServer: error on close()";
     if (unlink(path.c_str()) == -1)
-        perror(" error on remove()");
+        LOG << " SocketServer: error on unlink()";
 }
 
 
 
 bool SocketServer::accept() {
-    temp_socket = ::accept(fd, (struct sockaddr *) &addr_un, (socklen_t *) &addr_un_len);
+   int temp_socket = ::accept(fd, (struct sockaddr *) &addr_un, (socklen_t *) &addr_un_len);
 
     if (temp_socket < 0) {
-        perror("error on accept()");
+        LOG << "SocketServer: error on accept()";
         return false;
     }
     if (fcntl(temp_socket, F_SETFL, O_NONBLOCK) == -1) {
-        perror("error on fcntl()");
+        LOG << "SocketServer: error on fcntl()";
         return false;
     }
     activeConnections.push_back({temp_socket, POLLIN, 0});
@@ -74,12 +73,12 @@ void SocketServer::onRunning() {
 
     while (isRunning){
         int   poolResult = poll(
-                activeConnections.data(), activeConnections.size(), TIMEOUT_FOR_SOCKET);
+                activeConnections.data(), activeConnections.size(), SERVER_TIMEOUT);
         switch (poolResult) {
             case -1:
-                perror("error on poll()");
+                LOG << "SocketServer: error on poll()";
                 return;
-            case 0:// timeout
+            case 0:LOG <<"SocketServer: timeout";
                 continue;
             default:
                 break;
@@ -88,10 +87,7 @@ void SocketServer::onRunning() {
             activeConnections[0].revents = 0;
             --poolResult;
             accept();
-            if (accept())
-                std::cout << "Client connected successfully";
-
-        }
+         }
 
         for (auto it = activeConnections.begin() + 1; it != activeConnections.end() && poolResult > 0; ) {
             if (it->revents & POLLIN) {

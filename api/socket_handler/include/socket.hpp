@@ -2,18 +2,18 @@
 #define EXECUTION_MANAGER_SOCKET_HPP
 
 #include <string>
+#include <logger.hpp>
 
 class Socket
 {
 private:
     bool fd_created;
 protected:
-    int fd, temp_socket;
+    int fd;
     bool isCreated();
 
 public:
     Socket();
     ~Socket();
-   // void close();
 };
 #endif //EXECUTION_MANAGER_SOCKET_HPP

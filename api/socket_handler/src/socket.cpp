@@ -3,23 +3,23 @@
 #include <sys/socket.h>
 
 
-Socket::Socket() : fd_created(false)//, temp_socket(0)
+Socket::Socket() : m_fdcreated(false)
 {
-  if  ((fd = socket(AF_UNIX, SOCK_STREAM, 0)) == -1) {
+  if  ((m_fd = socket(AF_UNIX, SOCK_STREAM, 0)) == -1) {
      LOG << " Failed to create socket";
   }
   else {
-      fd_created = true;
+      m_fdcreated = true;
   }
 }
 
 Socket::~Socket()
 {
-   if(::close(fd) == -1)
+   if(::close(m_fd) == -1)
     LOG << "Socket error on close()";
 }
 
 bool Socket::isCreated()
 {
-    return fd_created;
+    return m_fdcreated;
 }

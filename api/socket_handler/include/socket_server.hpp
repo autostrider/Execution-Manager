@@ -9,21 +9,24 @@
 #include <vector>
 #include <poll.h>
 #include <queue>
+#include <i_socket_server.hpp>
+#include "i_socket_handler.hpp"
 
-class SocketServer : public Socket
+class SocketServer : public Socket//, ISocketServer
 {
 private:
-    int  addr_un_len;
-    struct sockaddr_un addr_un {};
-    std::atomic<bool> isRunning ;
-    std::string path;
-    std::thread serverThread;
-    std::vector<pollfd> activeConnections;
-    std::queue<std::string> requests;
+    int  m_addr_len;
+    struct sockaddr_un m_addr {};
+    std::atomic<bool> m_isRunning ;
+    std::string m_path;
+    std::thread m_serverThread;
+    std::vector<pollfd> m_activeConnections;
+    std::queue<std::string> m_requests;
+    std::unique_ptr<ISocket> m_socket;
 
 public:
 
-    explicit SocketServer(const std::string& path);
+    explicit SocketServer(std::unique_ptr<ISocket> socket, const std::string& path);
     ~SocketServer();
     bool accept();
     bool run();

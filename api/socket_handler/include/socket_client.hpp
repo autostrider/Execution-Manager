@@ -12,10 +12,10 @@
 class SocketClient : public Socket
 {
 private:
-    struct sockaddr_un addr_un{};
-    int  addr_un_len;
-    bool  connected;
-    std::string path;
+    struct sockaddr_un m_addr{};
+    int  m_addr_len;
+    bool  m_connected;
+    std::string m_path;
 
 
 public:

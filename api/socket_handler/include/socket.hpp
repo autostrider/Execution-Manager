@@ -7,9 +7,9 @@
 class Socket
 {
 private:
-    bool fd_created;
+    bool m_fdcreated;
 protected:
-    int fd;
+    int m_fd;
     bool isCreated();
 
 public:

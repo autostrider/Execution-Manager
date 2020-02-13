@@ -44,6 +44,7 @@ static const std::string SYSTEMCTL_STOP{"stop"};
 static const int SERVER_TIMEOUT = 500;
 static const  std::size_t RECV_BUFFER_SIZE = 512;
 static const std::size_t NUMBER_RESERVED_CONNECTIONS = 16;
+static const std::string SOCKET_SERVER_PATH{"/tmp/server"};
 
 
 

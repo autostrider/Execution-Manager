@@ -1,7 +1,9 @@
 cmake_minimum_required(VERSION 3.9)
-project(application_state_client VERSION 0.0.1 LANGUAGES C CXX)
+project(socket_handler VERSION 0.0.1 LANGUAGES C CXX)
 # Collect all source files into variable
 file(GLOB_RECURSE SH_SRC src/*.cpp)
+
+SET(CMAKE_CXX_FLAGS -pthread)
 
 # Create major target
 add_library(socket_handler
@@ -18,6 +20,7 @@ target_link_libraries(socket_handler
         CapnProto::capnp-rpc
         common
         )
+
 # Specify include directory
 target_include_directories(socket_handler
         PUBLIC

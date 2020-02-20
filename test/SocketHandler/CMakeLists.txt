@@ -5,14 +5,16 @@ set(TEST_NAME socket_handler)
 
 file(GLOB_RECURSE SRCS *.cpp)
 
-add_executable(${TEST_NAME}_test ${SRCS} ${SOCKET_HANDLER_SRCS})
+add_executable(${TEST_NAME}_test ${SRCS} ${SH_SRCS})
 
-target_include_directories(${TEST_NAME}_test PRIVATE ${SOCKET_HANDLER_INCLUDE})
+target_include_directories(${TEST_NAME}_test PRIVATE ${EM_INCLUDE})
 target_link_libraries(${TEST_NAME}_test
         gtest
-        gmock
         gtest_main
         gmock
+        api::socket_handler
+        gen::execution_management
+        per::per_memory
         common
         )
 
@@ -28,17 +30,19 @@ add_custom_target(${TEST_NAME}_test_run
 # =============================================
 set(COVERAGE_BUILD ${TEST_NAME}_coverage_build)
 
-add_executable(${COVERAGE_BUILD} ${SRCS} ${SOCKET_HANDLER_SRCS})
+add_executable(${COVERAGE_BUILD} ${SRCS} ${SH_SRCS})
 
-target_include_directories(${COVERAGE_BUILD} PRIVATE ${SOCKET_HANDLER_INCLUDE})
+target_include_directories(${COVERAGE_BUILD} PRIVATE ${EM_INCLUDE})
 target_link_libraries(${COVERAGE_BUILD}
         gcov
         gtest
-        gmock
         gtest_main
         gmock
+        api::socket_handler
+        gen::execution_management
+        per::per_memory
         common
-        nlohmann_json::nlohmann_json
+
         )
 
 target_compile_definitions(${COVERAGE_BUILD} PUBLIC -DUNIT_TEST)

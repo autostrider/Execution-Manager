@@ -1,30 +1,24 @@
 #ifndef EXECUTION_MANAGER_SERVER_SOCKET_HPP
 #define EXECUTION_MANAGER_SERVER_SOCKET_HPP
 
-#include "i_socket.hpp"
 #include "i_server_socket.hpp"
-#include <zconf.h>
 
 
-class ServerSocket : public IServerSocket {
-public:
-    int socket(int domain, int type, int protocol) const override;
+    class ServerSocket : public IServerSocket {
+    public:
+        int socket(int domain, int type, int protocol) const override;
 
-    int fcntl(int fd, int cmd, int arg) const override;
+        int fcntl(int fd, int cmd, int arg) const override;
 
-    int bind(int sockfd, const struct sockaddr *addr, socklen_t addrlen) const override;
+        int bind(int sockfd, const struct sockaddr *addr, socklen_t addrlen) const override;
 
-    int listen(int sockfd, int backlog) const override;
+        int listen(int sockfd, int backlog) const override;
 
-    int accept(int sockfd, struct sockaddr *addr, socklen_t *addrlen) const override;
+        int accept(int sockfd, struct sockaddr *addr, socklen_t *addrlen) const override;
 
-    int close(int fd) const override;
+        int close(int fd) const override;
 
-    ssize_t recv(int sockfd, void *buf, size_t len, int flags) const override;
-
-    ssize_t send(int sockfd, const void *buf, size_t len, int flags) const override;
-
-    int remove(const char *path) const override;
-};
+        int remove(const char *path) const override;
+    };
 
 #endif //EXECUTION_MANAGER_SERVER_SOCKET_HPP

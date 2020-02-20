@@ -1,12 +1,10 @@
 #ifndef EXECUTION_MANAGER_CLIENT_SOCKET_HPP
 #define EXECUTION_MANAGER_CLIENT_SOCKET_HPP
 
-#include "i_socket.hpp"
 #include "i_client_socket.hpp"
-#include <zconf.h>
 
 
-class ClientSocket : public  IClientSocket {
+class ClientSocket : public IClientSocket {
 public:
 
     int socket(int domain, int type, int protocol) const override;

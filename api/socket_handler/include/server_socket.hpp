@@ -3,7 +3,6 @@
 
 #include "i_server_socket.hpp"
 
-
     class ServerSocket : public IServerSocket {
     public:
         int socket(int domain, int type, int protocol) const override;

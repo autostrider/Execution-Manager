@@ -19,6 +19,7 @@ target_link_libraries(common
       per::per_memory
       nlohmann_json::nlohmann_json
       gmock
+      interfaces
 )
 
 # Specify include directory

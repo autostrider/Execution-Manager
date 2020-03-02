@@ -8,6 +8,7 @@ class IState
 {
 public:
     virtual ~IState() = default;
+
     virtual void enter() = 0;
     virtual void leave() const = 0;
     virtual void performAction() = 0;

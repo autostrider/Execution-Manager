@@ -13,12 +13,12 @@ class IAdaptiveApp;
 class IStateFactory
 {
 public:
+    virtual~ IStateFactory() = default;
+
     virtual std::unique_ptr<IState> createInit(IAdaptiveApp &app) const = 0;
     virtual std::unique_ptr<IState> createRun(IAdaptiveApp &app) const = 0;
     virtual std::unique_ptr<IState> createShutDown(IAdaptiveApp &app) const = 0;
     virtual std::unique_ptr<IState> createSuspend(IAdaptiveApp &app) const = 0;
-
-    virtual~ IStateFactory() = default;
 };
 
 }

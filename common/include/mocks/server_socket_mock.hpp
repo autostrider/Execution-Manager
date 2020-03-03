@@ -1,5 +1,5 @@
-#ifndef EXECUTION_MANAGER_SERVER_SOCKET_MOCK_HPP
-#define EXECUTION_MANAGER_SERVER_SOCKET_MOCK_HPP
+#ifndef SERVER_SOCKET_MOCK_HPP
+#define SERVER_SOCKET_MOCK_HPP
 
 #include "gmock/gmock.h"
 #include "server_socket.hpp"
@@ -15,4 +15,4 @@ public:
     MOCK_METHOD(int, accept, (int sockfd, struct sockaddr *addr, socklen_t *addrlen), (const, override));
 };
 
-#endif //EXECUTION_MANAGER_SERVER_SOCKET_MOCK_HPP
+#endif //SERVER_SOCKET_MOCK_HPP

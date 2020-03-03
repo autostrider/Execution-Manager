@@ -1,8 +1,8 @@
-#include "connection.hpp"
+#include "client.hpp"
 #include <constants.hpp>
 #include <logger.hpp>
 
-    Connection::Connection(const std::string &path, std::unique_ptr<IConnection> socket)
+    Client::Client(const std::string &path, std::unique_ptr<IClientSocket> socket)
             : m_client_socket{std::move(socket)},
               m_path{path},
               m_connected{false},
@@ -13,14 +13,14 @@
     }
 
 
-    void Connection::createSocket() {
+    void Client::createSocket() {
         m_client_fd = m_client_socket->socket(AF_UNIX, SOCK_STREAM, 0);
         if (m_client_fd < 0) {
             LOG << "Error opening socket\n";
         }
     }
 
-    void Connection::connect() {
+    void Client::connect() {
 
         if (m_client_socket->connect(m_client_fd, (const struct sockaddr *) &m_addr, m_addr_len) != -1) {
             m_connected = true;
@@ -29,11 +29,11 @@
         }
     }
 
-    Connection::~Connection() {
+    Client::~Client() {
         m_client_socket->close(m_client_fd);
     }
 
-    void Connection::sendBytes(std::string &message) const {
+    void Client::sendBytes(std::string &message) const {
 
         ssize_t sendBytes = m_client_socket->send(m_client_fd, message.c_str(), message.size() + 1, MSG_NOSIGNAL);
 
@@ -41,7 +41,7 @@
             LOG << " The connection is closed by the client\n";
     }
 
-    ssize_t Connection::receive(std::string &message) const {
+    ssize_t Client::receive(std::string &message) const {
         char buffer[RECV_BUFFER_SIZE];
         ssize_t recvBytes = m_client_socket->recv(m_client_fd, buffer, RECV_BUFFER_SIZE - 1, 0);
         if (recvBytes == -1) {
@@ -53,19 +53,19 @@
         return recvBytes;
     }
 
-    int Connection::getConnectionFd() {
+    int Client::getClientFd() {
         return m_client_fd;
     }
 
-    void Connection::setConnectionFd(int fd) {
+    void Client::setClientFd(int fd) {
         m_client_fd = fd;
     }
 
-    void Connection::setConnected(bool connected) {
+    void Client::setConnected(bool connected) {
         m_connected = connected;
     }
 
-    bool Connection::isConnected() {
+    bool Client::isConnected() {
         return m_connected;
     }
 

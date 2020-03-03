@@ -2,7 +2,7 @@
 #include <gmock/gmock.h>
 #include <fcntl.h>
 #include "mocks/server_socket_mock.hpp"
-#include "mocks/connection_mock.hpp"
+#include "mocks/client_socket_mock.hpp"
 #include <server.hpp>
 #include <thread>
 #include <chrono>
@@ -31,8 +31,8 @@ protected:
 
     std::unique_ptr<ServerSocketMock> socket =
             std::make_unique<StrictMock<ServerSocketMock>>();
-    std::unique_ptr<ConnectionMock> c_socket =
-            std::make_unique<StrictMock<ConnectionMock>>();
+    std::unique_ptr<ClientSocketMock> c_socket =
+            std::make_unique<StrictMock<ClientSocketMock>>();
 
 };
 
@@ -116,7 +116,7 @@ TEST_F(SocketServerTest, ShouldSuccessfulyReadData)
     }
 
     std::unique_ptr<Server> server = std::make_unique<Server> (socketPath, std::move(socket));
-    std::unique_ptr<Connection> client =  std::make_unique<Connection>(socketPath, std::move(c_socket));
+    std::unique_ptr<Client> client =  std::make_unique<Client>(socketPath, std::move(c_socket));
 
     client->createSocket();
     server->start();

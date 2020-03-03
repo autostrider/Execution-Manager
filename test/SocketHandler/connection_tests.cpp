@@ -1,15 +1,14 @@
 #include <gtest/gtest.h>
 #include <gmock/gmock.h>
 #include "mocks/server_socket_mock.hpp"
-#include "mocks/connection_mock.hpp"
+#include "mocks/client_socket_mock.hpp"
 #include <server.hpp>
 #include <thread>
 #include <chrono>
 
-
 using namespace ::testing;
 
-class ConnectionTest: public Test
+class ClientSocketTest: public Test
 {
 protected:
     const int clientfd = 4;
@@ -18,12 +17,12 @@ protected:
 
     std::unique_ptr<ServerSocketMock> s_socket =
             std::make_unique<NiceMock<ServerSocketMock>>();
-    std::unique_ptr<ConnectionMock> c_socket =
-            std::make_unique<StrictMock<ConnectionMock>>();
+    std::unique_ptr<ClientSocketMock> c_socket =
+            std::make_unique<StrictMock<ClientSocketMock>>();
 };
 
 
-TEST_F(ConnectionTest, ShouldSuccessfulyCreateAndKillConnection)
+TEST_F(ClientSocketTest, ShouldSuccessfulyCreateAndKillConnection)
 {
     {
         InSequence sq;
@@ -31,12 +30,12 @@ TEST_F(ConnectionTest, ShouldSuccessfulyCreateAndKillConnection)
 
         EXPECT_CALL(*c_socket, close(clientfd)).WillOnce(Return(0));
     }
-    std::unique_ptr<Connection> client =  std::make_unique<Connection>(socketPath, std::move(c_socket));
+    std::unique_ptr<Client> client =  std::make_unique<Client>(socketPath, std::move(c_socket));
     client->createSocket();
 }
 
 
-TEST_F(ConnectionTest, getConnectionFd)
+TEST_F(ClientSocketTest, getConnectionFd)
 {
     {
         InSequence sq;
@@ -44,13 +43,13 @@ TEST_F(ConnectionTest, getConnectionFd)
 
         EXPECT_CALL(*c_socket, close(4)).WillOnce(Return(0));
     }
-    std::unique_ptr<Connection> client =  std::make_unique<Connection>(socketPath, std::move(c_socket));
+    std::unique_ptr<Client> client =  std::make_unique<Client>(socketPath, std::move(c_socket));
     client->createSocket();
-    ASSERT_EQ(client->getConnectionFd(), 4);
+    ASSERT_EQ(client->getClientFd(), 4);
 }
 
 
-TEST_F(ConnectionTest, setClientFd)
+TEST_F(ClientSocketTest, setClientFd)
 {
     {
         InSequence sq;
@@ -58,14 +57,14 @@ TEST_F(ConnectionTest, setClientFd)
 
         EXPECT_CALL(*c_socket, close(5)).WillOnce(Return(0));
     }
-    std::unique_ptr<Connection> client =  std::make_unique<Connection>(socketPath, std::move(c_socket));
+    std::unique_ptr<Client> client =  std::make_unique<Client>(socketPath, std::move(c_socket));
     client->createSocket();
-    client->setConnectionFd(5);
-    ASSERT_EQ(client->getConnectionFd(), 5);
+    client->setClientFd(5);
+    ASSERT_EQ(client->getClientFd(), 5);
 }
 
 
-TEST_F(ConnectionTest, IsConnectedSuccessfulyConnectToServer)
+TEST_F(ClientSocketTest, IsConnectedSuccessfulyConnectToServer)
 {
     {
         EXPECT_CALL(*c_socket, socket(AF_UNIX, SOCK_STREAM, 0)).WillOnce(Return(clientfd));
@@ -74,7 +73,7 @@ TEST_F(ConnectionTest, IsConnectedSuccessfulyConnectToServer)
         EXPECT_CALL(*c_socket, connect(_, _,_)).WillOnce(Return(0));
 
     }
-    std::unique_ptr<Connection> client =  std::make_unique<Connection>(socketPath, std::move(c_socket));
+    std::unique_ptr<Client> client =  std::make_unique<Client>(socketPath, std::move(c_socket));
     ASSERT_EQ(client->isConnected(), false);
 
     std::unique_ptr<Server> server = std::make_unique<Server> (socketPath, std::move(s_socket));
@@ -88,7 +87,7 @@ TEST_F(ConnectionTest, IsConnectedSuccessfulyConnectToServer)
 }
 
 
-TEST_F(ConnectionTest, ShouldSuccessifulySendData)
+TEST_F(ClientSocketTest, ShouldSuccessifulySendData)
 {
     std::string message = "some string";
 
@@ -99,7 +98,7 @@ TEST_F(ConnectionTest, ShouldSuccessifulySendData)
         EXPECT_CALL(*c_socket, send(clientfd, _, _, MSG_NOSIGNAL)).WillOnce(Return(1));
 
     }
-    std::unique_ptr<Connection> client =  std::make_unique<Connection>(socketPath, std::move(c_socket));
+    std::unique_ptr<Client> client =  std::make_unique<Client>(socketPath, std::move(c_socket));
     std::unique_ptr<Server> server = std::make_unique<Server> (socketPath, std::move(s_socket));
     server->start();
     client->createSocket();
@@ -109,7 +108,7 @@ TEST_F(ConnectionTest, ShouldSuccessifulySendData)
     server->stop();
 }
 
-TEST_F(ConnectionTest, ShouldSuccessifulyReceiveData)
+TEST_F(ClientSocketTest, ShouldSuccessifulyReceiveData)
 {
     std::string message = "some string";
 
@@ -122,7 +121,7 @@ TEST_F(ConnectionTest, ShouldSuccessifulyReceiveData)
 
     }
     std::unique_ptr<Server> server = std::make_unique<Server> (socketPath, std::move(s_socket));
-    std::unique_ptr<Connection> client =  std::make_unique<Connection>(socketPath, std::move(c_socket));
+    std::unique_ptr<Client> client =  std::make_unique<Client>(socketPath, std::move(c_socket));
 
     server->start();
     client->createSocket();

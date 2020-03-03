@@ -1,10 +1,9 @@
-#ifndef EXECUTION_MANAGER_CONNECTION_MOCK_HPP
-#define EXECUTION_MANAGER_CONNECTION_MOCK_HPP
-#include <client_connection.hpp>
+#ifndef CLIENT_SOCKET_MOCK_HPP
+#define CLIENT_SOCKET_MOCK_HPP
+#include <client_socket.hpp>
 #include "gmock/gmock.h"
 
-
-class ConnectionMock : public IConnection {
+class ClientSocketMock : public IClientSocket {
 
 public:
     MOCK_METHOD(int, socket, (int domain, int type, int protocol), (const, override));
@@ -14,4 +13,4 @@ public:
     MOCK_METHOD(ssize_t, send, (int sockfd, const void *buf, size_t len, int flags), (const, override));
 };
 
-#endif //EXECUTION_MANAGER_CONNECTION_MOCK_HPP
+#endif //CLIENT_SOCKET_MOCK_HPP

@@ -95,7 +95,7 @@
                     if (recvBytes == 0) {
                         LOG << "recv(): connection is closed by the client\n";
 
-                        m_server_socket->close(m_activeConnections[i]->getConnectionFd());
+                        m_server_socket->close(m_activeConnections[i]->getClientFd());
                         std::lock_guard<std::mutex> guard(m_mtx2);
                         m_activeConnections.erase(m_activeConnections.begin() + i);
                         --i;
@@ -124,8 +124,8 @@
             int result = accept();
 
             if (result > 0) {
-                auto client = std::make_unique<Connection>(SOCKET_SERVER_PATH, std::move(std::make_unique<ClientConnection>()));
-                client->setConnectionFd(result);
+                auto client = std::make_unique<Client>(SOCKET_SERVER_PATH, std::move(std::make_unique<ClientSocket>()));
+                client->setClientFd(result);
                 client->setConnected(true);
                 std::lock_guard<std::mutex> guard(m_mtx1);
                 m_activeConnections.push_back(std::move(client));

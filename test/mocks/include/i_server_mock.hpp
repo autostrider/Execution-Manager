@@ -1,6 +1,5 @@
-#ifndef EXECUTION_MANAGER_I_SERVER_MOCK_HPP
-#define EXECUTION_MANAGER_I_SERVER_MOCK_HPP
-
+#ifndef I_SERVER_MOCK_HPP
+#define I_SERVER_MOCK_HPP
 
 #include <i_server.hpp>
 #include "gmock/gmock.h"
@@ -12,4 +11,4 @@ public:
     MOCK_METHOD0(void, stop, ());
 };
 
-#endif //EXECUTION_MANAGER_I_SERVER_MOCK_HPP
+#endif //I_SERVER_MOCK_HPP

@@ -1,11 +1,10 @@
-#ifndef CLIENT_CONNECTION_HPP
-#define CLIENT_CONNECTION_HPP
+#ifndef CLIENT_SOCKET_HPP
+#define CLIENT_SOCKET_HPP
 
-#include "i_connection.hpp"
+#include "i_client_socket.hpp"
 
-class ClientConnection : public IConnection {
+class ClientSocket : public IClientSocket {
 public:
-
     int socket(int domain, int type, int protocol) const override;
 
     int connect(int fd, const sockaddr *addr, socklen_t len) const override;
@@ -17,4 +16,4 @@ public:
     int close(int fd) const override;
 };
 
-#endif //CLIENT_CONNECTION_HPP
+#endif //CLIENT_SOCKET_HPP

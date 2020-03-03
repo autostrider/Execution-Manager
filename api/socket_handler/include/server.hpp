@@ -3,9 +3,9 @@
 
 #include "i_server.hpp"
 #include "server_socket.hpp"
-#include "client_connection.hpp"
+#include "client_socket.hpp"
 #include "i_server_socket.hpp"
-#include "connection.hpp"
+#include "client.hpp"
 #include <atomic>
 #include <thread>
 #include <vector>
@@ -31,7 +31,7 @@ private:
     std::atomic<bool> m_isRunning;
     std::string m_path;
     std::thread m_serverThread, m_receiveThread;
-    std::vector<std::unique_ptr<Connection>> m_activeConnections;
+    std::vector<std::unique_ptr<Client>> m_activeConnections;
     std::mutex m_mtx1;
     std::mutex m_mtx2;
 

@@ -16,14 +16,17 @@ target_link_libraries(${TEST_NAME}_test
         gen::execution_management
         per::per_memory
         common
-        )
+        interfaces
+
+)
 
 target_compile_definitions(${TEST_NAME}_test PUBLIC -DUNIT_TEST)
 add_custom_target(${TEST_NAME}_test_run
         COMMAND ${TEST_NAME}_test `printenv TESTFLAGS`
         WORKING_DIRECTORY ${CMAKE_CURRENT_SOURCE_DIR}
         COMMENT "Run socket handler tests"
-        )
+
+)
 
 # =============================================
 # Coverage
@@ -43,7 +46,7 @@ target_link_libraries(${COVERAGE_BUILD}
         per::per_memory
         common
 
-        )
+)
 
 target_compile_definitions(${COVERAGE_BUILD} PUBLIC -DUNIT_TEST)
 target_compile_options(${COVERAGE_BUILD} PUBLIC -g -O0 -fprofile-arcs -ftest-coverage)

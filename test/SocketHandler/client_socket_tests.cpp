@@ -26,12 +26,12 @@ TEST_F(ClientSocketTest, ShouldSuccessfulyCreateAndKillConnection)
 {
     {
         InSequence sq;
-        EXPECT_CALL(*c_socket, socket(AF_UNIX, SOCK_STREAM, 0)).WillOnce(Return(clientfd));
-
-        EXPECT_CALL(*c_socket, close(clientfd)).WillOnce(Return(0));
+        EXPECT_CALL(*c_socket, socket(AF_UNIX, SOCK_STREAM, 0)).WillOnce(Return(0));
+        EXPECT_CALL(*c_socket, connect(_, _,_)).WillOnce(Return(0));
+        EXPECT_CALL(*c_socket, close(0)).WillOnce(Return(0));
     }
     std::unique_ptr<Client> client =  std::make_unique<Client>(socketPath, std::move(c_socket));
-    client->createSocket();
+    client->Client::connect();
 }
 
 
@@ -39,13 +39,13 @@ TEST_F(ClientSocketTest, getConnectionFd)
 {
     {
         InSequence sq;
-        EXPECT_CALL(*c_socket, socket(AF_UNIX, SOCK_STREAM, 0)).WillOnce(Return(clientfd));
-
-        EXPECT_CALL(*c_socket, close(4)).WillOnce(Return(0));
+        EXPECT_CALL(*c_socket, socket(AF_UNIX, SOCK_STREAM, 0)).WillOnce(Return(0));
+        EXPECT_CALL(*c_socket, connect(_, _,_)).WillOnce(Return(0));
+        EXPECT_CALL(*c_socket, close(0)).WillOnce(Return(0));
     }
     std::unique_ptr<Client> client =  std::make_unique<Client>(socketPath, std::move(c_socket));
-    client->createSocket();
-    ASSERT_EQ(client->getClientFd(), 4);
+    client->connect();
+    ASSERT_EQ(client->getClientFd(), 0);
 }
 
 
@@ -54,11 +54,11 @@ TEST_F(ClientSocketTest, setClientFd)
     {
         InSequence sq;
         EXPECT_CALL(*c_socket, socket(AF_UNIX, SOCK_STREAM, 0)).WillOnce(Return(clientfd));
-
+        EXPECT_CALL(*c_socket, connect(_, _,_)).WillOnce(Return(0));
         EXPECT_CALL(*c_socket, close(5)).WillOnce(Return(0));
     }
     std::unique_ptr<Client> client =  std::make_unique<Client>(socketPath, std::move(c_socket));
-    client->createSocket();
+    client->connect();
     client->setClientFd(5);
     ASSERT_EQ(client->getClientFd(), 5);
 }
@@ -68,7 +68,6 @@ TEST_F(ClientSocketTest, IsConnectedSuccessfulyConnectToServer)
 {
     {
         EXPECT_CALL(*c_socket, socket(AF_UNIX, SOCK_STREAM, 0)).WillOnce(Return(clientfd));
-
         EXPECT_CALL(*c_socket, close(clientfd)).WillOnce(Return(0));
         EXPECT_CALL(*c_socket, connect(_, _,_)).WillOnce(Return(0));
 
@@ -78,7 +77,6 @@ TEST_F(ClientSocketTest, IsConnectedSuccessfulyConnectToServer)
 
     std::unique_ptr<Server> server = std::make_unique<Server> (socketPath, std::move(s_socket));
     server->start();
-    client->createSocket();
     client ->connect();
     std::this_thread::sleep_for(std::chrono::milliseconds(200));
 
@@ -101,7 +99,6 @@ TEST_F(ClientSocketTest, ShouldSuccessifulySendData)
     std::unique_ptr<Client> client =  std::make_unique<Client>(socketPath, std::move(c_socket));
     std::unique_ptr<Server> server = std::make_unique<Server> (socketPath, std::move(s_socket));
     server->start();
-    client->createSocket();
     client ->connect();
     client->sendBytes(message);
     std::this_thread::sleep_for(std::chrono::milliseconds(200));
@@ -116,7 +113,6 @@ TEST_F(ClientSocketTest, ShouldSuccessifulyReceiveData)
         EXPECT_CALL(*c_socket, socket(AF_UNIX, SOCK_STREAM, 0)).WillOnce(Return(clientfd));
         EXPECT_CALL(*c_socket, close(clientfd)).WillOnce(Return(0));
         EXPECT_CALL(*c_socket, connect(_, _,_)).WillOnce(Return(0));
-
         EXPECT_CALL(*c_socket, recv(clientfd, _, _,_)).WillOnce(Return(1));
 
     }
@@ -124,9 +120,9 @@ TEST_F(ClientSocketTest, ShouldSuccessifulyReceiveData)
     std::unique_ptr<Client> client =  std::make_unique<Client>(socketPath, std::move(c_socket));
 
     server->start();
-    client->createSocket();
     client ->connect();
     client->receive(message);
     std::this_thread::sleep_for(std::chrono::milliseconds(200));
     server->stop();
 }
+

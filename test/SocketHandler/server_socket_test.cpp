@@ -118,7 +118,6 @@ TEST_F(SocketServerTest, ShouldSuccessfulyReadData)
     std::unique_ptr<Server> server = std::make_unique<Server> (socketPath, std::move(socket));
     std::unique_ptr<Client> client =  std::make_unique<Client>(socketPath, std::move(c_socket));
 
-    client->createSocket();
     server->start();
     client->connect();
 

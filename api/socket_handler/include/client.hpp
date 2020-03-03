@@ -23,8 +23,6 @@ public:
 
     void sendBytes(std::string &message) const;
 
-    void createSocket();
-
     void connect();
 
     ssize_t receive(std::string &message) const;
@@ -35,6 +33,7 @@ private:
     sockaddr_un m_addr;
     int m_client_fd, m_addr_len;
     std::string m_path;
+    void createSocket();
 };
 
 #endif //CLIENT_HPP

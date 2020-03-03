@@ -15,6 +15,5 @@ add_subdirectory(ComponentClient)
 add_subdirectory(ExecutionManager)
 add_subdirectory(MachineStateClient)
 add_subdirectory(MachineStateManager)
-add_subdirectory(mocks)
 add_subdirectory(SocketHandler)
 

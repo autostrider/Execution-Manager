@@ -2,6 +2,7 @@
 #define COMPONENT_CLIENT_MOCK_HPP
 
 #include <i_component_client_wrapper.hpp>
+
 #include "gmock/gmock.h"
 
 namespace api

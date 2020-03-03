@@ -17,7 +17,7 @@ target_link_libraries(${TEST_NAME}_test
         per::per_memory
         common
         interfaces
-
+        mock
 )
 
 target_compile_definitions(${TEST_NAME}_test PUBLIC -DUNIT_TEST)
@@ -45,7 +45,8 @@ target_link_libraries(${COVERAGE_BUILD}
         gen::execution_management
         per::per_memory
         common
-
+        interfaces
+        mock
 )
 
 target_compile_definitions(${COVERAGE_BUILD} PUBLIC -DUNIT_TEST)

@@ -1,8 +1,8 @@
 #include <gtest/gtest.h>
 #include <gmock/gmock.h>
 #include <fcntl.h>
-#include "mocks/server_socket_mock.hpp"
-#include "mocks/client_socket_mock.hpp"
+#include "server_socket_mock.hpp"
+#include "client_socket_mock.hpp"
 #include <server.hpp>
 #include <thread>
 #include <chrono>

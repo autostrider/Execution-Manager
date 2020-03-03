@@ -1,6 +1,6 @@
 #include <application_handler.hpp>
 
-#include <mocks/os_interface_mock.hpp>
+#include <os_interface_mock.hpp>
 
 #include <memory>
 

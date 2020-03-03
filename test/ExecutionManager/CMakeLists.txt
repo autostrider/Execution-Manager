@@ -18,6 +18,7 @@ target_link_libraries(${TEST_NAME}_test
   gen::execution_management
   CapnProto::capnp-rpc
   common
+  mock
 )
 
 target_compile_definitions(${TEST_NAME}_test PUBLIC -DUNIT_TEST)
@@ -47,6 +48,7 @@ target_link_libraries(${COVERAGE_BUILD}
   gen::execution_management
   CapnProto::capnp-rpc
   common
+  mock
 )
 
 target_compile_definitions(${COVERAGE_BUILD} PUBLIC -DUNIT_TEST)

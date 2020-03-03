@@ -1,13 +1,13 @@
 #include <machine_state_manager.hpp>
 #include <logger.hpp>
 
-#include <mocks/app_state_client_mock.hpp>
-#include <mocks/i_state_factory_mock.hpp>
-#include <mocks/i_state_mock.hpp>
-#include <mocks/machine_state_client_mock.hpp>
-#include <mocks/manifest_reader_mock.hpp>
-#include <mocks/persistent_storage_mock.hpp>
-#include <mocks/socket_server_mock.hpp>
+#include <app_state_client_mock.hpp>
+#include <i_state_factory_mock.hpp>
+#include <i_state_mock.hpp>
+#include <machine_state_client_mock.hpp>
+#include <manifest_reader_mock.hpp>
+#include <persistent_storage_mock.hpp>
+#include <socket_server_mock.hpp>
 
 #include "gtest/gtest.h"
 

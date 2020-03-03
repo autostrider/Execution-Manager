@@ -1,5 +1,5 @@
-#ifndef EXECUTION_MANAGER_I_CONNECTION_HPP
-#define EXECUTION_MANAGER_I_CONNECTION_HPP
+#ifndef I_CONNECTION_HPP
+#define I_CONNECTION_HPP
 
 #include "i_socket.hpp"
 
@@ -15,4 +15,4 @@ class IConnection : public ISocket {
         virtual ~IConnection() = default;
     };
 
-#endif //EXECUTION_MANAGER_I_CONNECTION_HPP
+#endif //I_CONNECTION_HPP

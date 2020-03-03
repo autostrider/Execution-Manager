@@ -1,5 +1,5 @@
-#ifndef EXECUTION_MANAGER_I_SERVER_HPP
-#define EXECUTION_MANAGER_I_SERVER_HPP
+#ifndef I_SERVER_HPP
+#define I_SERVER_HPP
 
     class IServer {
     public:
@@ -10,4 +10,4 @@
         virtual void stop() = 0;
     };
 
-#endif //EXECUTION_MANAGER_I_SERVER_HPP
+#endif //I_SERVER_HPP

@@ -1,5 +1,5 @@
-#ifndef EXECUTION_MANAGER_I_SERVER_SOCKET_HPP
-#define EXECUTION_MANAGER_I_SERVER_SOCKET_HPP
+#ifndef I_SERVER_SOCKET_HPP
+#define I_SERVER_SOCKET_HPP
 
 #include "i_socket.hpp"
 
@@ -19,4 +19,4 @@
         virtual ~IServerSocket() = default;
     };
 
-#endif //EXECUTION_MANAGER_I_SERVER_SOCKET_HPP
+#endif //I_SERVER_SOCKET_HPP

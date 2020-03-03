@@ -1,5 +1,5 @@
-#ifndef EXECUTION_MANAGER_SERVER_SOCKET_HPP
-#define EXECUTION_MANAGER_SERVER_SOCKET_HPP
+#ifndef SERVER_SOCKET_HPP
+#define SERVER_SOCKET_HPP
 
 #include "i_server_socket.hpp"
 
@@ -20,4 +20,4 @@
         int remove(const char *path) const override;
     };
 
-#endif //EXECUTION_MANAGER_SERVER_SOCKET_HPP
+#endif //SERVER_SOCKET_HPP

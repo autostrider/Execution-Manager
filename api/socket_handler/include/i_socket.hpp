@@ -1,5 +1,5 @@
-#ifndef EXECUTION_MANAGER_I_SOCKET_HPP
-#define EXECUTION_MANAGER_I_SOCKET_HPP
+#ifndef I_SOCKET_HPP
+#define I_SOCKET_HPP
 
 #include <sys/socket.h>
 #include <unistd.h>
@@ -16,4 +16,4 @@
     };
 
 
-#endif //EXECUTION_MANAGER_I_SOCKET_HPP
+#endif //I_SOCKET_HPP

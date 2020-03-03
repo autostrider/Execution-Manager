@@ -1,5 +1,5 @@
-#ifndef EXECUTION_MANAGER_CLIENT_CONNECTION_HPP
-#define EXECUTION_MANAGER_CLIENT_CONNECTION_HPP
+#ifndef CLIENT_CONNECTION_HPP
+#define CLIENT_CONNECTION_HPP
 
 #include "i_connection.hpp"
 
@@ -17,4 +17,4 @@ public:
     int close(int fd) const override;
 };
 
-#endif //EXECUTION_MANAGER_CLIENT_CONNECTION_HPP
+#endif //CLIENT_CONNECTION_HPP

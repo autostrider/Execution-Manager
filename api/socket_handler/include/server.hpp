@@ -1,5 +1,5 @@
-#ifndef EXECUTION_MANAGER_SERVER_HPP
-#define EXECUTION_MANAGER_SERVER_HPP
+#ifndef SERVER_HPP
+#define SERVER_HPP
 
 #include "i_server.hpp"
 #include "server_socket.hpp"
@@ -46,4 +46,4 @@ private:
     void onRunning();
 };
 
-#endif //EXECUTION_MANAGER_SERVER_HPP
+#endif //SERVER_HPP

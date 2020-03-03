@@ -1,5 +1,5 @@
-#ifndef EXECUTION_MANAGER_CONNECTION_HPP
-#define EXECUTION_MANAGER_CONNECTION_HPP
+#ifndef CONNECTION_HPP
+#define CONNECTION_HPP
 
 #include <string>
 #include <memory>
@@ -37,4 +37,4 @@ private:
     std::string m_path;
 };
 
-#endif //EXECUTION_MANAGER_CONNECTION_HPP
+#endif //CONNECTION_HPP

@@ -2,9 +2,11 @@
 #define I_SERVER_MOCK_HPP
 
 #include <i_server.hpp>
+
 #include "gmock/gmock.h"
 
-class ServerMock : public IServer {
+class ServerMock : public IServer
+{
 public:
     ServerMock() = default;
     MOCK_METHOD0(bool, start, ());

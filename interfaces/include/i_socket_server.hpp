@@ -1,5 +1,5 @@
-#ifndef I_SOCKET_SERVER_HPP
-#define I_SOCKET_SERVER_HPP
+#ifndef EXECUTION_MANAGER_I_SOCKET_SERVER_HPP
+#define EXECUTION_MANAGER_I_SOCKET_SERVER_HPP
 
 #include <string>
 
@@ -12,4 +12,4 @@ public:
   virtual ~ISocketServer() = default;
 };
 
-#endif // I_SOCKET_SERVER_HPP
+#endif // EXECUTION_MANAGER_I_SOCKET_SERVER_HPP

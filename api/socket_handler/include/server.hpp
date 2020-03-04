@@ -6,11 +6,12 @@
 #include "client_socket.hpp"
 #include "i_server_socket.hpp"
 #include "client.hpp"
+
 #include <atomic>
+#include <mutex>
 #include <thread>
 #include <vector>
 #include <sys/un.h>
-#include <mutex>
 
 
 class Server : public IServer {

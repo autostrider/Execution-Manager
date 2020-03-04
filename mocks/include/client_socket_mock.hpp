@@ -1,10 +1,12 @@
 #ifndef CLIENT_SOCKET_MOCK_HPP
 #define CLIENT_SOCKET_MOCK_HPP
+
 #include <client_socket.hpp>
+
 #include "gmock/gmock.h"
 
-class ClientSocketMock : public IClientSocket {
-
+class ClientSocketMock : public IClientSocket
+{
 public:
     MOCK_METHOD(int, socket, (int domain, int type, int protocol), (const, override));
     MOCK_METHOD(int, connect, (int fd, const sockaddr *addr, socklen_t len), (const, override));

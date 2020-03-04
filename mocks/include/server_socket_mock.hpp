@@ -1,8 +1,9 @@
 #ifndef SERVER_SOCKET_MOCK_HPP
 #define SERVER_SOCKET_MOCK_HPP
 
+#include <server_socket.hpp>
+
 #include "gmock/gmock.h"
-#include "server_socket.hpp"
 
 class ServerSocketMock : public IServerSocket {
 public:

@@ -1,9 +1,10 @@
 #ifndef CLIENT_HPP
 #define CLIENT_HPP
 
+#include "client_socket.hpp"
+
 #include <string>
 #include <memory>
-#include "client_socket.hpp"
 #include <sys/un.h>
 
 class Client {
@@ -28,12 +29,14 @@ public:
     ssize_t receive(std::string &message) const;
 
 private:
+    void createSocket();
+
+private:
     std::unique_ptr<IClientSocket> m_client_socket;
     bool m_connected;
     sockaddr_un m_addr;
     int m_client_fd, m_addr_len;
     std::string m_path;
-    void createSocket();
 };
 
 #endif //CLIENT_HPP

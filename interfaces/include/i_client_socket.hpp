@@ -1,5 +1,5 @@
-#ifndef I_CLIENT_SOCKET
-#define I_CLIENT_SOCKET
+#ifndef I_CLIENT_SOCKET_HPP
+#define I_CLIENT_SOCKET_HPP
 
 #include "i_socket.hpp"
 
@@ -13,4 +13,4 @@ public:
     virtual ssize_t send(int sockfd, const void *buf, size_t len, int flags) const = 0;
 };
 
-#endif //I_CLIENT_SOCKET
+#endif //I_CLIENT_SOCKET_HPP

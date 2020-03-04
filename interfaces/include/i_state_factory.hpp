@@ -1,5 +1,5 @@
-#ifndef ISTATEFACTORY_HPP
-#define ISTATEFACTORY_HPP
+#ifndef I_STATE_FACTORY_HPP
+#define I_STATE_FACTORY_HPP
 
 #include "i_state.hpp"
 
@@ -22,4 +22,4 @@ public:
 };
 
 }
-#endif // ISTATEFACTORY_HPP
+#endif // I_STATE_FACTORY_HPP

@@ -23,7 +23,7 @@ protected:
 };
 
 
-TEST_F(SocketServerTest, ShouldSuccessfulyCreateAndKillSocket)
+TEST_F(SocketServerTest, ShouldSuccessfulyCreateAndKillServerSocket)
 {
     {
         InSequence sq;

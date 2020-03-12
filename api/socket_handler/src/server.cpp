@@ -119,8 +119,7 @@ void Server::handleConnections()
 
 void Server::readFromSocket(std::shared_ptr<Client> connClient)
 {
-    bool emptyMes = false;
-    std::string recv = connClient->receive(emptyMes);
+    std::string recv = connClient->receive();
     
     if (connClient->getRecvBytes() == 0)
     {        
@@ -132,14 +131,7 @@ void Server::readFromSocket(std::shared_ptr<Client> connClient)
                         connClient),
             m_activeConnections.end());
     }
-    else if (connClient->getRecvBytes() < 0)
-    {
-        if (!emptyMes)
-        {
-            perror("Error on receiving data from client: ");            
-        }
-    }
-    else
+    else if (connClient->getRecvBytes() > 0)
     {
         m_sQueue.push(recv);
     }

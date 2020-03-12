@@ -9,6 +9,7 @@ add_library(interfaces INTERFACE)
 target_link_libraries(interfaces
     INTERFACE
         common
+        proto_generated
 )
 
 # Specify include directory

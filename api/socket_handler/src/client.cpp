@@ -26,9 +26,9 @@ void Client::createSocket()
 
 void Client::connect()
 {
-    if (m_client_socket->connect(m_client_fd,
+    if (0 <= m_client_socket->connect(m_client_fd,
                                  (const struct sockaddr *) &m_addr,
-                                 m_addr_len) != -1)
+                                 m_addr_len))
     {
         m_connected = true;
     }
@@ -43,16 +43,33 @@ Client::~Client()
     m_client_socket->close(m_client_fd);
 }
 
-std::string Client::receive(bool& empty)
+std::string Client::receive()
 {
     char buffer[RECV_BUFFER_SIZE];
 
     m_recvBytes = m_client_socket->recv(m_client_fd, buffer, RECV_BUFFER_SIZE - 1, 0);
-    if (m_recvBytes == -1 && errno == EWOULDBLOCK)
+    
+    if (errno == EWOULDBLOCK && m_recvBytes == -1)
     {
-        empty = true;
+        return buffer;
+    }
+    else if(m_recvBytes == -1)
+    {
+        perror("Error on receiving data from client: ");
     }
     return buffer;
+}
+
+void Client::sendMessage(const google::protobuf::Any& message)
+{
+    size_t size = message.ByteSizeLong();
+    uint8_t* data = new uint8_t[size];
+    
+    if(message.SerializeToArray(data, size))
+    {
+        m_client_socket->send(m_client_fd, data, size, 0);
+    }
+    delete[] data;
 }
 
 bool Client::isConnected() {

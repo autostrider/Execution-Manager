@@ -159,7 +159,7 @@ target_link_libraries(proto_generated
 )
 
 # Specify include directory
-target_include_directories(execution_management
+target_include_directories(proto_generated
     PUBLIC
       $<BUILD_INTERFACE:${PROTO_OUTPUT_DIR}>
       $<INSTALL_INTERFACE:${PROTO_OUTPUT_DIR}>

@@ -2,7 +2,11 @@ syntax = "proto3";
 
 import "google/protobuf/any.proto";
 
-message Tmp {
+message testMessage {
   string message = 1;
-  google.protobuf.Any registerComponent = 2;
+  google.protobuf.Any details = 2;
+}
+
+message details {
+  string mymessage = 1;
 }

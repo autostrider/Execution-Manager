@@ -2,35 +2,23 @@
 #define CLIENT_HPP
 
 #include "client_socket.hpp"
+#include <i_client.hpp>
 
 #include <string>
 #include <memory>
 #include <sys/un.h>
 
-class Client {
+class Client : public IClient
+{
 public:
 
     Client(const std::string&, std::unique_ptr<IClientSocket>);
-
     ~Client();
 
-    void connect();
-
-    template < typename T >
-    void sendMessage(const T& message)
-    {
-        size_t size = message.ByteSizeLong();
-        uint8_t* data = new uint8_t[size];
-        if(message.SerializeToArray(data, size))
-        {
-            m_client_socket->send(m_client_fd, data, size, 0);
-        }
-        delete[] data;
-    }
-
-    std::string receive(bool&);
-
-    bool isConnected();
+    void connect() override;
+    void sendMessage(const google::protobuf::Any& message) override;
+    std::string receive() override;
+    bool isConnected() override;
 
     void setClientFd(int);
     void setConnected(bool);

@@ -25,7 +25,3 @@ int ServerSocket::fcntl(int fd, int cmd, int arg) const {
 int ServerSocket::accept(int sockfd, struct sockaddr *addr, socklen_t *addrlen) const {
     return ::accept(sockfd, addr, addrlen);
 }
-
-int ServerSocket::remove(const char *path) const {
-    return std::remove(path);
-}

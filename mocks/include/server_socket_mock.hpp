@@ -12,7 +12,6 @@ public:
     MOCK_METHOD(int, fcntl, (int fd, int cmd, int arg), (const, override));
     MOCK_METHOD(int, bind, (int sockfd, const struct sockaddr *addr, socklen_t addrlen), (const, override));
     MOCK_METHOD(int, listen, (int sockfd, int backlog), (const, override));
-    MOCK_METHOD(int, remove, (const char *path), (const, override));
     MOCK_METHOD(int, accept, (int sockfd, struct sockaddr *addr, socklen_t *addrlen), (const, override));
 };
 

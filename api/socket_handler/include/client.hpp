@@ -19,13 +19,13 @@ public:
     void sendMessage(const google::protobuf::Any& message) override;
     std::string receive() override;
     bool isConnected() override;
+    ssize_t getRecvBytes() override;
 
     void setClientFd(int);
     void setConnected(bool);
     void setRecvBytes(ssize_t byte);
 
     int getClientFd();
-    ssize_t getRecvBytes();
 
 private:
     void createSocket();

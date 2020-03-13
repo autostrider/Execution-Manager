@@ -3,7 +3,7 @@
 
 #include <memory>
 
-class Client;
+class IClient;
 class IServer
 {
 public:
@@ -13,7 +13,7 @@ public:
     virtual void stop() = 0;
     virtual bool isStarted() = 0;
     virtual int acceptConnection() = 0;
-    virtual void readFromSocket(std::shared_ptr<Client>) = 0;
+    virtual void readFromSocket(std::shared_ptr<IClient>) = 0;
 };
 
 #endif //I_SERVER_HPP

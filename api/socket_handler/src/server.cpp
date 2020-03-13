@@ -19,7 +19,7 @@ Server::Server(const std::string &path, std::unique_ptr<IServerSocket> socket)
           m_serverThread{},
           m_receiveThread{},
           m_sQueue{},
-          m_clientMaker{std::make_unique<ClientMaker>()}
+          m_clientFactory{std::make_unique<ClientFactory>()}
 {
     if (m_server_fd == -1)
     {
@@ -75,7 +75,7 @@ void Server::onRunning() {
 
         if (clientFd > 0)
         {
-            auto clientConnection = m_clientMaker->makeClientPtr(clientFd);;
+            auto clientConnection = m_clientFactory->makeClient(clientFd);;
 
             const std::lock_guard<std::mutex> guard(m_mtx1);
             m_activeConnections.push_back(clientConnection);
@@ -117,7 +117,7 @@ void Server::handleConnections()
     }
 }
 
-void Server::readFromSocket(std::shared_ptr<Client> connClient)
+void Server::readFromSocket(std::shared_ptr<IClient> connClient)
 {
     std::string recv = connClient->receive();
     

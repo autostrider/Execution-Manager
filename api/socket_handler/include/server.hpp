@@ -7,7 +7,7 @@
 #include "i_server_socket.hpp"
 #include "client.hpp"
 #include <string_safe_queue.hpp>
-#include <client_maker.hpp>
+#include <client_factory.hpp>
 
 #include <atomic>
 #include <mutex>
@@ -26,7 +26,7 @@ public:
     void stop() override;
     bool isStarted() override;
     int acceptConnection() override;
-    void readFromSocket(std::shared_ptr<Client>) override;
+    void readFromSocket(std::shared_ptr<IClient>) override;
 
     std::string getQueue();
 
@@ -48,7 +48,7 @@ private:
 
     std::atomic<bool> m_isStarted;
 
-    std::vector<std::shared_ptr<Client>> m_activeConnections;
+    std::vector<std::shared_ptr<IClient>> m_activeConnections;
 
     std::thread m_serverThread, m_receiveThread;
     std::mutex m_mtx1;
@@ -56,7 +56,7 @@ private:
 
     StringSafeQueue m_sQueue;
 
-    std::unique_ptr<IClientMaker> m_clientMaker;
+    std::unique_ptr<IClientFactory> m_clientFactory;
 };
 
 #endif //SERVER_HPP

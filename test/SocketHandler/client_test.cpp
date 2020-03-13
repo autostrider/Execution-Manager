@@ -1,37 +1,45 @@
 #include <client.hpp>
 #include <client_socket_mock.hpp>
-
-#include <thread>
-#include <chrono>
+#include <constants.hpp>
 
 #include <gtest/gtest.h>
 #include <gmock/gmock.h>
 
 using namespace ::testing;
 
-class ClientSocketTest: public Test
+class ClientTest : public Test
 {
 protected:
-    const int clientfd = 4;
+    ClientTest() {}
+    ~ClientTest() noexcept(true) override {}
 
-    const std::string socketPath = "/path/to/socket";
+    void SetUp() override
+    {
+        ::unlink(SOCKET_CLIENT_PATH.c_str());
+    }
+
+    void TearDown() override
+    {
+        ::unlink(SOCKET_CLIENT_PATH.c_str());
+    }
+
+    const int clientfd = 4;
 
     std::unique_ptr<ClientSocketMock> c_socket =
             std::make_unique<StrictMock<ClientSocketMock>>();
 };
 
-
-TEST_F(ClientSocketTest, ShouldSuccessfulyCreateAndKillClientSocket)
+TEST_F(ClientTest, ShouldSuccessfulyCreateClientSocket)
 {
     {
         InSequence sq;
         EXPECT_CALL(*c_socket, socket(AF_UNIX, SOCK_STREAM, 0)).WillOnce(Return(0));
         EXPECT_CALL(*c_socket, close(0)).WillOnce(Return(0));
     }
-    std::unique_ptr<Client> client = std::make_unique<Client>(socketPath, std::move(c_socket));
+    std::unique_ptr<Client> client = std::make_unique<Client>(SOCKET_CLIENT_PATH, std::move(c_socket));
 }
 
-TEST_F(ClientSocketTest, ShouldSuccessfulyConnect)
+TEST_F(ClientTest, ShouldSuccessfulyConnecToServer)
 {
     {
         InSequence sq;
@@ -39,13 +47,13 @@ TEST_F(ClientSocketTest, ShouldSuccessfulyConnect)
         EXPECT_CALL(*c_socket, connect(_, _,_)).WillOnce(Return(0));
         EXPECT_CALL(*c_socket, close(0)).WillOnce(Return(0));
     }
-    std::unique_ptr<Client> client = std::make_unique<Client>(socketPath, std::move(c_socket));
+    std::unique_ptr<Client> client = std::make_unique<Client>(SOCKET_CLIENT_PATH, std::move(c_socket));
     client->connect();
 
     ASSERT_EQ(client->isConnected(), true);
 }
 
-TEST_F(ClientSocketTest, ShouldSuccessifulySendData)
+TEST_F(ClientTest, ShouldSuccessifulySendData)
 {
     details dt;
     dt.set_mymessage("some message");
@@ -61,12 +69,12 @@ TEST_F(ClientSocketTest, ShouldSuccessifulySendData)
         EXPECT_CALL(*c_socket, close(clientfd)).WillOnce(Return(0));
 
     }
-    std::unique_ptr<Client> client =  std::make_unique<Client>(socketPath, std::move(c_socket));
+    std::unique_ptr<Client> client =  std::make_unique<Client>(SOCKET_CLIENT_PATH, std::move(c_socket));
     client->connect();
     client->sendMessage(any);
 }
 
-TEST_F(ClientSocketTest, ShouldSuccessifulyReceiveData)
+TEST_F(ClientTest, ShouldSuccessifulyReceiveData)
 {
     {
         InSequence sq;
@@ -74,7 +82,7 @@ TEST_F(ClientSocketTest, ShouldSuccessifulyReceiveData)
         EXPECT_CALL(*c_socket, recv(clientfd, _, _,_)).WillOnce(Return(13));
         EXPECT_CALL(*c_socket, close(clientfd)).WillOnce(Return(0));
     }
-    std::unique_ptr<Client> client =  std::make_unique<Client>(socketPath, std::move(c_socket));
+    std::unique_ptr<Client> client =  std::make_unique<Client>(SOCKET_CLIENT_PATH, std::move(c_socket));
 
     client->receive();
 

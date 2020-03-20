@@ -5,7 +5,7 @@
 
 #include "gmock/gmock.h"
 
-class ClientSocketMock : public IClientSocket
+class IClientSocketMock : public IClientSocket
 {
 public:
     MOCK_METHOD(int, socket, (int domain, int type, int protocol), (const, override));

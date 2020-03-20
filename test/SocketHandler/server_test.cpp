@@ -1,7 +1,7 @@
 #include <server.hpp>
 #include <server_socket_mock.hpp>
-#include <client_mock.hpp>
-#include <client_socket_mock.hpp>
+#include <connection_mock.hpp>
+#include <connection_factory_mock.hpp>
 #include <constants.hpp>
 
 #include <gtest/gtest.h>
@@ -9,53 +9,29 @@
 
 using namespace ::testing;
 
-class MyClient
-{
-public:
-    MyClient() {}
-    ~MyClient() = default;
-
-    void expectReadDataFromClient(std::string, int);
-
-public:
-    std::shared_ptr<ClientMock> clientShPtr =
-            std::make_shared<StrictMock<ClientMock>>();
-};
-
-void MyClient::expectReadDataFromClient(std::string message, int size)
-{
-    EXPECT_CALL(*clientShPtr, receive()).WillOnce(Return(message));
-    EXPECT_CALL(*clientShPtr, getRecvBytes()).WillRepeatedly(Return(size));
-}
 
 class ServerTest : public Test
 {
 protected:
-    ServerTest() {}
-    ~ServerTest() noexcept(true) override {}
-
-    void SetUp() override
-    {
-        ::unlink(SOCKET_SERVER_PATH.c_str());   
-    }
-
-    void TearDown() override
-    {
-        ::unlink(SOCKET_SERVER_PATH.c_str());
-    }
-
     void expectCreateServer();
-    void expectAcceptConnection();
     void expectCloseServerSocket();
+    void expectCreatingAcceptedConnection();
+    void expectReadData(std::string, const int);
     
 protected:
     const int serverfd = 4;
     const int clientfd = 3;
 
-    std::unique_ptr<ServerSocketMock> socket =
-            std::make_unique<StrictMock<ServerSocketMock>>();
+    const std::string socketPath = "/path/to/socket";
 
-    std::unique_ptr<MyClient> myClient = std::make_unique<MyClient>();
+    std::unique_ptr<StrictMock<IServerSocketMock>> socket =
+            std::make_unique<StrictMock<IServerSocketMock>>();
+    std::shared_ptr<StrictMock<ConnectionMock>> connection =
+            std::make_unique<StrictMock<ConnectionMock>>();
+    std::unique_ptr<StrictMock<IConnectionFactoryMock>> connFactory =
+            std::make_unique<StrictMock<IConnectionFactoryMock>>();
+
+    ConnectionMock* connectionPtr = connection.get();
 };
 
 void ServerTest::expectCreateServer()
@@ -67,15 +43,21 @@ void ServerTest::expectCreateServer()
     EXPECT_CALL(*socket, listen(serverfd, _)).WillOnce(Return(1));
 }
 
-void ServerTest::expectAcceptConnection()
-{
-    EXPECT_CALL(*socket, accept(serverfd, _, _)).WillOnce(Return(clientfd));
-    EXPECT_CALL(*socket, fcntl(clientfd, _, _)).WillOnce(Return(0));
-}
-
 void ServerTest::expectCloseServerSocket()
 {
     EXPECT_CALL(*socket, close(serverfd)).WillOnce(Return(0));
+}
+
+void ServerTest::expectCreatingAcceptedConnection()
+{
+    EXPECT_CALL(*connFactory, makeConnection(_, serverfd)).WillRepeatedly(Return(connection));
+    EXPECT_CALL(*connectionPtr, creatAcceptedClient()).WillRepeatedly(Return());
+}
+
+void ServerTest::expectReadData(std::string message, const int size)
+{
+    EXPECT_CALL(*connectionPtr, receiveData()).WillRepeatedly(Return(message));
+    EXPECT_CALL(*connectionPtr, getRecvBytes()).WillRepeatedly(Return(size));
 }
 
 
@@ -88,22 +70,7 @@ TEST_F(ServerTest, ShouldSuccessfulyCreateServer)
     }
 
     std::unique_ptr<Server> server =
-        std::make_unique<Server>(SOCKET_SERVER_PATH, std::move(socket));
-}
-
-TEST_F(ServerTest, ShouldSuccessfulyStartServer)
-{
-    {
-        InSequence sq;
-        expectCreateServer();
-        expectCloseServerSocket();
-    }
-
-    std::unique_ptr<Server> server =
-        std::make_unique<Server>(SOCKET_SERVER_PATH, std::move(socket));
-
-    server->start();
-    EXPECT_EQ(server->isStarted(), true);
+        std::make_unique<Server>(socketPath, std::move(socket), std::move(connFactory));
 }
 
 TEST_F(ServerTest, ShouldSuccessfulyStopServer)
@@ -115,41 +82,78 @@ TEST_F(ServerTest, ShouldSuccessfulyStopServer)
     }
 
     std::unique_ptr<Server> server =
-        std::make_unique<Server>(SOCKET_SERVER_PATH, std::move(socket));
-
+        std::make_unique<Server>(socketPath, std::move(socket), std::move(connFactory));
+    
     server->stop();
 
     EXPECT_EQ(server->isStarted(), false);
-
 }
 
-TEST_F(ServerTest, ShouldSuccessfulyAcceptConnection)
+TEST_F(ServerTest, ShouldSuccessfulyCreateConnectionAndAcceptedClient)
 {
     {
-        InSequence sq;
         expectCreateServer();
-        expectAcceptConnection();
+        expectCreatingAcceptedConnection();
+        expectReadData("message", 7);
         expectCloseServerSocket();
     }
     
     std::unique_ptr<Server> server =
-        std::make_unique<Server>(SOCKET_SERVER_PATH, std::move(socket));
+        std::make_unique<Server>(socketPath, std::move(socket), std::move(connFactory));
+    
+    server->start();
 
-    int result = server->acceptConnection();
-    EXPECT_EQ(result, clientfd);
+    std::this_thread::sleep_for(std::chrono::milliseconds(1000));
 }
 
-TEST_F(ServerTest, ShouldSuccessfulyReadFromSocket)
+TEST_F(ServerTest, ShouldSuccessfulyReceiveData)
 {
     {
-        InSequence sq;
         expectCreateServer();
-        myClient->expectReadDataFromClient("message", 7);
+        expectCreatingAcceptedConnection();
+        expectReadData("message", 7);
         expectCloseServerSocket();
     }
     
     std::unique_ptr<Server> server =
-        std::make_unique<Server>(SOCKET_SERVER_PATH, std::move(socket));
+        std::make_unique<Server>(socketPath, std::move(socket), std::move(connFactory));
+    
+    server->start();
 
-    server->readFromSocket(myClient->clientShPtr);
+    std::this_thread::sleep_for(std::chrono::milliseconds(1000));
+}
+
+TEST_F(ServerTest, ShouldSuccessfulyReceiveDataNull)
+{
+    {
+        expectCreateServer();
+        expectCreatingAcceptedConnection();
+        expectReadData("", 0);
+        expectCloseServerSocket();
+    }
+    
+    std::unique_ptr<Server> server =
+        std::make_unique<Server>(socketPath, std::move(socket), std::move(connFactory));
+    
+    server->start();
+    server->readFromSocket(std::move(connection));
+}
+
+TEST_F(ServerTest, ShouldSuccessfulyGetQueueElement)
+{
+    {
+        expectCreateServer();
+        expectCreatingAcceptedConnection();
+        expectReadData("hi", 2);
+        expectCloseServerSocket();
+    }
+    
+    std::unique_ptr<Server> server =
+        std::make_unique<Server>(socketPath, std::move(socket), std::move(connFactory));
+
+    server->start();
+
+    auto recv = server->getQueueElement();
+
+    EXPECT_NE(recv, "");
 }

@@ -1,12 +1,12 @@
-#ifndef EXECUTION_MANAGER_STRINGSAFEQUEUE_HPP
-#define EXECUTION_MANAGER_STRINGSAFEQUEUE_HPP
+#ifndef EXECUTION_MANAGER_SAFE_QUEUE_HPP
+#define EXECUTION_MANAGER_SAFE_QUEUE_HPP
 
 #include <queue>
 #include <string>
 #include <condition_variable>
 #include <mutex>
 
-class StringSafeQueue
+class SafeQueue
 {
 public:
   void push(const std::string& value);
@@ -18,4 +18,4 @@ private:
 };
 
 
-#endif //EXECUTION_MANAGER_STRINGSAFEQUEUE_HPP
+#endif //EXECUTION_MANAGER_SafeQueue_HPP

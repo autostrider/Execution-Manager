@@ -9,7 +9,8 @@ add_library(interfaces INTERFACE)
 target_link_libraries(interfaces
     INTERFACE
         common
-        proto_generated
+        gen::proto_generated
+        api::socket_handler
 )
 
 # Specify include directory

@@ -5,7 +5,7 @@
 
 #include "gmock/gmock.h"
 
-class ClientMock : public IClient
+class ClientMock : public api::socket_handler::IClient
 {
 public:
     ClientMock() = default;

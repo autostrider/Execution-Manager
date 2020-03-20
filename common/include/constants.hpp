@@ -35,18 +35,17 @@ static const std::string COMPONENT_STATE_OFF{"kOff"};
 using StateHandler = std::function<void()>;
 using ProcName = std::string;
 
-
 static const std::string SYSTEMCTL{"systemctl"};
 static const std::string SERVICE_EXTENSION{".service"};
 static const std::string USER{"--user"};
 static const std::string SYSTEMCTL_START{"start"};
 static const std::string SYSTEMCTL_STOP{"stop"};
-static const int SERVER_TIMEOUT = 500;
-static const  std::size_t RECV_BUFFER_SIZE = 512;
-static const std::size_t NUMBER_RESERVED_CONNECTIONS = 16;
+
+constexpr std::size_t RECV_BUFFER_SIZE = 512;
+constexpr std::size_t NUMBER_RESERVED_CONNECTIONS = 16;
+
 static const std::string SOCKET_SERVER_PATH{"/tmp/serverSocket"};
 static const std::string SOCKET_CLIENT_PATH{"/tmp/clientSocket"};
-
 
 
 #endif // CONSTANTS

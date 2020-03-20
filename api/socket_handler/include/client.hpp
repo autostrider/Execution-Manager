@@ -8,10 +8,9 @@
 #include <memory>
 #include <sys/un.h>
 
-class Client : public IClient
+class Client : public api::socket_handler::IClient
 {
 public:
-
     Client(const std::string&, std::unique_ptr<IClientSocket>);
     ~Client();
 
@@ -23,7 +22,6 @@ public:
 
     void setClientFd(int);
     void setConnected(bool);
-    void setRecvBytes(ssize_t byte);
 
     int getClientFd();
 
@@ -32,10 +30,13 @@ private:
 
 private:
     std::unique_ptr<IClientSocket> m_client_socket;
-    bool m_connected;
-    sockaddr_un m_addr;
-    int m_client_fd, m_addr_len;
     std::string m_path;
+    
+    bool m_connected;
+
+    sockaddr_un m_addr;
+    int m_client_fd;
+    int m_addr_len;
 
     ssize_t m_recvBytes;
 };

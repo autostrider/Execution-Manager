@@ -1,15 +1,10 @@
 #include "server.hpp"
-
-#include <algorithm>
-#include <cerrno>
-#include <logger.hpp>
-#include <fcntl.h>
-#include <mutex>
+#include "connection.hpp"
 #include <constants.hpp>
-#include <errno.h>
-#include <unistd.h>
+#include <logger.hpp>
 
-Server::Server(const std::string &path, std::unique_ptr<IServerSocket> socket)
+
+Server::Server(const std::string &path, std::unique_ptr<IServerSocket> socket, std::unique_ptr<IConnectionFactory> conn)
         : m_server_socket{std::move(socket)},
           m_server_fd{m_server_socket->socket(AF_UNIX, SOCK_STREAM, 0)},
           m_isStarted{false},
@@ -18,8 +13,8 @@ Server::Server(const std::string &path, std::unique_ptr<IServerSocket> socket)
           m_activeConnections{},
           m_serverThread{},
           m_receiveThread{},
-          m_sQueue{},
-          m_clientFactory{std::make_unique<ClientFactory>()}
+          m_recvDataQueue{},
+          m_connectionFactory{std::move(conn)}
 {
     if (m_server_fd == -1)
     {
@@ -36,80 +31,60 @@ Server::Server(const std::string &path, std::unique_ptr<IServerSocket> socket)
     }
 }
 
-void Server::bind() {
+void Server::bind()
+{
     if (m_server_socket->bind(m_server_fd,
                               (struct sockaddr *) &m_addr,
-                              m_addr_len) == -1)
+                              m_addr_len) == (-1))
     {
         LOG << "SocketServer: error on bind()\n";
     }
 }
 
-void Server::listen() {
-    if (m_server_socket->listen(m_server_fd, 1) == -1)
+void Server::listen()
+{
+    if (m_server_socket->listen(m_server_fd, 1) == (-1))
     {
         LOG << "SocketServer: error on listen()\n";
     }
 }
 
-Server::~Server() {
+Server::~Server()
+{
     stop();
-    if (m_server_socket->close(m_server_fd) == -1)
+    if (m_server_socket->close(m_server_fd) == (-1))
         LOG << "SocketServer: error on close()\n";
 
     ::unlink(m_addr.sun_path);
 }
 
-void Server::start() {
+void Server::start()
+{
     m_isStarted = true;
     m_serverThread = std::thread(&Server::onRunning, this);
     m_receiveThread = std::thread(&Server::handleConnections, this);
 }
 
-void Server::onRunning() {
-    m_activeConnections.reserve(NUMBER_RESERVED_CONNECTIONS);
-
+void Server::onRunning()
+{
     while (m_isStarted)
     {
-        int clientFd = acceptConnection();
+        std::shared_ptr<IConnection> connection =
+                m_connectionFactory->makeConnection(m_server_socket, m_server_fd);
 
-        if (clientFd > 0)
-        {
-            auto clientConnection = m_clientFactory->makeClient(clientFd);;
+        connection->creatAcceptedClient();
 
-            const std::lock_guard<std::mutex> guard(m_mtx1);
-            m_activeConnections.push_back(clientConnection);
-        }
-        else if (clientFd < 0)
-        {
-            m_isStarted = false;
-            LOG << "SocketServer: there is no clients connected\n";
-        }
+        const std::lock_guard<std::mutex> guard(m_mtxForServerThr);
+
+        m_activeConnections.push_back(connection);
     }
 }
-
-int Server::acceptConnection()
-{
-    sockaddr_un clientAddr;
-    socklen_t cliLen = sizeof(clientAddr);
-    
-    int fd =
-        m_server_socket->accept(m_server_fd,
-                                (struct sockaddr*)&clientAddr,
-                                &cliLen);
-
-    if (m_server_socket->fcntl(fd, F_SETFD, O_NONBLOCK) == -1)
-    {
-        return -1;
-    }
-    return fd;
-}
-
-
 
 void Server::handleConnections()
 {
-    while (m_isStarted) {
+    while (m_isStarted)
+    {
+        const std::lock_guard<std::mutex> guard(m_mtxForServerThr);
         for (auto it : m_activeConnections)
         {
             readFromSocket(it);
@@ -117,27 +92,28 @@ void Server::handleConnections()
     }
 }
 
-void Server::readFromSocket(std::shared_ptr<IClient> connClient)
+void Server::readFromSocket(std::shared_ptr<IConnection> conn)
 {
-    std::string recv = connClient->receive();
-    
-    if (connClient->getRecvBytes() == 0)
-    {        
-        const std::lock_guard<std::mutex> lock(m_mtx2);
-        
+    std::string recv = conn->receiveData();
+
+    if (conn->getRecvBytes() == 0)
+    {
+        const std::lock_guard<std::mutex> guard(m_mtxForServerThr);   
+
         m_activeConnections.erase(
             std::remove(m_activeConnections.begin(),
                         m_activeConnections.end(),
-                        connClient),
-            m_activeConnections.end());
+                        conn),
+            m_activeConnections.end());           
     }
-    else if (connClient->getRecvBytes() > 0)
+    else if (conn->getRecvBytes() > 0)
     {
-        m_sQueue.push(recv);
+        m_recvDataQueue.push(recv);
     }
 }
 
-void Server::stop() {
+void Server::stop()
+{
     m_isStarted = false;
     if (m_serverThread.joinable())
         m_serverThread.join();
@@ -145,9 +121,9 @@ void Server::stop() {
         m_receiveThread.join();
 }
 
-std::string Server::getQueue()
+std::string Server::getQueueElement()
 {
-    return m_sQueue.pop();
+    return m_recvDataQueue.pop();
 }
 
 bool Server::isStarted()

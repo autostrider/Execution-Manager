@@ -1,13 +1,13 @@
-#include "string_safe_queue.hpp"
+#include "safe_queue.hpp"
 
-void StringSafeQueue::push(const std::string &value)
+void SafeQueue::push(const std::string &value)
 {
   std::lock_guard<std::mutex> lck{m_mut};
   m_data.push(value);
   m_condVar.notify_one();
 }
 
-std::string StringSafeQueue::pop()
+std::string SafeQueue::pop()
 {
   std::string res;
   {

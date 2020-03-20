@@ -5,6 +5,9 @@
 
 #include <string>
 
+namespace api::socket_handler
+{
+
 class IClient
 {
 public:
@@ -17,4 +20,5 @@ public:
     virtual ssize_t getRecvBytes() = 0;
 };
 
+}
 #endif // I_CLIENT_HPP

@@ -19,7 +19,8 @@ void Client::createSocket()
 {
     m_client_fd = m_client_socket->socket(AF_UNIX, SOCK_STREAM, 0);
 
-    if (m_client_fd < 0) {
+    if (m_client_fd < 0)
+    {
         LOG << "Error opening socket\n";
     }
 }
@@ -55,7 +56,7 @@ std::string Client::receive()
     }
     else if(m_recvBytes == -1)
     {
-        perror("Error on receiving data from client: ");
+        LOG << "Error on receiving data from client: " << errno;
     }
     return buffer;
 }
@@ -63,33 +64,33 @@ std::string Client::receive()
 void Client::sendMessage(const google::protobuf::Any& message)
 {
     size_t size = message.ByteSizeLong();
-    uint8_t* data = new uint8_t[size];
+    std::unique_ptr<uint8_t> dataPtr = std::unique_ptr<uint8_t>(new uint8_t[size]);
+    auto data = dataPtr.get();
     
     if(message.SerializeToArray(data, size))
     {
         m_client_socket->send(m_client_fd, data, size, 0);
     }
-    delete[] data;
 }
 
-bool Client::isConnected() {
+bool Client::isConnected()
+{
     return m_connected;
 }
 
-void Client::setClientFd(int fd) {
+void Client::setClientFd(int fd)
+{
     m_client_fd = fd;
 }
 
-void Client::setConnected(bool connected) {
+void Client::setConnected(bool connected)
+{
     m_connected = connected;
 }
 
-void Client::setRecvBytes(ssize_t byte)
+int Client::getClientFd()
 {
-    m_recvBytes = byte;
-}
-
-int Client::getClientFd() {
+    std::cout << "====== " << m_client_fd << "\n";
     return m_client_fd;
 }
 

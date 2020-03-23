@@ -90,7 +90,6 @@ void Client::setConnected(bool connected)
 
 int Client::getClientFd()
 {
-    std::cout << "====== " << m_client_fd << "\n";
     return m_client_fd;
 }
 

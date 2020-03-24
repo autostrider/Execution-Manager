@@ -136,7 +136,7 @@ TEST_F(ServerTest, ShouldSuccessfulyReceiveDataNull)
         std::make_unique<Server>(socketPath, std::move(socket), std::move(connFactory));
     
     server->start();
-    server->readFromSocket(std::move(connection));
+    server->readFromSocket(connection);
 }
 
 TEST_F(ServerTest, ShouldSuccessfulyGetQueueElement)

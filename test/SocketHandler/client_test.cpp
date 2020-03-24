@@ -58,17 +58,20 @@ TEST_F(ClientTest, ShouldNotConnectToServer)
 
 TEST_F(ClientTest, ShouldSuccessifulySendData)
 {
+    std::string message = "some message";
     details dt;
-    dt.set_mymessage("some message");
+    dt.set_mymessage(message);
 
     google::protobuf::Any any;
     any.PackFrom(dt);
+    
+    size_t size = any.ByteSizeLong();
 
     {
         InSequence sq;
         EXPECT_CALL(*c_socket, socket(AF_UNIX, SOCK_STREAM, 0)).WillOnce(Return(clientfd));
         EXPECT_CALL(*c_socket, connect(_, _,_)).WillOnce(Return(0));
-        EXPECT_CALL(*c_socket, send(clientfd, _, _, 0)).WillOnce(Return(45));
+        EXPECT_CALL(*c_socket, send(clientfd, _, _, 0)).WillOnce(Return(size));
         EXPECT_CALL(*c_socket, close(clientfd)).WillOnce(Return(0));
 
     }

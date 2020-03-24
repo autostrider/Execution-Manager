@@ -9,8 +9,7 @@ public:
     ConnectionFactory(std::shared_ptr<api::socket_handler::IProxyClientFactory>);
 
     std::shared_ptr<IConnection> makeConnection(std::shared_ptr<IServerSocket>,
-                                                int)
-                                    const override;
+                                                int) const override;
 
 private:
     std::shared_ptr<api::socket_handler::IProxyClientFactory> m_proxyClientFactory;

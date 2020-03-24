@@ -35,5 +35,4 @@ private:
     const int m_serverFd;
 };
 
-
 #endif // CONNECTION_HPP

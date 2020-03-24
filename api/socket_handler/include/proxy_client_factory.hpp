@@ -1,5 +1,5 @@
-#ifndef CLIENT_FACTORY_HPP
-#define CLIENT_FACTORY_HPP
+#ifndef PROXY_CLIENT_FACTORY_MOCK_HPP
+#define PROXY_CLIENT_FACTORY_MOCK_HPP
 
 #include <client.hpp>
 #include <i_client_factory.hpp>
@@ -13,4 +13,4 @@ public:
             makeProxyClient(const int&) const override;
 };
 
-#endif // CLIENT_FACTORY_HPP
+#endif // PROXY_CLIENT_FACTORY_MOCK_HPP

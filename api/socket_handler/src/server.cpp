@@ -3,7 +3,6 @@
 #include <constants.hpp>
 #include <logger.hpp>
 
-
 Server::Server(const std::string &path, std::unique_ptr<IServerSocket> socket, std::unique_ptr<IConnectionFactory> conn)
         : m_server_socket{std::move(socket)},
           m_server_fd{m_server_socket->socket(AF_UNIX, SOCK_STREAM, 0)},

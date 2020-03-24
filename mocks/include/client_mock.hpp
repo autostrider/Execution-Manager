@@ -1,5 +1,5 @@
-#ifndef I_CLIENT_MOCK_HPP
-#define I_CLIENT_MOCK_HPP
+#ifndef CLIENT_MOCK_HPP
+#define CLIENT_MOCK_HPP
 
 #include <i_client.hpp>
 
@@ -16,4 +16,4 @@ public:
     MOCK_METHOD(ssize_t, getRecvBytes, (), (override));
 };
 
-#endif // I_CLIENT_MOCK_HPP
+#endif // CLIENT_MOCK_HPP

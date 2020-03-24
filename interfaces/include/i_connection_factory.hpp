@@ -14,8 +14,7 @@ public:
     virtual ~IConnectionFactory() = default;
 
     virtual std::shared_ptr<IConnection> makeConnection(std::shared_ptr<IServerSocket>,
-                                                        int)
-                                            const = 0;
+                                                        int) const = 0;
 };
 
 #endif // I_CONNECTION_FACTORY_HPP

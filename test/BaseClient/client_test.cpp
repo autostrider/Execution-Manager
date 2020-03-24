@@ -6,6 +6,9 @@
 #include <gmock/gmock.h>
 
 using namespace ::testing;
+using namespace api::client;
+using namespace api::socket_handler;
+
 
 class ClientTest : public Test
 {

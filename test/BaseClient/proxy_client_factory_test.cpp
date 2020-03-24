@@ -7,6 +7,7 @@
 #include <gmock/gmock.h>
 
 using namespace ::testing;
+using namespace api::client;
 
 class STest : public Test
 {
@@ -26,7 +27,7 @@ TEST_F(STest, Mytest)
         EXPECT_CALL(*c_socket, close(fd)).WillOnce(Return(0));
     }
 
-    std::unique_ptr<api::socket_handler::IClient> client = std::make_unique<Client>(socketPath, std::move(c_socket));
+    std::unique_ptr<IClient> client = std::make_unique<Client>(socketPath, std::move(c_socket));
     auto a = factory.makeProxyClient(fd);
 
     bool result = std::is_same<decltype (client), decltype (a)>::value;

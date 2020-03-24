@@ -11,6 +11,7 @@
 #include <gmock/gmock.h>
 
 using namespace ::testing;
+using namespace api::server;
 
 class ConnectionTest : public Test
 {

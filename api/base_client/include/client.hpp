@@ -8,7 +8,12 @@
 #include <memory>
 #include <sys/un.h>
 
-class Client : public api::socket_handler::IClient
+using namespace api::socket_handler;
+
+namespace api::client
+{
+
+class Client : public IClient
 {
 public:
     Client(const std::string&, std::unique_ptr<IClientSocket>);
@@ -40,5 +45,7 @@ private:
 
     ssize_t m_recvBytes;
 };
+
+}
 
 #endif //CLIENT_HPP

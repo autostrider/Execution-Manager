@@ -5,7 +5,7 @@
 
 #include <memory>
 
-namespace api::socket_handler
+namespace api::server
 {
 
 class IServer

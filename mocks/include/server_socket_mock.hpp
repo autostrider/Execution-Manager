@@ -5,6 +5,8 @@
 
 #include "gmock/gmock.h"
 
+using namespace api::socket_handler;
+
 class IServerSocketMock : public IServerSocket {
 public:
     MOCK_METHOD(int, socket, (int domain, int type, int protocol),

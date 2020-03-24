@@ -1,5 +1,8 @@
 #include "client_socket.hpp"
 
+namespace api::socket_handler
+{
+
 int ClientSocket::socket(int domain, int type, int protocol) const
 {
     return ::socket(domain, type, protocol);
@@ -25,3 +28,4 @@ int ClientSocket::close(int fd) const
     return ::close(fd);
 }
 
+}

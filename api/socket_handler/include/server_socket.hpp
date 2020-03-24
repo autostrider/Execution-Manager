@@ -3,6 +3,9 @@
 
 #include <i_server_socket.hpp>
 
+namespace api::socket_handler
+{
+
 class ServerSocket : public IServerSocket
 {
 public:
@@ -13,5 +16,7 @@ public:
     int fcntl(int fd, int cmd, int arg) const override;
     int close(int fd) const override;
 };
+
+}
 
 #endif //SERVER_SOCKET_HPP

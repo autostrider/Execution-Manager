@@ -1,9 +1,9 @@
-#ifndef I_CLIENT_FACTORY_HPP
-#define I_CLIENT_FACTORY_HPP
+#ifndef I_PROXY_CLIENT_FACTORY_HPP
+#define I_PROXY_CLIENT_FACTORY_HPP
 
 #include <memory>
 
-namespace api::socket_handler
+namespace api::client
 {
 
 class IClient;
@@ -17,4 +17,4 @@ public:
 };
 
 }
-#endif //I_CLIENT_FACTORY_HPP
+#endif //I_PROXY_CLIENT_FACTORY_HPP

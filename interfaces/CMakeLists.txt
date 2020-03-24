@@ -11,6 +11,8 @@ target_link_libraries(interfaces
         common
         gen::proto_generated
         api::socket_handler
+        api::server
+        api::client
 )
 
 # Specify include directory

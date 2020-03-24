@@ -3,6 +3,9 @@
 
 #include <string>
 
+namespace api::server
+{
+
 class IConnection
 {
 public:
@@ -12,5 +15,7 @@ public:
     virtual std::string receiveData() = 0;
     virtual int getRecvBytes() = 0;
 };
+
+}
 
 #endif // I_CONNECTION_HPP

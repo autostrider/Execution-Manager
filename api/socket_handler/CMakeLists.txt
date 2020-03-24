@@ -30,3 +30,26 @@ target_include_directories(socket_handler
           $<INSTALL_INTERFACE:${CMAKE_CURRENT_SOURCE_DIR}/include>
 )
 
+# =============================================
+# Coverage
+# =============================================
+set(COVERAGE_BUILD ${TEST_NAME}_coverage_build)
+
+add_executable(${COVERAGE_BUILD} ${SRC} ${SH_SRC})
+
+target_include_directories(${COVERAGE_BUILD} PRIVATE ${SH_INCLUDE})
+
+target_link_libraries(${COVERAGE_BUILD}
+     PUBLIC
+        gcov
+        gtest
+        gtest_main
+        gmock
+        api::socket_handler
+        common
+        interfaces
+        mock
+)
+
+target_compile_definitions(${COVERAGE_BUILD} PUBLIC -DUNIT_TEST)
+target_compile_options(${COVERAGE_BUILD} PUBLIC -g -O0 -fprofile-arcs -ftest-coverage)

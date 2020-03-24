@@ -12,11 +12,13 @@
 #include <vector>
 #include <sys/un.h>
 
+using namespace api::server;
 
-class Server : public  api::socket_handler::IServer
+
+class Server : public IServer
 {
 public:
-    Server(const std::string&, std::unique_ptr<IServerSocket>, std::unique_ptr<IConnectionFactory>);
+    Server(const std::string&, std::unique_ptr<api::socket_handler::IServerSocket>, std::unique_ptr<IConnectionFactory>);
     ~Server() override;
 
     void start() override;
@@ -27,7 +29,6 @@ public:
     std::string getQueueElement();
 
 private:
-
     void bind();
     void listen();
 
@@ -36,7 +37,7 @@ private:
     
 
 private:
-    std::shared_ptr<IServerSocket> m_server_socket;
+    std::shared_ptr<api::socket_handler::IServerSocket> m_server_socket;
     int m_server_fd = 0;
     int m_addr_len = 0;
     

@@ -2,6 +2,9 @@
 #include <cstdio>
 #include "server_socket.hpp"
 
+namespace api::socket_handler
+{
+
 int ServerSocket::socket(int domain, int type, int protocol) const
 {
     return ::socket(domain, type, protocol);
@@ -30,4 +33,6 @@ int ServerSocket::fcntl(int fd, int cmd, int arg) const
 int ServerSocket::accept(int sockfd, struct sockaddr *addr, socklen_t *addrlen) const
 {
     return ::accept(sockfd, addr, addrlen);
+}
+
 }

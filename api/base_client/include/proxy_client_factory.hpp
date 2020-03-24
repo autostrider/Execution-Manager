@@ -2,9 +2,10 @@
 #define PROXY_CLIENT_FACTORY_MOCK_HPP
 
 #include <client.hpp>
-#include <i_client_factory.hpp>
+#include <i_proxy_client_factory.hpp>
 
-using namespace api::socket_handler;
+namespace api::client
+{
 
 class ProxyClientFactory : public IProxyClientFactory
 {
@@ -13,4 +14,5 @@ public:
             makeProxyClient(const int&) const override;
 };
 
+}
 #endif // PROXY_CLIENT_FACTORY_MOCK_HPP

@@ -2,6 +2,9 @@
 #include <constants.hpp>
 #include <logger.hpp>
 
+namespace api::client
+{
+
 Client::Client(const std::string &path, std::unique_ptr<IClientSocket> socket)
         : m_client_socket{std::move(socket)},
           m_path{path},
@@ -96,4 +99,6 @@ int Client::getClientFd()
 ssize_t Client::getRecvBytes()
 {
     return m_recvBytes;
+}
+
 }

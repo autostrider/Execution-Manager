@@ -5,7 +5,7 @@
 
 #include <string>
 
-namespace api::socket_handler
+namespace api::client
 {
 
 class IClient

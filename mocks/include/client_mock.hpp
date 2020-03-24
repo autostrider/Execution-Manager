@@ -5,10 +5,11 @@
 
 #include "gmock/gmock.h"
 
-class ClientMock : public api::socket_handler::IClient
+using namespace api::client;
+
+class ClientMock : public IClient
 {
 public:
-    ClientMock() = default;
     MOCK_METHOD(void, connect, (), (override));
     MOCK_METHOD(bool, isConnected, (), (override));
     MOCK_METHOD(void, sendMessage, (const google::protobuf::Any&), (override));

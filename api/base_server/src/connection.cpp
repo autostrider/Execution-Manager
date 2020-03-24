@@ -7,10 +7,12 @@
 #include <unistd.h>
 #include <sys/un.h>
 
+namespace api::server
+{
 
-Connection::Connection(std::shared_ptr<IServerSocket> serverSocket,
+Connection::Connection(std::shared_ptr<api::socket_handler::IServerSocket> serverSocket,
                        const int serverFd,
-                       std::shared_ptr<api::socket_handler::IProxyClientFactory> proxyClientFactory)
+                       std::shared_ptr<api::client::IProxyClientFactory> proxyClientFactory)
     : m_serverSocket{serverSocket},
       m_serverFd{serverFd},
       m_clientFactory{proxyClientFactory},
@@ -59,4 +61,6 @@ std::string Connection::receiveData()
 int Connection::getRecvBytes()
 {
     return m_connectedCli->getRecvBytes();
+}
+
 }

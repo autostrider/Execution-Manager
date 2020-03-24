@@ -3,7 +3,7 @@
 #include <constants.hpp>
 #include <logger.hpp>
 
-Server::Server(const std::string &path, std::unique_ptr<IServerSocket> socket, std::unique_ptr<IConnectionFactory> conn)
+Server::Server(const std::string &path, std::unique_ptr<api::socket_handler::IServerSocket> socket, std::unique_ptr<IConnectionFactory> conn)
         : m_server_socket{std::move(socket)},
           m_server_fd{m_server_socket->socket(AF_UNIX, SOCK_STREAM, 0)},
           m_isStarted{false},
@@ -21,6 +21,8 @@ Server::Server(const std::string &path, std::unique_ptr<IServerSocket> socket, s
     }
     else
     {
+        ::unlink(m_addr.sun_path);
+        
         m_addr.sun_family = AF_UNIX;
         m_path.copy(m_addr.sun_path, m_path.size() + 1);
         m_addr_len = sizeof(m_addr);
@@ -53,8 +55,6 @@ Server::~Server()
     stop();
     if (m_server_socket->close(m_server_fd) == (-1))
         LOG << "SocketServer: error on close()\n";
-
-    ::unlink(m_addr.sun_path);
 }
 
 void Server::start()
@@ -72,10 +72,11 @@ void Server::onRunning()
                 m_connectionFactory->makeConnection(m_server_socket, m_server_fd);
 
         connection->creatAcceptedClient();
-
-        const std::lock_guard<std::mutex> guard(m_mtxForServerThr);
-
-        m_activeConnections.push_back(connection);
+        {
+            const std::lock_guard<std::mutex> guard(m_mtxForServerThr);
+            m_activeConnections.push_back(connection);
+        }
+        std::this_thread::sleep_for(std::chrono::milliseconds(200));
     }
 }
 
@@ -83,11 +84,14 @@ void Server::handleConnections()
 {
     while (m_isStarted)
     {
-        const std::lock_guard<std::mutex> guard(m_mtxForServerThr);
-        for (auto it : m_activeConnections)
         {
-            readFromSocket(it);
+            const std::lock_guard<std::mutex> guard(m_mtxForServerThr);
+            for (auto it : m_activeConnections)
+            {
+                readFromSocket(it);
+            }
         }
+        std::this_thread::sleep_for(std::chrono::milliseconds(200));
     }
 }
 
@@ -97,13 +101,11 @@ void Server::readFromSocket(std::shared_ptr<IConnection> conn)
 
     if (conn->getRecvBytes() == 0)
     {
-        const std::lock_guard<std::mutex> guard(m_mtxForServerThr);   
-
         m_activeConnections.erase(
             std::remove(m_activeConnections.begin(),
                         m_activeConnections.end(),
                         conn),
-            m_activeConnections.end());           
+            m_activeConnections.end());
     }
     else if (conn->getRecvBytes() > 0)
     {

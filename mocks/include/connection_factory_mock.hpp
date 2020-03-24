@@ -8,7 +8,6 @@
 class IConnectionFactoryMock : public IConnectionFactory
 {
 public:
-    ~IConnectionFactoryMock() = default;
     MOCK_METHOD(std::shared_ptr<IConnection>, makeConnection,
                 (std::shared_ptr<IServerSocket>, int), (const, override));
 };

@@ -16,6 +16,7 @@ target_link_libraries(${TEST_NAME}_test
   api::machine_state_client
   per::per_memory
   common
+  mock
 )
 
 target_compile_definitions(${TEST_NAME}_test PUBLIC -DUNIT_TEST)
@@ -42,6 +43,7 @@ target_link_libraries(${COVERAGE_BUILD}
   api::application_state_client
   api::machine_state_client
   common
+  mock
 )
 
 target_compile_definitions(${COVERAGE_BUILD} PUBLIC -DUNIT_TEST)

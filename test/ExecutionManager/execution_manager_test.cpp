@@ -1,11 +1,11 @@
 #include <constants.hpp>
 #include <execution_manager.hpp>
 
-#include <mocks/application_handler_mock.hpp>
-#include <mocks/app_state_client_mock.hpp>
-#include <mocks/execution_manager_client_mock.hpp>
-#include <mocks/manifest_reader_mock.hpp>
-#include <mocks/os_interface_mock.hpp>
+#include <application_handler_mock.hpp>
+#include <app_state_client_mock.hpp>
+#include <execution_manager_client_mock.hpp>
+#include <manifest_reader_mock.hpp>
+#include <os_interface_mock.hpp>
 
 #include <future>
 

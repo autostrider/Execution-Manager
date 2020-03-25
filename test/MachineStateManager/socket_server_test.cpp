@@ -1,6 +1,6 @@
 #include <socket_server.hpp>
 
-#include <mocks/i_socket_interface_mock.hpp>
+#include <i_socket_interface_mock.hpp>
 
 #include "gtest/gtest.h"
 

@@ -12,6 +12,10 @@ file(GLOB_RECURSE ASC_SRC ${CMAKE_CURRENT_SOURCE_DIR}/../api/application_state_c
 file(GLOB_RECURSE CC_SRC ${CMAKE_CURRENT_SOURCE_DIR}/../api/component_client/src/*.cpp)
 file(GLOB_RECURSE MSC_SRC ${CMAKE_CURRENT_SOURCE_DIR}/../api/machine_state_client/src/*.cpp)
 
+file(GLOB_RECURSE SERVER_SRC ${CMAKE_CURRENT_SOURCE_DIR}/../api/base_server/src/*.cpp)
+file(GLOB_RECURSE CLIENT_SRC ${CMAKE_CURRENT_SOURCE_DIR}/../api/base_client/src/*.cpp)
+file(GLOB_RECURSE SH_SRC ${CMAKE_CURRENT_SOURCE_DIR}/../api/socket_handler/src/*.cpp)
+
 add_subdirectory(AdaptiveApplication)
 add_subdirectory(ApplicationStateClient)
 add_subdirectory(Common)
@@ -19,4 +23,5 @@ add_subdirectory(ComponentClient)
 add_subdirectory(ExecutionManager)
 add_subdirectory(MachineStateClient)
 add_subdirectory(MachineStateManager)
-add_subdirectory(mocks)
+add_subdirectory(BaseClient)
+add_subdirectory(BaseServer)

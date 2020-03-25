@@ -4,7 +4,8 @@
 
 namespace ExecutionManager {
 
-class IApplicationHandler {
+class IApplicationHandler
+{
 public:
     virtual bool startProcess(const std::string& service) = 0;
 

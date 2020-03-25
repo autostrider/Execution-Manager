@@ -24,7 +24,9 @@ add_subdirectory(api)
 add_subdirectory(per)
 add_subdirectory(applications)
 add_subdirectory(common)
+add_subdirectory(interfaces)
 add_subdirectory(test)
+add_subdirectory(mocks)
 
 # =============================================
 # Coverage
@@ -43,6 +45,8 @@ add_custom_target(coverage
   COMMAND common_coverage_build
   COMMAND cc_coverage_build
   COMMAND per_mem_coverage_build
+  COMMAND base_client_coverage_build
+  COMMAND base_server_coverage_build
   COMMAND ${CMAKE_COMMAND} -E make_directory ${COVERAGE_REPORT_DIR}
   COMMAND ${LCOV_PATH} --gcov-tool ${GCOV_PATH} --directory ${CMAKE_BINARY_DIR} --capture --output-file ${COVERAGE_REPORT_DIR}/${COVERAGE_TARGET}.info
   COMMAND ${LCOV_PATH} --gcov-tool ${GCOV_PATH} --remove ${COVERAGE_REPORT_DIR}/${COVERAGE_TARGET}.info ${COVERAGE_LCOV_EXCLUDES} '*/test/*' -o ${COVERAGE_REPORT_DIR}/${COVERAGE_TARGET}_filtered.info

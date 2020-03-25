@@ -18,7 +18,8 @@ target_link_libraries(common
       api::component_client
       per::per_memory
       nlohmann_json::nlohmann_json
-      gmock
+      interfaces
+      mock
 )
 
 # Specify include directory

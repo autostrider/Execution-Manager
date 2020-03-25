@@ -1,6 +1,6 @@
 #include <common.hpp>
 
-#include <mocks/os_interface_mock.hpp>
+#include <os_interface_mock.hpp>
 
 #include "gtest/gtest.h"
 

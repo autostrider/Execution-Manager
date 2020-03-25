@@ -2,7 +2,7 @@
 #define SOCKET_SERVER_HPP
 
 #include <i_socket_server.hpp>
-#include <string_safe_queue.hpp>
+#include <safe_queue.hpp>
 
 #include <atomic>
 #include <memory>
@@ -28,7 +28,7 @@ private:
 private:
   std::unique_ptr<ISocketInterface> m_socket;
   std::atomic<bool> m_isAlive;
-  StringSafeQueue m_receivedData;
+  SafeQueue m_receivedData;
   int m_socketfd;
   std::future<std::string> m_newState;
   struct sockaddr_un m_serverAddress;

@@ -1,6 +1,7 @@
 # CMake gen namespace e.g. gen::<some_service_lib>
 set(GEN_NAMESPACE_NAME gen)
 set(CAPNPC_OUTPUT_DIR ${CMAKE_CURRENT_SOURCE_DIR}/generated)
+set(PROTO_OUTPUT_DIR ${CMAKE_CURRENT_SOURCE_DIR}/../build/gen)
 
 #################################################################
 #                 Application State Management                  #
@@ -136,11 +137,12 @@ include_directories(${Protobuf_INCLUDE_DIRS})
 include_directories(${CMAKE_CURRENT_BINARY_DIR})
 
 protobuf_generate_cpp(PROTO_SRCS PROTO_HDRS
-      application_state_management.proto
+      any.proto
+      application_state_management_p.proto
       enums.proto
-      component_state_management.proto
-      execution_management.proto
-      machine_state_management.proto)
+      component_state_management_p.proto
+      execution_management_p.proto
+      machine_state_management_p.proto)
 
 add_library(proto_generated STATIC
    ${PROTO_SRCS}
@@ -154,6 +156,13 @@ add_library(${GEN_NAMESPACE_NAME}::proto_generated
 # Link needed libraries
 target_link_libraries(proto_generated
       ${Protobuf_LIBRARIES}
+)
+
+# Specify include directory
+target_include_directories(proto_generated
+    PUBLIC
+      $<BUILD_INTERFACE:${PROTO_OUTPUT_DIR}>
+      $<INSTALL_INTERFACE:${PROTO_OUTPUT_DIR}>
 )
 
 #################################################################

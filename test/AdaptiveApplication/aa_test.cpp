@@ -1,10 +1,10 @@
 #include <adaptive_app.hpp>
 
-#include <mocks/i_state_mock.hpp>
-#include <mocks/i_state_factory_mock.hpp>
-#include <mocks/app_state_client_mock.hpp>
-#include <mocks/component_client_mock.hpp>
-#include <mocks/mean_calculator_mock.hpp>
+#include <i_state_mock.hpp>
+#include <i_state_factory_mock.hpp>
+#include <app_state_client_mock.hpp>
+#include <component_client_mock.hpp>
+#include <mean_calculator_mock.hpp>
 
 #include "gtest/gtest.h"
 #include "gmock/gmock.h"

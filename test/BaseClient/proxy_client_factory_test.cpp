@@ -9,18 +9,21 @@
 using namespace ::testing;
 using namespace api::client;
 
-class STest : public Test
+class ProxyClientFactoryTest : public Test
 {
 public:
     ProxyClientFactory factory;
-    int fd = 3;
-    const std::string socketPath = "/path/to/socket";
+    static constexpr char socketPath[] = "/path/to/socket";
+    static constexpr int fd = 13;
 
     std::unique_ptr<StrictMock<IClientSocketMock>> c_socket =
             std::make_unique<StrictMock<IClientSocketMock>>();
 };
 
-TEST_F(STest, Mytest)
+constexpr int ProxyClientFactoryTest::fd;
+constexpr char ProxyClientFactoryTest::socketPath[];
+
+TEST_F(ProxyClientFactoryTest, MekeClient)
 {
     {
         EXPECT_CALL(*c_socket, socket(_,_,_)).WillOnce(Return(fd));
@@ -28,8 +31,8 @@ TEST_F(STest, Mytest)
     }
 
     std::unique_ptr<IClient> client = std::make_unique<Client>(socketPath, std::move(c_socket));
-    auto a = factory.makeProxyClient(fd);
+    auto makedClient = factory.makeProxyClient(fd);
 
-    bool result = std::is_same<decltype (client), decltype (a)>::value;
+    bool result = std::is_same<decltype (client), decltype (makedClient)>::value;
     ASSERT_TRUE(result);
 }

@@ -16,8 +16,8 @@ using namespace api::server;
 class ConnectionTest : public Test
 {
 protected:
-    const int serverFd = 1;
-    const int clientFd = 2;
+    static constexpr int serverFd = 1;
+    static constexpr int clientFd = 2;
     
     std::shared_ptr<StrictMock<IServerSocketMock>> socket = std::make_unique<StrictMock<IServerSocketMock>>();
     std::unique_ptr<StrictMock<ClientMock>> client = std::make_unique<StrictMock<ClientMock>>();
@@ -26,6 +26,9 @@ protected:
     ClientMock* clientPtr = client.get();
     ProxyClientFactoryMock* proxyClientFactoryPtr = proxyClientFactory.get();
 };
+
+constexpr int ConnectionTest::serverFd;
+constexpr int ConnectionTest::clientFd;
 
 TEST_F(ConnectionTest, ShouldSuccessfulyAcceptConnection)
 {

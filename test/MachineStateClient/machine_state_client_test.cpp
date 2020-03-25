@@ -7,7 +7,8 @@
 
 #include "gtest/gtest.h"
 
-using api::MachineStateClient;
+using machine_state_client::MachineStateClient;
+using namespace constants;
 
 struct TestData
 {

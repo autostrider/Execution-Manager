@@ -9,21 +9,24 @@
 #include "gtest/gtest.h"
 #include "gmock/gmock.h"
 
+using namespace api;
+using namespace application_state;
+using namespace component_client;
 using namespace testing;
 
-using ApplicationState = api::ApplicationStateClient::ApplicationState;
+using ApplicationState = ApplicationStateClient::ApplicationState;
 
 class StateTest : public ::testing::Test
 {
 protected:
-    std::unique_ptr<api::AppStateClientMock> stateClientMock = std::make_unique<StrictMock<api::AppStateClientMock>>();
-    std::unique_ptr<api::ComponentClientMock> componentClientMock = std::make_unique<StrictMock<api::ComponentClientMock>>();
-    std::unique_ptr<api::StateFactoryMock> factoryMock = std::make_unique<StrictMock<api::StateFactoryMock>>();
+    std::unique_ptr<AppStateClientMock> stateClientMock = std::make_unique<StrictMock<AppStateClientMock>>();
+    std::unique_ptr<ComponentClientMock> componentClientMock = std::make_unique<StrictMock<ComponentClientMock>>();
+    std::unique_ptr<StateFactoryMock> factoryMock = std::make_unique<StrictMock<StateFactoryMock>>();
     std::unique_ptr<MeanCalculatorMock> meanCalculatorMock = std::make_unique<StrictMock<MeanCalculatorMock>>();
     StateFactory factory;
 
-    api::AppStateClientMock* stateClientMockPtr = stateClientMock.get();
-    api::ComponentClientMock* componentClientMockPtr = componentClientMock.get();
+    AppStateClientMock* stateClientMockPtr = stateClientMock.get();
+    ComponentClientMock* componentClientMockPtr = componentClientMock.get();
     MeanCalculatorMock* meanCalculatorMockPtr = meanCalculatorMock.get();
 
     AdaptiveApp appMock{std::move(factoryMock),
@@ -42,7 +45,7 @@ TEST_F(StateTest, shouldReportStateWhenInitEntered)
 TEST_F(StateTest, shouldReportRunningStateWhenRunEntered)
 {
     auto state = factory.createRun(appMock);
-    EXPECT_CALL(*stateClientMockPtr, ReportApplicationState(api::ApplicationStateClient::ApplicationState::K_RUNNING));
+    EXPECT_CALL(*stateClientMockPtr, ReportApplicationState(ApplicationStateClient::ApplicationState::K_RUNNING));
     state->enter();
 }
 
@@ -56,7 +59,7 @@ TEST_F(StateTest, shouldCalculateMeanWhenPerforemActionCalled)
 TEST_F(StateTest, shouldReportShutdownStateWhenShutDownEntered)
 {
     auto state = factory.createShutDown(appMock);
-    EXPECT_CALL(*stateClientMockPtr, ReportApplicationState(api::ApplicationStateClient::ApplicationState::K_SHUTTINGDOWN));
+    EXPECT_CALL(*stateClientMockPtr, ReportApplicationState(ApplicationStateClient::ApplicationState::K_SHUTTINGDOWN));
     state->enter();
 }
 

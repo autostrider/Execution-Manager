@@ -14,12 +14,12 @@
 #include <condition_variable>
 #include <atomic>
 
+using namespace api;
+
 namespace ExecutionManager
 {
 
-using MachineState = std::string;
 using ComponentState = std::string;
-using ProcName = std::string;
 using StateError = ::MachineStateManagement::StateError;
 using ComponentClientReturnType = ::StateManagement::ComponentClientReturnType;
 using StateUpdateMode = ::StateManagement::StateUpdateMode;
@@ -39,7 +39,7 @@ class ExecutionManager
 public:
   ExecutionManager(std::unique_ptr<IManifestReader> reader,
                    std::unique_ptr<IApplicationHandler> applicationHandler,
-                   std::unique_ptr<ExecutionManagerClient::IExecutionManagerClient> client);
+                   std::unique_ptr<IExecutionManagerClient> client);
 
   void reportApplicationState(const std::string& appName, AppState state);
 
@@ -102,7 +102,7 @@ private:
   std::set<std::string> m_componentPendingConfirms;
   std::vector<std::string> m_componentStateUpdateSbscrs;
 
-  std::unique_ptr<ExecutionManagerClient::IExecutionManagerClient> m_rpcClient;
+  std::unique_ptr<IExecutionManagerClient> m_rpcClient;
 };
 
 } // namespace ExecutionManager

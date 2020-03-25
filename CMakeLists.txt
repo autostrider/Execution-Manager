@@ -24,9 +24,7 @@ add_subdirectory(api)
 add_subdirectory(per)
 add_subdirectory(applications)
 add_subdirectory(common)
-add_subdirectory(interfaces)
 add_subdirectory(test)
-add_subdirectory(mocks)
 
 # =============================================
 # Coverage

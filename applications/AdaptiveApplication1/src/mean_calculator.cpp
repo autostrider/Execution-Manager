@@ -3,6 +3,9 @@
 #include <numeric>
 #include <random>
 
+namespace api
+{
+
 double MeanCalculator::mean()
 {
     auto data = readSensorData();
@@ -25,4 +28,6 @@ std::vector<double> MeanCalculator::readSensorData()
         data[k] = d(gen);
     }
     return data;
+}
+
 }

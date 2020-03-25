@@ -12,7 +12,7 @@ target_link_libraries(${TEST_NAME}_test
   gtest
   gtest_main
   gmock
-  api::application_state_client
+  application_state::application_state_client
   mock
 )
 
@@ -36,7 +36,7 @@ target_link_libraries(${COVERAGE_BUILD}
   gtest
   gtest_main
   gmock
-  api::application_state_client
+  application_state::application_state_client
   mock
 )
 

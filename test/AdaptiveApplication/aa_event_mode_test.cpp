@@ -9,28 +9,31 @@
 #include "gtest/gtest.h"
 #include "gmock/gmock.h"
 
+using namespace api;
+using namespace application_state;
+using namespace component_client;
 using namespace testing;
 
 class AppEventModeTest : public ::testing::Test
 {
 protected:
-    std::unique_ptr<api::AppStateClientMock> stateClientMock{std::make_unique<StrictMock<api::AppStateClientMock>>()};
+    std::unique_ptr<AppStateClientMock> stateClientMock{std::make_unique<StrictMock<AppStateClientMock>>()};
 
-    std::unique_ptr<api::StateFactoryMock> factoryMock{std::make_unique<StrictMock<api::StateFactoryMock>>()};
-    std::unique_ptr<api::StateMock> stateInitMock = std::make_unique<StrictMock<api::StateMock>>();
+    std::unique_ptr<StateFactoryMock> factoryMock{std::make_unique<StrictMock<StateFactoryMock>>()};
+    std::unique_ptr<StateMock> stateInitMock = std::make_unique<StrictMock<StateMock>>();
 
-    std::unique_ptr<api::ComponentClientMock> compStateMock = std::make_unique<StrictMock<api::ComponentClientMock>>();
+    std::unique_ptr<ComponentClientMock> compStateMock = std::make_unique<StrictMock<ComponentClientMock>>();
     std::unique_ptr<MeanCalculatorMock> meanCalculatorMock = std::make_unique<StrictMock<MeanCalculatorMock>>();
 
-    api::StateMock* stateInitMockPtr = stateInitMock.get();
-    api::StateFactoryMock* factoryPtr = factoryMock.get();
-    api::ComponentClientMock* compStateMockPtr = compStateMock.get();
+    StateMock* stateInitMockPtr = stateInitMock.get();
+    StateFactoryMock* factoryPtr = factoryMock.get();
+    ComponentClientMock* compStateMockPtr = compStateMock.get();
 
     void expectSetStateUpdateHandler();
     void expectCheckIfAnyEventsAvailable();
 
     void goToInit(AdaptiveApp&);
-    void performActionOnState(AdaptiveApp&, api::StateMock *stateMock);
+    void performActionOnState(AdaptiveApp&, StateMock *stateMock);
     std::unique_ptr<AdaptiveApp> createApp();
 };
 
@@ -61,7 +64,7 @@ void AppEventModeTest::goToInit(AdaptiveApp& app)
     app.init();
 }
 
-void AppEventModeTest::performActionOnState(AdaptiveApp& app, api::StateMock *stateMock)
+void AppEventModeTest::performActionOnState(AdaptiveApp& app, StateMock *stateMock)
 {
     EXPECT_CALL(*stateMock, performAction());
     expectCheckIfAnyEventsAvailable();

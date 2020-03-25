@@ -11,9 +11,11 @@
 
 #include "gtest/gtest.h"
 
+using namespace api;
+using namespace application_state;
+using namespace machine_state_client;
 using namespace MSM;
 using namespace testing;
-using namespace api;
 
 class MsmTest : public ::testing::Test
 {
@@ -24,8 +26,8 @@ protected:
            std::make_unique<AppStateClientMock>();
    std::unique_ptr<MachineStateClientMock> machineStateClientMock =
            std::make_unique<MachineStateClientMock>();
-   std::unique_ptr<ExecutionManager::ManifestReaderMock> manifestReaderMock =
-           std::make_unique<NiceMock<ExecutionManager::ManifestReaderMock>>();
+   std::unique_ptr<ManifestReaderMock> manifestReaderMock =
+           std::make_unique<NiceMock<ManifestReaderMock>>();
    std::unique_ptr<StrictMock<KeyValueStorageMock>> storageMock =
            std::make_unique<StrictMock<KeyValueStorageMock>>();
 
@@ -103,5 +105,5 @@ TEST_F(ReportingStateTest, ShouldReportCurrentState)
 
     auto msm = initMsm();
 
-    msm.reportApplicationState(api::ApplicationStateClient::ApplicationState::K_RUNNING);
+    msm.reportApplicationState(ApplicationStateClient::ApplicationState::K_RUNNING);
 }

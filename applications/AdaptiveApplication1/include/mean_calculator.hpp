@@ -5,6 +5,8 @@
 
 #include <vector>
 
+namespace api {
+
 class MeanCalculator : public IMeanCalculator
 {
 public:
@@ -12,4 +14,7 @@ public:
 private:
     std::vector<double> readSensorData();
 };
+
+}
+
 #endif

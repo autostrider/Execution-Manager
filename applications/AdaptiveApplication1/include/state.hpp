@@ -8,15 +8,15 @@
 class State : public api::IState
 {
 public:
-    State(AdaptiveApp& app, api::ApplicationStateClient::ApplicationState state, std::string stateName);
+    State(AdaptiveApp& app, application_state::ApplicationStateClient::ApplicationState state, std::string stateName);
 
     void leave() const override;
     virtual void performAction() override;
-    api::ApplicationStateClient::ApplicationState getApplicationState() const;
+    application_state::ApplicationStateClient::ApplicationState getApplicationState() const;
 
 protected:
     AdaptiveApp& m_app;
-    const api::ApplicationStateClient::ApplicationState m_applState;
+    const application_state::ApplicationStateClient::ApplicationState m_applState;
     const std::string m_stateName;
 };
 

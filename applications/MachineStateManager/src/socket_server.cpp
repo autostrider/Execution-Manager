@@ -10,7 +10,7 @@ namespace MSM
 {
 
 SocketServer::SocketServer
-(std::unique_ptr<ISocketInterface> socket, const std::string& path)
+(std::unique_ptr<api::ISocketInterface> socket, const std::string& path)
   : m_socket{std::move(socket)},
     m_isAlive{true},
     m_receivedData{},

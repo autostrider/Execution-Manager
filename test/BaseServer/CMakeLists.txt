@@ -12,10 +12,10 @@ target_link_libraries(${TEST_NAME}_test
             gtest
             gtest_main
             gmock
-            api::server
-            api::socket_handler
+            server
+            socket_handler
             common
-            interfaces
+            api
             mock
 )
 
@@ -42,10 +42,10 @@ target_link_libraries(${COVERAGE_BUILD}
         gtest
         gtest_main
         gmock
-        api::server
-        api::socket_handler
+        server
+        socket_handler
         common
-        interfaces
+        api
         mock
 )
 

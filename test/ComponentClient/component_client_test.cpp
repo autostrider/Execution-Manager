@@ -15,9 +15,10 @@
 #include "gmock/gmock.h"
 
 using namespace std;
+using namespace constants;
 using namespace testing;
 
-using api::ComponentClient;
+using component_client::ComponentClient;
 using ComponentClientReturnType = ::StateManagement::ComponentClientReturnType;
 
 struct TestData
@@ -95,8 +96,8 @@ class ComponentClientTest
   const uint32_t defaultTimeout{666};
 
   TestData testData;
-  api::StateUpdateMode mode = api::StateUpdateMode::K_POLL;
-  api::StateUpdateMode eventMode = api::StateUpdateMode::K_EVENT;
+  component_client::StateUpdateMode mode = component_client::StateUpdateMode::K_POLL;
+  component_client::StateUpdateMode eventMode = component_client::StateUpdateMode::K_EVENT;
   std::string componentName = "TestName";
   std::string eventComponentName = "ComponentWithEventMode";
   ExecutionManagementTestServer emServer {testData};

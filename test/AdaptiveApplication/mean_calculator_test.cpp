@@ -10,6 +10,6 @@ TEST(MeanCalculatorTest, shouldCalculateMean)
     const double mu = 10;
     const double sigma = 0.5;
 
-    MeanCalculator meanCalculator;
+    api::MeanCalculator meanCalculator;
     ASSERT_TRUE(::abs(meanCalculator.mean()-mu) < sigma);
 }

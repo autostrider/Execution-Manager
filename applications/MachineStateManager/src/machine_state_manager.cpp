@@ -8,6 +8,8 @@
 #include <kvstype.h>
 #include <logger.hpp>
 
+using namespace constants;
+
 namespace
 {
   const std::string STATE_KEY = "state";
@@ -15,16 +17,16 @@ namespace
 
 namespace MSM {
 
-using api::MachineStateClient;
-using ApplicationState = api::ApplicationStateClient::ApplicationState;
-using StateError = api::MachineStateClient::StateError;
+using machine_state_client::MachineStateClient;
+using ApplicationState = application_state::ApplicationStateClient::ApplicationState;
+using StateError = machine_state_client::MachineStateClient::StateError;
 
 MachineStateManager::MachineStateManager(
         std::unique_ptr<api::IStateFactory> factory,
-        std::unique_ptr<api::IApplicationStateClientWrapper> appStateClient,
-        std::unique_ptr<api::IMachineStateClientWrapper> machineClient,
-        std::unique_ptr<ExecutionManager::IManifestReader> manifestReader,
-        std::unique_ptr<ISocketServer> socketServer,
+        std::unique_ptr<application_state::IApplicationStateClientWrapper> appStateClient,
+        std::unique_ptr<machine_state_client::IMachineStateClientWrapper> machineClient,
+        std::unique_ptr<api::IManifestReader> manifestReader,
+        std::unique_ptr<api::ISocketServer> socketServer,
         std::unique_ptr<per::KeyValueStorageBase> persistentStorage) :
         m_machineStateClient(std::move(machineClient)),
         m_factory{std::move(factory)},

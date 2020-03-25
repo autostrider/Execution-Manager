@@ -6,7 +6,7 @@
 namespace ExecutionManager
 {
 
-class OsInterface : public IOsInterface
+class OsInterface : public api::IOsInterface
 {
 public:
   OsInterface(){}

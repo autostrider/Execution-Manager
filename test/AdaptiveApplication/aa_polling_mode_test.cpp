@@ -9,50 +9,53 @@
 #include "gtest/gtest.h"
 #include "gmock/gmock.h"
 
+using namespace api;
+using namespace application_state;
+using namespace component_client;
 using namespace testing;
 
 class AppPollingModeTest : public ::testing::Test
 {
 protected:
-    std::unique_ptr<api::AppStateClientMock> stateClientMock{std::make_unique<StrictMock<api::AppStateClientMock>>()};
+    std::unique_ptr<AppStateClientMock> stateClientMock{std::make_unique<StrictMock<AppStateClientMock>>()};
 
-    std::unique_ptr<api::StateFactoryMock> factoryMock{std::make_unique<StrictMock<api::StateFactoryMock>>()};
-    std::unique_ptr<api::StateMock> stateInitMock = std::make_unique<StrictMock<api::StateMock>>();
-    std::unique_ptr<api::StateMock> stateRunMock = std::make_unique<StrictMock<api::StateMock>>();
-    std::unique_ptr<api::StateMock> stateTermMock = std::make_unique<StrictMock<api::StateMock>>();
-    std::unique_ptr<api::StateMock> stateSuspendMock = std::make_unique<StrictMock<api::StateMock>>();
+    std::unique_ptr<StateFactoryMock> factoryMock{std::make_unique<StrictMock<StateFactoryMock>>()};
+    std::unique_ptr<StateMock> stateInitMock = std::make_unique<StrictMock<StateMock>>();
+    std::unique_ptr<StateMock> stateRunMock = std::make_unique<StrictMock<StateMock>>();
+    std::unique_ptr<StateMock> stateTermMock = std::make_unique<StrictMock<StateMock>>();
+    std::unique_ptr<StateMock> stateSuspendMock = std::make_unique<StrictMock<StateMock>>();
 
-    std::unique_ptr<api::ComponentClientMock> compStateMock = std::make_unique<StrictMock<api::ComponentClientMock>>();
+    std::unique_ptr<ComponentClientMock> compStateMock = std::make_unique<StrictMock<ComponentClientMock>>();
     std::unique_ptr<MeanCalculatorMock> meanCalculatorMock = std::make_unique<StrictMock<MeanCalculatorMock>>();
 
-    api::StateMock* stateInitMockPtr = stateInitMock.get();
-    api::StateMock* stateRunMockPtr = stateRunMock.get();
-    api::StateMock* stateSuspendMockPtr = stateSuspendMock.get();
-    api::StateFactoryMock* factoryPtr = factoryMock.get();
-    api::AppStateClientMock* stateClientMockPtr = stateClientMock.get();
+    StateMock* stateInitMockPtr = stateInitMock.get();
+    StateMock* stateRunMockPtr = stateRunMock.get();
+    StateMock* stateSuspendMockPtr = stateSuspendMock.get();
+    StateFactoryMock* factoryPtr = factoryMock.get();
+    AppStateClientMock* stateClientMockPtr = stateClientMock.get();
     MeanCalculatorMock* meanCalculatorMockPtr = meanCalculatorMock.get();
-    api::ComponentClientMock* compStateMockPtr = compStateMock.get();
+    ComponentClientMock* compStateMockPtr = compStateMock.get();
 
     AdaptiveApp app{std::move(factoryMock), std::move(stateClientMock),
                 std::move(compStateMock), std::move(meanCalculatorMock)};
 
-    const api::ComponentState expectedStateKOn = COMPONENT_STATE_ON;
-    const api::ComponentState expectedStateKOff = COMPONENT_STATE_OFF;
-    const api::ComponentState expectedStateInvalid = "invalidState";
+    const ComponentState expectedStateKOn = COMPONENT_STATE_ON;
+    const ComponentState expectedStateKOff = COMPONENT_STATE_OFF;
+    const ComponentState expectedStateInvalid = "invalidState";
 
-    void expectGetComponentState(const api::ComponentState &expectedState,
-                                 const api::ComponentClientReturnType& result);
-    void expectConfirmComponentState(const api::ComponentState& expectedState,
-                                     api::ComponentClientReturnType result);
+    void expectGetComponentState(const ComponentState &expectedState,
+                                 const ComponentClientReturnType& result);
+    void expectConfirmComponentState(const ComponentState& expectedState,
+                                     ComponentClientReturnType result);
     void goToInit();
-    void goToRunFromState(api::StateMock *oldStateMock);
-    void expectGoToSuspendFromState(api::StateMock *oldStateMock);
-    void performActionOnState(api::StateMock *stateMock);
+    void goToRunFromState(StateMock *oldStateMock);
+    void expectGoToSuspendFromState(StateMock *oldStateMock);
+    void performActionOnState(StateMock *stateMock);
     void resume();
 };
 
-void AppPollingModeTest::expectGetComponentState(const api::ComponentState& expectedState,
-                                      const api::ComponentClientReturnType& result)
+void AppPollingModeTest::expectGetComponentState(const ComponentState& expectedState,
+                                      const ComponentClientReturnType& result)
 {
     EXPECT_CALL(*compStateMockPtr, GetComponentState(_))
             .WillOnce(
@@ -62,8 +65,8 @@ void AppPollingModeTest::expectGetComponentState(const api::ComponentState& expe
                 );
 }
 
-void AppPollingModeTest::expectConfirmComponentState(const api::ComponentState& expectedState,
-                                          const api::ComponentClientReturnType result)
+void AppPollingModeTest::expectConfirmComponentState(const ComponentState& expectedState,
+                                          const ComponentClientReturnType result)
 {
     EXPECT_CALL(*compStateMockPtr,
                 ConfirmComponentState
@@ -82,7 +85,7 @@ void AppPollingModeTest::goToInit()
     app.init();
 }
 
-void AppPollingModeTest::goToRunFromState(api::StateMock* oldStateMock)
+void AppPollingModeTest::goToRunFromState(StateMock* oldStateMock)
 {
     EXPECT_CALL(*oldStateMock, leave());
     EXPECT_CALL(*stateRunMock, enter());
@@ -92,14 +95,14 @@ void AppPollingModeTest::goToRunFromState(api::StateMock* oldStateMock)
     app.run();
 }
 
-void AppPollingModeTest::expectGoToSuspendFromState(api::StateMock *oldStateMock)
+void AppPollingModeTest::expectGoToSuspendFromState(StateMock *oldStateMock)
 {
     EXPECT_CALL(*oldStateMock, leave());
     EXPECT_CALL(*factoryPtr, createSuspend(Ref(app))).WillOnce(Return(ByMove(std::move(stateSuspendMock))));
     EXPECT_CALL(*stateSuspendMockPtr, enter());
 }
 
-void AppPollingModeTest::performActionOnState(api::StateMock *stateMock)
+void AppPollingModeTest::performActionOnState(StateMock *stateMock)
 {
     EXPECT_CALL(*stateMock, performAction());
     app.performAction();
@@ -110,14 +113,14 @@ void AppPollingModeTest::resume()
     {
         InSequence seq;
 
-        stateRunMock = std::make_unique<StrictMock<api::StateMock>>();
+        stateRunMock = std::make_unique<StrictMock<StateMock>>();
         stateRunMockPtr = stateRunMock.get();
 
-        expectGetComponentState(expectedStateKOn, api::ComponentClientReturnType::K_SUCCESS);
+        expectGetComponentState(expectedStateKOn, ComponentClientReturnType::K_SUCCESS);
         EXPECT_CALL(*stateSuspendMockPtr, leave());
         EXPECT_CALL(*factoryPtr, createRun(Ref(app))).WillOnce(Return(ByMove(std::move(stateRunMock))));
         EXPECT_CALL(*stateRunMockPtr, enter());
-        expectConfirmComponentState(expectedStateKOn, api::ComponentClientReturnType::K_SUCCESS);
+        expectConfirmComponentState(expectedStateKOn, ComponentClientReturnType::K_SUCCESS);
 
     }
 }
@@ -125,8 +128,8 @@ void AppPollingModeTest::resume()
 TEST_F(AppPollingModeTest, Should_StayInKOnWhenPerformActionCalled)
 {
     goToInit();
-    expectGetComponentState(expectedStateKOn, api::ComponentClientReturnType::K_SUCCESS);
-    expectConfirmComponentState(expectedStateKOn, api::ComponentClientReturnType::K_UNCHANGED);
+    expectGetComponentState(expectedStateKOn, ComponentClientReturnType::K_SUCCESS);
+    expectConfirmComponentState(expectedStateKOn, ComponentClientReturnType::K_UNCHANGED);
     performActionOnState(stateInitMockPtr);
 }
 
@@ -135,8 +138,8 @@ TEST_F(AppPollingModeTest, shouldReportErrorWhenErrorOccuredWhileGettingCompStat
     goToInit();
     goToRunFromState(stateInitMockPtr);
 
-    expectGetComponentState(expectedStateKOn, api::ComponentClientReturnType::K_GENERAL_ERROR);
-    expectConfirmComponentState(expectedStateKOn, api::ComponentClientReturnType::K_GENERAL_ERROR);
+    expectGetComponentState(expectedStateKOn, ComponentClientReturnType::K_GENERAL_ERROR);
+    expectConfirmComponentState(expectedStateKOn, ComponentClientReturnType::K_GENERAL_ERROR);
     performActionOnState(stateRunMockPtr);
 }
 
@@ -145,8 +148,8 @@ TEST_F(AppPollingModeTest, shouldStayInKOnStateWhenPerformActionCalled)
     goToInit();
     goToRunFromState(stateInitMockPtr);
 
-    expectGetComponentState(expectedStateKOn, api::ComponentClientReturnType::K_SUCCESS);
-    expectConfirmComponentState(expectedStateKOn, api::ComponentClientReturnType::K_UNCHANGED);
+    expectGetComponentState(expectedStateKOn, ComponentClientReturnType::K_SUCCESS);
+    expectConfirmComponentState(expectedStateKOn, ComponentClientReturnType::K_UNCHANGED);
     performActionOnState(stateRunMockPtr);
 }
 
@@ -155,8 +158,8 @@ TEST_F(AppPollingModeTest, shouldStayInKOnStateWhenInvalidStateReceived)
     goToInit();
     goToRunFromState(stateInitMockPtr);
 
-    expectGetComponentState(expectedStateInvalid, api::ComponentClientReturnType::K_SUCCESS);
-    expectConfirmComponentState(expectedStateInvalid, api::ComponentClientReturnType::K_INVALID);
+    expectGetComponentState(expectedStateInvalid, ComponentClientReturnType::K_SUCCESS);
+    expectConfirmComponentState(expectedStateInvalid, ComponentClientReturnType::K_INVALID);
     performActionOnState(stateRunMockPtr);
 }
 
@@ -165,8 +168,8 @@ TEST_F(AppPollingModeTest, shouldStayInKOnStateWhenGetComponentStateFailed)
     goToInit();
     goToRunFromState(stateInitMockPtr);
 
-    expectGetComponentState(expectedStateInvalid, api::ComponentClientReturnType::K_GENERAL_ERROR);
-    expectConfirmComponentState(expectedStateInvalid, api::ComponentClientReturnType::K_GENERAL_ERROR);
+    expectGetComponentState(expectedStateInvalid, ComponentClientReturnType::K_GENERAL_ERROR);
+    expectConfirmComponentState(expectedStateInvalid, ComponentClientReturnType::K_GENERAL_ERROR);
     performActionOnState(stateRunMockPtr);
 }
 
@@ -177,8 +180,8 @@ TEST_F(AppPollingModeTest, shouldTransitToKOffStateWhenPerformActionCalled)
     expectGoToSuspendFromState(stateRunMockPtr);
     {
         InSequence seq;
-        expectGetComponentState(expectedStateKOff, api::ComponentClientReturnType::K_SUCCESS);
-        expectConfirmComponentState(expectedStateKOff, api::ComponentClientReturnType::K_SUCCESS);
+        expectGetComponentState(expectedStateKOff, ComponentClientReturnType::K_SUCCESS);
+        expectConfirmComponentState(expectedStateKOff, ComponentClientReturnType::K_SUCCESS);
     }
     performActionOnState(stateSuspendMockPtr);
 }
@@ -189,8 +192,8 @@ TEST_F(AppPollingModeTest, shouldTransitToKOnStateFromKOffWhenPerformActionCalle
     goToRunFromState(stateInitMockPtr);
     expectGoToSuspendFromState(stateRunMockPtr);
 
-    expectGetComponentState(expectedStateKOff, api::ComponentClientReturnType::K_SUCCESS);
-    expectConfirmComponentState(expectedStateKOff, api::ComponentClientReturnType::K_SUCCESS);
+    expectGetComponentState(expectedStateKOff, ComponentClientReturnType::K_SUCCESS);
+    expectConfirmComponentState(expectedStateKOff, ComponentClientReturnType::K_SUCCESS);
     performActionOnState(stateSuspendMockPtr);
 
     resume();

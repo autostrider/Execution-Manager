@@ -5,8 +5,10 @@
 
 #include <thread>
 
-using ApplicationState = api::ApplicationStateClient::ApplicationState;
-using StateError = api::MachineStateClient::StateError;
+using namespace constants;
+
+using ApplicationState = application_state::ApplicationStateClient::ApplicationState;
+using StateError = machine_state_client::MachineStateClient::StateError;
 
 namespace MSM
 {

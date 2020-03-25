@@ -7,6 +7,8 @@
 #include <thread>
 #include <future>
 
+using namespace constants;
+
 namespace ExecutionManager
 {
 
@@ -22,7 +24,7 @@ namespace {
 ExecutionManager::ExecutionManager(
   std::unique_ptr<IManifestReader> reader,
   std::unique_ptr<IApplicationHandler> applicationHandler,
-  std::unique_ptr<ExecutionManagerClient::IExecutionManagerClient> client)
+  std::unique_ptr<IExecutionManagerClient> client)
   : m_appHandler{std::move(applicationHandler)},
     m_activeProcesses{},
     m_allowedProcessesForState{reader->getStatesSupportedByApplication()},

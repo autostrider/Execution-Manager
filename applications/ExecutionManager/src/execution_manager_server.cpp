@@ -7,6 +7,9 @@
 #include <string>
 #include <iostream>
 
+using namespace constants;
+using namespace common;
+
 namespace ExecutionManagerServer
 {
 using ApplicationState = ::ApplicationStateManagement::ApplicationState;
@@ -23,7 +26,7 @@ ExecutionManagerServer::ExecutionManagerServer
 
     isRunning = true;
 
-    threadsMap[THREADS::EM_SERVER]->addMethod(
+    common::threadsMap[common::THREADS::EM_SERVER]->addMethod(
                 std::bind(&ExecutionManager::ExecutionManager::setMachineState,
                           &m_em, MACHINE_STATE_STARTUP));
 

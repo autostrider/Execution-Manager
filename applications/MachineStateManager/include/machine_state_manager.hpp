@@ -7,9 +7,8 @@
 
 #include <capnp/ez-rpc.h>
 
-class ISocketServer;
 
-namespace ExecutionManager
+namespace api
 {
 
 class IManifestReader;
@@ -25,10 +24,13 @@ class KeyValueStorageBase;
 
 namespace api
 {
-
 class IStateFactory;
-class IApplicationStateClientWrapper;
+class ISocketServer;
+}
 
+namespace application_state
+{
+class IApplicationStateClientWrapper;
 }
 
 namespace MSM
@@ -38,10 +40,10 @@ class MachineStateManager : public api::IAdaptiveApp
 {
 public:
   MachineStateManager(std::unique_ptr<api::IStateFactory> factory,
-                      std::unique_ptr<api::IApplicationStateClientWrapper> appStateClient,
-                      std::unique_ptr<api::IMachineStateClientWrapper> machineClient,
-                      std::unique_ptr<ExecutionManager::IManifestReader> manifestReader,
-                      std::unique_ptr<ISocketServer> socketServer,
+                      std::unique_ptr<application_state::IApplicationStateClientWrapper> appStateClient,
+                      std::unique_ptr<machine_state_client::IMachineStateClientWrapper> machineClient,
+                      std::unique_ptr<api::IManifestReader> manifestReader,
+                      std::unique_ptr<api::ISocketServer> socketServer,
                       std::unique_ptr<per::KeyValueStorageBase> persistentStorage);
 
   void init() override;
@@ -49,25 +51,25 @@ public:
   void terminate() override;
   void performAction() override;
 
-  api::MachineStateClient::StateError setMachineState(const std::string&);
+  machine_state_client::MachineStateClient::StateError setMachineState(const std::string&);
   void startServer();
   void closeServer();
   std::string getNewState();
   void saveReceivedState(const std::string& state);
-  api::MachineStateClient::StateError registerMsm(const std::string&);
+  machine_state_client::MachineStateClient::StateError registerMsm(const std::string&);
   void
-  reportApplicationState(api::ApplicationStateClient::ApplicationState) override;
+  reportApplicationState(application_state::ApplicationStateClient::ApplicationState) override;
 
 private:
   void transitToNextState(api::IAdaptiveApp::FactoryFunc nextState) override;
   std::string getNewStateForStartRun();
 
 private:
-  std::unique_ptr<api::IMachineStateClientWrapper> m_machineStateClient;
+  std::unique_ptr<machine_state_client::IMachineStateClientWrapper> m_machineStateClient;
   std::unique_ptr<api::IStateFactory> m_factory;
   std::unique_ptr<api::IState> m_currentState;
-  std::unique_ptr<api::IApplicationStateClientWrapper> m_appStateClient;
-  std::unique_ptr<ISocketServer> m_newStatesProvider;
+  std::unique_ptr<application_state::IApplicationStateClientWrapper> m_appStateClient;
+  std::unique_ptr<api::ISocketServer> m_newStatesProvider;
   std::unique_ptr<per::KeyValueStorageBase> m_persistentStorage;
   std::vector<std::string> m_availableStates;
 };

@@ -6,7 +6,7 @@
 namespace MSM
 {
 
-class SocketInterface: public ISocketInterface
+class SocketInterface: public api::ISocketInterface
 {
 public:
   int bind(int sockfd, const struct sockaddr* addr, socklen_t addrlen) override;

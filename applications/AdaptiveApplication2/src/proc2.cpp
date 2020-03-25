@@ -9,7 +9,7 @@
 #include <thread>
 
 static void signalHandler(int signo);
-using ApplicationState = api::ApplicationStateClient::ApplicationState;
+using ApplicationState = application_state::ApplicationStateClient::ApplicationState;
 
 static std::atomic<bool> isTerminated{false};
 
@@ -21,13 +21,13 @@ int main()
     }
 
     const std::string componentName{"AdaptiveApplication2_proc2"};
-    auto componentStateUpdateMode = api::StateUpdateMode::K_POLL;
+    auto componentStateUpdateMode = component_client::StateUpdateMode::K_POLL;
 
     AdaptiveApp app2(std::make_unique<StateFactory>(),
-                    std::make_unique<api::ApplicationStateClientWrapper>(),
-                    std::make_unique<api::ComponentClientWrapper>(componentName,
+                    std::make_unique<application_state::ApplicationStateClientWrapper>(),
+                    std::make_unique<component_client::ComponentClientWrapper>(componentName,
                                                                   componentStateUpdateMode),
-                    std::make_unique<MeanCalculator>());
+                    std::make_unique<api::MeanCalculator>());
 
     app2.init();
     app2.run();

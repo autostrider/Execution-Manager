@@ -3,7 +3,8 @@
 
 using namespace constants;
 
-namespace machine_state_client {
+namespace machine_state_client
+{
 
 using StateError = MachineStateClient::StateError;
 

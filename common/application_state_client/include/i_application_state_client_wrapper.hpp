@@ -4,7 +4,8 @@
 #include <application_state_client.h>
 #include <application_state_management.capnp.h>
 
-namespace application_state {
+namespace application_state
+{
 
 class IApplicationStateClientWrapper
 {

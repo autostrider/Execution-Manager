@@ -10,27 +10,23 @@
 
 namespace api
 {
-
-class IManifestReader;
-
+  class IManifestReader;
 }
 
 namespace per
 {
-
-class KeyValueStorageBase;
-
+  class KeyValueStorageBase;
 }
 
 namespace api
 {
-class IStateFactory;
-class ISocketServer;
+  class IStateFactory;
+  class ISocketServer;
 }
 
 namespace application_state
 {
-class IApplicationStateClientWrapper;
+  class IApplicationStateClientWrapper;
 }
 
 namespace MSM

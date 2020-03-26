@@ -7,7 +7,8 @@
 #include <vector>
 #include <memory>
 
-namespace api {
+namespace api
+{
 
 class IState;
 class IStateFactory;

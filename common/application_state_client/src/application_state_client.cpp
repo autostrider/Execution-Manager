@@ -7,6 +7,7 @@ using namespace common;
 
 namespace application_state
 {
+
 ApplicationStateClient::ApplicationStateClient()
   : m_client(IPC_PROTOCOL + EM_SOCKET_NAME),
     m_pid(getpid())

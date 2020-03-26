@@ -6,7 +6,7 @@
 
 namespace api
 {
-class ISocketServer;
+    class ISocketServer;
 }
 
 namespace MSM

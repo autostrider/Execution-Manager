@@ -3,7 +3,8 @@
 
 #include "component_client.h"
 
-namespace component_client {
+namespace component_client
+{
 
 class IComponentClientWrapper
 {

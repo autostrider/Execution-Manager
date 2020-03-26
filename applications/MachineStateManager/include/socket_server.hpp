@@ -11,8 +11,9 @@
 
 using namespace common;
 
-namespace api{
-class ISocketInterface;
+namespace api
+{
+  class ISocketInterface;
 }
 
 namespace MSM

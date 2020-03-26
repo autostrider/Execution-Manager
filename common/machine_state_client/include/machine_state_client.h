@@ -10,7 +10,8 @@
 #include <unistd.h>
 #include <future>
 
-namespace machine_state_client {
+namespace machine_state_client
+{
 
 class MachineStateClient;
 

@@ -4,7 +4,8 @@
 #include "machine_state_client.h"
 #include <machine_state_management.capnp.h>
 
-namespace machine_state_client {
+namespace machine_state_client
+{
 
 class IMachineStateClientWrapper
 {

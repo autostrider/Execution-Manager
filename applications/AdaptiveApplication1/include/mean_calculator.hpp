@@ -5,7 +5,8 @@
 
 #include <vector>
 
-namespace api {
+namespace api
+{
 
 class MeanCalculator : public IMeanCalculator
 {

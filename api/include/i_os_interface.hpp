@@ -4,7 +4,8 @@
 #include <unistd.h>
 #include <stdio.h>
 
-namespace api {
+namespace api
+{
 
 class IOsInterface
 {

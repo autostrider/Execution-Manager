@@ -5,9 +5,11 @@
 
 using std::string;
 
-namespace machine_state_client {
+namespace machine_state_client
+{
 
-namespace {
+namespace
+{
   const auto exceptionLambda = [](kj::Exception&& exception)
     {
       switch(exception.getType())

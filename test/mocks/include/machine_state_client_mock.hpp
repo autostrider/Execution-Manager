@@ -19,7 +19,7 @@ public:
     MOCK_METHOD1(waitForConfirm, StateError(std::uint32_t timeout));
 };
 
-} // namespace namespace machine_state_client
+} // namespace machine_state_client
 
 
 #endif // MACHINE_STATE_CLIENT_MOCK_HPP

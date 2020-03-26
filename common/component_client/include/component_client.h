@@ -10,7 +10,8 @@
 #include <kj/async-io.h>
 #include <capnp/rpc-twoparty.h>
 
-namespace component_client {
+namespace component_client
+{
 
 using ComponentState = std::string;
 

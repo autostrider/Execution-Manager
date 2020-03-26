@@ -15,7 +15,8 @@ namespace
   const std::string STATE_KEY = "state";
 }
 
-namespace MSM {
+namespace MSM
+{
 
 using machine_state_client::MachineStateClient;
 using ApplicationState = application_state::ApplicationStateClient::ApplicationState;

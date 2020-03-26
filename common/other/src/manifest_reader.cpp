@@ -7,7 +7,8 @@
 
 using namespace api;
 
-namespace common {
+namespace common
+{
 
 using std::runtime_error;
 using std::ifstream;

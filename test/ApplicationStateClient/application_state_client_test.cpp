@@ -16,7 +16,9 @@ using namespace constants;
 
 namespace ApplicationStateClientTest
 {
+
 using ApplicationState = ::ApplicationStateManagement::ApplicationState;
+
 struct Data
 {
     ApplicationState m_state;

@@ -2,7 +2,8 @@
 #define IAPPLICATION_HANDLER_HPP
 
 
-namespace api {
+namespace api
+{
 
 class IApplicationHandler
 {

@@ -1,7 +1,8 @@
 #ifndef I_MEAN_CALCULATOR
 #define I_MEAN_CALCULATOR
 
-namespace api {
+namespace api
+{
 
 class IMeanCalculator
 {

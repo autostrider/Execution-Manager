@@ -6,8 +6,8 @@ add_executable(proc2 src/proc2.cpp ${AA1_SRC})
 
 target_link_libraries(proc2
 PRIVATE
-api::application_state_client
-api::component_client
+application_state::application_state_client
+component_client::component_client
 )
 target_include_directories(proc2
   PUBLIC
@@ -18,8 +18,8 @@ add_executable(proc3 src/proc3.cpp ${AA1_SRC})
 
 target_link_libraries(proc3
   PRIVATE
-    api::component_client
-    api::application_state_client
+    component_client::component_client
+    application_state::application_state_client
 )
 
 target_include_directories(proc3

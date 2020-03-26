@@ -7,6 +7,8 @@
 #include <gtest/gtest.h>
 #include <gmock/gmock.h>
 
+using namespace constants;
+using namespace base_server;
 using namespace ::testing;
 
 

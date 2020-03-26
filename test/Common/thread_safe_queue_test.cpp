@@ -14,7 +14,7 @@ TEST(ThreadSafeQueueTest, checkFunctionsExecution)
     EXPECT_CALL(mock, fork());
     EXPECT_CALL(mock, popen(_, _));
   }
-  ThreadQueue queue;
+  common::ThreadQueue queue;
 
   queue.addMethod([&] { mock.fork(); });
   queue.addMethod([&] { mock.popen("File", "open"); });

@@ -12,7 +12,7 @@ target_link_libraries(em
     PUBLIC
     nlohmann_json::nlohmann_json
       gen::execution_management
-      api::application_state_client
+      application_state::application_state_client
       CapnProto::capnp-rpc
       common
 )

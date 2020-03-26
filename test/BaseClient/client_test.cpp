@@ -5,10 +5,10 @@
 #include <gtest/gtest.h>
 #include <gmock/gmock.h>
 
+using namespace api;
+using namespace base_client;
+using namespace constants;
 using namespace ::testing;
-using namespace api::client;
-using namespace api::socket_handler;
-
 
 class ClientTest : public Test
 {

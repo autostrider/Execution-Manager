@@ -8,21 +8,27 @@
 #include <memory>
 #include <atomic>
 
+using namespace component_client;
+using namespace constants;
+
 namespace api
 {
-class IStateFactory;
-class IApplicationStateClientWrapper;
+    class IStateFactory;
+    class IMeanCalculator;
+}
+namespace application_state
+{
+    class IApplicationStateClientWrapper;
 }
 
-class IMeanCalculator;
 
 class AdaptiveApp : public api::IAdaptiveApp
 {
 public:
     AdaptiveApp(std::unique_ptr<api::IStateFactory> factory,
-                std::unique_ptr<api::IApplicationStateClientWrapper> appClient,
-                std::unique_ptr<api::IComponentClientWrapper> compClient,
-                std::unique_ptr<IMeanCalculator> meanCalculator,
+                std::unique_ptr<application_state::IApplicationStateClientWrapper> appClient,
+                std::unique_ptr<IComponentClientWrapper> compClient,
+                std::unique_ptr<api::IMeanCalculator> meanCalculator,
                 bool eventModeEnabled = false);
     virtual ~AdaptiveApp() override = default;
 
@@ -32,25 +38,25 @@ public:
     void performAction() override;
 
     double mean();
-    void reportApplicationState(api::ApplicationStateClient::ApplicationState state) override;
+    void reportApplicationState(application_state::ApplicationStateClient::ApplicationState state) override;
 
 private:
     void suspend();
     void transitToNextState(IAdaptiveApp::FactoryFunc nextState) override;
-    bool isValid(const api::ComponentState& state) const;
-    bool shouldResume(const api::ComponentState& state) const;
-    bool shouldSuspend(const api::ComponentState& state) const;
-    void stateUpdateHandler(api::ComponentState const& state);
+    bool isValid(const ComponentState& state) const;
+    bool shouldResume(const ComponentState& state) const;
+    bool shouldSuspend(const ComponentState& state) const;
+    void stateUpdateHandler(ComponentState const& state);
     void pollComponentState();
 
-    api::ComponentClientReturnType setComponentState(api::ComponentState const& state);
-    api::ComponentState m_componentState = COMPONENT_STATE_ON;
+    ComponentClientReturnType setComponentState(ComponentState const& state);
+    ComponentState m_componentState = COMPONENT_STATE_ON;
 
     std::unique_ptr<api::IStateFactory> m_factory;
     std::unique_ptr<api::IState> m_currentState;
-    std::unique_ptr<api::IApplicationStateClientWrapper> m_appClient;
-    std::unique_ptr<api::IComponentClientWrapper> m_componentClient;
-    std::unique_ptr<IMeanCalculator> m_meanCalculator;
+    std::unique_ptr<application_state::IApplicationStateClientWrapper> m_appClient;
+    std::unique_ptr<IComponentClientWrapper> m_componentClient;
+    std::unique_ptr<api::IMeanCalculator> m_meanCalculator;
     bool m_eventModeEnabled;
 };
 #endif

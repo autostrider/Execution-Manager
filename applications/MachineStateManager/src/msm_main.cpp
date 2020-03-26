@@ -14,8 +14,11 @@
 #include <thread>
 #include <atomic>
 
+using namespace constants;
+
+
 static void signalHandler(int signo);
-using ApplicationState = api::ApplicationStateClient::ApplicationState;
+using ApplicationState = application_state::ApplicationStateClient::ApplicationState;
 
 static std::atomic<bool> isTerminated{false};
 
@@ -33,9 +36,9 @@ int main(int argc, char **argv)
 
     auto socket = std::make_unique<MSM::SocketInterface>();
     MSM::MachineStateManager msm(std::make_unique<MSM::MsmStateFactory>(),
-                                 std::make_unique<api::ApplicationStateClientWrapper>(),
-                                 std::make_unique<api::MachineStateClientWrapper>(),
-                                 std::make_unique<ExecutionManager::ManifestReader>(),
+                                 std::make_unique<application_state::ApplicationStateClientWrapper>(),
+                                 std::make_unique<machine_state_client::MachineStateClientWrapper>(),
+                                 std::make_unique<common::ManifestReader>(),
                                  std::make_unique<MSM::SocketServer>(
                                          std::move(socket), MSM_STATES_SERVER),
                                  std::make_unique<per::KeyValueStorage>(MSM_STATE_PROVIDER));

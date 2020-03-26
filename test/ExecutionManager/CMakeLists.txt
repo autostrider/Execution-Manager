@@ -13,8 +13,8 @@ target_link_libraries(${TEST_NAME}_test
   gmock
   gtest_main
   nlohmann_json::nlohmann_json
-  api::application_state_client
-  api::machine_state_client
+  application_state::application_state_client
+  machine_state_client::machine_state_client
   gen::execution_management
   CapnProto::capnp-rpc
   common
@@ -43,8 +43,8 @@ target_link_libraries(${COVERAGE_BUILD}
   gtest_main
   gmock
   nlohmann_json::nlohmann_json
-  api::application_state_client
-  api::machine_state_client
+  application_state::application_state_client
+  machine_state_client::machine_state_client
   gen::execution_management
   CapnProto::capnp-rpc
   common

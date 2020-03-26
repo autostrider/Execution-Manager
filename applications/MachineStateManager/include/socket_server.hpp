@@ -9,15 +9,20 @@
 #include <future>
 #include <sys/un.h>
 
-class ISocketInterface;
+using namespace common;
+
+namespace api
+{
+  class ISocketInterface;
+}
 
 namespace MSM
 {
 
-class SocketServer final: public ISocketServer
+class SocketServer final: public api::ISocketServer
 {
 public:
-  SocketServer(std::unique_ptr<ISocketInterface> socket, const std::string& path);
+  SocketServer(std::unique_ptr<api::ISocketInterface> socket, const std::string& path);
   std::string getData() override;
   void closeServer() override;
   void startServer() override;
@@ -26,7 +31,7 @@ public:
 private:
   void dataListener();
 private:
-  std::unique_ptr<ISocketInterface> m_socket;
+  std::unique_ptr<api::ISocketInterface> m_socket;
   std::atomic<bool> m_isAlive;
   SafeQueue m_receivedData;
   int m_socketfd;

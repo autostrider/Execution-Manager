@@ -10,8 +10,8 @@
 #include <gtest/gtest.h>
 #include <gmock/gmock.h>
 
+using namespace base_server;
 using namespace ::testing;
-using namespace api::server;
 
 class ConnectionTest : public Test
 {

@@ -5,6 +5,8 @@
 #include <string>
 #include <kj/async-io.h>
 
+using namespace api;
+
 namespace ExecutionManagerClient
 {
 

@@ -9,36 +9,39 @@
 #include "gtest/gtest.h"
 #include "gmock/gmock.h"
 
+using namespace api;
+using namespace application_state;
+using namespace component_client;
 using namespace testing;
 
 class AppTest : public ::testing::Test
 {
 protected:
-    std::unique_ptr<api::AppStateClientMock> stateClientMock{std::make_unique<StrictMock<api::AppStateClientMock>>()};
+    std::unique_ptr<AppStateClientMock> stateClientMock{std::make_unique<StrictMock<AppStateClientMock>>()};
 
-    std::unique_ptr<api::StateFactoryMock> factoryMock{std::make_unique<StrictMock<api::StateFactoryMock>>()};
-    std::unique_ptr<api::StateMock> stateInitMock = std::make_unique<StrictMock<api::StateMock>>();
-    std::unique_ptr<api::StateMock> stateRunMock = std::make_unique<StrictMock<api::StateMock>>();
-    std::unique_ptr<api::StateMock> stateTermMock = std::make_unique<StrictMock<api::StateMock>>();
-    std::unique_ptr<api::StateMock> stateSuspendMock = std::make_unique<StrictMock<api::StateMock>>();
+    std::unique_ptr<StateFactoryMock> factoryMock{std::make_unique<StrictMock<StateFactoryMock>>()};
+    std::unique_ptr<StateMock> stateInitMock = std::make_unique<StrictMock<StateMock>>();
+    std::unique_ptr<StateMock> stateRunMock = std::make_unique<StrictMock<StateMock>>();
+    std::unique_ptr<StateMock> stateTermMock = std::make_unique<StrictMock<StateMock>>();
+    std::unique_ptr<StateMock> stateSuspendMock = std::make_unique<StrictMock<StateMock>>();
 
-    std::unique_ptr<api::ComponentClientMock> compStateMock = std::make_unique<StrictMock<api::ComponentClientMock>>();
+    std::unique_ptr<ComponentClientMock> compStateMock = std::make_unique<StrictMock<ComponentClientMock>>();
     std::unique_ptr<MeanCalculatorMock> meanCalculatorMock = std::make_unique<StrictMock<MeanCalculatorMock>>();
 
-    api::StateMock* stateInitMockPtr = stateInitMock.get();
-    api::StateMock* stateRunMockPtr = stateRunMock.get();
-    api::StateMock* stateSuspendMockPtr = stateSuspendMock.get();
-    api::StateFactoryMock* factoryPtr = factoryMock.get();
-    api::AppStateClientMock* stateClientMockPtr = stateClientMock.get();
+    StateMock* stateInitMockPtr = stateInitMock.get();
+    StateMock* stateRunMockPtr = stateRunMock.get();
+    StateMock* stateSuspendMockPtr = stateSuspendMock.get();
+    StateFactoryMock* factoryPtr = factoryMock.get();
+    AppStateClientMock* stateClientMockPtr = stateClientMock.get();
     MeanCalculatorMock* meanCalculatorMockPtr = meanCalculatorMock.get();
-    api::ComponentClientMock* compStateMockPtr = compStateMock.get();
+    ComponentClientMock* compStateMockPtr = compStateMock.get();
 
     AdaptiveApp app{std::move(factoryMock), std::move(stateClientMock),
                 std::move(compStateMock), std::move(meanCalculatorMock)};
 
     void goToInit();
-    void goToRunFromState(api::StateMock *oldStateMock);
-    void goToTerminateFromState(api::StateMock *oldStateMock);
+    void goToRunFromState(StateMock *oldStateMock);
+    void goToTerminateFromState(StateMock *oldStateMock);
 };
 
 void AppTest::goToInit()
@@ -50,7 +53,7 @@ void AppTest::goToInit()
     app.init();
 }
 
-void AppTest::goToRunFromState(api::StateMock* oldStateMock)
+void AppTest::goToRunFromState(StateMock* oldStateMock)
 {
     EXPECT_CALL(*oldStateMock, leave());
     EXPECT_CALL(*stateRunMock, enter());
@@ -60,7 +63,7 @@ void AppTest::goToRunFromState(api::StateMock* oldStateMock)
     app.run();
 }
 
-void AppTest::goToTerminateFromState(api::StateMock *oldStateMock)
+void AppTest::goToTerminateFromState(StateMock *oldStateMock)
 {
     EXPECT_CALL(*oldStateMock, leave());
     EXPECT_CALL(*stateTermMock, enter());

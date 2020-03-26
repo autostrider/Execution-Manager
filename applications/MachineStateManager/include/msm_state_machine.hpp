@@ -4,7 +4,10 @@
 #include "machine_state_manager.hpp"
 #include <i_state_factory.hpp>
 
-class ISocketServer;
+namespace api
+{
+    class ISocketServer;
+}
 
 namespace MSM
 {
@@ -13,17 +16,17 @@ class MsmState : public api::IState
 {
 public:
     MsmState(MachineStateManager& msm, 
-             api::ApplicationStateClient::ApplicationState state, 
+             application_state::ApplicationStateClient::ApplicationState state, 
              std::string stateName);
 
     virtual void enter() = 0;
     void leave() const override;
     void performAction() override;
-    api::ApplicationStateClient::ApplicationState getApplicationState() const;
+    application_state::ApplicationStateClient::ApplicationState getApplicationState() const;
 
 protected:
     MachineStateManager& m_msm;
-    const api::ApplicationStateClient::ApplicationState m_msmState;
+    const application_state::ApplicationStateClient::ApplicationState m_msmState;
     const std::string m_stateName;
 };
 

@@ -13,9 +13,9 @@ target_link_libraries(${TEST_NAME}_test
   gmock
   gtest_main
   gmock
-  api::application_state_client
-  api::machine_state_client
-  api::component_client
+  application_state::application_state_client
+  machine_state_client::machine_state_client
+  component_client::component_client
   nlohmann_json::nlohmann_json
   mock
 )
@@ -41,9 +41,9 @@ target_link_libraries(${COVERAGE_BUILD}
   gmock
   gtest_main
   gmock
-  api::application_state_client
-  api::machine_state_client
-  api::component_client
+  application_state::application_state_client
+  machine_state_client::machine_state_client
+  component_client::component_client
   nlohmann_json::nlohmann_json
   mock
 )

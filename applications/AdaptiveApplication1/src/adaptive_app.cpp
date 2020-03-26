@@ -9,9 +9,9 @@
 #include "i_mean_calculator.hpp"
 
 AdaptiveApp::AdaptiveApp(std::unique_ptr<api::IStateFactory> factory,
-                         std::unique_ptr<api::IApplicationStateClientWrapper> appClient,
-                         std::unique_ptr<api::IComponentClientWrapper> compClient,
-                         std::unique_ptr<IMeanCalculator> meanCalculator,
+                         std::unique_ptr<application_state::IApplicationStateClientWrapper> appClient,
+                         std::unique_ptr<IComponentClientWrapper> compClient,
+                         std::unique_ptr<api::IMeanCalculator> meanCalculator,
                          bool eventModeEnabled) :
     m_factory{std::move(factory)},
     m_currentState{nullptr},
@@ -59,17 +59,17 @@ void AdaptiveApp::suspend()
     LOG << "ComponentState updated to: " << m_componentState;
 }
 
-void AdaptiveApp::stateUpdateHandler(api::ComponentState const& state)
+void AdaptiveApp::stateUpdateHandler(ComponentState const& state)
 {
     m_componentClient->ConfirmComponentState(state, setComponentState(state));
 }
 
 void AdaptiveApp::pollComponentState()
 {
-    api::ComponentState state;
+    ComponentState state;
     auto result = m_componentClient->GetComponentState(state);
     
-    if (api::ComponentClientReturnType::K_SUCCESS == result)
+    if (ComponentClientReturnType::K_SUCCESS == result)
     {
         result = setComponentState(state);
     }
@@ -77,9 +77,9 @@ void AdaptiveApp::pollComponentState()
     m_componentClient->ConfirmComponentState(state, result);
 }
 
-api::ComponentClientReturnType AdaptiveApp::setComponentState(api::ComponentState const& state)
+ComponentClientReturnType AdaptiveApp::setComponentState(ComponentState const& state)
 {
-    auto setStateResult = api::ComponentClientReturnType::K_SUCCESS;
+    auto setStateResult = ComponentClientReturnType::K_SUCCESS;
 
     if (isValid(state))
     {
@@ -93,12 +93,12 @@ api::ComponentClientReturnType AdaptiveApp::setComponentState(api::ComponentStat
         }
         else
         {
-            setStateResult = api::ComponentClientReturnType::K_UNCHANGED;
+            setStateResult = ComponentClientReturnType::K_UNCHANGED;
         }
     }
     else
     {
-        setStateResult = api::ComponentClientReturnType::K_INVALID;
+        setStateResult = ComponentClientReturnType::K_INVALID;
     }
   
     return setStateResult;
@@ -131,22 +131,22 @@ void AdaptiveApp::transitToNextState(api::IAdaptiveApp::FactoryFunc nextState)
     m_currentState->enter();
 }
 
-bool AdaptiveApp::isValid(const api::ComponentState &state) const
+bool AdaptiveApp::isValid(const ComponentState &state) const
 {
     return COMPONENT_STATE_ON == state || COMPONENT_STATE_OFF == state;
 }
 
-bool AdaptiveApp::shouldResume(const api::ComponentState& state) const
+bool AdaptiveApp::shouldResume(const ComponentState& state) const
 {
     return (m_componentState != state && COMPONENT_STATE_ON == state);
 }
 
-bool AdaptiveApp::shouldSuspend(const api::ComponentState& state) const
+bool AdaptiveApp::shouldSuspend(const ComponentState& state) const
 {
     return (m_componentState != state && COMPONENT_STATE_OFF == state);
 }
 
-void AdaptiveApp::reportApplicationState(api::ApplicationStateClient::ApplicationState state)
+void AdaptiveApp::reportApplicationState(application_state::ApplicationStateClient::ApplicationState state)
 {
     m_appClient->ReportApplicationState(state);
 }

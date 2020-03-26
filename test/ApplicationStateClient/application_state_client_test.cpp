@@ -12,10 +12,13 @@
 #include "gmock/gmock.h"
 
 using namespace ::testing;
+using namespace constants;
 
 namespace ApplicationStateClientTest
 {
+
 using ApplicationState = ::ApplicationStateManagement::ApplicationState;
+
 struct Data
 {
     ApplicationState m_state;
@@ -75,7 +78,7 @@ protected:
 
 TEST_F(ApplicationStateClientTest, ShouldSucceedToReportApplicationState)
 {
-	api::ApplicationStateClient asc;
+	application_state::ApplicationStateClient asc;
 	asc.ReportApplicationState(ApplicationState::K_RUNNING);
 
 	ASSERT_EQ(ApplicationState::K_RUNNING, sharedResource.m_state);

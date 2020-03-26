@@ -14,6 +14,7 @@
 
 using namespace ExecutionManager;
 using namespace std::chrono_literals;
+using namespace constants;
 using namespace ::testing;
 
 struct ComponentTestData
@@ -53,13 +54,13 @@ protected:
             std::make_unique<NiceMock<ManifestReaderMock>>();
     std::unique_ptr<ApplicationHandlerMock> applicationHandler =
             std::make_unique<StrictMock<ApplicationHandlerMock>>();
-    std::unique_ptr<ExecutionManagerClient::ExecutionManagerClientMock> client =
-            std::make_unique<StrictMock<ExecutionManagerClient::ExecutionManagerClientMock>>();
+    std::unique_ptr<ExecutionManagerClientMock> client =
+            std::make_unique<StrictMock<ExecutionManagerClientMock>>();
 
     const std::chrono::seconds oneSecond{1};
     const int appId{1};
     const int additionalAppId{2};
-    ExecutionManagerClient::ExecutionManagerClientMock* pClient = client.get();
+    ExecutionManagerClientMock* pClient = client.get();
     ApplicationHandlerMock* pAppHandler = applicationHandler.get();
     const std::string wrongMachineState{"WrongMachineState"};
     const std::string testState{"TestState"};

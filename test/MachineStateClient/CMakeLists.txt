@@ -11,7 +11,7 @@ target_link_libraries(${TEST_NAME}_test
   gmock
   gtest
   gtest_main
-  api::machine_state_client
+  machine_state_client::machine_state_client
   gen::machine_state_management
   gen::execution_management
 )
@@ -35,7 +35,7 @@ target_link_libraries(${COVERAGE_BUILD}
   gmock
   gtest
   gtest_main
-  api::machine_state_client
+  machine_state_client::machine_state_client
   gen::machine_state_management
   gen::execution_management
 )

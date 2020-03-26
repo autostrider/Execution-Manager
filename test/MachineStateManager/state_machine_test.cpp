@@ -10,9 +10,11 @@
 
 #include "gtest/gtest.h"
 
+using namespace api;
+using namespace application_state;
+using namespace machine_state_client;
 using namespace MSM;
 using namespace testing;
-using namespace api;
 
 class MsmStateMachineTest : public ::testing::Test
 {
@@ -38,8 +40,8 @@ protected:
            std::make_unique<StateFactoryMock>();
    std::unique_ptr<MachineStateClientMock> machineStateClientMock =
            std::make_unique<MachineStateClientMock>();
-   std::unique_ptr<NiceMock<ExecutionManager::ManifestReaderMock>> manifestReaderMock =
-           std::make_unique<NiceMock<ExecutionManager::ManifestReaderMock>>();
+   std::unique_ptr<NiceMock<ManifestReaderMock>> manifestReaderMock =
+           std::make_unique<NiceMock<ManifestReaderMock>>();
    std::unique_ptr<NiceMock<SocketServerMock>> socketServerMock =
            std::make_unique<NiceMock<SocketServerMock>>();
    std::unique_ptr<NiceMock<KeyValueStorageMock>> storageMock =
@@ -145,8 +147,8 @@ TEST_F(MsmStateMachineTest, ShouldCreateInit)
 {
     msmMock = initIMsm();
 
-    std::unique_ptr<api::IState> expectedState = std::make_unique<Init>(*msmMock);
-    std::unique_ptr<api::IState> createdState = factory.createInit(*msmMock);
+    std::unique_ptr<IState> expectedState = std::make_unique<Init>(*msmMock);
+    std::unique_ptr<IState> createdState = factory.createInit(*msmMock);
 
     bool result = std::is_same<decltype (expectedState), decltype (createdState)>::value;
     ASSERT_TRUE(result);
@@ -156,8 +158,8 @@ TEST_F(MsmStateMachineTest, ShouldCreateRun)
 {
     msmMock = initIMsm();
 
-    std::unique_ptr<api::IState> expectedState = std::make_unique<::Run>(*msmMock);
-    std::unique_ptr<api::IState> createdState = factory.createRun(*msmMock);
+    std::unique_ptr<IState> expectedState = std::make_unique<::Run>(*msmMock);
+    std::unique_ptr<IState> createdState = factory.createRun(*msmMock);
 
     bool result = std::is_same<decltype (expectedState), decltype (createdState)>::value;
     ASSERT_TRUE(result);
@@ -167,8 +169,8 @@ TEST_F(MsmStateMachineTest, ShouldCreateTerminate)
 {
     msmMock = initIMsm();
 
-    std::unique_ptr<api::IState> expectedState = std::make_unique<ShutDown>(*msmMock);
-    std::unique_ptr<api::IState> createdState = factory.createShutDown(*msmMock);
+    std::unique_ptr<IState> expectedState = std::make_unique<ShutDown>(*msmMock);
+    std::unique_ptr<IState> createdState = factory.createShutDown(*msmMock);
 
     bool result = std::is_same<decltype (expectedState), decltype (createdState)>::value;
     ASSERT_TRUE(result);

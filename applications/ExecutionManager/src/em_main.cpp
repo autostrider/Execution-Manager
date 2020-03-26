@@ -22,7 +22,7 @@ int main(int argc, char **argv)
     auto io = kj::setupAsyncIo();
 
     ExecutionManager::ExecutionManager executionManager
-      (std::make_unique<ExecutionManager::ManifestReader>(),
+      (std::make_unique<common::ManifestReader>(),
           std::make_unique<ExecutionManager::ApplicationHandler>(
            std::make_unique<ExecutionManager::OsInterface>()
            ),

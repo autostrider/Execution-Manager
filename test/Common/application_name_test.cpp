@@ -2,7 +2,9 @@
 
 #include "gtest/gtest.h"
 
+using namespace common;
 using namespace testing;
+
 using testParamType = std::pair<std::string, std::string>;
 class ParseServiceNameTest: public TestWithParam<std::pair<std::string, std::string>>
 {

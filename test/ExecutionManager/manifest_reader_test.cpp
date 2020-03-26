@@ -10,7 +10,8 @@
 namespace ExecutionManagerTests
 {
 
-using namespace ExecutionManager;
+using namespace api;
+using namespace common;
 using nlohmann::json;
 
 /// Config data structures started

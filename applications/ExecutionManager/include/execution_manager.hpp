@@ -5,6 +5,8 @@
 #include <i_manifest_reader.hpp>
 #include <i_application_handler.hpp>
 
+#include <execution_management.capnp.h>
+
 #include <map>
 #include <memory>
 #include <string>

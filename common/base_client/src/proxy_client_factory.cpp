@@ -1,4 +1,5 @@
 #include "proxy_client_factory.hpp"
+#include <client_socket.hpp>
 #include <constants.hpp>
 
 using namespace constants;

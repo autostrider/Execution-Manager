@@ -4,12 +4,17 @@
 #include <logger.hpp>
 #include <mean_calculator.hpp>
 #include <i_application_state_client_wrapper.hpp>
+#include <component_server.hpp>
+#include <connection_factory.hpp>
+#include <proxy_client_factory.hpp>
+#include <server_socket.hpp>
 
 #include <csignal>
 #include <thread>
 
 static void signalHandler(int signo);
 using ApplicationState = application_state::ApplicationStateClient::ApplicationState;
+using namespace base_client;
 
 static std::atomic<bool> isTerminated{false};
 
@@ -24,10 +29,13 @@ int main()
     auto componentStateUpdateMode = component_client::StateUpdateMode::K_POLL;
 
     AdaptiveApp app2(std::make_unique<StateFactory>(),
-                    std::make_unique<application_state::ApplicationStateClientWrapper>(),
-                    std::make_unique<component_client::ComponentClientWrapper>(componentName,
-                                                                  componentStateUpdateMode),
-                    std::make_unique<api::MeanCalculator>());
+                     std::make_unique<application_state::ApplicationStateClientWrapper>(),
+                     std::make_unique<component_client::ComponentClientWrapper>(componentName,
+                                                                                componentStateUpdateMode),
+                     std::make_unique<component_server::ComponentServer>((IPC_PROTOCOL + COMPONENT_SOCKET_NAME + componentName),
+                                                                         std::make_unique<socket_handler::ServerSocket>(),
+                                                                         std::make_unique<ConnectionFactory>(std::make_shared<ProxyClientFactory>())),
+                     std::make_unique<api::MeanCalculator>());
 
     app2.init();
     app2.run();

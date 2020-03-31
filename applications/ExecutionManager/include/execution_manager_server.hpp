@@ -4,6 +4,8 @@
 #include "execution_manager.hpp"
 #include "msm_handler.hpp"
 
+#include <execution_management.capnp.h>
+
 #include <thread>
 #include <atomic>
 

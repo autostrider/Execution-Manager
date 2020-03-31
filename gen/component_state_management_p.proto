@@ -2,27 +2,27 @@ syntax = "proto3";
 
 import "enums.proto";
 
-package StateManagement;
+package pStateManagement;
 
-message registerComponent
+message pRegisterComponent
 {
     string component = 1;
-    enums.StateUpdateMode mode = 2;
+    enums.pStateUpdateMode mode = 2;
 }
 
-message getComponentState
+message pGetComponentState
 {
     string component = 1;
 }
 
-message confirmComponentState
+message pConfirmComponentState
 {
     string component = 1;
     string state = 2;
-    enums.ComponentClientReturnType status = 3;
+    enums.pComponentClientReturnType status = 3;
 }
 
-message resultSetComponentState
+message pResultSetComponentState
 {
-    enums.ComponentClientReturnType result = 1;
+    enums.pComponentClientReturnType result = 1;
 }

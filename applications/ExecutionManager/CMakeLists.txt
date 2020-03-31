@@ -15,6 +15,7 @@ target_link_libraries(em
       application_state::application_state_client
       CapnProto::capnp-rpc
       common
+      socket_handler
 )
 
 target_include_directories(em

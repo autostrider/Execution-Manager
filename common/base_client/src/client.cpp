@@ -33,8 +33,8 @@ void Client::createSocket()
 void Client::connect()
 {
     if (0 <= m_client_socket->connect(m_client_fd,
-                                 (const struct sockaddr *) &m_addr,
-                                 m_addr_len))
+                                      (const struct sockaddr *) &m_addr,
+                                      m_addr_len))
     {
         m_connected = true;
     }

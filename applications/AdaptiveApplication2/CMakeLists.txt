@@ -5,9 +5,8 @@ set(CXX_STANDARD_REQUIRED 14)
 add_executable(proc2 src/proc2.cpp ${AA1_SRC})
 
 target_link_libraries(proc2
-PRIVATE
-application_state::application_state_client
-component_client::component_client
+  PRIVATE
+    proto_generated
 )
 target_include_directories(proc2
   PUBLIC
@@ -18,8 +17,7 @@ add_executable(proc3 src/proc3.cpp ${AA1_SRC})
 
 target_link_libraries(proc3
   PRIVATE
-    component_client::component_client
-    application_state::application_state_client
+    proto_generated
 )
 
 target_include_directories(proc3

@@ -13,7 +13,7 @@ class SafeQueue
 {
 public:
   void push(const std::string& value);
-  std::string pop();
+  bool pop(std::string& payload);
 private:
   std::queue<std::string> m_data;
   std::mutex m_mut;

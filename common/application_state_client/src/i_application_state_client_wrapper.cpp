@@ -3,7 +3,7 @@
 namespace application_state
 {
 
-void ApplicationStateClientWrapper::ReportApplicationState(ApplicationStateManagement::ApplicationState state)
+void ApplicationStateClientWrapper::ReportApplicationState(ApplicationStateClient::ApplicationState state)
 {
   m_client.ReportApplicationState(state);
 }

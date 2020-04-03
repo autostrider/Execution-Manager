@@ -4,10 +4,6 @@
 #include "machine_state_manager.hpp"
 #include <i_state_factory.hpp>
 
-namespace api
-{
-    class ISocketServer;
-}
 
 namespace MSM
 {

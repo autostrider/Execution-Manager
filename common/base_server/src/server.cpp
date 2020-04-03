@@ -125,9 +125,9 @@ void Server::stop()
         m_receiveThread.join();
 }
 
-std::string Server::getQueueElement()
+bool Server::getQueueElement(std::string& data)
 {
-    return m_recvDataQueue.pop();
+    return m_recvDataQueue.pop(data);
 }
 
 bool Server::isStarted()

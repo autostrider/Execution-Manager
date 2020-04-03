@@ -1,0 +1,16 @@
+syntax = "proto3";
+
+import "enums.proto";
+
+package ExecutionManagement;
+
+message setComponentState
+{
+    string state = 1;
+}
+
+message resultGetComponentState
+{
+    string state = 1;
+    enums.ComponentClientReturnType resualt = 2;
+}

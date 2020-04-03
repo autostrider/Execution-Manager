@@ -29,7 +29,7 @@ public:
     bool isStarted() override;
     void readFromSocket(std::shared_ptr<IConnection>) override;
 
-    std::string getQueueElement();
+    bool getQueueElement(std::string& data);
 
 private:
     void bind();

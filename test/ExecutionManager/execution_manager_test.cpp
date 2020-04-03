@@ -17,13 +17,6 @@ using namespace std::chrono_literals;
 using namespace constants;
 using namespace ::testing;
 
-struct ComponentTestData
-{
-    std::string component;
-    std::string state;
-    ComponentClientReturnType status;
-};
-
 
 class ExecutionManagerTest : public ::testing::Test
 {
@@ -74,21 +67,8 @@ protected:
     {MACHINE_STATE_STARTUP, MACHINE_STATE_RUNNING, MACHINE_STATE_LIVING,
      MACHINE_STATE_SUSPEND, MACHINE_STATE_SHUTTINGDOWN};
 
-    void expectGetAndConfirmComponentState(ExecutionManager::ExecutionManager&,
-                                           ComponentTestData&,
-                                           const std::string&);
 };
 
-void
-ExecutionManagerTest::expectGetAndConfirmComponentState(ExecutionManager::ExecutionManager& em,
-                                                        ComponentTestData& compTestData,
-                                                        const std::string& expectState)
-{
-    em.getComponentState(compTestData.component, compTestData.state);
-    em.confirmComponentState(compTestData.component, compTestData.state, compTestData.status);
-
-    EXPECT_EQ(expectState, compTestData.state);
-}
 
 TEST_F(ExecutionManagerTest, ShouldSucceedToSetStartingUpMachineState)
 {
@@ -375,8 +355,6 @@ TEST_F(ExecutionManagerTest, ShouldKillTwoAppsToTransitToNextState)
 
 TEST_F(ExecutionManagerTest, ShouldTransitToSuspendState)
 {
-  ComponentTestData componentTestData = {};
-  componentTestData.component = app;
 
   auto em = initEm(transitionStates,
                    {{MACHINE_STATE_RUNNING, {app}},
@@ -393,9 +371,7 @@ TEST_F(ExecutionManagerTest, ShouldTransitToSuspendState)
       return em->setMachineState(MACHINE_STATE_RUNNING);
   });
   std::this_thread::sleep_for(oneSecond);
-  em->registerComponent(componentTestData.component, StateUpdateMode::K_POLL);
   em->reportApplicationState(app, AppState::kRunning);
-  expectGetAndConfirmComponentState(*em, componentTestData, COMPONENT_STATE_ON);
   ASSERT_EQ(res.get(), StateError::K_SUCCESS);
 
   auto res2 = std::async(std::launch::async, [&]()
@@ -403,7 +379,6 @@ TEST_F(ExecutionManagerTest, ShouldTransitToSuspendState)
       return em->setMachineState(MACHINE_STATE_SUSPEND);
   });
   std::this_thread::sleep_for(oneSecond);
-  expectGetAndConfirmComponentState(*em, componentTestData, COMPONENT_STATE_OFF);
 
   ASSERT_EQ(res2.get(), StateError::K_SUCCESS);
   ASSERT_EQ(em->getMachineState(), MACHINE_STATE_SUSPEND);
@@ -411,10 +386,6 @@ TEST_F(ExecutionManagerTest, ShouldTransitToSuspendState)
 
 TEST_F(ExecutionManagerTest, ShouldKillAndTransitToSuspendState)
 {
-  ComponentTestData componentTestData = {};
-
-  componentTestData.component = app;
-
   auto em = initEm(transitionStates,
                    {{MACHINE_STATE_RUNNING, {app}},
                     {MACHINE_STATE_SUSPEND, {}}});
@@ -431,9 +402,7 @@ TEST_F(ExecutionManagerTest, ShouldKillAndTransitToSuspendState)
       return em->setMachineState(MACHINE_STATE_RUNNING);
   });
   std::this_thread::sleep_for(oneSecond);
-  em->registerComponent(componentTestData.component, StateUpdateMode::K_POLL);
   em->reportApplicationState(app, AppState::kRunning);
-  expectGetAndConfirmComponentState(*em, componentTestData, COMPONENT_STATE_ON);
   
   ASSERT_EQ(res.get(), StateError::K_SUCCESS);
 
@@ -449,12 +418,6 @@ TEST_F(ExecutionManagerTest, ShouldKillAndTransitToSuspendState)
 
 TEST_F(ExecutionManagerTest, ShouldKillOneProcessAndTransitToSuspendState)
 {
-  ComponentTestData componentTestData = {};
-  ComponentTestData componentTestDataForAdditionalApp = {};
-
-  componentTestData.component = app;
-  componentTestDataForAdditionalApp.component = additionalApp;
-
   auto em = initEm(transitionStates,
                    {{MACHINE_STATE_RUNNING, {app, additionalApp}},
                     {MACHINE_STATE_SUSPEND, {app}}});
@@ -472,13 +435,9 @@ TEST_F(ExecutionManagerTest, ShouldKillOneProcessAndTransitToSuspendState)
       return  em->setMachineState(MACHINE_STATE_RUNNING);
   });
   std::this_thread::sleep_for(oneSecond);
-  em->registerComponent(componentTestData.component, StateUpdateMode::K_POLL);
   em->reportApplicationState(app, AppState::kRunning);
-  expectGetAndConfirmComponentState(*em, componentTestData, COMPONENT_STATE_ON);
 
-  em->registerComponent(componentTestDataForAdditionalApp.component, StateUpdateMode::K_POLL);
   em->reportApplicationState(additionalApp, AppState::kRunning);
-  expectGetAndConfirmComponentState(*em, componentTestDataForAdditionalApp, COMPONENT_STATE_ON);
   ASSERT_EQ(res.get(), StateError::K_SUCCESS);
 
   auto res2 = std::async(std::launch::async, [&]()
@@ -487,7 +446,6 @@ TEST_F(ExecutionManagerTest, ShouldKillOneProcessAndTransitToSuspendState)
   });
   std::this_thread::sleep_for(oneSecond);
   em->reportApplicationState(additionalApp, AppState::kShuttingDown);
-  expectGetAndConfirmComponentState(*em, componentTestData, COMPONENT_STATE_OFF);
 
   ASSERT_EQ(res2.get(), StateError::K_SUCCESS);
   ASSERT_EQ(em->getMachineState(), MACHINE_STATE_SUSPEND);
@@ -495,9 +453,6 @@ TEST_F(ExecutionManagerTest, ShouldKillOneProcessAndTransitToSuspendState)
 
 TEST_F(ExecutionManagerTest, ShouldTransitToSuspendStateAndStartApp)
 {
-  ComponentTestData componentTestData = {};
-  componentTestData.component = app;
-
   auto em = initEm(transitionStates,
                    {{MACHINE_STATE_RUNNING, {}},
                     {MACHINE_STATE_SUSPEND, {app}}});
@@ -516,9 +471,7 @@ TEST_F(ExecutionManagerTest, ShouldTransitToSuspendStateAndStartApp)
       return em->setMachineState(MACHINE_STATE_SUSPEND);
   });
   std::this_thread::sleep_for(oneSecond);
-  em->registerComponent(componentTestData.component, StateUpdateMode::K_POLL);
   em->reportApplicationState(app, AppState::kRunning);
-  expectGetAndConfirmComponentState(*em, componentTestData, COMPONENT_STATE_OFF);
 
   ASSERT_EQ(res.get(), StateError::K_SUCCESS);
   ASSERT_EQ(em->getMachineState(), MACHINE_STATE_SUSPEND);
@@ -526,9 +479,6 @@ TEST_F(ExecutionManagerTest, ShouldTransitToSuspendStateAndStartApp)
 
 TEST_F(ExecutionManagerTest, ShouldRegisterComponent)
 {
-  ComponentTestData componentTestData = {};
-  componentTestData.component = app;
-
   auto em = initEm({MACHINE_STATE_RUNNING}, {{MACHINE_STATE_RUNNING, {app}}});
 
   {
@@ -543,18 +493,12 @@ TEST_F(ExecutionManagerTest, ShouldRegisterComponent)
   });
   std::this_thread::sleep_for(oneSecond);
   em->reportApplicationState(app, AppState::kRunning);
-  em->registerComponent(componentTestData.component, StateUpdateMode::K_POLL);
-  em->getComponentState(componentTestData.component, componentTestData.state);
 
   ASSERT_EQ(res.get(), StateError::K_SUCCESS);
-  ASSERT_EQ(COMPONENT_STATE_ON, componentTestData.state);
 }
 
 TEST_F(ExecutionManagerTest, ShouldNotGetComponentStateWhenComponentNotRegistered)
 {
-  ComponentTestData componentTestData = {};
-  componentTestData.component = app;
-
   auto em = initEm({MACHINE_STATE_RUNNING}, {{MACHINE_STATE_RUNNING, {app}}});
   
   {
@@ -570,17 +514,11 @@ TEST_F(ExecutionManagerTest, ShouldNotGetComponentStateWhenComponentNotRegistere
   std::this_thread::sleep_for(oneSecond);
   em->reportApplicationState(app, AppState::kRunning);
 
-  auto result = em->getComponentState(componentTestData.component, componentTestData.state);
   ASSERT_EQ(res.get(), StateError::K_SUCCESS);
-  ASSERT_EQ(componentTestData.state, "");
-  ASSERT_EQ(result, ComponentClientReturnType::K_GENERAL_ERROR);
 }
 
 TEST_F(ExecutionManagerTest, ShouldGetComponentStateWhenComponentRegistered)
 {
-  ComponentTestData componentTestData = {};
-  componentTestData.component = app;
-
   auto em = initEm({MACHINE_STATE_RUNNING}, {{MACHINE_STATE_RUNNING, {app}}});
 
   {
@@ -594,21 +532,13 @@ TEST_F(ExecutionManagerTest, ShouldGetComponentStateWhenComponentRegistered)
       return  em->setMachineState(MACHINE_STATE_RUNNING);
   });
   std::this_thread::sleep_for(oneSecond);
-  em->registerComponent(componentTestData.component, StateUpdateMode::K_POLL);
   em->reportApplicationState(app, AppState::kRunning);
 
-  auto result = em->getComponentState(componentTestData.component, componentTestData.state);
-
   ASSERT_EQ(res.get(), StateError::K_SUCCESS);
-  ASSERT_EQ(COMPONENT_STATE_ON, componentTestData.state);
-  ASSERT_EQ(result, ComponentClientReturnType::K_SUCCESS);
 }
 
 TEST_F(ExecutionManagerTest, ShouldConfirmSuccessComponentState)
 {
-  ComponentTestData componentTestData = {};
-  componentTestData.component = app;
-
   auto em = initEm({MACHINE_STATE_RUNNING}, {{MACHINE_STATE_RUNNING, {app}}});
 
   {
@@ -622,19 +552,13 @@ TEST_F(ExecutionManagerTest, ShouldConfirmSuccessComponentState)
       return  em->setMachineState(MACHINE_STATE_RUNNING);
   });
   std::this_thread::sleep_for(oneSecond);
-  em->registerComponent(componentTestData.component, StateUpdateMode::K_POLL);
   em->reportApplicationState(app, AppState::kRunning);
-  expectGetAndConfirmComponentState(*em, componentTestData, COMPONENT_STATE_ON);
 
   ASSERT_EQ(res.get(), StateError::K_SUCCESS);
-  ASSERT_EQ(componentTestData.status, ComponentClientReturnType::K_SUCCESS);
 }
 
 TEST_F(ExecutionManagerTest, ShouldConfirmSuccessComponentStateForSuspend)
 {
-  ComponentTestData componentTestData = {};
-  componentTestData.component = app;
-
   auto em = initEm({MACHINE_STATE_SUSPEND}, {{MACHINE_STATE_SUSPEND, {app}}});
 
   {
@@ -649,19 +573,13 @@ TEST_F(ExecutionManagerTest, ShouldConfirmSuccessComponentStateForSuspend)
   });
   std::this_thread::sleep_for(oneSecond);
 
-  em->registerComponent(componentTestData.component, StateUpdateMode::K_POLL);
   em->reportApplicationState(app, AppState::kRunning);
-  expectGetAndConfirmComponentState(*em, componentTestData, COMPONENT_STATE_OFF);
 
   ASSERT_EQ(res.get(), StateError::K_SUCCESS);
-  ASSERT_EQ(componentTestData.status, ComponentClientReturnType::K_SUCCESS);
 }
 
 TEST_F(ExecutionManagerTest, ShouldSetMachineStateWithApplicationThatHasEventMode)
 {
-  ComponentTestData componentTestData = {};
-  componentTestData.component = app;
-  std::string setState = "kOn";
 
   auto em = initEm({MACHINE_STATE_SUSPEND, MACHINE_STATE_RUNNING},
                    {{MACHINE_STATE_SUSPEND, {app}},
@@ -671,7 +589,6 @@ TEST_F(ExecutionManagerTest, ShouldSetMachineStateWithApplicationThatHasEventMod
     InSequence seq;
     EXPECT_CALL(*pAppHandler, startProcess(app));
     EXPECT_CALL(*pClient, confirm(StateError::K_SUCCESS));
-    EXPECT_CALL(*pClient, SetComponentState(setState, componentTestData.component));
     EXPECT_CALL(*pClient, confirm(StateError::K_SUCCESS));
   }
 
@@ -681,9 +598,7 @@ TEST_F(ExecutionManagerTest, ShouldSetMachineStateWithApplicationThatHasEventMod
   });
   std::this_thread::sleep_for(oneSecond);
 
-  em->registerComponent(componentTestData.component, StateUpdateMode::K_EVENT);
   em->reportApplicationState(app, AppState::kRunning);
-  expectGetAndConfirmComponentState(*em, componentTestData, COMPONENT_STATE_OFF);
 
   auto res1 = std::async(std::launch::async, [&]()
   {
@@ -691,8 +606,6 @@ TEST_F(ExecutionManagerTest, ShouldSetMachineStateWithApplicationThatHasEventMod
   });
   std::this_thread::sleep_for(oneSecond);
   
-  expectGetAndConfirmComponentState(*em, componentTestData, COMPONENT_STATE_ON);
-
   ASSERT_EQ(res.get(), StateError::K_SUCCESS);
   ASSERT_EQ(res1.get(), StateError::K_SUCCESS);
 }
@@ -704,15 +617,12 @@ TEST_F(ExecutionManagerTest, ShouldNotSetMachineState)
 
   StateError result = em->setMachineState(MACHINE_STATE_RUNNING);
 
-  ASSERT_EQ(result, StateError::K_INVALID_STATE);
+  ASSERT_EQ(result, StateError::kInvalidState);
 }
 
 TEST_F(ExecutionManagerTest, ShouldNotTransitToInvalidNextState)
 {
   std::string invalidState = "invalidState";
-
-  ComponentTestData componentTestData = {};
-  componentTestData.component = app;
 
   auto em = initEm(transitionStates,
                    {{MACHINE_STATE_RUNNING, {app}},
@@ -730,17 +640,14 @@ TEST_F(ExecutionManagerTest, ShouldNotTransitToInvalidNextState)
   });
   std::this_thread::sleep_for(oneSecond);
 
-  em->registerComponent(componentTestData.component, StateUpdateMode::K_POLL);
   em->reportApplicationState(app, AppState::kRunning);
-  expectGetAndConfirmComponentState(*em, componentTestData, COMPONENT_STATE_ON);
 
   ASSERT_EQ(res.get(), StateError::K_SUCCESS);
-  ASSERT_EQ(componentTestData.status, ComponentClientReturnType::K_SUCCESS);
 
   auto res1 = std::async(std::launch::async, [&]()
   {
       return  em->setMachineState(invalidState);
   });
 
-  ASSERT_EQ(res1.get(), StateError::K_INVALID_STATE);
+  ASSERT_EQ(res1.get(), StateError::kInvalidState);
 }

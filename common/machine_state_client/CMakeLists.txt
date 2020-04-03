@@ -16,8 +16,6 @@ add_library(${MACHINE_STATE_CLIENT_NAMESPACE_NAME}::machine_state_client
 # Link needed libraries
 target_link_libraries(machine_state_client
     PUBLIC
-      gen::machine_state_management
-      CapnProto::capnp-rpc
       common
 )
 

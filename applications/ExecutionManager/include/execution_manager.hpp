@@ -20,9 +20,6 @@ namespace ExecutionManager
 {
 
 using ComponentState = std::string;
-using StateError = ::MachineStateManagement::StateError;
-using ComponentClientReturnType = ::StateManagement::ComponentClientReturnType;
-using StateUpdateMode = ::StateManagement::StateUpdateMode;
 using std::pair;
 
 struct ApplicationManifest;
@@ -46,14 +43,6 @@ public:
   MachineState getMachineState() const;
 
   StateError setMachineState(std::string state);
-
-  void registerComponent(std::string component, StateUpdateMode updateMode);
-
-  ComponentClientReturnType
-  getComponentState(std::string component, ComponentState& state) const;
-
-  void confirmComponentState
-  (std::string component, ComponentState state, ComponentClientReturnType status);
 
 private:
   void filterStates();

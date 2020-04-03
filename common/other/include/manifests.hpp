@@ -1,7 +1,7 @@
 #ifndef MANIFESTS_HPP
 #define MANIFESTS_HPP
 
-#include <application_state_management.capnp.h>
+#include <enums.pb.h>
 
 #include <string>
 #include <vector>
@@ -13,7 +13,7 @@ namespace common
 
 using nlohmann::json;
 using MachineState = std::string;
-using ApplicationState = ::ApplicationStateManagement::ApplicationState;
+using ApplicationState = ::enums::ApplicationState;
 
 struct MachineInstanceMode
 {

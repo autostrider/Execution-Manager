@@ -1,263 +1,261 @@
-#include <machine_state_client.h>
-#include <constants.hpp>
-
-#include <execution_management.capnp.h>
-
-#include <thread>
-
-#include "gtest/gtest.h"
-
-using machine_state_client::MachineStateClient;
-using namespace constants;
+// #include <machine_state_client.h>
+// #include <constants.hpp>
+
+// #include <thread>
+
+// #include "gtest/gtest.h"
+
+// using machine_state_client::MachineStateClient;
+// using namespace constants;
+
+// struct TestData
+// {
+//   pid_t pid;
+//   std::string appName;
+//   std::string state;
+
+//   size_t registerCallCount{0};
+//   size_t getMachineStateCallCount{0};
+//   size_t setMachineStateCallCount{0};
+//   bool isTimeouted{false};
+// };
+
+// class ExecutionManagementTestServer
+//   : public ExecutionManagement::Server
+// {
+// public:
+//   explicit
+//   ExecutionManagementTestServer
+//   (TestData& data)
+//   : m_data(data)
+//   {}
+// private:
+//   using StateError = ::MachineStateManagement::StateError;
+
+//   ::kj::Promise<void>
+//   register_(RegisterContext context) override
+//   {
+//     ++m_data.registerCallCount;
+//     m_data.appName = context.getParams().getAppName();
+//     m_data.pid = context.getParams().getPid();
+
+//     context.getResults().setResult(StateError::K_SUCCESS);
+
+//     if(m_data.isTimeouted)
+//     {
+//       std::this_thread::sleep_for(std::chrono::milliseconds(m_defaultDelay));
+//     }
+
+//     return kj::READY_NOW;
+//   }
+
+//   ::kj::Promise<void>
+//   getMachineState(GetMachineStateContext context) override
+//   {
+//     ++m_data.getMachineStateCallCount;
+//     m_data.pid = context.getParams().getPid();
+//     context.getResults().setState(m_data.state);
 
-struct TestData
-{
-  pid_t pid;
-  std::string appName;
-  std::string state;
-
-  size_t registerCallCount{0};
-  size_t getMachineStateCallCount{0};
-  size_t setMachineStateCallCount{0};
-  bool isTimeouted{false};
-};
-
-class ExecutionManagementTestServer
-  : public ExecutionManagement::Server
-{
-public:
-  explicit
-  ExecutionManagementTestServer
-  (TestData& data)
-  : m_data(data)
-  {}
-private:
-  using StateError = ::MachineStateManagement::StateError;
-
-  ::kj::Promise<void>
-  register_(RegisterContext context) override
-  {
-    ++m_data.registerCallCount;
-    m_data.appName = context.getParams().getAppName();
-    m_data.pid = context.getParams().getPid();
-
-    context.getResults().setResult(StateError::K_SUCCESS);
-
-    if(m_data.isTimeouted)
-    {
-      std::this_thread::sleep_for(std::chrono::milliseconds(m_defaultDelay));
-    }
-
-    return kj::READY_NOW;
-  }
+//     context.getResults().setResult(StateError::K_SUCCESS);
 
-  ::kj::Promise<void>
-  getMachineState(GetMachineStateContext context) override
-  {
-    ++m_data.getMachineStateCallCount;
-    m_data.pid = context.getParams().getPid();
-    context.getResults().setState(m_data.state);
+//     if(m_data.isTimeouted)
+//     {
+//       std::this_thread::sleep_for(std::chrono::milliseconds(m_defaultDelay));
+//     }
 
-    context.getResults().setResult(StateError::K_SUCCESS);
+//     return kj::READY_NOW;
+//   }
 
-    if(m_data.isTimeouted)
-    {
-      std::this_thread::sleep_for(std::chrono::milliseconds(m_defaultDelay));
-    }
+//   ::kj::Promise<void>
+//   setMachineState(SetMachineStateContext context) override
+//   {
+//     ++m_data.setMachineStateCallCount;
+//     m_data.state = context.getParams().getState().cStr();
+//     m_data.pid = context.getParams().getPid();
+
+//     context.getResults().setResult(StateError::K_SUCCESS);
 
-    return kj::READY_NOW;
-  }
+//     sendConfirm(StateError::K_SUCCESS);
 
-  ::kj::Promise<void>
-  setMachineState(SetMachineStateContext context) override
-  {
-    ++m_data.setMachineStateCallCount;
-    m_data.state = context.getParams().getState().cStr();
-    m_data.pid = context.getParams().getPid();
+//     if(m_data.isTimeouted)
+//     {
+//       std::this_thread::sleep_for(std::chrono::milliseconds(m_defaultDelay));
+//     }
 
-    context.getResults().setResult(StateError::K_SUCCESS);
+//     return kj::READY_NOW;
+//   }
 
-    sendConfirm(StateError::K_SUCCESS);
+//   void sendConfirm(StateError status)
+//   {
+//     std::thread([&]()
+//     {
+//       auto ioContext = kj::setupAsyncIo();
 
-    if(m_data.isTimeouted)
-    {
-      std::this_thread::sleep_for(std::chrono::milliseconds(m_defaultDelay));
-    }
+//       auto address = ioContext.provider->getNetwork()
+//         .parseAddress(IPC_PROTOCOL + MSM_SOCKET_NAME)
+//           .wait(ioContext.waitScope);
 
-    return kj::READY_NOW;
-  }
+//       auto connection = address->connect().wait(ioContext.waitScope);
 
-  void sendConfirm(StateError status)
-  {
-    std::thread([&]()
-    {
-      auto ioContext = kj::setupAsyncIo();
+//       capnp::TwoPartyClient client(*connection);
+//       auto capability = client.bootstrap()
+//         .castAs<MachineStateManagement::MachineStateManager>();
 
-      auto address = ioContext.provider->getNetwork()
-        .parseAddress(IPC_PROTOCOL + MSM_SOCKET_NAME)
-          .wait(ioContext.waitScope);
+//       auto request = capability.confirmStateTransitionRequest();
 
-      auto connection = address->connect().wait(ioContext.waitScope);
+//       request.setResult(status);
 
-      capnp::TwoPartyClient client(*connection);
-      auto capability = client.bootstrap()
-        .castAs<MachineStateManagement::MachineStateManager>();
+//       request.send().ignoreResult().wait(ioContext.waitScope);
 
-      auto request = capability.confirmStateTransitionRequest();
+//     }).join();
+//   }
+// private:
+//   TestData& m_data;
+//   static const uint32_t m_defaultDelay;
+// };
 
-      request.setResult(status);
+// const uint32_t ExecutionManagementTestServer::m_defaultDelay = 800;
 
-      request.send().ignoreResult().wait(ioContext.waitScope);
+// class MachineStateClientTest
+// : public ::testing::Test
+// {
+// public:
+//   ~MachineStateClientTest() noexcept
+//   {}
 
-    }).join();
-  }
-private:
-  TestData& m_data;
-  static const uint32_t m_defaultDelay;
-};
+//   void SetUp()
+//   {
+//     unlink(MSM_SOCKET_NAME.c_str());
+//     unlink(MSM_TEST.c_str());
 
-const uint32_t ExecutionManagementTestServer::m_defaultDelay = 800;
+//     std::promise<void> sPromise;
 
-class MachineStateClientTest
-: public ::testing::Test
-{
-public:
-  ~MachineStateClientTest() noexcept
-  {}
+//     serverThread = std::thread([&]()
+//     {
+//       auto ioContext = kj::setupAsyncIo();
+//       const int timeout = 20;
 
-  void SetUp()
-  {
-    unlink(MSM_SOCKET_NAME.c_str());
-    unlink(MSM_TEST.c_str());
+//       capnp::TwoPartyServer server(
+//         kj::heap<ExecutionManagementTestServer>(testData));
 
-    std::promise<void> sPromise;
+//       auto address = ioContext.provider->getNetwork()
+//           .parseAddress(std::string{msm_address})
+//             .wait(ioContext.waitScope);
 
-    serverThread = std::thread([&]()
-    {
-      auto ioContext = kj::setupAsyncIo();
-      const int timeout = 20;
+//       auto listener = address->listen();
+//       auto listenPromise = server.listen(*listener);
 
-      capnp::TwoPartyServer server(
-        kj::heap<ExecutionManagementTestServer>(testData));
+//       auto exitPaf = kj::newPromiseAndFulfiller<void>();
+//       auto exitPromise = listenPromise.exclusiveJoin(kj::mv(exitPaf.promise));
 
-      auto address = ioContext.provider->getNetwork()
-          .parseAddress(std::string{msm_address})
-            .wait(ioContext.waitScope);
+//       listenFulfiller = kj::mv(exitPaf.fulfiller);
 
-      auto listener = address->listen();
-      auto listenPromise = server.listen(*listener);
+//       *executor.lockExclusive() = kj::getCurrentThreadExecutor();
 
-      auto exitPaf = kj::newPromiseAndFulfiller<void>();
-      auto exitPromise = listenPromise.exclusiveJoin(kj::mv(exitPaf.promise));
+//       sPromise.set_value();
+//       exitPromise.wait(ioContext.waitScope);
 
-      listenFulfiller = kj::mv(exitPaf.fulfiller);
+//       std::this_thread::sleep_for(std::chrono::milliseconds(timeout));
+//     });
 
-      *executor.lockExclusive() = kj::getCurrentThreadExecutor();
-
-      sPromise.set_value();
-      exitPromise.wait(ioContext.waitScope);
-
-      std::this_thread::sleep_for(std::chrono::milliseconds(timeout));
-    });
-
-    sPromise.get_future().wait();
-  }
-
-  void TearDown()
-  {
-    const kj::Executor* exec;
-    {
-      auto lock = executor.lockExclusive();
-      exec = &KJ_ASSERT_NONNULL(*lock);
-    }
-
-    exec->executeSync([&]()
-    {
-      listenFulfiller->fulfill();
-    });
-
-    serverThread.join();
-
-    testData = TestData{-1, "", "", 0, 0, 0, false};
-
-    unlink(MSM_SOCKET_NAME.c_str());
-    unlink(MSM_TEST.c_str());
-  }
-
-  std::thread serverThread;
-
-  const std::string applicationName{"TestMSC"};
-  const uint32_t defaultTimeout{666};
-
-  TestData testData;
-  kj::Own<kj::PromiseFulfiller<void>> listenFulfiller;
-  kj::MutexGuarded<kj::Maybe<const kj::Executor&>> executor;
-  const std::string msm_address{IPC_PROTOCOL + MSM_TEST};
-
-  MachineStateClient msc{msm_address};
-};
-
-TEST_F(MachineStateClientTest, ShouldSucceedToRegister)
-{
-  const auto result = msc.Register(applicationName, defaultTimeout);
-
-  EXPECT_EQ(result, MachineStateClient::StateError::K_SUCCESS);
-  EXPECT_EQ(testData.registerCallCount, 1);
-  EXPECT_EQ(testData.appName, applicationName);
-  EXPECT_EQ(testData.pid, getpid());
-}
-
-TEST_F(MachineStateClientTest, ShouldSucceedToGetMachineState)
-{
-  testData.state = "TestMachineState";
-  std::string state;
-  const auto result = msc.GetMachineState(defaultTimeout, state);
-
-  EXPECT_EQ(result, MachineStateClient::StateError::K_SUCCESS);
-  EXPECT_EQ(testData.getMachineStateCallCount, 1);
-  EXPECT_EQ(testData.state, state);
-  EXPECT_EQ(testData.pid, getpid());
-}
-
-TEST_F(MachineStateClientTest, ShouldSucceedToSetMachineState)
-{
-  msc.Register(applicationName, defaultTimeout);
-  std::string state = "TestMachineState";
-  const auto result = msc.SetMachineState(state, defaultTimeout);
-
-  EXPECT_EQ(result, MachineStateClient::StateError::K_SUCCESS);
-  EXPECT_EQ(testData.setMachineStateCallCount, 1);
-  EXPECT_EQ(testData.state, state);
-  EXPECT_EQ(testData.pid, getpid());
-}
-
-TEST_F(MachineStateClientTest, ShouldTimeoutOnRegister)
-{
-  testData.isTimeouted = true;
-  const auto result = msc.Register(applicationName, defaultTimeout);
-
-  EXPECT_EQ(result, MachineStateClient::StateError::K_TIMEOUT);
-  EXPECT_EQ(testData.registerCallCount, 1);
-}
-
-TEST_F(MachineStateClientTest, ShouldTimeoutOnGettingMachineState)
-{
-  testData.isTimeouted = true;
-  std::string state;
-
-  const auto result = msc.GetMachineState(defaultTimeout, state);
-
-  EXPECT_EQ(result, MachineStateClient::StateError::K_TIMEOUT);
-  EXPECT_EQ(state, "");
-  EXPECT_EQ(testData.getMachineStateCallCount, 1);
-}
-
-TEST_F(MachineStateClientTest, ShouldTimeoutOnSettingMachineState)
-{
-  msc.Register(applicationName, defaultTimeout);
-  testData.isTimeouted = true;
-  const auto result = msc.SetMachineState("TestMachineState", defaultTimeout);
-
-  EXPECT_EQ(result, MachineStateClient::StateError::K_TIMEOUT);
-  EXPECT_EQ(testData.setMachineStateCallCount, 1);
-}
+//     sPromise.get_future().wait();
+//   }
+
+//   void TearDown()
+//   {
+//     const kj::Executor* exec;
+//     {
+//       auto lock = executor.lockExclusive();
+//       exec = &KJ_ASSERT_NONNULL(*lock);
+//     }
+
+//     exec->executeSync([&]()
+//     {
+//       listenFulfiller->fulfill();
+//     });
+
+//     serverThread.join();
+
+//     testData = TestData{-1, "", "", 0, 0, 0, false};
+
+//     unlink(MSM_SOCKET_NAME.c_str());
+//     unlink(MSM_TEST.c_str());
+//   }
+
+//   std::thread serverThread;
+
+//   const std::string applicationName{"TestMSC"};
+//   const uint32_t defaultTimeout{666};
+
+//   TestData testData;
+//   kj::Own<kj::PromiseFulfiller<void>> listenFulfiller;
+//   kj::MutexGuarded<kj::Maybe<const kj::Executor&>> executor;
+//   const std::string msm_address{IPC_PROTOCOL + MSM_TEST};
+
+//   MachineStateClient msc{msm_address};
+// };
+
+// TEST_F(MachineStateClientTest, ShouldSucceedToRegister)
+// {
+//   const auto result = msc.Register(applicationName, defaultTimeout);
+
+//   EXPECT_EQ(result, MachineStateClient::StateError::K_SUCCESS);
+//   EXPECT_EQ(testData.registerCallCount, 1);
+//   EXPECT_EQ(testData.appName, applicationName);
+//   EXPECT_EQ(testData.pid, getpid());
+// }
+
+// TEST_F(MachineStateClientTest, ShouldSucceedToGetMachineState)
+// {
+//   testData.state = "TestMachineState";
+//   std::string state;
+//   const auto result = msc.GetMachineState(defaultTimeout, state);
+
+//   EXPECT_EQ(result, MachineStateClient::StateError::K_SUCCESS);
+//   EXPECT_EQ(testData.getMachineStateCallCount, 1);
+//   EXPECT_EQ(testData.state, state);
+//   EXPECT_EQ(testData.pid, getpid());
+// }
+
+// TEST_F(MachineStateClientTest, ShouldSucceedToSetMachineState)
+// {
+//   msc.Register(applicationName, defaultTimeout);
+//   std::string state = "TestMachineState";
+//   const auto result = msc.SetMachineState(state, defaultTimeout);
+
+//   EXPECT_EQ(result, MachineStateClient::StateError::K_SUCCESS);
+//   EXPECT_EQ(testData.setMachineStateCallCount, 1);
+//   EXPECT_EQ(testData.state, state);
+//   EXPECT_EQ(testData.pid, getpid());
+// }
+
+// TEST_F(MachineStateClientTest, ShouldTimeoutOnRegister)
+// {
+//   testData.isTimeouted = true;
+//   const auto result = msc.Register(applicationName, defaultTimeout);
+
+//   EXPECT_EQ(result, MachineStateClient::StateError::K_TIMEOUT);
+//   EXPECT_EQ(testData.registerCallCount, 1);
+// }
+
+// TEST_F(MachineStateClientTest, ShouldTimeoutOnGettingMachineState)
+// {
+//   testData.isTimeouted = true;
+//   std::string state;
+
+//   const auto result = msc.GetMachineState(defaultTimeout, state);
+
+//   EXPECT_EQ(result, MachineStateClient::StateError::K_TIMEOUT);
+//   EXPECT_EQ(state, "");
+//   EXPECT_EQ(testData.getMachineStateCallCount, 1);
+// }
+
+// TEST_F(MachineStateClientTest, ShouldTimeoutOnSettingMachineState)
+// {
+//   msc.Register(applicationName, defaultTimeout);
+//   testData.isTimeouted = true;
+//   const auto result = msc.SetMachineState("TestMachineState", defaultTimeout);
+
+//   EXPECT_EQ(result, MachineStateClient::StateError::K_TIMEOUT);
+//   EXPECT_EQ(testData.setMachineStateCallCount, 1);
+// }

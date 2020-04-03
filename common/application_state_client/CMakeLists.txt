@@ -18,8 +18,6 @@ target_link_libraries(application_state_client
     PRIVATE
       nlohmann_json::nlohmann_json
     PUBLIC
-      gen::application_state_management
-      CapnProto::capnp-rpc
       common
 )
 # Specify include directory

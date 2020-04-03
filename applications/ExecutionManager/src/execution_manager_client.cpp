@@ -1,7 +1,5 @@
 #include "execution_manager_client.hpp"
 
-#include <capnp/rpc-twoparty.h>
-
 namespace ExecutionManagerClient
 {
 
@@ -37,7 +35,7 @@ ExecutionManagerClient::confirm(StateError status)
   });
 }
 
-StateManagement::ComponentClientReturnType 
+ComponentClientReturnType 
 ExecutionManagerClient::SetComponentState(std::string& state, 
                                           std::string& componentName)
 {
@@ -63,7 +61,7 @@ ExecutionManagerClient::SetComponentState(std::string& state,
 
   });
 
-  return StateManagement::ComponentClientReturnType::K_SUCCESS;
+  return ComponentClientReturnType::kSuccess;
 }
 
 } // namespace ExecutionManagerClient

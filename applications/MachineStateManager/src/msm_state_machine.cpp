@@ -8,7 +8,7 @@
 using namespace constants;
 
 using ApplicationState = application_state::ApplicationStateClient::ApplicationState;
-using StateError = machine_state_client::MachineStateClient::StateError;
+using StateError = machine_state_client::StateError;
 
 namespace MSM
 {
@@ -38,7 +38,7 @@ void MsmState::performAction()
 }
 
 Init::Init(MachineStateManager& msm)
-    : MsmState (msm, ApplicationState::K_INITIALIZING, AA_STATE_INIT)
+    : MsmState (msm, ApplicationState::kInitializing, AA_STATE_INIT)
 {
 }
 
@@ -56,7 +56,7 @@ void Init::enter()
     StateError result = m_msm.registerMsm(applicationName);
     m_msm.startServer();
 
-    if (StateError::K_SUCCESS == result)
+    if (StateError::kSuccess == result)
     {
         LOG << "Successful registration as a MSM.";
         std::this_thread::sleep_for(FIVE_SECONDS);
@@ -72,11 +72,11 @@ void Init::leave() const
     LOG << "Reporting state "
         << m_stateName << ".";
 
-    m_msm.reportApplicationState(ApplicationState::K_RUNNING);
+    m_msm.reportApplicationState(ApplicationState::kRunning);
 }
 
 Run::Run(MachineStateManager& msm)
-    : MsmState (msm, ApplicationState::K_RUNNING, AA_STATE_RUNNING)
+    : MsmState (msm, ApplicationState::kRunning, AA_STATE_RUNNING)
 {
 }
 
@@ -94,9 +94,9 @@ void Run::enter()
 
     StateError result = m_msm.setMachineState(state);
 
-    if (StateError::K_SUCCESS != result)
+    if (StateError::kSuccess != result)
     {
-        if (!((StateError::K_TIMEOUT == result) && (MACHINE_STATE_SHUTTINGDOWN == state)))
+        if (!((StateError::kTimeout == result) && (MACHINE_STATE_SHUTTINGDOWN == state)))
         {
             LOG << "Failed to set machine state " << state << ".";
         }
@@ -105,7 +105,7 @@ void Run::enter()
 }
 
 ShutDown::ShutDown(MachineStateManager& msm)
-    : MsmState (msm, ApplicationState::K_SHUTTINGDOWN, AA_STATE_SHUTDOWN)
+    : MsmState (msm, ApplicationState::kShuttingdown, AA_STATE_SHUTDOWN)
 {
 }
 

@@ -10,8 +10,6 @@
 namespace ExecutionManagerServer
 {
 
-using ComponentState = ExecutionManager::ComponentState;
-using ComponentClientReturnType = ExecutionManager::ComponentClientReturnType;
 
 class ExecutionManagerServer : public ExecutionManagement::Server
 {

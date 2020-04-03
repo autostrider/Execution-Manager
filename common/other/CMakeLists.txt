@@ -13,9 +13,7 @@ add_library(common
 
 target_link_libraries(common
     PUBLIC
-      application_state::application_state_client
-      machine_state_client::machine_state_client
-      component_client::component_client
+      proto_generated
       per::per_memory
       nlohmann_json::nlohmann_json
       api

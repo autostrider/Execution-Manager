@@ -66,7 +66,7 @@ TEST_F(MsmStateMachineTest, ShouldInitCallEnter)
 TEST_F(MsmStateMachineTest, UnsuccessfulRegistration)
 {
     EXPECT_CALL(*machineStateClientMock, Register(_,_))
-        .WillOnce(Return(StateError::K_INVALID_STATE));
+        .WillOnce(Return(StateError::kInvalidState));
 
     msmMock = initIMsm();
 

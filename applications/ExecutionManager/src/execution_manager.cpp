@@ -179,10 +179,6 @@ void ExecutionManager::changeComponentsState()
   }
 
   std::lock_guard<std::mutex> lk(m_componentPendingConfirmsMutex);
-  for(auto& component : m_registeredComponents)
-  {
-    m_componentPendingConfirms.emplace(component);
-  }
 
   for (auto subscriber : m_componentStateUpdateSbscrs)
   {
@@ -238,11 +234,11 @@ ExecutionManager::setMachineState(std::string state)
 
   if (stateIt == m_machineManifestStates.end())
   {
-    return StateError::K_INVALID_STATE;
+    return StateError::kInvalidState;
   }
   else if (state == m_currentState)
   {
-    return StateError::K_INVALID_STATE;
+    return StateError::kInvalidState;
   }
 
   m_pendingState = state;
@@ -252,7 +248,7 @@ ExecutionManager::setMachineState(std::string state)
   if (!startApplicationsForState())
   {
     LOG << "Failed to start critical App!!!";
-    return StateError::K_INVALID_REQUEST;
+    return StateError::kInvalidRequest;
   }
 
   changeComponentsState();
@@ -285,62 +281,12 @@ ExecutionManager::setMachineState(std::string state)
     }
   }
 
-  confirmState(StateError::K_SUCCESS);
+  confirmState(StateError::kSuccess);
   m_currentState = m_pendingState;
   LOG  << "Machine state changed successfully to "
        << m_currentState << ".";
 
-  return StateError::K_SUCCESS;
-}
-
-void ExecutionManager::registerComponent(std::string component,
-                                         StateUpdateMode updateMode)
-{
-  m_registeredComponents.emplace(component);
-
-  if (updateMode == StateUpdateMode::K_EVENT)
-  {
-    m_componentStateUpdateSbscrs.push_back(component);
-  }
-}
-
-ComponentClientReturnType
-ExecutionManager::getComponentState
-(std::string component, ComponentState& state) const
-{
-  auto iter = m_registeredComponents.find(component);
-
-  if (iter != m_registeredComponents.cend())
-  {
-    state = m_currentComponentState;
-    return ComponentClientReturnType::K_SUCCESS;
-  }
-  else
-  {
-    return ComponentClientReturnType::K_GENERAL_ERROR;
-  }
-}
-
-void ExecutionManager::confirmComponentState
-(std::string component, ComponentState state, ComponentClientReturnType status)
-{
-  if (m_componentPendingConfirms.empty())
-  {
-    m_componentConfirmsReceived = true;
-    return;
-  }
-  if (status == ComponentClientReturnType::K_GENERAL_ERROR ||
-      status == ComponentClientReturnType::K_INVALID)
-  {
-    LOG << "Confirm component state are failed with error: "
-        << static_cast<int>(status) << ".";
-  }
-  else
-  {
-    std::lock_guard<std::mutex> lk(m_componentPendingConfirmsMutex);
-    m_componentPendingConfirms.erase(component);
-    m_componentConfirmsReceived = m_componentPendingConfirms.empty();
-  }
+  return StateError::kSuccess;
 }
 
 } // namespace ExecutionManager

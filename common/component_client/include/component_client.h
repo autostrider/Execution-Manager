@@ -1,22 +1,19 @@
 #ifndef COMPONENT_CLIENT_H
 #define COMPONENT_CLIENT_H
 
-#include <component_state_management.capnp.h>
-#include <capnp/ez-rpc.h>
+#include <component_state_management.pb.h>
 #include <functional>
 #include <string>
 #include <map>
 #include <future>
-#include <kj/async-io.h>
-#include <capnp/rpc-twoparty.h>
 
 namespace component_client
 {
 
 using ComponentState = std::string;
 
-using ComponentClientReturnType = StateManagement::ComponentClientReturnType;
-using StateUpdateMode = StateManagement::StateUpdateMode;
+using ComponentClientReturnType = enums::ComponentClientReturnType;
+using StateUpdateMode = enums::StateUpdateMode;
 
 enum class ComponentStates: uint8_t
 {
@@ -33,7 +30,6 @@ class ComponentServer
   : public StateManagement::StateManager::Server
 {
 public:
-  using StateError = StateManagement::ComponentClientReturnType;
   ComponentServer(std::promise<ComponentState>&);
 private:
  ::kj::Promise<void> setComponentState(SetComponentStateContext context);

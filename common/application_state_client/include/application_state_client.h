@@ -1,9 +1,12 @@
 #ifndef APPLICATION_STATE_CLIENT_H
 #define APPLICATION_STATE_CLIENT_H
 
-#include <application_state_management.capnp.h>
-#include <capnp/ez-rpc.h>
+#include <client.hpp>
+#include <enums.pb.h>
+
 #include <unistd.h>
+
+using namespace base_client;
 
 namespace application_state
 {
@@ -13,12 +16,12 @@ class ApplicationStateClient
 public:
   ApplicationStateClient();
 
-  using ApplicationState = ::ApplicationStateManagement::ApplicationState;
+  using ApplicationState = enums::ApplicationState;
 
   void ReportApplicationState(ApplicationState state);
-private:
-  capnp::EzRpcClient m_client;
 
+private:
+  Client m_client;
   pid_t m_pid;
 };
 

@@ -2,10 +2,8 @@
 #define MACHINE_STATE_MANAGER_HPP
 
 #include <i_adaptive_app.hpp>
-
 #include <i_machine_state_client_wrapper.hpp>
-
-#include <capnp/ez-rpc.h>
+#include <server.hpp>
 
 
 namespace api
@@ -21,7 +19,7 @@ namespace per
 namespace api
 {
   class IStateFactory;
-  class ISocketServer;
+  class IServer;
 }
 
 namespace application_state
@@ -39,7 +37,7 @@ public:
                       std::unique_ptr<application_state::IApplicationStateClientWrapper> appStateClient,
                       std::unique_ptr<machine_state_client::IMachineStateClientWrapper> machineClient,
                       std::unique_ptr<api::IManifestReader> manifestReader,
-                      std::unique_ptr<api::ISocketServer> socketServer,
+                      std::unique_ptr<base_server::Server> server,
                       std::unique_ptr<per::KeyValueStorageBase> persistentStorage);
 
   void init() override;
@@ -47,25 +45,26 @@ public:
   void terminate() override;
   void performAction() override;
 
-  machine_state_client::MachineStateClient::StateError setMachineState(const std::string&);
+  machine_state_client::StateError setMachineState(const std::string&);
   void startServer();
   void closeServer();
   std::string getNewState();
   void saveReceivedState(const std::string& state);
-  machine_state_client::MachineStateClient::StateError registerMsm(const std::string&);
+  machine_state_client::StateError registerMsm(const std::string&);
   void
   reportApplicationState(application_state::ApplicationStateClient::ApplicationState) override;
 
 private:
   void transitToNextState(api::IAdaptiveApp::FactoryFunc nextState) override;
   std::string getNewStateForStartRun();
+  std::string recvState();
 
 private:
   std::unique_ptr<machine_state_client::IMachineStateClientWrapper> m_machineStateClient;
   std::unique_ptr<api::IStateFactory> m_factory;
   std::unique_ptr<api::IState> m_currentState;
   std::unique_ptr<application_state::IApplicationStateClientWrapper> m_appStateClient;
-  std::unique_ptr<api::ISocketServer> m_newStatesProvider;
+  std::unique_ptr<base_server::Server> m_newStatesProvider;
   std::unique_ptr<per::KeyValueStorageBase> m_persistentStorage;
   std::vector<std::string> m_availableStates;
 };

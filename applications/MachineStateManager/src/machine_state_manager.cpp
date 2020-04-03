@@ -1,5 +1,4 @@
 #include "machine_state_manager.hpp"
-#include "socket_server.hpp"
 #include <i_state_factory.hpp>
 #include <i_manifest_reader.hpp>
 #include <i_application_state_client_wrapper.hpp>
@@ -7,6 +6,7 @@
 #include <keyvaluestorage.h>
 #include <kvstype.h>
 #include <logger.hpp>
+#include <machine_state_management.pb.h>
 
 using namespace constants;
 
@@ -20,20 +20,20 @@ namespace MSM
 
 using machine_state_client::MachineStateClient;
 using ApplicationState = application_state::ApplicationStateClient::ApplicationState;
-using StateError = machine_state_client::MachineStateClient::StateError;
+using StateError = machine_state_client::StateError;
 
 MachineStateManager::MachineStateManager(
         std::unique_ptr<api::IStateFactory> factory,
         std::unique_ptr<application_state::IApplicationStateClientWrapper> appStateClient,
         std::unique_ptr<machine_state_client::IMachineStateClientWrapper> machineClient,
         std::unique_ptr<api::IManifestReader> manifestReader,
-        std::unique_ptr<api::ISocketServer> socketServer,
+        std::unique_ptr<base_server::Server> server,
         std::unique_ptr<per::KeyValueStorageBase> persistentStorage) :
         m_machineStateClient(std::move(machineClient)),
         m_factory{std::move(factory)},
         m_currentState{nullptr},
         m_appStateClient{std::move(appStateClient)},
-        m_newStatesProvider{std::move(socketServer)},
+        m_newStatesProvider{std::move(server)},
         m_persistentStorage{std::move(persistentStorage)},
         m_availableStates{manifestReader->getMachineStates()}
 {
@@ -82,16 +82,15 @@ StateError MachineStateManager::setMachineState(const std::string& state)
 {
   if (MACHINE_STATE_SHUTTINGDOWN == state)
   {
-    return m_machineStateClient->SetMachineState(state, NO_TIMEOUT);
+    return m_machineStateClient->SetMachineState(state);
   }
 
-  return m_machineStateClient->SetMachineState(state, DEFAULT_RESPONSE_TIMEOUT);
+  return m_machineStateClient->SetMachineState(state);
 }
 
 StateError MachineStateManager::registerMsm(const std::string& applicationName)
 {
-  return m_machineStateClient->Register(applicationName.c_str(),
-                                        DEFAULT_RESPONSE_TIMEOUT);
+  return m_machineStateClient->Register(applicationName.c_str());
 }
 
 std::string MachineStateManager::getNewState()
@@ -104,7 +103,7 @@ std::string MachineStateManager::getNewState()
                    newState))
   {
     LOG << "Invalid state received: " << newState;
-    newState = m_newStatesProvider->getData();
+    newState = recvState();
   }
 
   return newState;
@@ -112,12 +111,12 @@ std::string MachineStateManager::getNewState()
 
 void MachineStateManager::startServer()
 {
-  m_newStatesProvider->startServer();
+  m_newStatesProvider->start();
 }
 
 void MachineStateManager::closeServer()
 {
-  m_newStatesProvider->closeServer();
+  m_newStatesProvider->stop();
 }
 
 std::string MachineStateManager::getNewStateForStartRun()
@@ -137,15 +136,30 @@ std::string MachineStateManager::getNewStateForStartRun()
     }
   }
 
-  return m_newStatesProvider->getData();
+  return recvState();
 }
 
-void MachineStateManager::saveReceivedState(const std::string &state)
+std::string MachineStateManager::recvState()
 {
-  std::async(std::launch::async, [&] {
-      m_persistentStorage->SetValue(STATE_KEY, per::KvsType(state));
-      m_persistentStorage->SyncToStorage();
-  });
+  std::string data;
+  m_newStatesProvider->getQueueElement(data);
+  google::protobuf::Any recvData;
+  if(recvData.Is<MachineStateManagement::nextState>())
+  {
+      MachineStateManagement::nextState context;
+      recvData.UnpackTo(&context);
+      std::string result = context.state();
+      context = {};
+      return result;
+  }
 }
+
+// void MachineStateManager::saveReceivedState(const std::string &state)
+// {
+//   std::async(std::launch::async, [&] {
+//       m_persistentStorage->SetValue(STATE_KEY, per::KvsType(state));
+//       m_persistentStorage->SyncToStorage();
+//   });
+// }
 
 } // namespace MSM

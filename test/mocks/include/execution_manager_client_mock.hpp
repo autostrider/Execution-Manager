@@ -8,14 +8,12 @@
 namespace api
 {
 
-using StateError = ::MachineStateManagement::StateError;
-
 class ExecutionManagerClientMock :
   public IExecutionManagerClient
 {
 public:
-  MOCK_METHOD1(confirm, void(StateError status));
-  MOCK_METHOD2(SetComponentState, StateManagement::ComponentClientReturnType(std::string& state, std::string& componentName));
+  MOCK_METHOD(void, confirm, (StateError status));
+  MOCK_METHOD(ComponentClientReturnType, SetComponentState, (std::string& state, std::string& componentName));
 };
 
 } // namespace api

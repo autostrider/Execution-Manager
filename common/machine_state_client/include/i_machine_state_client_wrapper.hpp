@@ -2,7 +2,6 @@
 #define MACHINE_STATE_CLIENT_WRAPPER_H
 
 #include "machine_state_client.h"
-#include <machine_state_management.capnp.h>
 
 namespace machine_state_client
 {
@@ -11,20 +10,18 @@ class IMachineStateClientWrapper
 {
 public:
     virtual ~IMachineStateClientWrapper() noexcept(false) {}
-    virtual MachineStateClient::StateError Register(std::string appName, std::uint32_t timeout) = 0;
-    virtual MachineStateClient::StateError GetMachineState(std::uint32_t timeout, std::string& state) = 0;
-    virtual MachineStateClient::StateError SetMachineState(std::string state, std::uint32_t timeout) = 0;
-    virtual MachineStateClient::StateError waitForConfirm(std::uint32_t timeout) = 0;
+    virtual StateError Register(std::string appName) = 0;
+    virtual StateError GetMachineState(std::string& state) = 0;
+    virtual StateError SetMachineState(std::string state) = 0;
 };
 
 class MachineStateClientWrapper : public IMachineStateClientWrapper
 {
 public: 
     MachineStateClientWrapper();
-    MachineStateClient::StateError Register(std::string appName, std::uint32_t timeout) override;
-    MachineStateClient::StateError GetMachineState(std::uint32_t timeout, std::string& state) override;
-    MachineStateClient::StateError SetMachineState(std::string state, std::uint32_t timeout) override;
-    MachineStateClient::StateError waitForConfirm(std::uint32_t timeout) override;
+    StateError Register(std::string appName) override;
+    StateError GetMachineState(std::string& state) override;
+    StateError SetMachineState(std::string state) override;
 
 private:
     MachineStateClient m_machineClient;

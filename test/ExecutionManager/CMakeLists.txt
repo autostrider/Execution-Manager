@@ -16,6 +16,7 @@ target_link_libraries(${TEST_NAME}_test
   application_state::application_state_client
   machine_state_client::machine_state_client
   gen::execution_management
+  socket_handler
   CapnProto::capnp-rpc
   common
   mock
@@ -46,6 +47,7 @@ target_link_libraries(${COVERAGE_BUILD}
   application_state::application_state_client
   machine_state_client::machine_state_client
   gen::execution_management
+  socket_handler
   CapnProto::capnp-rpc
   common
   mock

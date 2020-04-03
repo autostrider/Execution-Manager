@@ -3,19 +3,21 @@
 
 #include <i_adaptive_app.hpp>
 #include <i_component_client_wrapper.hpp>
-#include <component_server.hpp>
+#include <i_component_server_wrapper.hpp>
 #include <constants.hpp>
 
 #include <memory>
 #include <atomic>
 
 using namespace component_client;
+using namespace component_server;
 using namespace constants;
 
 namespace api
 {
     class IStateFactory;
     class IMeanCalculator;
+    class IComponentServer;
 }
 namespace application_state
 {
@@ -29,7 +31,7 @@ public:
     AdaptiveApp(std::unique_ptr<api::IStateFactory> factory,
                 std::unique_ptr<application_state::IApplicationStateClientWrapper> appClient,
                 std::unique_ptr<IComponentClientWrapper> compClient,
-                std::unique_ptr<component_server::ComponentServer> compServer,
+                std::unique_ptr<IComponentServerWrapper> compServer,
                 std::unique_ptr<api::IMeanCalculator> meanCalculator,
                 bool eventModeEnabled = false);
     virtual ~AdaptiveApp() override = default;
@@ -58,7 +60,7 @@ private:
     std::unique_ptr<api::IState> m_currentState;
     std::unique_ptr<application_state::IApplicationStateClientWrapper> m_appClient;
     std::unique_ptr<IComponentClientWrapper> m_componentClient;
-    std::unique_ptr<component_server::ComponentServer> m_componentServer;
+    std::unique_ptr<IComponentServerWrapper> m_componentServer;
     std::unique_ptr<api::IMeanCalculator> m_meanCalculator;
     bool m_eventModeEnabled;
 };

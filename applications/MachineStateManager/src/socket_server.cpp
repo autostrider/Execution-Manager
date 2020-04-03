@@ -25,7 +25,8 @@ SocketServer::SocketServer
 
   if (m_socketfd < 0)
   {
-     LOG << "Error opening socket " << strerror(errno);
+    LOG << "Error opening socket ";
+    perror(strerror(errno));
   }
 
   int res = m_socket->bind(m_socketfd,
@@ -41,12 +42,14 @@ SocketServer::SocketServer
 
   if (-1 == res)
   {
-    LOG << "Error listening in socket";
+    LOG << "Error listening in socket: ";
+    perror(strerror(errno));
   }
 }
 
 void SocketServer::dataListener()
 {
+  LOG << "dataListener";
   struct sockaddr_un cli;
   unsigned int cliSize =  sizeof(cli);
   constexpr int BUFFER_SIZE = 100000;
@@ -62,7 +65,8 @@ void SocketServer::dataListener()
     auto resRecv = m_socket->recv(clientfd, buff, BUFFER_SIZE, 0);
     if (resRecv <= 0)
     {
-      LOG << "Error occurred receiving data from client";
+      LOG << "Error occurred receiving data from client: ";
+      perror(strerror(errno));
       break;
     }
     else
@@ -76,7 +80,12 @@ void SocketServer::dataListener()
 
 std::string SocketServer::getData()
 {
-  return m_receivedData.pop();
+  std::string str;
+  while(!m_receivedData.pop(str))
+  {
+    std::this_thread::sleep_for(std::chrono::seconds(1));
+  }
+  return str;
 }
 
 void SocketServer::closeServer()
@@ -86,6 +95,7 @@ void SocketServer::closeServer()
 
 void SocketServer::startServer()
 {
+  LOG << "MSM startServer";
   m_worker = std::thread(&SocketServer::dataListener, this);
 }
 
@@ -96,7 +106,11 @@ SocketServer::~SocketServer()
     m_worker.join();
   }
   LOG << "closing server on: " << m_serverAddress.sun_path;
-  m_socket->close(m_socketfd);
+  if(m_socket->close(m_socketfd))
+  {
+    LOG << "Error occurred close server socket: ";
+    perror(strerror(errno));
+  }
   ::unlink(m_serverAddress.sun_path);
 }
 

@@ -16,7 +16,7 @@ class ComponentServer : public Server
 public:
     ComponentServer(const std::string&, std::unique_ptr<IServerSocket>, std::unique_ptr<IConnectionFactory>);
 
-    std::string setStateUpdateHandler(std::string recv) noexcept;
+    ComponentState setStateUpdateHandler(std::string recv) noexcept;
 };
 
 }

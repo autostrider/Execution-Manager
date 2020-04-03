@@ -12,7 +12,7 @@
 AdaptiveApp::AdaptiveApp(std::unique_ptr<api::IStateFactory> factory,
                          std::unique_ptr<application_state::IApplicationStateClientWrapper> appClient,
                          std::unique_ptr<IComponentClientWrapper> compClient,
-                         std::unique_ptr<component_server::ComponentServer> compServer,
+                         std::unique_ptr<IComponentServerWrapper> compServer,
                          std::unique_ptr<api::IMeanCalculator> meanCalculator,
                          bool eventModeEnabled) :
     m_factory{std::move(factory)},
@@ -109,11 +109,11 @@ void AdaptiveApp::performAction()
 {
     if (m_eventModeEnabled)
     {
-        auto receive = m_componentServer->getQueueElement();
+        std::string receivedData;
         
-        if (!receive.empty())
+        if (m_componentServer->getQueueElement(receivedData))
         {
-            stateUpdateHandler(m_componentServer->setStateUpdateHandler(receive));
+            stateUpdateHandler(m_componentServer->setStateUpdateHandler(receivedData));
         }
     }
     else
@@ -121,7 +121,6 @@ void AdaptiveApp::performAction()
         pollComponentState();
     }
     
-
     m_currentState->performAction();
 }
 

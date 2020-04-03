@@ -40,7 +40,7 @@ void Client::connect()
     }
     else
     {
-        LOG << "Client failed to connect socket\n";
+        LOG << "Client failed to connect socket: " << errno;
     }
 }
 

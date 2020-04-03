@@ -6,24 +6,29 @@
 namespace component_server
 {
 
-class IComponentServerWrapper
+class IComponentServerWrapper 
 {
 public:
     virtual ~IComponentServerWrapper() noexcept {}
 
-    virtual std::string SetStateUpdateHandler(std::string data) noexcept = 0;
+    virtual void start() noexcept = 0;
+    virtual bool getQueueElement(std::string&) noexcept = 0;
+    virtual ComponentState setStateUpdateHandler(std::string) noexcept = 0;
+
 };
 
 class ComponentServerWrapper : public IComponentServerWrapper
 {
 public:
-    ComponentServerWrapper(const std::string &path,
+    ComponentServerWrapper(const std::string &component,
                            std::unique_ptr<IServerSocket> socket,
                            std::unique_ptr<IConnectionFactory> conn) noexcept;
 
     ~ComponentServerWrapper() noexcept;
 
-    std::string SetStateUpdateHandler(std::string data) noexcept override;
+    void start() noexcept override;
+    bool getQueueElement(std::string& data) noexcept override;
+    ComponentState setStateUpdateHandler(std::string data) noexcept override;
 
 private:
     ComponentServer m_server;

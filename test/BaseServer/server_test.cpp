@@ -143,10 +143,11 @@ TEST_F(ServerTest, ShouldSuccessfulyReceiveDataNull)
 
 TEST_F(ServerTest, ShouldSuccessfulyGetQueueElement)
 {
+    std::string str = "hi";
     {
         expectCreateServer();
         expectCreatingAcceptedConnection();
-        expectReadData("hi", 2);
+        expectReadData(str, 2);
         expectCloseServerSocket();
     }
     
@@ -155,7 +156,6 @@ TEST_F(ServerTest, ShouldSuccessfulyGetQueueElement)
 
     server->start();
 
-    auto recv = server->getQueueElement();
-
-    EXPECT_NE(recv, "");
+    ASSERT_FALSE(server->getQueueElement(str));
+    EXPECT_NE(str, "");
 }

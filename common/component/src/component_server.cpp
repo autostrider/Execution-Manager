@@ -1,17 +1,18 @@
 #include "component_server.hpp"
+#include <logger.hpp>
 
 #include <any.pb.h>
 
 namespace component_server
 {
 
-ComponentServer::ComponentServer(const std::string &path,
+ComponentServer::ComponentServer(const std::string &component,
                                  std::unique_ptr<IServerSocket> socket,
                                  std::unique_ptr<IConnectionFactory> conn)
-    : Server{path, std::move(socket), std::move(conn)}
+    : Server{component, std::move(socket), std::move(conn)}
 {}
 
-std::string ComponentServer::setStateUpdateHandler(std::string recv) noexcept
+ComponentState ComponentServer::setStateUpdateHandler(std::string recv) noexcept
 {
     google::protobuf::Any any;
 
@@ -23,7 +24,6 @@ std::string ComponentServer::setStateUpdateHandler(std::string recv) noexcept
         any.UnpackTo(&comp);
         return comp.state();
     }
-
 }
 
 }

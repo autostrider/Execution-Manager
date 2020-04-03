@@ -32,9 +32,7 @@ int main()
                      std::make_unique<application_state::ApplicationStateClientWrapper>(),
                      std::make_unique<component_client::ComponentClientWrapper>(componentName,
                                                                                 componentStateUpdateMode),
-                     std::make_unique<component_server::ComponentServer>((IPC_PROTOCOL + COMPONENT_SOCKET_NAME + componentName),
-                                                                         std::make_unique<socket_handler::ServerSocket>(),
-                                                                         std::make_unique<ConnectionFactory>(std::make_shared<ProxyClientFactory>())),
+                     nullptr,
                      std::make_unique<api::MeanCalculator>());
 
     app2.init();

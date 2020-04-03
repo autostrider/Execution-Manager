@@ -47,7 +47,7 @@ ExecutionManagerClient::confirm(StateError status)
 pComponentClientReturnType
 ExecutionManagerClient::SetComponentState(std::string& state, 
                                           std::string& componentName)
-{  
+{
   auto m_client =
       std::make_unique<Client>((m_componentAddress + componentName),
                                 std::move(std::make_unique<ClientSocket>()));

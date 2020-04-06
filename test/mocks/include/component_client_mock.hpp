@@ -11,9 +11,6 @@ namespace component_client
 class ComponentClientMock : public IComponentClientWrapper
 {
 public:
-    MOCK_METHOD(ComponentClientReturnType, SetStateUpdateHandler,
-                (std::function<void(ComponentState const&)> f), (noexcept));
-
     MOCK_METHOD(ComponentClientReturnType, GetComponentState,
                 (ComponentState& state), (noexcept));
 

@@ -32,6 +32,7 @@ public:
     bool getQueueElement(std::string& data) override;
 
 private:
+    void createSocket();
     void bind();
     void listen();
 
@@ -42,10 +43,9 @@ private:
 private:
     std::shared_ptr<IServerSocket> m_server_socket;
     int m_server_fd = 0;
-    int m_addr_len = 0;
     
     struct sockaddr_un m_addr;
-    std::string m_path;
+    std::string m_componentName;
 
     std::atomic<bool> m_isStarted;
 

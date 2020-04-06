@@ -30,9 +30,10 @@ protected:
     MeanCalculatorMock* meanCalculatorMockPtr = meanCalculatorMock.get();
 
     AdaptiveApp appMock{std::move(factoryMock),
-                std::move(stateClientMock),
-                std::move(componentClientMock),
-                       std::move(meanCalculatorMock)};
+                        std::move(stateClientMock),
+                        std::move(componentClientMock),
+                        nullptr,
+                        std::move(meanCalculatorMock)};
 };
 
 TEST_F(StateTest, shouldReportStateWhenInitEntered)

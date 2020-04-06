@@ -13,13 +13,6 @@ ComponentClientWrapper::~ComponentClientWrapper() noexcept
 {}
 
 ComponentClientReturnType
-ComponentClientWrapper::SetStateUpdateHandler
-(std::function<void(ComponentState const&)> f) noexcept
-{
-  return m_client.SetStateUpdateHandler(f);
-}
-
-ComponentClientReturnType
 ComponentClientWrapper::GetComponentState
 (ComponentState& state) noexcept
 {
@@ -31,11 +24,6 @@ ComponentClientWrapper::ConfirmComponentState
 (ComponentState state, ComponentClientReturnType status) noexcept
 {
   m_client.ConfirmComponentState(state, status);
-}
-
-void ComponentClientWrapper::CheckIfAnyEventsAvailable() noexcept
-{
-  m_client.checkIfAnyEventsAvailable();
 }
 
 } // namespace component_client

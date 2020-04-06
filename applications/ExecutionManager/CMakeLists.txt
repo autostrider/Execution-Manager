@@ -13,6 +13,7 @@ target_link_libraries(em
     nlohmann_json::nlohmann_json
       application_state::application_state_client
       common
+      socket_handler
 )
 
 target_include_directories(em

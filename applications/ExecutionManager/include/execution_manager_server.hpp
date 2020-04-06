@@ -21,7 +21,7 @@ public:
      ExecutionManager::MsmHandler msmHandler);
   ~ExecutionManagerServer();
 private:
-  void reportApplicationState(ReportApplicationStateContext context);
+  void reportApplicationState(ApplicationState context);
 
   // ::kj::Promise<void>
   // register_(RegisterContext context) override;

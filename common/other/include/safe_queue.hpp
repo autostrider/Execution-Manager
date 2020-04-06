@@ -17,7 +17,6 @@ public:
 private:
   std::queue<std::string> m_data;
   std::mutex m_mut;
-  std::condition_variable m_condVar;
 };
 
 }

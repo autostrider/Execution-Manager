@@ -89,8 +89,6 @@
 // 		unlink(EM_SOCKET_NAME.c_str());
 //   }
 
-//   void expectSetStateUpdateHandler();
-//   void expectCheckIfAnyEventsAvailable();
 
 //   const uint32_t defaultTimeout{666};
 

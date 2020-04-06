@@ -30,7 +30,7 @@
 
 // private:
 //     ::kj::Promise<void>
-//     reportApplicationState(ReportApplicationStateContext context) override;
+//     reportApplicationState(ApplicationState context) override;
 
 // private:
 //     Data& m_sharedResource;
@@ -43,7 +43,7 @@
 // }
 
 // ::kj::Promise<void>
-// ApplicationStateClientServer::reportApplicationState(ReportApplicationStateContext context)
+// ApplicationStateClientServer::reportApplicationState(ApplicationState context)
 // {
 //     m_sharedResource.m_state = context.getParams().getState();
 

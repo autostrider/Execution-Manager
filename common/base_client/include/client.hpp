@@ -1,7 +1,7 @@
 #ifndef CLIENT_HPP
 #define CLIENT_HPP
 
-#include "client_socket.hpp"
+#include <i_client_socket.hpp>
 #include <i_client.hpp>
 
 #include <string>

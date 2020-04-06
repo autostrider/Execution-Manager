@@ -4,25 +4,25 @@ import "enums.proto";
 
 package StateManagement;
 
-message registerComponent
+message RegisterComponent
 {
     string component = 1;
     enums.StateUpdateMode mode = 2;
 }
 
-message getComponentState
+message GetComponentState
 {
     string component = 1;
 }
 
-message confirmComponentState
+message ConfirmComponentState
 {
     string component = 1;
     string state = 2;
     enums.ComponentClientReturnType status = 3;
 }
 
-message resultSetComponentState
+message ResultSetComponentState
 {
     enums.ComponentClientReturnType result = 1;
 }

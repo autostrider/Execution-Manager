@@ -16,8 +16,6 @@ add_library(${COMPONENT_CLIENT_NAMESPACE_NAME}::component_client
 # Link needed libraries
 target_link_libraries(component_client
     PUBLIC
-      CapnProto::capnp-rpc
-      gen::component_state_management
       common
 )
 # Specify include directory

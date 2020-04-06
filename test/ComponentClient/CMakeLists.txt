@@ -12,11 +12,6 @@ target_link_libraries(${TEST_NAME}_test
   gtest
   gtest_main
   gmock
-  application_state::application_state_client
-  component_client::component_client
-  machine_state_client::machine_state_client
-  gen::execution_management
-  CapnProto::capnp-rpc
   common
 )
 
@@ -40,11 +35,6 @@ target_link_libraries(${COVERAGE_BUILD}
   gtest
   gtest_main
   gmock
-  application_state::application_state_client
-  component_client::component_client
-  machine_state_client::machine_state_client
-  gen::execution_management
-  CapnProto::capnp-rpc
   common
 )
 

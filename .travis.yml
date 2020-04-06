@@ -20,6 +20,8 @@ before_install:
 - sudo ldconfig
 
 script:
+- cd /home/travis/build/autostrider/Execution-Manager/tools/googletest
+- git checkout v1.10.x
 - cd /home/travis/build/autostrider/Execution-Manager
 - mkdir build
 - cd build

@@ -50,17 +50,17 @@ ExecutionManagerServer::~ExecutionManagerServer()
     }
 }
 
-void
-ExecutionManagerServer::reportApplicationState
-(ReportApplicationStateContext context)
-{
-  ApplicationState state = context.getParams().getState();
-  std::string appName = context.getParams().getAppName().cStr();
+// void
+// ExecutionManagerServer::reportApplicationState
+// (ApplicationState context)
+// {
+//   ApplicationState state = context.getParams().getState();
+//   std::string appName = context.getParams().getAppName().cStr();
 
-  m_em.reportApplicationState(appName,
-                              static_cast<ExecutionManager::AppState>(state));
+//   m_em.reportApplicationState(appName,
+//                               static_cast<ExecutionManager::AppState>(state));
 
-}
+// }
 
 // ::kj::Promise<void>
 // ExecutionManagerServer::register_(RegisterContext context)

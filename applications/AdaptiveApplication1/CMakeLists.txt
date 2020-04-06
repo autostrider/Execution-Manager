@@ -9,6 +9,8 @@ target_link_libraries(proc1
   PRIVATE
     common
     proto_generated
+    application_state_client
+    component_client
 )
 
 target_include_directories(proc1

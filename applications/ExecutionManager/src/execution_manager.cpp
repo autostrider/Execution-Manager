@@ -23,8 +23,7 @@ namespace {
 
 ExecutionManager::ExecutionManager(
   std::unique_ptr<IManifestReader> reader,
-  std::unique_ptr<IApplicationHandler> applicationHandler,
-  std::unique_ptr<IExecutionManagerClient> client)
+  std::unique_ptr<IApplicationHandler> applicationHandler)
   : m_appHandler{std::move(applicationHandler)},
     m_activeProcesses{},
     m_allowedProcessesForState{reader->getStatesSupportedByApplication()},
@@ -32,8 +31,7 @@ ExecutionManager::ExecutionManager(
     m_pendingState{},
     m_currentComponentState{},
     m_machineManifestStates{reader->getMachineStates()},
-    m_componentStateUpdateSbscrs{},
-    m_rpcClient(std::move(client))
+    m_componentStateUpdateSbscrs{}
 {
   filterStates();
 }

@@ -3,6 +3,7 @@
 
 #include "execution_manager.hpp"
 #include "msm_handler.hpp"
+#include <server.hpp>
 
 #include <thread>
 #include <atomic>
@@ -11,7 +12,7 @@ namespace ExecutionManagerServer
 {
 
 
-class ExecutionManagerServer : public ExecutionManagement::Server
+class ExecutionManagerServer : public base_server::Server
 {
 public:
   explicit
@@ -20,26 +21,25 @@ public:
      ExecutionManager::MsmHandler msmHandler);
   ~ExecutionManagerServer();
 private:
-  ::kj::Promise<void>
-  reportApplicationState(ReportApplicationStateContext context) override;
+  void reportApplicationState(ReportApplicationStateContext context);
 
-  ::kj::Promise<void>
-  register_(RegisterContext context) override;
+  // ::kj::Promise<void>
+  // register_(RegisterContext context) override;
 
-  ::kj::Promise<void>
-  getMachineState(GetMachineStateContext context) override;
+  // ::kj::Promise<void>
+  // getMachineState(GetMachineStateContext context) override;
 
-  ::kj::Promise<void>
-  setMachineState(SetMachineStateContext context) override;
+  // ::kj::Promise<void>
+  // setMachineState(SetMachineStateContext context) override;
 
-  ::kj::Promise<void>
-  registerComponent(RegisterComponentContext context) override;
+  // ::kj::Promise<void>
+  // registerComponent(RegisterComponentContext context) override;
 
-  ::kj::Promise<void>
-  getComponentState(GetComponentStateContext context) override;
+  // ::kj::Promise<void>
+  // getComponentState(GetComponentStateContext context) override;
 
-  ::kj::Promise<void>
-  confirmComponentState(ConfirmComponentStateContext context) override;
+  // ::kj::Promise<void>
+  // confirmComponentState(ConfirmComponentStateContext context) override;
 
 private:
   ExecutionManager::ExecutionManager& m_em;

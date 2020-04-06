@@ -35,8 +35,7 @@ class ExecutionManager
 {
 public:
   ExecutionManager(std::unique_ptr<IManifestReader> reader,
-                   std::unique_ptr<IApplicationHandler> applicationHandler,
-                   std::unique_ptr<IExecutionManagerClient> client);
+                   std::unique_ptr<IApplicationHandler> applicationHandler);
 
   void reportApplicationState(const std::string& appName, AppState state);
 

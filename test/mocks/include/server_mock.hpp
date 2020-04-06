@@ -13,6 +13,7 @@ public:
     MOCK_METHOD(bool, isStarted, (), (override));
     MOCK_METHOD(void, readFromSocket,
                 (std::shared_ptr<api::IConnection>), (override));
+    MOCK_METHOD(bool, getQueueElement, (std::string& data), (override));
 };
 
 #endif //I_SERVER_MOCK_HPP

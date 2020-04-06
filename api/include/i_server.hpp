@@ -17,6 +17,7 @@ public:
     virtual void stop() = 0;
     virtual bool isStarted() = 0;
     virtual void readFromSocket(std::shared_ptr<IConnection>) = 0;
+    virtual bool getQueueElement(std::string& data) = 0;
 };
 
 }

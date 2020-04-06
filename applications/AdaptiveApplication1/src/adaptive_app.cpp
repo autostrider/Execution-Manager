@@ -2,11 +2,13 @@
 #include <state.hpp>
 #include <logger.hpp>
 
+#include <application_state_client.h>
 #include <i_state_factory.hpp>
 #include <i_application_state_client_wrapper.hpp>
-#include <application_state_client.h>
 #include <i_component_client_wrapper.hpp>
 #include "i_mean_calculator.hpp"
+
+using namespace component_client;
 
 AdaptiveApp::AdaptiveApp(std::unique_ptr<api::IStateFactory> factory,
                          std::unique_ptr<application_state::IApplicationStateClientWrapper> appClient,
@@ -69,7 +71,7 @@ void AdaptiveApp::pollComponentState()
     ComponentState state;
     auto result = m_componentClient->GetComponentState(state);
     
-    if (ComponentClientReturnType::K_SUCCESS == result)
+    if (ComponentClientReturnType::kSuccess == result)
     {
         result = setComponentState(state);
     }
@@ -79,7 +81,7 @@ void AdaptiveApp::pollComponentState()
 
 ComponentClientReturnType AdaptiveApp::setComponentState(ComponentState const& state)
 {
-    auto setStateResult = ComponentClientReturnType::K_SUCCESS;
+    auto setStateResult = ComponentClientReturnType::kSuccess;
 
     if (isValid(state))
     {
@@ -93,12 +95,12 @@ ComponentClientReturnType AdaptiveApp::setComponentState(ComponentState const& s
         }
         else
         {
-            setStateResult = ComponentClientReturnType::K_UNCHANGED;
+            setStateResult = ComponentClientReturnType::kUnchanged;
         }
     }
     else
     {
-        setStateResult = ComponentClientReturnType::K_INVALID;
+        setStateResult = ComponentClientReturnType::kInvalid;
     }
   
     return setStateResult;

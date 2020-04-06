@@ -2,6 +2,8 @@
 #include "msm_handler.hpp"
 #include <common.hpp>
 #include <logger.hpp>
+#include <server_socket.hpp>
+#include <connection_factory.hpp>
 
 #include <string>
 #include <iostream>
@@ -16,10 +18,12 @@ using std::string;
 
 ExecutionManagerServer::ExecutionManagerServer
 (ExecutionManager::ExecutionManager& application,
- ExecutionManager::MsmHandler msmHandler)
+ ExecutionManager::MsmHandler msmHandler,
+ IServerWrapper server)
   : m_em{application},
     m_msmHandler{msmHandler}
 {
+   // member->start();
   LOG << "Execution Manager server started...";
 
     isRunning = true;
@@ -46,7 +50,7 @@ ExecutionManagerServer::~ExecutionManagerServer()
     }
 }
 
-::kj::Promise<void>
+void
 ExecutionManagerServer::reportApplicationState
 (ReportApplicationStateContext context)
 {
@@ -56,53 +60,52 @@ ExecutionManagerServer::reportApplicationState
   m_em.reportApplicationState(appName,
                               static_cast<ExecutionManager::AppState>(state));
 
-  return kj::READY_NOW;
 }
 
-::kj::Promise<void>
-ExecutionManagerServer::register_(RegisterContext context)
-{
-  string newMachineClient = context.getParams().getAppName();
-  pid_t applicationPid = context.getParams().getPid();
+// ::kj::Promise<void>
+// ExecutionManagerServer::register_(RegisterContext context)
+// {
+//   string newMachineClient = context.getParams().getAppName();
+//   pid_t applicationPid = context.getParams().getPid();
 
-  if (m_msmHandler.registerMsm(applicationPid, newMachineClient))
-  {
-    context.getResults().setResult(StateError::K_SUCCESS);
-  }
-  else
-  {
-    context.getResults().setResult(StateError::K_INVALID_REQUEST);
-  }
+//   if (m_msmHandler.registerMsm(applicationPid, newMachineClient))
+//   {
+//     context.getResults().setResult(StateError::K_SUCCESS);
+//   }
+//   else
+//   {
+//     context.getResults().setResult(StateError::K_INVALID_REQUEST);
+//   }
 
-  return kj::READY_NOW;
-}
+//   return kj::READY_NOW;
+// }
 
-::kj::Promise<void>
-ExecutionManagerServer::getMachineState(GetMachineStateContext context)
-{
-  context.getResults().setState(m_em.getMachineState());
+// ::kj::Promise<void>
+// ExecutionManagerServer::getMachineState(GetMachineStateContext context)
+// {
+//   context.getResults().setState(m_em.getMachineState());
 
-  context.getResults().setResult(StateError::K_SUCCESS);
+//   context.getResults().setResult(StateError::K_SUCCESS);
 
-  return kj::READY_NOW;
-}
+//   return kj::READY_NOW;
+// }
 
-::kj::Promise<void>
-ExecutionManagerServer::setMachineState(SetMachineStateContext context)
-{
-  string state = context.getParams().getState().cStr();
-  pid_t applicationPid = context.getParams().getPid();
+// ::kj::Promise<void>
+// ExecutionManagerServer::setMachineState(SetMachineStateContext context)
+// {
+//   string state = context.getParams().getState().cStr();
+//   pid_t applicationPid = context.getParams().getPid();
 
-  if (!m_msmHandler.checkMsm(applicationPid))
-  {
-    return kj::READY_NOW;
-  }
+//   if (!m_msmHandler.checkMsm(applicationPid))
+//   {
+//     return kj::READY_NOW;
+//   }
 
-  threadsMap.at(THREADS::EM_SERVER)->addMethod(
-              std::bind(&ExecutionManager::ExecutionManager::setMachineState,
-                        &m_em, state));
+//   threadsMap.at(THREADS::EM_SERVER)->addMethod(
+//               std::bind(&ExecutionManager::ExecutionManager::setMachineState,
+//                         &m_em, state));
 
-  return kj::READY_NOW;
-}
+//   return kj::READY_NOW;
+// }
 
 } //namespace ExecutionManagerServer

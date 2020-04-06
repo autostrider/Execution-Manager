@@ -1,15 +1,22 @@
 #include "execution_manager_client.hpp"
+#include <client_socket.hpp>
+#include <client.hpp>
 
 #include <capnp/rpc-twoparty.h>
+#include <execution_management_p.pb.h>
+
+using namespace socket_handler;
+using namespace base_client;
+using namespace pExecutionManagement;
 
 namespace ExecutionManagerClient
 {
 
 ExecutionManagerClient::ExecutionManagerClient(const std::string& msmAddress,
-                                               const std::string& m_componentAddress,
+                                               const std::string& componentAddress,
                                                kj::AsyncIoContext& context)
 : m_msmAddress(msmAddress),
-  m_componentAddress(m_componentAddress),
+  m_componentAddress(componentAddress),
   m_ioContext(context)
 {}
 
@@ -37,33 +44,24 @@ ExecutionManagerClient::confirm(StateError status)
   });
 }
 
-StateManagement::ComponentClientReturnType 
+pComponentClientReturnType
 ExecutionManagerClient::SetComponentState(std::string& state, 
                                           std::string& componentName)
 {
-  m_ioContext.provider->newPipeThread(
-    [&](kj::AsyncIoProvider& ioProvider,
-        auto&, 
-        kj::WaitScope& waitScope)
-  {
-    auto address = ioProvider.getNetwork()
-      .parseAddress(m_componentAddress + componentName)
-        .wait(waitScope);
+  auto m_client =
+      std::make_unique<Client>((m_componentAddress + componentName),
+                                std::move(std::make_unique<ClientSocket>()));
+  m_client->connect();
 
-    auto connection = address->connect().wait(waitScope);
-    capnp::TwoPartyClient client(*connection);
-    auto capability = client.bootstrap()
-      .castAs<StateManagement::StateManager>();
+  pSetCompState message;
+  message.set_state(state);
 
-    auto request = capability.setComponentStateRequest();
+  google::protobuf::Any any;
+  any.PackFrom(message);
 
-    request.setState(state);
+  m_client->sendMessage(any);
 
-    request.send().ignoreResult().wait(waitScope);
-
-  });
-
-  return StateManagement::ComponentClientReturnType::K_SUCCESS;
+  return pComponentClientReturnType::kSuccess;
 }
 
 } // namespace ExecutionManagerClient

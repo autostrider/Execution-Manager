@@ -1,19 +1,19 @@
 syntax = "proto3";
 
-package MachineStateManagement;
+package pMachineStateManagement;
 
-message registerApp
+message pRegisterApp
 {
     int32 pid = 1;
     string appName = 2;
 }
 
-message getMachineState
+message pGetMachineState
 {
     int32 pid = 1;
 }
 
-message setMachineState
+message pSetMachineState
 {
     int32 pid = 1;
     string state = 2;

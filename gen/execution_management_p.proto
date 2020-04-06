@@ -2,9 +2,9 @@ syntax = "proto3";
 
 import "enums.proto";
 
-package ExecutionManagement;
+package pExecutionManagement;
 
-enum StateError
+enum pStateError
 {
     kSuccess = 0;
     kInvalidState = 1;
@@ -12,34 +12,34 @@ enum StateError
     kTimeout = 3;
 }
 
-message setComponentState
+message pSetCompState
 {
     string state = 1;
 }
 
-message confirmStateTransition
+message pConfirmStateTransition
 {
-    StateError result = 1;
+    pStateError result = 1;
 }
 
-message resultGetComponentState
+message pResultGetComponentState
 {
     string state = 1;
-    enums.ComponentClientReturnType resualt = 2;
+    enums.pComponentClientReturnType resualt = 2;
 }
 
-message resultRegisterComponent
+message pResultRegisterComponent
 {
-    StateError result = 1;
+    pStateError result = 1;
 }
 
-message resultGetMachineState
+message pResultGetMachineState
 {
     string state = 1;
-    StateError result = 2;
+    pStateError result = 2;
 }
 
-message resultSetMachineState
+message pResultSetMachineState
 {
-    StateError result = 1;
+    pStateError result = 1;
 }

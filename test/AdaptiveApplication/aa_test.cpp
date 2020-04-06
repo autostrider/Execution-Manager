@@ -12,6 +12,7 @@
 using namespace api;
 using namespace application_state;
 using namespace component_client;
+using namespace component_server;
 using namespace testing;
 
 class AppTest : public ::testing::Test
@@ -25,7 +26,7 @@ protected:
     std::unique_ptr<StateMock> stateTermMock = std::make_unique<StrictMock<StateMock>>();
     std::unique_ptr<StateMock> stateSuspendMock = std::make_unique<StrictMock<StateMock>>();
 
-    std::unique_ptr<ComponentClientMock> compStateMock = std::make_unique<StrictMock<ComponentClientMock>>();
+    std::unique_ptr<ComponentClientMock> compClientMock = std::make_unique<StrictMock<ComponentClientMock>>();
     std::unique_ptr<MeanCalculatorMock> meanCalculatorMock = std::make_unique<StrictMock<MeanCalculatorMock>>();
 
     StateMock* stateInitMockPtr = stateInitMock.get();
@@ -34,10 +35,11 @@ protected:
     StateFactoryMock* factoryPtr = factoryMock.get();
     AppStateClientMock* stateClientMockPtr = stateClientMock.get();
     MeanCalculatorMock* meanCalculatorMockPtr = meanCalculatorMock.get();
-    ComponentClientMock* compStateMockPtr = compStateMock.get();
+    ComponentClientMock* compStateMockPtr = compClientMock.get();
 
     AdaptiveApp app{std::move(factoryMock), std::move(stateClientMock),
-                std::move(compStateMock), std::move(meanCalculatorMock)};
+                    std::move(compClientMock), nullptr,
+                    std::move(meanCalculatorMock)};
 
     void goToInit();
     void goToRunFromState(StateMock *oldStateMock);

@@ -2,7 +2,7 @@ syntax = "proto3";
 
 package enums;
 
-enum ComponentClientReturnType
+enum pComponentClientReturnType
 {
     kSuccess = 0;
     kGeneralError = 1;
@@ -11,13 +11,13 @@ enum ComponentClientReturnType
     kUnchanged = 4;
 }
 
-enum StateUpdateMode
+enum pStateUpdateMode
 {
     kPoll = 0;
     kEvent = 1;
 }
 
-enum ApplicationState
+enum pApplicationState
 {
     kInitializing = 0;
     kRunning = 1;

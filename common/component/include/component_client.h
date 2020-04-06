@@ -29,36 +29,15 @@ static const ComponentState ComponentStateKOff = "kOff";
 
 class ComponentClient;
 
-class ComponentServer
-  : public StateManagement::StateManager::Server
-{
-public:
-  using StateError = StateManagement::ComponentClientReturnType;
-  ComponentServer(std::promise<ComponentState>&);
-private:
- ::kj::Promise<void> setComponentState(SetComponentStateContext context);
-
-private:
-  std::promise<ComponentState>& m_eventPromise;
-};
-
 class ComponentClient
 {
 public:
   ComponentClient (const std::string &s, StateUpdateMode mode) noexcept;
 
-  ComponentClientReturnType SetStateUpdateHandler (std::function<void(ComponentState const&)> f) noexcept;
-
   ComponentClientReturnType GetComponentState (ComponentState& state) noexcept;
-
   void ConfirmComponentState (ComponentState state, ComponentClientReturnType status) noexcept;
 
-  void checkIfAnyEventsAvailable();
-
   ~ComponentClient();
-private:  
-  void startServer();
-  bool eventReceived(std::future<ComponentState>& stateFuture);
  
 private:
   capnp::EzRpcClient m_rpcClient;

@@ -2,10 +2,10 @@ syntax = "proto3";
 
 import "enums.proto";
 
-package ApplicationStateManagement;
+package pApplicationStateManagement;
 
-message registerComponent
+message pRegisterComponent
 {
     string appName = 1;
-    enums.ApplicationState state = 2;
+    enums.pApplicationState state = 2;
 }

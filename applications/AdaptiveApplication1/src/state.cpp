@@ -28,7 +28,7 @@ ApplicationState State::getApplicationState() const
     return m_applState;
 }
 
-Init::Init(AdaptiveApp &app) : State (app, ApplicationState::K_INITIALIZING, AA_STATE_INIT)
+Init::Init(AdaptiveApp &app) : State (app, ApplicationState::kInitializing, AA_STATE_INIT)
 {
 }
 
@@ -37,7 +37,7 @@ void Init::enter()
     m_app.reportApplicationState(getApplicationState());
 }
 
-Run::Run(AdaptiveApp &app) : State (app, ApplicationState::K_RUNNING, AA_STATE_RUNNING)
+Run::Run(AdaptiveApp &app) : State (app, ApplicationState::kRunning, AA_STATE_RUNNING)
 {
 }
 
@@ -64,7 +64,7 @@ void Suspend::performAction()
 
 }
 
-ShutDown::ShutDown(AdaptiveApp& app) : State (app, ApplicationState::K_SHUTTINGDOWN, AA_STATE_SHUTDOWN)
+ShutDown::ShutDown(AdaptiveApp& app) : State (app, ApplicationState::kShuttingdown, AA_STATE_SHUTDOWN)
 {
 }
 

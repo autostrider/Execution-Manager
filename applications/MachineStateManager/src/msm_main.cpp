@@ -7,6 +7,7 @@
 #include <server.hpp>
 #include <connection_factory.hpp>
 #include <i_application_state_client_wrapper.hpp>
+#include <proxy_client_factory.hpp>
 
 #include <keyvaluestorage.h>
 #include <kvstype.h>
@@ -42,7 +43,7 @@ int main(int argc, char **argv)
                                  std::make_unique<common::ManifestReader>(),
                                  std::make_unique<Server>(MSM_STATES_SERVER,
                                                           std::make_unique<ServerSocket>(),
-                                                          std::make_unique<ConnectionFactory>()),
+                                                          std::make_unique<ConnectionFactory>(std::make_shared<ProxyClientFactory>())),
                                  std::make_unique<per::KeyValueStorage>(MSM_STATE_PROVIDER));
 
     msm.init();

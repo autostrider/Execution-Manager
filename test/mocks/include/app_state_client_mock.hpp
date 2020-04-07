@@ -12,7 +12,7 @@ class AppStateClientMock : public IApplicationStateClientWrapper
 {
 public:
     AppStateClientMock() = default;
-    MOCK_METHOD1(ReportApplicationState, void(ApplicationStateManagement::ApplicationState state));
+    MOCK_METHOD(void, ReportApplicationState, (ApplicationStateClient::ApplicationState state));
 };
 
 } // namespace application_state

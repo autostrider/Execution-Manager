@@ -7,10 +7,11 @@ add_executable(proc1 src/aa_main.cpp ${AA1_SRC})
 
 target_link_libraries(proc1
   PRIVATE
-    common
-    proto_generated
+    api
     application_state_client
+    common
     component_client
+    proto_generated
 )
 
 target_include_directories(proc1

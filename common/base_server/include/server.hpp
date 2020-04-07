@@ -4,6 +4,7 @@
 #include <i_connection_factory.hpp>
 #include <i_server.hpp>
 #include <i_server_socket.hpp>
+#include <google/protobuf/message.h>
 #include <safe_queue.hpp>
 
 #include <atomic>
@@ -28,8 +29,8 @@ public:
     void stop() override;
     bool isStarted() override;
     void readFromSocket(std::shared_ptr<IConnection>) override;
-
     bool getQueueElement(std::string& data) override;
+    void send(const google::protobuf::Message& context);
 
 private:
     void createSocket();

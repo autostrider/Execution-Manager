@@ -53,7 +53,7 @@
 //     m_data.component = context.getParams().getComponent().cStr();
     
 //     context.getResults().setState(m_data.state);
-//     context.getResults().setResult(ComponentClientReturnType::K_SUCCESS);
+//     context.getResults().setResult(ComponentClientReturnType::kSuccess);
 
 //     return kj::READY_NOW;
 //   }
@@ -93,8 +93,8 @@
 //   const uint32_t defaultTimeout{666};
 
 //   TestData testData;
-//   component_client::StateUpdateMode mode = component_client::StateUpdateMode::K_POLL;
-//   component_client::StateUpdateMode eventMode = component_client::StateUpdateMode::K_EVENT;
+//   component_client::StateUpdateMode mode = component_client::StateUpdateMode::kPoll;
+//   component_client::StateUpdateMode eventMode = component_client::StateUpdateMode::kEvent;
 //   std::string componentName = "TestName";
 //   std::string eventComponentName = "ComponentWithEventMode";
 //   ExecutionManagementTestServer emServer {testData};
@@ -110,7 +110,7 @@
 // {
 //   std::function<void(std::string const&)> f;
 //   const auto result = ccEventMode.SetStateUpdateHandler(f);
-//   EXPECT_EQ(result, ComponentClientReturnType::K_SUCCESS);
+//   EXPECT_EQ(result, ComponentClientReturnType::kSuccess);
 // }
 
 // void ComponentClientTest::expectCheckIfAnyEventsAvailable()
@@ -136,14 +136,14 @@
   
 // 	const auto result = cc.GetComponentState(state);
 
-//   EXPECT_EQ(result, ComponentClientReturnType::K_SUCCESS);
+//   EXPECT_EQ(result, ComponentClientReturnType::kSuccess);
 //   EXPECT_EQ(testData.state, state);
 // }
 
 // TEST_F(ComponentClientTest, ShouldSucceedToConfirmComponentState)
 // {
 //   std::string state = "TestComponentState";
-//   ComponentClientReturnType status = ComponentClientReturnType::K_SUCCESS;
+//   ComponentClientReturnType status = ComponentClientReturnType::kSuccess;
 
 //   cc.ConfirmComponentState(state, status);
 
@@ -155,7 +155,7 @@
 // TEST_F(ComponentClientTest, ShouldSuccessfullyConfirmComponentStateWithInvalidStatus)
 // {
 //   std::string state = "TestComponentState";
-//   ComponentClientReturnType status = ComponentClientReturnType::K_INVALID;
+//   ComponentClientReturnType status = ComponentClientReturnType::kInvalid;
 
 //   cc.ConfirmComponentState(state, status);
 

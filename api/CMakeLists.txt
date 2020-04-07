@@ -8,6 +8,7 @@ add_library(api INTERFACE)
 
 target_link_libraries(api
     INTERFACE
+        application_state_client
         common
         gen::proto_generated
         socket_handler

@@ -10,6 +10,7 @@ add_executable(msm src/msm_main.cpp ${MSM_SRC})
 
 target_link_libraries(msm
     PUBLIC
+      api
       application_state::application_state_client
       machine_state_client::machine_state_client
       per::per_memory

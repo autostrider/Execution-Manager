@@ -109,9 +109,10 @@ void Server::handleConnections()
 
 void Server::readFromSocket(std::shared_ptr<IConnection> conn)
 {
-    std::string recv = conn->receiveData();
+    std::string recv;
+    int byte = conn->receiveData(recv);
 
-    if (conn->getRecvBytes() == 0)
+    if (byte == 0)
     {
         m_activeConnections.erase(
             std::remove(m_activeConnections.begin(),
@@ -119,7 +120,7 @@ void Server::readFromSocket(std::shared_ptr<IConnection> conn)
                         conn),
             m_activeConnections.end());
     }
-    else if (conn->getRecvBytes() > 0)
+    else if (byte > 0)
     {
         m_recvDataQueue.push(recv);
     }
@@ -132,6 +133,17 @@ void Server::stop()
         m_serverThread.join();
     if (m_receiveThread.joinable())
         m_receiveThread.join();
+}
+
+void Server::send(const google::protobuf::Message& context)
+{
+    while (m_isStarted)     
+    {
+        for (auto it : m_activeConnections)
+        {
+            it->sendData(context);
+        }
+    }
 }
 
 bool Server::getQueueElement(std::string& data)

@@ -25,8 +25,8 @@ public:
   StateError SetMachineState(std::string state);
 
 private:
-  StateError waitForConfirm(google::protobuf::Any any);
-  StateError waitForConfirm(google::protobuf::Any any, std::string& state);
+  StateError waitForConfirm();
+  StateError waitForConfirm(std::string& state);
 
 private:
   Client m_client;

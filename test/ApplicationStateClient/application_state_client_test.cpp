@@ -76,9 +76,9 @@
 // TEST_F(ApplicationStateClientTest, ShouldSucceedToReportApplicationState)
 // {
 // 	application_state::ApplicationStateClient asc;
-// 	asc.ReportApplicationState(ApplicationState::K_RUNNING);
+// 	asc.ReportApplicationState(ApplicationState::kRunning);
 
-// 	ASSERT_EQ(ApplicationState::K_RUNNING, sharedResource.m_state);
+// 	ASSERT_EQ(ApplicationState::kRunning, sharedResource.m_state);
 // }
 
 // } //namespace

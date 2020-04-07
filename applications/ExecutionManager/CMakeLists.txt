@@ -10,7 +10,7 @@ add_executable(em src/em_main.cpp ${EM_SRC})
 
 target_link_libraries(em
     PUBLIC
-    nlohmann_json::nlohmann_json
+      nlohmann_json::nlohmann_json
       application_state::application_state_client
       common
       socket_handler

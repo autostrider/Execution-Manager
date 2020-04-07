@@ -12,8 +12,7 @@ class ClientMock : public IClient
 public:
     MOCK_METHOD(void, connect, (), (override));
     MOCK_METHOD(bool, isConnected, (), (override));
-    MOCK_METHOD(void, sendMessage, (const google::protobuf::Any&), (override));
-    MOCK_METHOD(std::string, receive, (), (override));
+    MOCK_METHOD(int, receive, (std::string&), (override));
     MOCK_METHOD(ssize_t, getRecvBytes, (), (override));
 };
 

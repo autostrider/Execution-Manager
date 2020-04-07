@@ -26,4 +26,9 @@ ComponentClientWrapper::ConfirmComponentState
   m_client.ConfirmComponentState(state, status);
 }
 
+ComponentState ComponentClientWrapper::setStateUpdateHandler() noexcept
+{
+    return m_client.setStateUpdateHandler();
+}
+
 } // namespace component_client

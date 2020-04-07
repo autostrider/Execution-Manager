@@ -21,9 +21,10 @@ public:
                std::shared_ptr<IProxyClientFactory>);
 
     void creatAcceptedClient() override;
-    std::string receiveData() override;
+    int receiveData(std::string&) override;
 
     int getRecvBytes() override;
+    void sendData(const google::protobuf::Message& context) override;
 
 private:
     int acceptConnection();

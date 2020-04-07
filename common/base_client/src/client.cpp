@@ -1,6 +1,7 @@
 #include "client.hpp"
 #include <constants.hpp>
 #include <logger.hpp>
+#include <any.pb.h>
 
 using namespace constants;
 
@@ -49,29 +50,33 @@ Client::~Client()
     m_client_socket->close(m_client_fd);
 }
 
-std::string Client::receive()
+int Client::receive(std::string& recvMessage)
 {
     char buffer[RECV_BUFFER_SIZE];
 
-    m_recvBytes = m_client_socket->recv(m_client_fd, buffer, RECV_BUFFER_SIZE - 1, 0);
+    int byte = m_client_socket->recv(m_client_fd, buffer, RECV_BUFFER_SIZE - 1, 0);
     
-    if (errno == EWOULDBLOCK && m_recvBytes == -1)
+    if (errno == EWOULDBLOCK && byte == -1)
     {
-        return buffer;
+        return byte;
     }
-    else if(m_recvBytes == -1)
+    else if(byte == -1)
     {
         LOG << "Error on receiving data from client: " << errno;
     }
-    return buffer;
+    recvMessage = buffer;
+    return byte;
 }
 
-void Client::sendMessage(const google::protobuf::Any& message)
+void Client::sendMessage(const google::protobuf::Message& context)
 {
+    google::protobuf::Any message;
+    message.PackFrom(context);
+
     size_t size = message.ByteSizeLong();
     std::unique_ptr<uint8_t> dataPtr = std::unique_ptr<uint8_t>(new uint8_t[size]);
     auto data = dataPtr.get();
-    
+        
     if(message.SerializeToArray(data, size))
     {
         m_client_socket->send(m_client_fd, data, size, 0);

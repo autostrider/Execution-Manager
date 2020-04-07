@@ -5,30 +5,27 @@
 #include <application_state_client.h>
 #include <i_state_factory.hpp>
 #include <i_application_state_client_wrapper.hpp>
-#include <i_component_client_wrapper.hpp>
 #include "i_mean_calculator.hpp"
-#include "component_server.hpp"
+#include <i_component_client_wrapper.hpp>
 
 using namespace component_client;
 
 AdaptiveApp::AdaptiveApp(std::unique_ptr<api::IStateFactory> factory,
                          std::unique_ptr<application_state::IApplicationStateClientWrapper> appClient,
                          std::unique_ptr<IComponentClientWrapper> compClient,
-                         std::unique_ptr<IComponentServerWrapper> compServer,
                          std::unique_ptr<api::IMeanCalculator> meanCalculator,
                          bool eventModeEnabled) :
     m_factory{std::move(factory)},
     m_currentState{nullptr},
     m_appClient{std::move(appClient)},
     m_componentClient{std::move(compClient)},
-    m_componentServer{std::move(compServer)},
     m_meanCalculator{std::move(meanCalculator)},
     m_eventModeEnabled{eventModeEnabled}
 {
-    if (m_eventModeEnabled)
-    {
-        m_componentServer->start();
-    }
+    // if (m_eventModeEnabled)
+    // {
+    //     m_componentServer->start();
+    // }
 }
 
 void AdaptiveApp::init()
@@ -111,12 +108,7 @@ void AdaptiveApp::performAction()
 {
     if (m_eventModeEnabled)
     {
-        std::string receivedData;
-        
-        if (m_componentServer->getQueueElement(receivedData))
-        {
-            stateUpdateHandler(m_componentServer->setStateUpdateHandler(receivedData));
-        }
+        stateUpdateHandler(m_componentClient->setStateUpdateHandler());
     }
     else
     {

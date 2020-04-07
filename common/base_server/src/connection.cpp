@@ -51,16 +51,19 @@ void Connection::creatAcceptedClient()
     }
 }
 
-std::string Connection::receiveData()
-{
-    std::string recv = m_connectedCli->receive();
- 
-    return recv;
+int Connection::receiveData(std::string& recv)
+{ 
+    return m_connectedCli->receive(recv);;
 }
 
 int Connection::getRecvBytes()
 {
     return m_connectedCli->getRecvBytes();
+}
+
+void Connection::sendData(const google::protobuf::Message& context)
+{
+    m_connectedCli->sendMessage(context);
 }
 
 }

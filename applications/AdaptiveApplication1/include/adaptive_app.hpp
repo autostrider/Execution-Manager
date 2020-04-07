@@ -9,6 +9,9 @@
 
 using namespace constants;
 
+using ComponentState = std::string;
+using ComponentClientReturnType = enums::ComponentClientReturnType;
+
 namespace api
 {
     class IStateFactory;

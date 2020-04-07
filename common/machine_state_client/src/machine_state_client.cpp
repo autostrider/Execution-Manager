@@ -1,6 +1,7 @@
 #include "machine_state_client.h"
 #include <client_socket.hpp>
 #include <machine_state_management.pb.h>
+#include <any.pb.h>
 
 #include <thread>
 #include <chrono>
@@ -26,14 +27,9 @@ StateError MachineStateClient::Register(std::string appName)
   context.set_appname(appName);
   context.set_pid(m_pid);
 
-  google::protobuf::Any sendData;
-  google::protobuf::Any recvData;
+  m_client.sendMessage(context);
 
-  sendData.PackFrom(context);
-
-  m_client.sendMessage(sendData);
-
-  return waitForConfirm(recvData);
+  return waitForConfirm();
 }
 
 StateError MachineStateClient::GetMachineState(std::string& state)
@@ -41,14 +37,9 @@ StateError MachineStateClient::GetMachineState(std::string& state)
   MachineStateManagement::getMachineState context;
   context.set_pid(m_pid);
 
-  google::protobuf::Any sendData;
-  google::protobuf::Any recvData;
+  m_client.sendMessage(context);
 
-  sendData.PackFrom(context);
-
-  m_client.sendMessage(sendData);
-
-  return waitForConfirm(recvData, state);
+  return waitForConfirm(state);
 }
 
 StateError MachineStateClient::SetMachineState(std::string state)
@@ -57,56 +48,74 @@ StateError MachineStateClient::SetMachineState(std::string state)
   context.set_state(state);
   context.set_pid(m_pid);
 
-  google::protobuf::Any sendData;
-  google::protobuf::Any recvData;
+  m_client.sendMessage(context);
 
-  sendData.PackFrom(context);
-
-  m_client.sendMessage(sendData);
-
-  return waitForConfirm(recvData);
+  return waitForConfirm();
 }
 
-StateError MachineStateClient::waitForConfirm(google::protobuf::Any any)
+StateError MachineStateClient::waitForConfirm()
 {
-  while(m_client.getRecvBytes() == -1)
+  google::protobuf::Any any;
+  std::string data;
+
+  do
   {
-      auto data = m_client.receive();
+    if (m_client.receive(data) > 0)
+    {
+        any.ParseFromString(data);
+
+        if (any.Is<MachineStateManagement::resultRegisterApp>())
+        {
+            MachineStateManagement::resultRegisterApp context;
+            any.UnpackTo(&context);
+            StateError result = context.result();
+            context = {};
+
+            return result;
+        }
+        else if (any.Is<MachineStateManagement::resultSetMachineState>())
+        {
+            MachineStateManagement::resultSetMachineState context;
+            any.UnpackTo(&context);
+            StateError result = context.result();
+            context = {};
+
+            return result;
+        }
+        
+        any = {};
+        data = {};
+    }
+  } while (true);
+}
+
+StateError MachineStateClient::waitForConfirm(std::string& state)
+{
+  google::protobuf::Any any;
+  std::string data;
+
+  do
+  {    
+    if (m_client.receive(data) > 0)
+    {
       any.ParseFromString(data);
-
-      if(any.Is<MachineStateManagement::resultRegisterApp>())
-      {
-          MachineStateManagement::resultRegisterApp context;
-          any.UnpackTo(&context);
-          StateError result = context.result();
-          context = {};
-          return result;
-      }
-      else if(any.Is<MachineStateManagement::resultSetMachineState>())
-      {
-          MachineStateManagement::resultSetMachineState context;
-          any.UnpackTo(&context);
-          StateError result = context.result();
-          context = {};
-          return result;
-      }
-  }
-}
-
-StateError MachineStateClient::waitForConfirm(google::protobuf::Any any, std::string& state)
-{
-  while(m_client.getRecvBytes() == -1)
-  {
+        
       if(any.Is<MachineStateManagement::resultGetMachineState>())
       {
-          MachineStateManagement::resultGetMachineState context;
-          any.UnpackTo(&context);
-          StateError result = context.result();
-          state = context.state();
-          context = {};
-          return result;
+        MachineStateManagement::resultGetMachineState context;
+        any.UnpackTo(&context);
+
+        StateError result = context.result();
+        state = context.state();
+        context = {};
+        
+        return result;
       }
-  }
+
+      any = {};
+      data = {};
+    }
+  } while (true);
 }
 
 } // namespace machine_state_client

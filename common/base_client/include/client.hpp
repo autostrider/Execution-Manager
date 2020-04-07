@@ -20,8 +20,10 @@ public:
     ~Client();
 
     void connect() override;
-    void sendMessage(const google::protobuf::Any& message) override;
-    std::string receive() override;
+    
+    void sendMessage(const google::protobuf::Message& context) override;
+
+    int receive(std::string&) override;
     bool isConnected() override;
     ssize_t getRecvBytes() override;
 

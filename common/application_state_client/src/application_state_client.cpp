@@ -19,15 +19,13 @@ ApplicationStateClient::ApplicationStateClient()
 
 void ApplicationStateClient::ReportApplicationState(ApplicationState state)
 {
-  ApplicationStateManagement::registerComponent context;
+  ApplicationStateManagement::RegisterComponent context;
   auto fullPath = getAppBinaryPath(m_pid);
 
   context.set_state(state);
   context.set_appname(parseServiceName(fullPath));
 
-  google::protobuf::Any sendData;
-
-  sendData.PackFrom(context);
+  m_client.sendMessage(context);
 }
 
 } // namespace application_state

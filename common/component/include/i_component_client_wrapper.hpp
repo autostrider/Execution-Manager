@@ -9,11 +9,12 @@ namespace component_client
 class IComponentClientWrapper
 {
 public:
-    virtual ComponentClientReturnType GetComponentState
-    (ComponentState&) noexcept = 0;
+    virtual ComponentClientReturnType GetComponentState(ComponentState&) noexcept = 0;
 
-    virtual void ConfirmComponentState
-    (ComponentState, ComponentClientReturnType) noexcept = 0;
+    virtual void ConfirmComponentState(ComponentState,
+                                       ComponentClientReturnType) noexcept = 0;
+
+    virtual ComponentState setStateUpdateHandler() noexcept = 0;
 
     virtual ~IComponentClientWrapper() noexcept {}
 };
@@ -26,11 +27,12 @@ public:
 
     ~ComponentClientWrapper() noexcept;
 
-    ComponentClientReturnType GetComponentState
-    (ComponentState& state) noexcept override;
+    ComponentClientReturnType GetComponentState(ComponentState& state) noexcept override;
 
-    void ConfirmComponentState
-    (ComponentState state, ComponentClientReturnType status) noexcept override;
+    void ConfirmComponentState(ComponentState state,
+                               ComponentClientReturnType status) noexcept override;
+
+    ComponentState setStateUpdateHandler() noexcept override;
 
 private:
     ComponentClient m_client;

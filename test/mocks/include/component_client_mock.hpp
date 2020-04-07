@@ -17,7 +17,7 @@ public:
     MOCK_METHOD(void, ConfirmComponentState,
                 (ComponentState state, ComponentClientReturnType status), (noexcept));
 
-    MOCK_METHOD(void, CheckIfAnyEventsAvailable, (), (noexcept));
+    MOCK_METHOD(ComponentState, setStateUpdateHandler, (std::string recv), (noexcept));
 };
 
 } //namespace component_client

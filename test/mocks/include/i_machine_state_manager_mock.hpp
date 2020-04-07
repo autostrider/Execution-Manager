@@ -8,7 +8,7 @@
 namespace MSM
 {
 
-using StateError = machine_state_client::MachineStateClient::StateError;
+using StateError = machine_state_client::StateError;
 
 class IMachineStateManagerMock : public MachineStateManager
 {
@@ -18,15 +18,15 @@ public:
             std::unique_ptr<application_state::IApplicationStateClientWrapper> appClient,
             std::unique_ptr<machine_state_client::IMachineStateClientWrapper> machineClient,
             std::unique_ptr<api::IManifestReader> manifestReader,
-            std::unique_ptr<api::ISocketServer> socketServer,
+            std::unique_ptr<base_server::Server> server,
             std::unique_ptr<per::KeyValueStorageBase> persistentStorage);
 
-    MOCK_METHOD0(init, void());
-    MOCK_METHOD0(run, void());
-    MOCK_METHOD0(terminate, void());
+    MOCK_METHOD(void, init, ());
+    MOCK_METHOD(void, run, ());
+    MOCK_METHOD(void, terminate, ());
 
-    MOCK_METHOD1(reportApplicationState, void(application_state::ApplicationStateClient::ApplicationState state));
-    MOCK_METHOD1(transitToNextState, void(IMachineStateManagerMock::FactoryFunc nextState));
+    MOCK_METHOD(void, reportApplicationState, (application_state::ApplicationStateClient::ApplicationState));
+    MOCK_METHOD(void, transitToNextState, (IMachineStateManagerMock::FactoryFunc));
 };
 
 } // namespace MSM

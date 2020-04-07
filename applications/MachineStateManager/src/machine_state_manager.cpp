@@ -7,6 +7,8 @@
 #include <kvstype.h>
 #include <logger.hpp>
 #include <machine_state_management.pb.h>
+#include <any.pb.h>
+#include <future>
 
 using namespace constants;
 
@@ -141,25 +143,58 @@ std::string MachineStateManager::getNewStateForStartRun()
 
 std::string MachineStateManager::recvState()
 {
-  std::string data;
-  m_newStatesProvider->getQueueElement(data);
   google::protobuf::Any recvData;
-  if(recvData.Is<MachineStateManagement::nextState>())
+  std::string data;
+  std::string recv;
+
+  if(m_newStatesProvider->getQueueElement(data))
   {
-      MachineStateManagement::nextState context;
-      recvData.UnpackTo(&context);
-      std::string result = context.state();
-      context = {};
-      return result;
+    recvData.ParseFromString(data);
+
+    if(recvData.Is<MachineStateManagement::nextState>())
+    {
+        MachineStateManagement::nextState context;
+        recvData.UnpackTo(&context);
+        recv = context.state();
+        context = {};
+    }
   }
+  return recv;
 }
 
-// void MachineStateManager::saveReceivedState(const std::string &state)
+// std::string MachineStateManager::recvState()
 // {
-//   std::async(std::launch::async, [&] {
-//       m_persistentStorage->SetValue(STATE_KEY, per::KvsType(state));
-//       m_persistentStorage->SyncToStorage();
-//   });
+//   google::protobuf::Any recvData;
+//   std::string data;
+
+//   do
+//   {
+//     if (m_client.receive(data) > 0)
+//     {
+//       recvData.ParseFromString(data);
+        
+//       if(recvData.Is<MachineStateManagement::nextState>())
+//       {
+//         MachineStateManagement::nextState context;
+//         recvData.UnpackTo(&context);
+//         data = context.state();
+//         context = {};
+
+//         return data;
+//       }
+
+//       recvData = {};
+//       data = {};
+//     }
+//   } while (true);
 // }
+
+void MachineStateManager::saveReceivedState(const std::string &state)
+{
+  std::async(std::launch::async, [&] {
+      m_persistentStorage->SetValue(STATE_KEY, per::KvsType(state));
+      m_persistentStorage->SyncToStorage();
+  });
+}
 
 } // namespace MSM

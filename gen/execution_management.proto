@@ -12,5 +12,5 @@ message setComponentState
 message resultGetComponentState
 {
     string state = 1;
-    enums.ComponentClientReturnType resualt = 2;
+    enums.ComponentClientReturnType result = 2;
 }

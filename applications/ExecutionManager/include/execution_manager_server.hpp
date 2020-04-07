@@ -12,13 +12,14 @@ namespace ExecutionManagerServer
 {
 
 
-class ExecutionManagerServer : public base_server::Server
+class ExecutionManagerServer
 {
 public:
   explicit
   ExecutionManagerServer
     (ExecutionManager::ExecutionManager& application,
-     ExecutionManager::MsmHandler msmHandler);
+     ExecutionManager::MsmHandler msmHandler,
+     std::unique_ptr<IServer> server);
   ~ExecutionManagerServer();
 private:
   void reportApplicationState(ApplicationState context);
@@ -46,6 +47,7 @@ private:
   ExecutionManager::MsmHandler m_msmHandler;
   std::thread m_setMachineStateThread;
   std::atomic<bool> isRunning{false};
+  std::unique_ptr<IServer> m_server;
 };
 
 } // namespace ExecutionManagerServer

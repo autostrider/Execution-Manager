@@ -1,7 +1,7 @@
 #ifndef I_CLIENT_HPP
 #define I_CLIENT_HPP
 
-#include <any.pb.h>
+#include <google/protobuf/message.h>
 
 #include <string>
 
@@ -14,10 +14,10 @@ public:
     virtual ~IClient() = default;
 
     virtual void connect() = 0;
-    virtual void sendMessage(const google::protobuf::Any&) = 0;
-    virtual std::string receive() = 0;
+    virtual int receive(std::string&) = 0;
     virtual bool isConnected() = 0;
     virtual ssize_t getRecvBytes() = 0;
+    virtual void sendMessage(const google::protobuf::Message& context) = 0;
 };
 
 }

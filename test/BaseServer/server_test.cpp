@@ -58,8 +58,7 @@ void ServerTest::expectCreatingAcceptedConnection()
 
 void ServerTest::expectReadData(std::string message, const int size)
 {
-    EXPECT_CALL(*connectionPtr, receiveData()).WillRepeatedly(Return(message));
-    EXPECT_CALL(*connectionPtr, getRecvBytes()).WillRepeatedly(Return(size));
+    EXPECT_CALL(*connectionPtr, receiveData(_)).WillRepeatedly(Return(size));
 }
 
 

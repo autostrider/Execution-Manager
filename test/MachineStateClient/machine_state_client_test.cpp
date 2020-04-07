@@ -39,7 +39,7 @@
 //     m_data.appName = context.getParams().getAppName();
 //     m_data.pid = context.getParams().getPid();
 
-//     context.getResults().setResult(StateError::K_SUCCESS);
+//     context.getResults().setResult(StateError::kSuccess);
 
 //     if(m_data.isTimeouted)
 //     {
@@ -56,7 +56,7 @@
 //     m_data.pid = context.getParams().getPid();
 //     context.getResults().setState(m_data.state);
 
-//     context.getResults().setResult(StateError::K_SUCCESS);
+//     context.getResults().setResult(StateError::kSuccess);
 
 //     if(m_data.isTimeouted)
 //     {
@@ -73,9 +73,9 @@
 //     m_data.state = context.getParams().getState().cStr();
 //     m_data.pid = context.getParams().getPid();
 
-//     context.getResults().setResult(StateError::K_SUCCESS);
+//     context.getResults().setResult(StateError::kSuccess);
 
-//     sendConfirm(StateError::K_SUCCESS);
+//     sendConfirm(StateError::kSuccess);
 
 //     if(m_data.isTimeouted)
 //     {
@@ -199,7 +199,7 @@
 // {
 //   const auto result = msc.Register(applicationName, defaultTimeout);
 
-//   EXPECT_EQ(result, MachineStateClient::StateError::K_SUCCESS);
+//   EXPECT_EQ(result, MachineStateClient::StateError::kSuccess);
 //   EXPECT_EQ(testData.registerCallCount, 1);
 //   EXPECT_EQ(testData.appName, applicationName);
 //   EXPECT_EQ(testData.pid, getpid());
@@ -211,7 +211,7 @@
 //   std::string state;
 //   const auto result = msc.GetMachineState(defaultTimeout, state);
 
-//   EXPECT_EQ(result, MachineStateClient::StateError::K_SUCCESS);
+//   EXPECT_EQ(result, MachineStateClient::StateError::kSuccess);
 //   EXPECT_EQ(testData.getMachineStateCallCount, 1);
 //   EXPECT_EQ(testData.state, state);
 //   EXPECT_EQ(testData.pid, getpid());
@@ -223,7 +223,7 @@
 //   std::string state = "TestMachineState";
 //   const auto result = msc.SetMachineState(state, defaultTimeout);
 
-//   EXPECT_EQ(result, MachineStateClient::StateError::K_SUCCESS);
+//   EXPECT_EQ(result, MachineStateClient::StateError::kSuccess);
 //   EXPECT_EQ(testData.setMachineStateCallCount, 1);
 //   EXPECT_EQ(testData.state, state);
 //   EXPECT_EQ(testData.pid, getpid());

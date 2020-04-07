@@ -1,20 +1,21 @@
 #include "adaptive_app.hpp"
-#include <state.hpp>
-#include <constants.hpp>
+// #include <state.hpp>
+// #include <constants.hpp>
 #include <logger.hpp>
-#include <mean_calculator.hpp>
-#include <i_application_state_client_wrapper.hpp>
-#include <i_component_server_wrapper.hpp>
-#include <connection_factory.hpp>
-#include <proxy_client_factory.hpp>
-#include <server_socket.hpp>
+// #include <mean_calculator.hpp>
+// #include <i_application_state_client_wrapper.hpp>
+// #include <i_component_server_wrapper.hpp>
+// #include <i_component_client_wrapper.hpp>
+// #include <connection_factory.hpp>
+// #include <proxy_client_factory.hpp>
+// #include <server_socket.hpp>
 
 #include <csignal>
 #include <thread>
 
 static void signalHandler(int signo);
-using ApplicationState = application_state::ApplicationStateClient::ApplicationState;
-using namespace base_client;
+// using ApplicationState = application_state::ApplicationStateClient::ApplicationState;
+// using namespace base_client;
 
 static std::atomic<bool> isTerminated{false};
 
@@ -27,29 +28,29 @@ int main()
 
     std::this_thread::sleep_for(FIVE_SECONDS);
 
-    const std::string componentName{"AdaptiveApplication1_proc1"};
-    auto componentStateUpdateMode = component_client::StateUpdateMode::K_EVENT;
+    // const std::string componentName{"AdaptiveApplication1_proc1"};
+    // auto componentStateUpdateMode = component_client::StateUpdateMode::kEvent;
 
-    AdaptiveApp app(std::make_unique<StateFactory>(),
-                    std::make_unique<application_state::ApplicationStateClientWrapper>(),
-                    std::make_unique<component_client::ComponentClientWrapper>(componentName,
-                                                                               componentStateUpdateMode),
-                    std::make_unique<component_server::ComponentServerWrapper>(componentName,
-                                                                         std::make_unique<socket_handler::ServerSocket>(),
-                                                                         std::make_unique<ConnectionFactory>(std::make_shared<ProxyClientFactory>())),
-                    std::make_unique<api::MeanCalculator>(),
-                    true);
+    // AdaptiveApp app(std::make_unique<StateFactory>(),
+    //                 std::make_unique<application_state::ApplicationStateClientWrapper>(),
+    //                 std::make_unique<component_client::ComponentClientWrapper>(componentName,
+    //                                                                            componentStateUpdateMode),
+    //                 std::make_unique<component_server::ComponentServerWrapper>(componentName,
+    //                                                                      std::make_unique<socket_handler::ServerSocket>(),
+    //                                                                      std::make_unique<ConnectionFactory>(std::make_shared<ProxyClientFactory>())),
+    //                 std::make_unique<api::MeanCalculator>(),
+    //                 true);
 
-    app.init();
-    app.run();
+    // app.init();
+    // app.run();
 
-    while (false == isTerminated)
-    {
-        app.performAction();
-        std::this_thread::sleep_for(FIVE_SECONDS);
-    }
+    // while (false == isTerminated)
+    // {
+    //     app.performAction();
+    //     std::this_thread::sleep_for(FIVE_SECONDS);
+    // }
 
-    app.terminate();
+    // app.terminate();
     return 0;
 }
 

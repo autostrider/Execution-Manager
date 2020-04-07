@@ -19,12 +19,13 @@ using std::string;
 ExecutionManagerServer::ExecutionManagerServer
 (ExecutionManager::ExecutionManager& application,
  ExecutionManager::MsmHandler msmHandler,
- IServerWrapper server)
+ std::unique_ptr<IServer> server)
   : m_em{application},
-    m_msmHandler{msmHandler}
+    m_msmHandler{msmHandler},
+    m_server{std::move(server)}
 {
-   // member->start();
-  LOG << "Execution Manager server started...";
+    m_server->start();
+    LOG << "Execution Manager server started...";
 
     isRunning = true;
 
@@ -70,11 +71,11 @@ ExecutionManagerServer::~ExecutionManagerServer()
 
 //   if (m_msmHandler.registerMsm(applicationPid, newMachineClient))
 //   {
-//     context.getResults().setResult(StateError::K_SUCCESS);
+//     context.getResults().setResult(StateError::kSuccess);
 //   }
 //   else
 //   {
-//     context.getResults().setResult(StateError::K_INVALID_REQUEST);
+//     context.getResults().setResult(StateError::kInvalidRequest);
 //   }
 
 //   return kj::READY_NOW;
@@ -85,7 +86,7 @@ ExecutionManagerServer::~ExecutionManagerServer()
 // {
 //   context.getResults().setState(m_em.getMachineState());
 
-//   context.getResults().setResult(StateError::K_SUCCESS);
+//   context.getResults().setResult(StateError::);
 
 //   return kj::READY_NOW;
 // }

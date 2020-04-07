@@ -4,7 +4,6 @@ set(BASE_CLIENT_NAMESPACE_NAME base_client)
 set(BASE_SERVER_NAMESPACE_NAME base_server)
 set(APPLICATION_STATE_NAMESPACE_NAME application_state)
 set(COMPONENT_CLIENT_NAMESPACE_NAME component_client)
-set(COMPONENT_SERVER_NAMESPACE_NAME component_server)
 set(MACHINE_STATE_CLIENT_NAMESPACE_NAME machine_state_client)
 
 add_subdirectory(machine_state_client)

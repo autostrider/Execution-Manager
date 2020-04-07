@@ -9,8 +9,9 @@ class ConnectionMock : public api::IConnection
 {
 public:
     MOCK_METHOD(void, creatAcceptedClient, (), (override));
-    MOCK_METHOD(std::string, receiveData, (), (override));
+    MOCK_METHOD(int, receiveData, (std::string&), (override));
     MOCK_METHOD(int, getRecvBytes, (), (override));
+    MOCK_METHOD(void, sendData,(const google::protobuf::Message&), (override));
 };
 
 

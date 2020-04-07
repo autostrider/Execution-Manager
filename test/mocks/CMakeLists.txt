@@ -12,9 +12,11 @@ add_library(mock
 
 target_link_libraries(mock
     PUBLIC
+      component_client
       proto_generated
       per::per_memory
       nlohmann_json::nlohmann_json
+      machine_state_client::machine_state_client
       gmock
       api
 )

@@ -6,11 +6,6 @@
 #include <server.hpp>
 
 
-namespace api
-{
-  class IManifestReader;
-}
-
 namespace per
 {
   class KeyValueStorageBase;
@@ -18,6 +13,7 @@ namespace per
 
 namespace api
 {
+  class IManifestReader;
   class IStateFactory;
   class IServer;
 }

@@ -1,6 +1,13 @@
 #include "component_client.h"
 #include <constants.hpp>
+#include <client.hpp>
+#include <client_socket.hpp>
 #include <logger.hpp>
+
+#include <any.pb.h>
+#include <execution_management.pb.h>
+
+#include <memory>
 #include <thread>
 
 using namespace constants;
@@ -11,67 +18,65 @@ namespace component_client
 ComponentClient::ComponentClient
 (const std::string& componentName, 
  StateUpdateMode mode) noexcept
-: m_rpcClient(IPC_PROTOCOL + EM_SOCKET_NAME),
-  m_componentName(componentName),
+: m_componentName(componentName),
   m_updateMode(mode),
-  m_eventPromise{std::promise<ComponentState>()},
-  m_serverStopPromise{kj::Promise<void>(nullptr)},
-  m_stateManagementCap{m_rpcClient.getMain<StateManagement>()}
+  m_client((IPC_PROTOCOL + EM_SOCKET_NAME), std::make_unique<socket_handler::ClientSocket>())
 {
-  auto request = m_stateManagementCap.registerComponentRequest();
-  request.setComponent(m_componentName);
-  request.setMode(m_updateMode);
-  request.send().wait(m_rpcClient.getWaitScope());
-}
+  StateManagement::RegisterComponent context;
+  context.set_component(m_componentName);
+  context.set_mode(m_updateMode);
 
-ComponentClient::~ComponentClient()
-{
-  if (!m_listenFulfiller.get())
-  {
-    return;
-  }
- 
-  const kj::Executor* exec;
-  {
-    auto lock = m_serverExecutor.lockExclusive();
-    lock.wait([&](kj::Maybe<const kj::Executor&> value)
-    {
-      return value != nullptr;
-    });
-
-    exec = &KJ_ASSERT_NONNULL(*lock);
-  }
-
-  exec->executeSync([&]()
-  {
-    m_listenFulfiller->fulfill();
-  });
+  m_client.sendMessage(context);
 }
 
 ComponentClientReturnType
 ComponentClient::GetComponentState
 (ComponentState& state) noexcept
 {
-  auto request = m_stateManagementCap.getComponentStateRequest();
-  request.setComponent(m_componentName);
+  // auto request = m_stateManagementCap.getComponentStateRequest();
+  // request.setComponent(m_componentName);
 
-  auto result = request.send().wait(m_rpcClient.getWaitScope());
-  state = result.getState();
+  // auto result = request.send().wait(m_rpcClient.getWaitScope());
+  // state = result.getState();
 
-  return result.getResult();
+  // return result.getResult();
 }
 
 void
 ComponentClient::ConfirmComponentState
 (ComponentState state, ComponentClientReturnType status) noexcept
 {
-  auto request = m_stateManagementCap.confirmComponentStateRequest();
+  StateManagement::ConfirmComponentState context;
+  context.set_component(m_componentName);
+  context.set_state(state);
+  context.set_status(status);
 
-  request.setComponent(m_componentName);
-  request.setState(state);
-  request.setStatus(status);
+  m_client.sendMessage(context);
+}
 
-  request.send().wait(m_rpcClient.getWaitScope());
- }
+ComponentState ComponentClient::setStateUpdateHandler() noexcept
+{
+  google::protobuf::Any any;
+  std::string data;
+
+  do
+  {    
+    if (m_client.receive(data) > 0)
+    {
+      any.ParseFromString(data);
+
+      if(any.Is<ExecutionManagement::setComponentState>())
+      {
+        ExecutionManagement::setComponentState comp;
+        any.UnpackTo(&comp);
+            
+        return comp.state();
+      }
+
+      any = {};
+      data = {};
+    }
+  } while (true);
+}
 
 } // namespace component_client

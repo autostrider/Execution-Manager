@@ -36,7 +36,7 @@ public:
   void ConfirmComponentState (ComponentState state, ComponentClientReturnType status) noexcept;
   ComponentState setStateUpdateHandler() noexcept;
 
-  ~ComponentClient();
+  ~ComponentClient() = default;
  
 private:
   const std::string m_componentName;

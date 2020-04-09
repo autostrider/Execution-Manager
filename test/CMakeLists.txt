@@ -14,7 +14,7 @@ file(GLOB_RECURSE MSC_SRC ${CMAKE_CURRENT_SOURCE_DIR}/../common/machine_state_cl
 file(GLOB_RECURSE SERVER_SRC ${CMAKE_CURRENT_SOURCE_DIR}/../common/base_server/src/*.cpp)
 file(GLOB_RECURSE CLIENT_SRC ${CMAKE_CURRENT_SOURCE_DIR}/../common/base_client/src/*.cpp)
 file(GLOB_RECURSE SH_SRC ${CMAKE_CURRENT_SOURCE_DIR}/../common/socket_handler/src/*.cpp)
-#file(GLOB_RECURSE CC_SRC ${CMAKE_CURRENT_SOURCE_DIR}/../common/component/src/*.cpp)
+file(GLOB_RECURSE CC_SRC ${CMAKE_CURRENT_SOURCE_DIR}/../common/component/src/*.cpp)
 file(GLOB_RECURSE COMMON_SRCS ${CMAKE_CURRENT_SOURCE_DIR}/../common/other/src/*.cpp)
 
 add_subdirectory(AdaptiveApplication)

@@ -24,17 +24,17 @@ int Connection::acceptConnection()
     sockaddr_un clientAddr;
     socklen_t cliLen = sizeof(clientAddr);
 
-    int acceprFd =
+    int accepdFd =
         m_serverSocket->accept(m_serverFd,
                                 (struct sockaddr*)&clientAddr,
                                 &cliLen);
 
-    if (m_serverSocket->fcntl(acceprFd, F_SETFD, O_NONBLOCK) == -1)
+    if (m_serverSocket->fcntl(accepdFd, F_SETFD, O_NONBLOCK) == -1)
     {
-        acceprFd = -1;
+        accepdFd = -1;
     }
 
-    return acceprFd;
+    return accepdFd;
 }
 
 void Connection::creatAcceptedClient()

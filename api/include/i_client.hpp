@@ -14,7 +14,7 @@ public:
     virtual ~IClient() = default;
 
     virtual void connect() = 0;
-    virtual int receive(std::string&) = 0;
+    virtual ssize_t receive(std::string&) = 0;
     virtual bool isConnected() = 0;
     virtual ssize_t getRecvBytes() = 0;
     virtual void sendMessage(const google::protobuf::Message& context) = 0;

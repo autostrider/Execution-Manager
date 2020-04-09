@@ -18,6 +18,7 @@ public:
     virtual bool isStarted() = 0;
     virtual void readFromSocket(std::shared_ptr<IConnection>) = 0;
     virtual bool getQueueElement(std::string& data) = 0;
+    virtual void send(const google::protobuf::Message& context) = 0;
 };
 
 }

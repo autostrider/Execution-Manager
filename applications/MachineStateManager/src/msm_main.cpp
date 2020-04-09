@@ -3,11 +3,10 @@
 #include <logger.hpp>
 #include <constants.hpp>
 #include <manifest_reader.hpp>
-#include <server_socket.hpp>
-#include <server.hpp>
-#include <connection_factory.hpp>
+#include <client_socket.hpp>
+#include <client.hpp>
 #include <i_application_state_client_wrapper.hpp>
-#include <proxy_client_factory.hpp>
+#include <constants.hpp>
 
 #include <keyvaluestorage.h>
 #include <kvstype.h>
@@ -17,8 +16,6 @@
 #include <atomic>
 
 using namespace constants;
-using namespace base_server;
-using namespace socket_handler;
 
 static void signalHandler(int signo);
 using ApplicationState = application_state::ApplicationStateClient::ApplicationState;
@@ -39,11 +36,10 @@ int main(int argc, char **argv)
 
     MSM::MachineStateManager msm(std::make_unique<MSM::MsmStateFactory>(),
                                  std::make_unique<application_state::ApplicationStateClientWrapper>(),
-                                 std::make_unique<machine_state_client::MachineStateClientWrapper>(),
+                                 std::make_unique<machine_state_client::MachineStateClientWrapper>(MSM_SOCKET_NAME),
                                  std::make_unique<common::ManifestReader>(),
-                                 std::make_unique<Server>(MSM_STATES_SERVER,
-                                                          std::make_unique<ServerSocket>(),
-                                                          std::make_unique<ConnectionFactory>(std::make_shared<ProxyClientFactory>())),
+                                 std::make_unique<base_client::Client>(MSM_STATES_SERVER,
+                                                                       std::make_unique<socket_handler::ClientSocket>()),
                                  std::make_unique<per::KeyValueStorage>(MSM_STATE_PROVIDER));
 
     msm.init();

@@ -23,7 +23,7 @@ public:
     
     void sendMessage(const google::protobuf::Message& context) override;
 
-    int receive(std::string&) override;
+    ssize_t receive(std::string&) override;
     bool isConnected() override;
     ssize_t getRecvBytes() override;
 

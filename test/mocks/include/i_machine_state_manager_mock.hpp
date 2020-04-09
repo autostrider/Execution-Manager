@@ -18,7 +18,7 @@ public:
             std::unique_ptr<application_state::IApplicationStateClientWrapper> appClient,
             std::unique_ptr<machine_state_client::IMachineStateClientWrapper> machineClient,
             std::unique_ptr<api::IManifestReader> manifestReader,
-            std::unique_ptr<base_server::Server> server,
+            std::unique_ptr<base_client::Client> client,
             std::unique_ptr<per::KeyValueStorageBase> persistentStorage);
 
     MOCK_METHOD(void, init, ());

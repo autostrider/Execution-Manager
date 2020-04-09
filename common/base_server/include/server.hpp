@@ -30,7 +30,7 @@ public:
     bool isStarted() override;
     void readFromSocket(std::shared_ptr<IConnection>) override;
     bool getQueueElement(std::string& data) override;
-    void send(const google::protobuf::Message& context);
+    void send(const google::protobuf::Message& context) override;
 
 private:
     void createSocket();
@@ -46,7 +46,7 @@ private:
     int m_server_fd = 0;
     
     struct sockaddr_un m_addr;
-    std::string m_componentName;
+    std::string m_path;
 
     std::atomic<bool> m_isStarted;
 

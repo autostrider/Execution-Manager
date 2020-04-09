@@ -1,102 +1,107 @@
 #include "machine_state_client.h"
 #include <client_socket.hpp>
-#include <machine_state_management.pb.h>
+#include <logger.hpp>
+
 #include <any.pb.h>
 
-#include <thread>
 #include <chrono>
+#include <thread>
+
+using namespace std::chrono;
 
 namespace machine_state_client
 {
 
-MachineStateClient::MachineStateClient(std::string path)
-    : m_client(path, std::make_unique<socket_handler::ClientSocket>()),
+MachineStateClient::MachineStateClient(const std::string& path)
+    : m_path{path},
       m_pid(getpid())
+{}
+
+void MachineStateClient::setClient(std::unique_ptr<IClient> client)
 {
-  m_client.connect();
+  std::cout << "MachineStateClient\n";
+  m_client = std::move(client);
+  std::cout << "Created\n";
+  m_client->connect();
 }
 
-MachineStateClient::~MachineStateClient()
-{
-  m_client.~Client();
-}
-
-StateError MachineStateClient::Register(std::string appName)
+StateError MachineStateClient::Register(std::string appName, uint32_t timeout)
 {
   MachineStateManagement::registerApp context;
   context.set_appname(appName);
   context.set_pid(m_pid);
 
-  m_client.sendMessage(context);
+  m_client->sendMessage(context);
 
-  return waitForConfirm();
+  return waitForConfirm(timeout);
 }
 
-StateError MachineStateClient::GetMachineState(std::string& state)
+StateError MachineStateClient::GetMachineState(std::string& state, uint32_t timeout)
 {
   MachineStateManagement::getMachineState context;
   context.set_pid(m_pid);
 
-  m_client.sendMessage(context);
+  m_client->sendMessage(context);
 
-  return waitForConfirm(state);
+  return waitForConfirm(state, timeout);
 }
 
-StateError MachineStateClient::SetMachineState(std::string state)
+StateError MachineStateClient::SetMachineState(std::string state, uint32_t timeout)
 {
   MachineStateManagement::setMachineState context;
   context.set_state(state);
   context.set_pid(m_pid);
 
-  m_client.sendMessage(context);
+  m_client->sendMessage(context);
 
-  return waitForConfirm();
+  return waitForConfirm(timeout);
 }
 
-StateError MachineStateClient::waitForConfirm()
+StateError MachineStateClient::waitForConfirm(uint32_t timeout)
 {
   google::protobuf::Any any;
   std::string data;
+  auto start = std::chrono::high_resolution_clock::now();
 
   do
   {
-    if (m_client.receive(data) > 0)
+    if (m_client->receive(data) > 0)
     {
-        any.ParseFromString(data);
+      any.ParseFromString(data);
+      
+      if (any.Is<MachineStateManagement::resultRegisterApp>())
+      {
+        MachineStateManagement::resultRegisterApp context;
+        any.UnpackTo(&context);
+        StateError result = context.result();
+        context = {};
 
-        if (any.Is<MachineStateManagement::resultRegisterApp>())
-        {
-            MachineStateManagement::resultRegisterApp context;
-            any.UnpackTo(&context);
-            StateError result = context.result();
-            context = {};
+        return result;
+      }
+      else if (any.Is<MachineStateManagement::resultSetMachineState>())
+      {
+        MachineStateManagement::resultSetMachineState context;
+        any.UnpackTo(&context);
+        StateError result = context.result();
+        context = {};
 
-            return result;
-        }
-        else if (any.Is<MachineStateManagement::resultSetMachineState>())
-        {
-            MachineStateManagement::resultSetMachineState context;
-            any.UnpackTo(&context);
-            StateError result = context.result();
-            context = {};
-
-            return result;
-        }
-        
-        any = {};
-        data = {};
+        return result;
+      }
     }
-  } while (true);
+  } while (duration_cast<microseconds>(high_resolution_clock::now() - start).count() < timeout);
+  
+  return StateError::kTimeout;
 }
 
-StateError MachineStateClient::waitForConfirm(std::string& state)
+StateError MachineStateClient::waitForConfirm(std::string& state, uint32_t timeout)
 {
   google::protobuf::Any any;
   std::string data;
+  auto start = std::chrono::high_resolution_clock::now();
 
   do
   {    
-    if (m_client.receive(data) > 0)
+    if (m_client->receive(data) > 0)
     {
       any.ParseFromString(data);
         
@@ -111,11 +116,10 @@ StateError MachineStateClient::waitForConfirm(std::string& state)
         
         return result;
       }
-
-      any = {};
-      data = {};
     }
-  } while (true);
+  } while (duration_cast<microseconds>(high_resolution_clock::now() - start).count() < timeout);
+
+  return StateError::kTimeout;
 }
 
 } // namespace machine_state_client

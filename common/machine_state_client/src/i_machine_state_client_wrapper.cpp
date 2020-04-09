@@ -1,27 +1,30 @@
 #include "i_machine_state_client_wrapper.hpp"
-#include <constants.hpp>
-
-using namespace constants;
 
 namespace machine_state_client
 {
 
-MachineStateClientWrapper::MachineStateClientWrapper() : m_machineClient{IPC_PROTOCOL + EM_SOCKET_NAME}
+MachineStateClientWrapper::MachineStateClientWrapper(const std::string& path)
+    : m_machineClient(path)
 {}
 
-StateError MachineStateClientWrapper::Register(std::string appName)
+void MachineStateClientWrapper::setClient(std::unique_ptr<IClient> client)
 {
-    return m_machineClient.Register(appName);
+    m_machineClient.setClient(std::move(client));
 }
 
-StateError MachineStateClientWrapper::GetMachineState(std::string& state)
+StateError MachineStateClientWrapper::Register(std::string appName, uint32_t timeout)
 {
-    return m_machineClient.GetMachineState(state);
+    return m_machineClient.Register(appName, timeout);
 }
 
-StateError MachineStateClientWrapper::SetMachineState(std::string state)
+StateError MachineStateClientWrapper::GetMachineState(std::string& state, uint32_t timeout)
 {
-    return m_machineClient.SetMachineState(state);
+    return m_machineClient.GetMachineState(state, timeout);
+}
+
+StateError MachineStateClientWrapper::SetMachineState(std::string state, uint32_t timeout)
+{
+    return m_machineClient.SetMachineState(state, timeout);
 }
 
 }

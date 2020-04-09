@@ -17,20 +17,24 @@ using StateError = MachineStateManagement::StateError;
 class MachineStateClient
 {
 public:
-  MachineStateClient(std::string path);
-  ~MachineStateClient();
+  MachineStateClient(const std::string& path);
+  ~MachineStateClient() = default;
 
-  StateError Register(std::string appName);
-  StateError GetMachineState(std::string& state);
-  StateError SetMachineState(std::string state);
+  StateError Register(std::string appName, uint32_t timeout);
+  StateError GetMachineState(std::string& state, uint32_t timeout);
+  StateError SetMachineState(std::string state, uint32_t timeout);
+
+protected:
+  void setClient(std::unique_ptr<IClient> client);
 
 private:
-  StateError waitForConfirm();
-  StateError waitForConfirm(std::string& state);
+  StateError waitForConfirm(uint32_t timeout);
+  StateError waitForConfirm(std::string& state, uint32_t timeout);
 
 private:
-  Client m_client;
+  std::unique_ptr<IClient> m_client;
   pid_t m_pid;
+  const std::string m_path;
 };
 
 }

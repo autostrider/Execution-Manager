@@ -6,24 +6,22 @@
 namespace base_server
 {
 
-Server::Server(const std::string &component, std::unique_ptr<IServerSocket> socket, std::unique_ptr<IConnectionFactory> conn)
+Server::Server(const std::string &path, std::unique_ptr<IServerSocket> socket, std::unique_ptr<IConnectionFactory> conn)
         : m_server_socket{std::move(socket)},
           m_server_fd{},
           m_isStarted{false},
           m_addr{},
-          m_componentName{component},
+          m_path{path},
           m_activeConnections{},
           m_serverThread{},
           m_receiveThread{},
           m_recvDataQueue{},
           m_connectionFactory{std::move(conn)}
 {
-    auto path = constants::COMPONENT_SOCKET_NAME + "_" + m_componentName;
-
-    ::unlink(path.c_str());
+    ::unlink(m_path.c_str());
 
     m_addr.sun_family = AF_UNIX;
-    path.copy(m_addr.sun_path, path.size() + 1);
+    m_path.copy(m_addr.sun_path, m_path.size() + 1);
     
     createSocket();
     bind();
@@ -32,7 +30,7 @@ Server::Server(const std::string &component, std::unique_ptr<IServerSocket> sock
 
 void Server::createSocket()
 {
-    m_server_fd = m_server_socket->socket(AF_UNIX, SOCK_STREAM, 0);  
+    m_server_fd = m_server_socket->socket(AF_UNIX, SOCK_STREAM, 0);
 
     if (m_server_fd == -1)
     {

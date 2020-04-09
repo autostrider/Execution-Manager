@@ -14,6 +14,7 @@ public:
     MOCK_METHOD(void, readFromSocket,
                 (std::shared_ptr<api::IConnection>), (override));
     MOCK_METHOD(bool, getQueueElement, (std::string& data), (override));
+    MOCK_METHOD(void, send, (google::protobuf::Message& context), (override));
 };
 
 #endif //I_SERVER_MOCK_HPP

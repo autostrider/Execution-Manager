@@ -9,6 +9,7 @@
 #include <machine_state_management.pb.h>
 #include <any.pb.h>
 #include <future>
+#include <client_socket.hpp>
 
 using namespace constants;
 
@@ -29,13 +30,13 @@ MachineStateManager::MachineStateManager(
         std::unique_ptr<application_state::IApplicationStateClientWrapper> appStateClient,
         std::unique_ptr<machine_state_client::IMachineStateClientWrapper> machineClient,
         std::unique_ptr<api::IManifestReader> manifestReader,
-        std::unique_ptr<base_server::Server> server,
+        std::unique_ptr<base_client::Client> client,
         std::unique_ptr<per::KeyValueStorageBase> persistentStorage) :
         m_machineStateClient(std::move(machineClient)),
         m_factory{std::move(factory)},
         m_currentState{nullptr},
         m_appStateClient{std::move(appStateClient)},
-        m_newStatesProvider{std::move(server)},
+        m_newStatesProvider{std::move(client)},
         m_persistentStorage{std::move(persistentStorage)},
         m_availableStates{manifestReader->getMachineStates()}
 {
@@ -82,17 +83,15 @@ void MachineStateManager::reportApplicationState(ApplicationState state)
 
 StateError MachineStateManager::setMachineState(const std::string& state)
 {
-  if (MACHINE_STATE_SHUTTINGDOWN == state)
-  {
-    return m_machineStateClient->SetMachineState(state);
-  }
-
-  return m_machineStateClient->SetMachineState(state);
+  return m_machineStateClient->SetMachineState(state, DEFAULT_RESPONSE_TIMEOUT);
 }
 
 StateError MachineStateManager::registerMsm(const std::string& applicationName)
 {
-  return m_machineStateClient->Register(applicationName.c_str());
+  auto c = std::make_unique<base_client::Client>(MSM_STATES_SERVER,
+                                                 std::make_unique<socket_handler::ClientSocket>());
+  m_machineStateClient->setClient(std::move(c));
+  return m_machineStateClient->Register(applicationName.c_str(), DEFAULT_RESPONSE_TIMEOUT);
 }
 
 std::string MachineStateManager::getNewState()
@@ -109,16 +108,6 @@ std::string MachineStateManager::getNewState()
   }
 
   return newState;
-}
-
-void MachineStateManager::startServer()
-{
-  m_newStatesProvider->start();
-}
-
-void MachineStateManager::closeServer()
-{
-  m_newStatesProvider->stop();
 }
 
 std::string MachineStateManager::getNewStateForStartRun()
@@ -145,49 +134,28 @@ std::string MachineStateManager::recvState()
 {
   google::protobuf::Any recvData;
   std::string data;
-  std::string recv;
 
-  if(m_newStatesProvider->getQueueElement(data))
+  do
   {
-    recvData.ParseFromString(data);
-
-    if(recvData.Is<MachineStateManagement::nextState>())
+    if (m_newStatesProvider->receive(data) > 0)
     {
+      recvData.ParseFromString(data);
+        
+      if(recvData.Is<MachineStateManagement::nextState>())
+      {
         MachineStateManagement::nextState context;
         recvData.UnpackTo(&context);
-        recv = context.state();
+        data = context.state();
         context = {};
+
+        return data;
+      }
+
+      recvData = {};
+      data = {};
     }
-  }
-  return recv;
+  } while (true);
 }
-
-// std::string MachineStateManager::recvState()
-// {
-//   google::protobuf::Any recvData;
-//   std::string data;
-
-//   do
-//   {
-//     if (m_client.receive(data) > 0)
-//     {
-//       recvData.ParseFromString(data);
-        
-//       if(recvData.Is<MachineStateManagement::nextState>())
-//       {
-//         MachineStateManagement::nextState context;
-//         recvData.UnpackTo(&context);
-//         data = context.state();
-//         context = {};
-
-//         return data;
-//       }
-
-//       recvData = {};
-//       data = {};
-//     }
-//   } while (true);
-// }
 
 void MachineStateManager::saveReceivedState(const std::string &state)
 {

@@ -53,7 +53,6 @@ void Init::enter()
     std::string applicationName{"MSM"};
 
     StateError result = m_msm.registerMsm(applicationName);
-    m_msm.startServer();
 
     if (StateError::kSuccess == result)
     {
@@ -112,7 +111,6 @@ void ShutDown::enter()
 {
     LOG << "Reporting state "
         << m_stateName << ".";
-    m_msm.closeServer();
     m_msm.reportApplicationState(getApplicationState());
 }
 

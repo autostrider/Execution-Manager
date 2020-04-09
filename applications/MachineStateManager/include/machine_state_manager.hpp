@@ -3,7 +3,7 @@
 
 #include <i_adaptive_app.hpp>
 #include <i_machine_state_client_wrapper.hpp>
-#include <server.hpp>
+#include <client.hpp>
 
 
 namespace per
@@ -33,7 +33,7 @@ public:
                       std::unique_ptr<application_state::IApplicationStateClientWrapper> appStateClient,
                       std::unique_ptr<machine_state_client::IMachineStateClientWrapper> machineClient,
                       std::unique_ptr<api::IManifestReader> manifestReader,
-                      std::unique_ptr<base_server::Server> server,
+                      std::unique_ptr<base_client::Client> cilent,
                       std::unique_ptr<per::KeyValueStorageBase> persistentStorage);
 
   void init() override;
@@ -42,8 +42,6 @@ public:
   void performAction() override;
 
   machine_state_client::StateError setMachineState(const std::string&);
-  void startServer();
-  void closeServer();
   std::string getNewState();
   void saveReceivedState(const std::string& state);
   machine_state_client::StateError registerMsm(const std::string&);
@@ -60,7 +58,7 @@ private:
   std::unique_ptr<api::IStateFactory> m_factory;
   std::unique_ptr<api::IState> m_currentState;
   std::unique_ptr<application_state::IApplicationStateClientWrapper> m_appStateClient;
-  std::unique_ptr<base_server::Server> m_newStatesProvider;
+  std::unique_ptr<base_client::Client> m_newStatesProvider;
   std::unique_ptr<per::KeyValueStorageBase> m_persistentStorage;
   std::vector<std::string> m_availableStates;
 };

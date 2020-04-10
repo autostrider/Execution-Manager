@@ -19,9 +19,7 @@ MachineStateClient::MachineStateClient(const std::string& path)
 
 void MachineStateClient::setClient(std::unique_ptr<IClient> client)
 {
-  std::cout << "MachineStateClient\n";
   m_client = std::move(client);
-  std::cout << "Created\n";
   m_client->connect();
 }
 

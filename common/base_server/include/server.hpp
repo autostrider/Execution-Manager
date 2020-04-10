@@ -23,7 +23,6 @@ class Server : public IServer
 {
 public:
     Server(const std::string&, std::unique_ptr<IServerSocket>, std::unique_ptr<IConnectionFactory>);
-    ~Server() override;
 
     void start() override;
     void stop() override;
@@ -36,6 +35,7 @@ private:
     void createSocket();
     void bind();
     void listen();
+    void closeSocketConnection();
 
     void onRunning();
     void handleConnections();

@@ -4,7 +4,7 @@ import "enums.proto";
 
 package ApplicationStateManagement;
 
-message RegisterComponent
+message ReportApplicationState 
 {
     string appName = 1;
     enums.ApplicationState state = 2;

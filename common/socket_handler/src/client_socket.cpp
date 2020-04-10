@@ -28,4 +28,9 @@ int ClientSocket::close(int fd) const
     return ::close(fd);
 }
 
+int ClientSocket::shutdown(int fd) const
+{
+    return ::shutdown(fd, SHUT_RDWR);
+}
+
 }

@@ -4,8 +4,6 @@
 #include <client.hpp>
 #include <enums.pb.h>
 
-#include <unistd.h>
-
 using namespace base_client;
 
 namespace application_state
@@ -20,8 +18,11 @@ public:
 
   void ReportApplicationState(ApplicationState state);
 
+protected:
+  void setClient(std::unique_ptr<IClient> client);
+
 private:
-  Client m_client;
+  std::unique_ptr<IClient> m_client;
   pid_t m_pid;
 };
 

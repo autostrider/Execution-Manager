@@ -1,84 +1,146 @@
-// #include <application_state_client.h>
-// #include <constants.hpp>
-// #include <logger.hpp>
+#include <asc_for_wrapper.hpp>
+#include <constants.hpp>
+#include <logger.hpp>
+#include <server.hpp>
+#include <client_mock.hpp>
+#include <server_socket.hpp>
+#include <client_socket.hpp>
+#include <connection_factory.hpp>
+#include <proxy_client_factory.hpp>
 
-// #include <iostream>
-// #include <unistd.h>
+#include <any.pb.h>
+#include <application_state_management.pb.h>
 
-// #include "gtest/gtest.h"
-// #include "gmock/gmock.h"
+#include "gtest/gtest.h"
+#include "gmock/gmock.h"
 
-// using namespace ::testing;
-// using namespace constants;
+using namespace ::testing;
+using namespace constants;
 
-// namespace ApplicationStateClientTest
-// {
+namespace ApplicationStateClientTest
+{
 
-// using ApplicationState = ::ApplicationStateManagement::ApplicationState;
+using ApplicationState = application_state::ApplicationStateClient::ApplicationState;
 
-// struct Data
-// {
-//     ApplicationState m_state;
-//     pid_t m_appPid;
-// };
+struct Data
+{
+    ApplicationState m_state;
+    pid_t m_appPid;
+};
 
-// class ApplicationStateClientServer : public ::ExecutionManagement::Server
-// {
-// public:
-//     explicit
-//     ApplicationStateClientServer (Data& sharedResource);
+class TestServer
+{
+public:
+    explicit TestServer(Data& sharedResource);
+    
+    void start(std::string);
+    void stop();
+    void reportApplicationState();
 
-// private:
-//     ::kj::Promise<void>
-//     reportApplicationState(ApplicationState context) override;
+private:
+    Data& m_sharedResource;
+    std::unique_ptr<base_server::Server> server;
+    std::unique_ptr<base_server::ConnectionFactory> connection = std::make_unique<base_server::ConnectionFactory>(
+                    std::make_unique<base_client::ProxyClientFactory>());
+};
 
-// private:
-//     Data& m_sharedResource;
-// };
+TestServer::TestServer(Data& sharedResource) 
+    : m_sharedResource{sharedResource}
+{
+    LOG << "Application State Client server started...";
+}
 
-// ApplicationStateClientServer::ApplicationStateClientServer(Data& sharedResource) 
-//     : m_sharedResource{sharedResource}
-// {
-//     LOG << "Application State Client server started...";
-// }
+void TestServer::reportApplicationState()
+{
+    std::string data;
+    
+    while (data.empty())
+    {
+        server->getQueueElement(data);
+    }
 
-// ::kj::Promise<void>
-// ApplicationStateClientServer::reportApplicationState(ApplicationState context)
-// {
-//     m_sharedResource.m_state = context.getParams().getState();
 
-//     return kj::READY_NOW;
-// }
+    google::protobuf::Any any;
+    any.ParseFromString(data);
+      
+    if (any.Is<ApplicationStateManagement::ReportApplicationState>())
+    {
+        ApplicationStateManagement::ReportApplicationState context;
+        any.UnpackTo(&context);
+       
+        m_sharedResource.m_state = context.state();
+       
+        context = {};
+    }
+}
 
-// class ApplicationStateClientTest : public Test 
-// {
-// protected:
-//     ~ApplicationStateClientTest() noexcept(true) override {}
+void TestServer::start(std::string path)
+{
+  server = std::make_unique<base_server::Server>
+            (path,
+             std::make_unique<socket_handler::ServerSocket>(),
+             std::make_unique<base_server::ConnectionFactory>(
+                    std::make_unique<base_client::ProxyClientFactory>()));
 
-//     ApplicationStateClientTest() {}
+  server->start();
+}
 
-//   void SetUp() override
-//   {
-//     ::unlink(EM_SOCKET_NAME.c_str());
-//   }
+void TestServer::stop()
+{
+    server->stop();
+}
 
-//   void TearDown() override
-//     {
-//         ::unlink(EM_SOCKET_NAME.c_str());
-//     }
+class ApplicationStateClientTest : public Test 
+{
+protected:
+    ~ApplicationStateClientTest() noexcept(true) override {}
 
-//     Data sharedResource;
-//     const std::string socketName{IPC_PROTOCOL + EM_SOCKET_NAME};
-//     capnp::EzRpcServer server
-//     {kj::heap<ApplicationStateClientServer>(sharedResource), socketName}; 
-// };
+    ApplicationStateClientTest() {}
 
-// TEST_F(ApplicationStateClientTest, ShouldSucceedToReportApplicationState)
-// {
-// 	application_state::ApplicationStateClient asc;
-// 	asc.ReportApplicationState(ApplicationState::kRunning);
+    void SetUp() override
+    {
+        ::unlink(EM_SOCKET_NAME.c_str());
+    }
 
-// 	ASSERT_EQ(ApplicationState::kRunning, sharedResource.m_state);
-// }
+    void TearDown() override
+    {
+        ::unlink(EM_SOCKET_NAME.c_str());
+    }
 
-// } //namespace
+    Data sharedResource;
+    const std::string socketName{IPC_PROTOCOL + EM_SOCKET_NAME};
+
+    std::unique_ptr<ClientMock> clientMock = std::make_unique<ClientMock>();
+    ClientMock *clientMockPtr = clientMock.get();
+
+    std::unique_ptr<Client> client = std::make_unique<Client>(EM_SOCKET_NAME, std::make_unique<socket_handler::ClientSocket>());
+
+	application_state::AscForWrapper asc;
+    TestServer testServer{sharedResource};
+};
+
+TEST_F(ApplicationStateClientTest, ShouldSucceedSendReportApplicationState)
+{
+    {
+        EXPECT_CALL(*clientMockPtr, connect()).WillOnce(Return());
+        EXPECT_CALL(*clientMockPtr, sendMessage(_));
+    }
+    asc.setClient(std::move(clientMock));
+	asc.ReportApplicationState(ApplicationState::kRunning);
+}
+
+TEST_F(ApplicationStateClientTest, ShouldSucceedToReportApplicationState)
+{
+    testServer.start(EM_SOCKET_NAME);
+    asc.setClient(std::move(client));
+
+	asc.ReportApplicationState(ApplicationState::kRunning);
+
+    testServer.reportApplicationState();
+
+	ASSERT_EQ(ApplicationState::kRunning, sharedResource.m_state);
+
+    testServer.stop();
+}
+
+} //namespace

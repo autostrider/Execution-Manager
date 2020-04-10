@@ -17,6 +17,7 @@ public:
     int accept(int sockfd, struct sockaddr *addr, socklen_t *addrlen) const override;
     int fcntl(int fd, int cmd, int arg) const override;
     int close(int fd) const override;
+    int shutdown(int fd) const override;
 };
 
 }

@@ -22,22 +22,37 @@ std::string getAppBinaryPath(pid_t appPid)
     std::string fullCmd;
     data >> fullCmd;
 
-    return fullCmd;
+    return fullCmd.c_str();
 }
 
 std::string parseServiceName(const std::string& path)
-{
-    static constexpr auto delimiter = '/';
+{    
+    static const std::string delimiter{'/'};
+    static const std::string procStr {"processes"};
 
-    static const auto processesSize = std::string("/processes/").size();
-    auto currPos = path.find_last_of(delimiter);
-    std::string processName = path.substr(currPos + 1);
+    static const auto processesSize = procStr.size();
+    auto procNamePos = path.find_last_of(delimiter);
+    std::string processName{path.substr(procNamePos + 1)};
 
-    auto prevPos = currPos - processesSize;
-    currPos = path.find_last_of(delimiter, prevPos);
-    std::string appName = path.substr(currPos + 1, prevPos - currPos);
+    auto processesPos = path.find(procStr);
 
-    return getServiceName(appName, processName);
+    std::string res;
+    if (processesPos != std::string::npos)
+    {
+        auto appNameEndPos = processesPos - delimiter.size();
+        auto appNameStartPos = path.find_last_of(delimiter, (appNameEndPos - delimiter.size())) + delimiter.size();
+        auto appNameSize = appNameEndPos - appNameStartPos;
+
+        std::string appName{path.substr(appNameStartPos, appNameSize)};
+    
+        res = getServiceName(appName, processName);
+    }
+    else
+    {
+        res = processName;
+    }
+    
+    return res;
 }
 
 void ThreadQueue::addMethod(std::function<void ()> func)

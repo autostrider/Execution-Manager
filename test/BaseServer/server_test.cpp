@@ -47,6 +47,7 @@ void ServerTest::expectCreateServer()
 
 void ServerTest::expectCloseServerSocket()
 {
+    EXPECT_CALL(*socket, shutdown(serverfd)).WillOnce(Return(0));
     EXPECT_CALL(*socket, close(serverfd)).WillOnce(Return(0));
 }
 
@@ -67,7 +68,6 @@ TEST_F(ServerTest, ShouldSuccessfulyCreateServer)
     {
         InSequence sq;
         expectCreateServer();
-        expectCloseServerSocket();
     }
 
     std::unique_ptr<Server> server =
@@ -84,7 +84,8 @@ TEST_F(ServerTest, ShouldSuccessfulyStopServer)
 
     std::unique_ptr<Server> server =
         std::make_unique<Server>(socketPath, std::move(socket), std::move(connFactory));
-    
+
+    server->start();
     server->stop();
 
     EXPECT_EQ(server->isStarted(), false);
@@ -105,6 +106,8 @@ TEST_F(ServerTest, ShouldSuccessfulyCreateConnectionAndAcceptedClient)
     server->start();
 
     std::this_thread::sleep_for(std::chrono::milliseconds(1000));
+
+    server->stop();
 }
 
 TEST_F(ServerTest, ShouldSuccessfulyReceiveData)
@@ -122,6 +125,8 @@ TEST_F(ServerTest, ShouldSuccessfulyReceiveData)
     server->start();
 
     std::this_thread::sleep_for(std::chrono::milliseconds(1000));
+
+    server->stop();
 }
 
 TEST_F(ServerTest, ShouldSuccessfulyReceiveDataNull)
@@ -138,6 +143,7 @@ TEST_F(ServerTest, ShouldSuccessfulyReceiveDataNull)
     
     server->start();
     server->readFromSocket(connection);
+    server->stop();
 }
 
 TEST_F(ServerTest, ShouldSuccessfulyGetQueueElement)
@@ -157,4 +163,6 @@ TEST_F(ServerTest, ShouldSuccessfulyGetQueueElement)
 
     ASSERT_FALSE(server->getQueueElement(str));
     EXPECT_NE(str, "");
+
+    server->stop();
 }

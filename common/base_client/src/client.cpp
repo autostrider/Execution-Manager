@@ -23,19 +23,16 @@ Client::Client(const std::string &path, std::unique_ptr<IClientSocket> socket)
 
 void Client::createSocket()
 {
-    std::cout << "createSocket\n";
     m_client_fd = m_client_socket->socket(AF_UNIX, SOCK_STREAM, 0);
 
     if (m_client_fd < 0)
     {
         LOG << "Error opening socket\n";
     }
-    std::cout << "createSocket DONE " << m_client_fd << "\n";
 }
 
 void Client::connect()
 {
-    std::cout << "connect " << m_client_fd << "\n";
     if (0 == m_client_socket->connect(m_client_fd,
                                       (const struct sockaddr *) &m_addr,
                                       m_addr_len))
@@ -46,11 +43,11 @@ void Client::connect()
     {
         LOG << "Client failed to connect socket: " << errno;
     }
-    std::cout << "connect DONE\n";
 }
 
 Client::~Client()
 {
+    m_client_socket->shutdown(m_client_fd);
     m_client_socket->close(m_client_fd);
 }
 
@@ -66,9 +63,12 @@ ssize_t Client::receive(std::string& recvMessage)
     }
     else if(byte == -1)
     {
-        LOG << "Error on receiving data from client: " << errno;
+        LOG << "Error on receiving data from client: " << strerror(errno);
     }
-    recvMessage = buffer;
+    else
+    {
+        recvMessage = buffer;
+    }
 
     return byte;
 }

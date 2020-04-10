@@ -44,7 +44,7 @@ static const std::string USER{"--user"};
 static const std::string SYSTEMCTL_START{"start"};
 static const std::string SYSTEMCTL_STOP{"stop"};
 
-constexpr std::size_t RECV_BUFFER_SIZE = 512;
+constexpr std::size_t RECV_BUFFER_SIZE = 2048;
 constexpr std::size_t NUMBER_RESERVED_CONNECTIONS = 16;
 
 static const std::string SOCKET_SERVER_PATH{"/tmp/serverSocket"};

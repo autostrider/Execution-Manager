@@ -18,6 +18,7 @@ bool SafeQueue::pop(std::string& payload)
   {
     payload = m_data.front();
     m_data.pop();
+
     result = true;
   }
 

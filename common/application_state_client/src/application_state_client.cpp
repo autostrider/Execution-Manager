@@ -2,6 +2,7 @@
 #include <constants.hpp>
 #include <common.hpp>
 #include <client_socket.hpp>
+#include <logger.hpp>
 
 #include <application_state_management.pb.h>
 
@@ -12,20 +13,24 @@ namespace application_state
 {
 
 ApplicationStateClient::ApplicationStateClient()
-  : m_client((IPC_PROTOCOL + EM_SOCKET_NAME),
-             std::make_unique<socket_handler::ClientSocket>()),
-    m_pid(getpid())
+  : m_pid(getpid())
 {}
+
+void ApplicationStateClient::setClient(std::unique_ptr<IClient> client)
+{
+  m_client = std::move(client);
+  m_client->connect();
+}
 
 void ApplicationStateClient::ReportApplicationState(ApplicationState state)
 {
-  ApplicationStateManagement::RegisterComponent context;
+  ApplicationStateManagement::ReportApplicationState context;
   auto fullPath = getAppBinaryPath(m_pid);
 
   context.set_state(state);
   context.set_appname(parseServiceName(fullPath));
 
-  m_client.sendMessage(context);
+  m_client->sendMessage(context);
 }
 
 } // namespace application_state

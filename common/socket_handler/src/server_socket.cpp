@@ -35,4 +35,9 @@ int ServerSocket::accept(int sockfd, struct sockaddr *addr, socklen_t *addrlen) 
     return ::accept(sockfd, addr, addrlen);
 }
 
+int ServerSocket::shutdown(int fd) const
+{
+    return ::shutdown(fd, SHUT_RD);
+}
+
 }

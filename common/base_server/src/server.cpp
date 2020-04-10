@@ -59,14 +59,6 @@ void Server::listen()
     }
 }
 
-Server::~Server()
-{
-    stop();
-    if (m_server_socket->close(m_server_fd) == (-1))
-        LOG << "Error on close function: "
-            << strerror(errno) << ".";
-}
-
 void Server::start()
 {
     m_isStarted = true;
@@ -82,6 +74,7 @@ void Server::onRunning()
                 m_connectionFactory->makeConnection(m_server_socket, m_server_fd);
 
         connection->creatAcceptedClient();
+
         {
             const std::lock_guard<std::mutex> guard(m_mtxForServerThr);
             m_activeConnections.push_back(connection);
@@ -127,10 +120,24 @@ void Server::readFromSocket(std::shared_ptr<IConnection> conn)
 void Server::stop()
 {
     m_isStarted = false;
+
+    closeSocketConnection();
+
     if (m_serverThread.joinable())
         m_serverThread.join();
     if (m_receiveThread.joinable())
         m_receiveThread.join();
+}
+
+void Server::closeSocketConnection()
+{
+    if (m_server_socket->shutdown(m_server_fd) == (-1))
+        LOG << "Error on shutdown function: "
+            << strerror(errno) << ".";
+
+    if (m_server_socket->close(m_server_fd) == (-1))
+        LOG << "Error on close function: "
+            << strerror(errno) << ".";
 }
 
 void Server::send(const google::protobuf::Message& context)

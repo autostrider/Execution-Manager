@@ -13,9 +13,9 @@ class ParseServiceNameTest: public TestWithParam<std::pair<std::string, std::str
 std::vector<std::pair<std::string, std::string>> testData = 
 {
   {"/path/to/Application/processes/Process", "Application_Process"},
-  {"process", "process_process"},
-  {"/some/app/path/process/", "pa_"},
-  {"app/process", "process_process"}
+  {"process", "process"},
+  {"/some/app/path/processes/", "path_"},
+  {"app/process", "process"}
 
 };
 

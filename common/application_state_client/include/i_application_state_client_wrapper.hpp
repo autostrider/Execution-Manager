@@ -1,7 +1,7 @@
 #ifndef APPLICATION_STATE_CLIENT_WRAPPER_H
 #define APPLICATION_STATE_CLIENT_WRAPPER_H
 
-#include <application_state_client.h>
+#include <asc_for_wrapper.hpp>
 
 namespace application_state
 {
@@ -16,9 +16,10 @@ public:
 class ApplicationStateClientWrapper : public IApplicationStateClientWrapper
 {
 public:
+    void setClient(std::unique_ptr<IClient> client);
     void ReportApplicationState(ApplicationStateClient::ApplicationState state) override;
 private:
-    ApplicationStateClient m_client;
+    AscForWrapper m_client;
 };
 
 }

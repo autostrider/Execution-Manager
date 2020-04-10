@@ -20,8 +20,11 @@ public:
 
   void ReportApplicationState(ApplicationState state);
 
+protected:
+  void setClient(std::unique_ptr<IClient> client);
+
 private:
-  Client m_client;
+  std::unique_ptr<IClient> m_client;
   pid_t m_pid;
 };
 

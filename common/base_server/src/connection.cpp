@@ -29,9 +29,10 @@ int Connection::acceptConnection()
                                 (struct sockaddr*)&clientAddr,
                                 &cliLen);
 
-    if (m_serverSocket->fcntl(accepdFd, F_SETFD, O_NONBLOCK) == -1)
+    if (m_serverSocket->fcntl(accepdFd, F_SETFD, O_NONBLOCK) == -1 && !EBADF)
     {
         accepdFd = -1;
+        LOG << "Error in fcntl function: " << strerror(errno);
     }
 
     return accepdFd;
@@ -47,7 +48,7 @@ void Connection::creatAcceptedClient()
     }
     else if (fd < 0)
     {
-        LOG << "SocketServer: there is no clients connected\n";
+        LOG << "There is no clients connected.";
     }
 }
 

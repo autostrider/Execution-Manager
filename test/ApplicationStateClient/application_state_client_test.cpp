@@ -2,17 +2,14 @@
 #include <constants.hpp>
 #include <logger.hpp>
 #include <server.hpp>
-#include <application_state_management.pb.h>
 #include <client_mock.hpp>
 #include <server_socket.hpp>
 #include <client_socket.hpp>
 #include <connection_factory.hpp>
 #include <proxy_client_factory.hpp>
+
 #include <any.pb.h>
-
-
-#include <iostream>
-#include <unistd.h>
+#include <application_state_management.pb.h>
 
 #include "gtest/gtest.h"
 #include "gmock/gmock.h"

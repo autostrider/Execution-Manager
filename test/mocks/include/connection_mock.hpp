@@ -1,5 +1,5 @@
-#ifndef CONNECTION_HPP
-#define CONNECTION_HPP
+#ifndef CONNECTION_MOCK_HPP
+#define CONNECTION_MOCK_HPP
 
 #include <i_connection.hpp>
 
@@ -16,4 +16,4 @@ public:
 
 
 
-#endif // CONNECTION_HPP
+#endif // CONNECTION_MOCK_HPP

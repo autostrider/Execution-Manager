@@ -14,4 +14,4 @@ public:
 
 }
 
-#endif // MSC_FOR_WRAPPER_HPP
+#endif // ASC_FOR_WRAPPER_HPP

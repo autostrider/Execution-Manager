@@ -4,8 +4,6 @@
 #include <client.hpp>
 #include <enums.pb.h>
 
-#include <unistd.h>
-
 using namespace base_client;
 
 namespace application_state

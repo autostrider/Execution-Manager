@@ -2,7 +2,6 @@
 #include <constants.hpp>
 #include <common.hpp>
 #include <client_socket.hpp>
-#include <logger.hpp>
 
 #include <application_state_management.pb.h>
 

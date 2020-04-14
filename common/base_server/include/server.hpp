@@ -27,9 +27,9 @@ public:
     void start() override;
     void stop() override;
     bool isStarted() override;
-    void readFromSocket(std::shared_ptr<IConnection>) override;
-    bool getQueueElement(std::string& data) override;
-    void send(const google::protobuf::Message& context) override;
+    void readFromSocket(std::vector<std::shared_ptr<IConnection>>::iterator&) override;
+    bool getQueueElement(ReceivedMessage& data) override;
+    void send(const google::protobuf::Message& context, int fd) override;
 
 private:
     void createSocket();

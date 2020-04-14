@@ -9,13 +9,19 @@
 namespace common
 {
 
+struct ReceivedMessage
+{
+    std::string data;
+    int fd;
+};
+
 class SafeQueue
 {
 public:
-  void push(const std::string& value);
-  bool pop(std::string& payload);
+  void push(const ReceivedMessage&);
+  bool pop(ReceivedMessage& payload);
 private:
-  std::queue<std::string> m_data;
+  std::queue<ReceivedMessage> m_data;
   std::mutex m_mut;
 };
 

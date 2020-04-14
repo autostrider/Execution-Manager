@@ -30,7 +30,7 @@ public:
     void setClientFd(int);
     void setConnected(bool);
 
-    int getClientFd();
+    int getClientFd() override;
 
 private:
     void createSocket();

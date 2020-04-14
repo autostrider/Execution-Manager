@@ -27,7 +27,6 @@ TEST_F(ProxyClientFactoryTest, MekeClient)
 {
     {
         EXPECT_CALL(*c_socket, socket(_,_,_)).WillOnce(Return(fd));
-        EXPECT_CALL(*c_socket, shutdown(fd)).WillOnce(Return(0));
         EXPECT_CALL(*c_socket, close(fd)).WillOnce(Return(0));
     }
 

@@ -5,6 +5,11 @@
 
 #include <memory>
 
+namespace common
+{
+    struct ReceivedMessage;
+}
+
 namespace api
 {
 
@@ -16,9 +21,9 @@ public:
     virtual void start() = 0;
     virtual void stop() = 0;
     virtual bool isStarted() = 0;
-    virtual void readFromSocket(std::shared_ptr<IConnection>) = 0;
-    virtual bool getQueueElement(std::string& data) = 0;
-    virtual void send(const google::protobuf::Message& context) = 0;
+    virtual void readFromSocket(std::vector<std::shared_ptr<IConnection>>::iterator&) = 0;
+    virtual bool getQueueElement(common::ReceivedMessage& data) = 0;
+    virtual void send(const google::protobuf::Message& context, int fd) = 0;
 };
 
 }

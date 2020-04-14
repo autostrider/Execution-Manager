@@ -22,10 +22,12 @@ AdaptiveApp::AdaptiveApp(std::unique_ptr<api::IStateFactory> factory,
     m_meanCalculator{std::move(meanCalculator)},
     m_eventModeEnabled{eventModeEnabled}
 {
-    // if (m_eventModeEnabled)
-    // {
-    //     m_componentServer->start();
-    // }
+    if (m_eventModeEnabled)
+    {
+        m_componentClient->setStateUpdateHandler(std::bind(&AdaptiveApp::stateUpdateHandler,
+                                                           this, 
+                                                           std::placeholders::_1));
+    }
 }
 
 void AdaptiveApp::init()
@@ -108,7 +110,7 @@ void AdaptiveApp::performAction()
 {
     if (m_eventModeEnabled)
     {
-        stateUpdateHandler(m_componentClient->setStateUpdateHandler());
+        m_componentClient->checkIfAnyEventsAvailable();
     }
     else
     {

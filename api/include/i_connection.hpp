@@ -16,6 +16,7 @@ public:
     virtual int receiveData(std::string&) = 0;
     virtual int getRecvBytes() = 0;
     virtual void sendData(const google::protobuf::Message& context) = 0;
+    virtual int getFd() = 0;
 };
 
 }

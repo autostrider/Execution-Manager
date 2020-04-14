@@ -25,6 +25,7 @@ public:
 
     int getRecvBytes() override;
     void sendData(const google::protobuf::Message& context) override;
+    int getFd() override;
 
 private:
     int acceptConnection();

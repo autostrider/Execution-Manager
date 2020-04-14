@@ -4,6 +4,11 @@ import "enums.proto";
 
 package ExecutionManagement;
 
+message resultRegisterComponent
+{
+    enums.ComponentClientReturnType result = 1;
+}
+
 message setComponentState
 {
     string state = 1;

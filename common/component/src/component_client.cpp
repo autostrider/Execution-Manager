@@ -108,10 +108,10 @@ ComponentClientReturnType ComponentClient::registerComponent()
       any.UnpackTo(&comp);
 
       return comp.result();
-
-      any = {};
-      data = {};
     }
+    
+    data = {};
+
   } while (recvData <= 0);
 }
 

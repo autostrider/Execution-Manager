@@ -74,7 +74,6 @@ void Server::onRunning()
     {
         std::shared_ptr<IConnection> connection =
                 m_connectionFactory->makeConnection(m_server_socket, m_server_fd);
-        
 
         if (connection)
         {

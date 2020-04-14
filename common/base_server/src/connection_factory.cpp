@@ -12,7 +12,7 @@ ConnectionFactory::ConnectionFactory(std::shared_ptr<IProxyClientFactory> proxyC
 std::shared_ptr<IConnection> ConnectionFactory::makeConnection(
             std::shared_ptr<IServerSocket> socket,
             int fd) const
-{    
+{
     return std::make_shared<Connection>(socket, fd, m_proxyClientFactory);
 }
 

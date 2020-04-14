@@ -135,7 +135,7 @@ TEST_F(ServerTest, ShouldSuccessfulyReceiveDataNull)
     {
         expectCreateServer();
         expectCreatingAcceptedConnection();
-        expectReadData("", 0);     
+        expectReadData("", 0);
         expectCloseServerSocket();
     }
     

@@ -44,7 +44,6 @@ private:
 private:
     std::shared_ptr<IServerSocket> m_server_socket;
     int m_server_fd = 0;
-    int m_connectedClientFd;
     
     struct sockaddr_un m_addr;
     std::string m_path;

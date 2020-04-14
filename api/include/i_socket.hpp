@@ -14,7 +14,6 @@ public:
 
     virtual int socket(int domain, int type, int protocol) const = 0;
     virtual int close(int socket_fd) const = 0;
-    virtual int shutdown(int socket_fd) const = 0;
 };
 
 }

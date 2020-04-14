@@ -3,13 +3,13 @@
 namespace common
 {
 
-void SafeQueue::push(const std::string &value)
+void SafeQueue::push(const ReceivedMessage& message)
 {
   std::lock_guard<std::mutex> lck{m_mut};
-  m_data.push(value);
+  m_data.push(message);
 }
 
-bool SafeQueue::pop(std::string& payload)
+bool SafeQueue::pop(ReceivedMessage& payload)
 {
   bool result {false};
 

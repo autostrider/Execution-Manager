@@ -12,6 +12,7 @@ public:
     MOCK_METHOD(int, receiveData, (std::string&), (override));
     MOCK_METHOD(int, getRecvBytes, (), (override));
     MOCK_METHOD(void, sendData,(const google::protobuf::Message&), (override));
+    MOCK_METHOD(int, getFd, (), (override));
 };
 
 

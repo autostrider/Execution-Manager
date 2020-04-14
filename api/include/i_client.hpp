@@ -18,6 +18,7 @@ public:
     virtual bool isConnected() = 0;
     virtual ssize_t getRecvBytes() = 0;
     virtual void sendMessage(const google::protobuf::Message& context) = 0;
+    virtual int getClientFd() = 0;
 };
 
 }

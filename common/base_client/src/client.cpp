@@ -47,7 +47,6 @@ void Client::connect()
 
 Client::~Client()
 {
-    m_client_socket->shutdown(m_client_fd);
     m_client_socket->close(m_client_fd);
 }
 
@@ -55,7 +54,7 @@ ssize_t Client::receive(std::string& recvMessage)
 {
     char buffer[RECV_BUFFER_SIZE];
 
-    ssize_t byte = m_client_socket->recv(m_client_fd, buffer, RECV_BUFFER_SIZE - 1, 0);
+    ssize_t byte = m_client_socket->recv(m_client_fd, buffer, RECV_BUFFER_SIZE - 1, MSG_DONTWAIT);
     
     if (errno == EWOULDBLOCK && byte == -1)
     {
@@ -65,10 +64,8 @@ ssize_t Client::receive(std::string& recvMessage)
     {
         LOG << "Error on receiving data from client: " << strerror(errno);
     }
-    else
-    {
-        recvMessage = buffer;
-    }
+
+    recvMessage = buffer;
 
     return byte;
 }

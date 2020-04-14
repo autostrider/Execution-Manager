@@ -3,6 +3,8 @@
 #include <constants.hpp>
 #include <logger.hpp>
 
+#include <algorithm>
+
 namespace base_server
 {
 
@@ -72,10 +74,12 @@ void Server::onRunning()
     {
         std::shared_ptr<IConnection> connection =
                 m_connectionFactory->makeConnection(m_server_socket, m_server_fd);
+        
 
-        connection->creatAcceptedClient();
-
+        if (connection)
         {
+            connection->creatAcceptedClient();
+
             const std::lock_guard<std::mutex> guard(m_mtxForServerThr);
             m_activeConnections.push_back(connection);
         }
@@ -89,7 +93,7 @@ void Server::handleConnections()
     {
         {
             const std::lock_guard<std::mutex> guard(m_mtxForServerThr);
-            for (auto it : m_activeConnections)
+            for (auto it = m_activeConnections.begin(); it < m_activeConnections.end(); it++)
             {
                 readFromSocket(it);
             }
@@ -98,29 +102,28 @@ void Server::handleConnections()
     }
 }
 
-void Server::readFromSocket(std::shared_ptr<IConnection> conn)
+void Server::readFromSocket(std::vector<std::shared_ptr<IConnection>>::iterator& conn)
 {
     std::string recv;
-    int byte = conn->receiveData(recv);
+    int byte = (*conn)->receiveData(recv);
 
     if (byte == 0)
     {
-        m_activeConnections.erase(
+        conn = m_activeConnections.erase(
             std::remove(m_activeConnections.begin(),
                         m_activeConnections.end(),
-                        conn),
+                        *conn),
             m_activeConnections.end());
     }
     else if (byte > 0)
     {
-        m_recvDataQueue.push(recv);
+        m_recvDataQueue.push({recv, (*conn)->getFd()});
     }
 }
 
 void Server::stop()
 {
     m_isStarted = false;
-
     closeSocketConnection();
 
     if (m_serverThread.joinable())
@@ -134,24 +137,30 @@ void Server::closeSocketConnection()
     if (m_server_socket->shutdown(m_server_fd) == (-1))
         LOG << "Error on shutdown function: "
             << strerror(errno) << ".";
-
-    if (m_server_socket->close(m_server_fd) == (-1))
-        LOG << "Error on close function: "
-            << strerror(errno) << ".";
 }
 
-void Server::send(const google::protobuf::Message& context)
+void Server::send(const google::protobuf::Message& context, int fd)
 {
-    while (m_isStarted)     
+    if (m_isStarted)
     {
-        for (auto it : m_activeConnections)
+        auto it = std::find_if(m_activeConnections.cbegin(), m_activeConnections.cend(), [fd] (const auto& activeConnection)
         {
-            it->sendData(context);
+            return activeConnection->getFd() == fd;
+        });
+
+        if (it != m_activeConnections.cend())
+        {
+            (*it)->sendData(context);
         }
+        else
+        {
+            LOG << "Error proxy client does not exist fd: " << fd;
+        }
+        
     }
 }
 
-bool Server::getQueueElement(std::string& data)
+bool Server::getQueueElement(common::ReceivedMessage& data)
 {
     return m_recvDataQueue.pop(data);
 }

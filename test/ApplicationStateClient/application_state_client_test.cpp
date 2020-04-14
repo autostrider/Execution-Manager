@@ -52,16 +52,16 @@ TestServer::TestServer(Data& sharedResource)
 
 void TestServer::reportApplicationState()
 {
-    std::string data;
+    common::ReceivedMessage message;
     
-    while (data.empty())
+    while (message.data.empty())
     {
-        server->getQueueElement(data);
+        server->getQueueElement(message);
     }
 
 
     google::protobuf::Any any;
-    any.ParseFromString(data);
+    any.ParseFromString(message.data);
       
     if (any.Is<ApplicationStateManagement::ReportApplicationState>())
     {

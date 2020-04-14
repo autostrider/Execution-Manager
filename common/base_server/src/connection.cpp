@@ -24,18 +24,24 @@ int Connection::acceptConnection()
     sockaddr_un clientAddr;
     socklen_t cliLen = sizeof(clientAddr);
 
-    int accepdFd =
+    int acceptFd =
         m_serverSocket->accept(m_serverFd,
                                 (struct sockaddr*)&clientAddr,
                                 &cliLen);
 
-    if (m_serverSocket->fcntl(accepdFd, F_SETFD, O_NONBLOCK) == -1 && !EBADF)
+    if (acceptFd < 0 && errno == EINVAL)
     {
-        accepdFd = -1;
+        LOG << "Server socket closed.";
+        return acceptFd;
+    }
+
+    if (m_serverSocket->fcntl(acceptFd, F_SETFD, O_NONBLOCK) == -1 && errno == EINVAL)
+    {
+        acceptFd = -1;
         LOG << "Error in fcntl function: " << strerror(errno);
     }
 
-    return accepdFd;
+    return acceptFd;
 }
 
 void Connection::creatAcceptedClient()
@@ -45,10 +51,6 @@ void Connection::creatAcceptedClient()
     if (fd > 0)
     {
         m_connectedCli = m_clientFactory->makeProxyClient(fd);
-    }
-    else if (fd < 0)
-    {
-        LOG << "There is no clients connected.";
     }
 }
 
@@ -65,6 +67,11 @@ int Connection::getRecvBytes()
 void Connection::sendData(const google::protobuf::Message& context)
 {
     m_connectedCli->sendMessage(context);
+}
+
+int Connection::getFd()
+{
+    return m_connectedCli->getClientFd();
 }
 
 }

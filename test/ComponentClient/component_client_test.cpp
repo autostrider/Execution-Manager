@@ -1,160 +1,321 @@
-// #include <component_client.h>
-// #include <constants.hpp>
-// #include <logger.hpp>
+#include <component_client_for_wrapper.hpp>
+#include <constants.hpp>
+#include <logger.hpp>
+#include <server.hpp>
+#include <client_mock.hpp>
+#include <server_socket.hpp>
+#include <client_socket.hpp>
+#include <connection_factory.hpp>
+#include <proxy_client_factory.hpp>
 
-// #include <iostream>
-// #include <thread>
-// #include <unistd.h>
+#include <any.pb.h>
+#include <component_state_management.pb.h>
+#include <execution_management.pb.h>
 
-// #include "gtest/gtest.h"
-// #include "gmock/gmock.h"
+#include <future>
 
-// using namespace std;
-// using namespace constants;
-// using namespace testing;
+#include "gtest/gtest.h"
+#include "gmock/gmock.h"
 
-// using component_client::ComponentClient;
+using namespace std;
+using namespace constants;
+using namespace component_client;
+using namespace testing;
 
-// struct TestData
-// {
-//   std::string component;
-//   std::string state;
-//   ComponentClientReturnType status;
-// };
-
-// class ExecutionManagementTestServer
-//   : public ExecutionManagement::Server
-// {
-// public:
-//   explicit ExecutionManagementTestServer
-//           (TestData& data)
-//     : m_data(data)
-//   {}
-
-// private:
-//   using StateError = ::MachineStateManagement::StateError;
-
-//   ::kj::Promise<void>
-//   registerComponent(RegisterComponentContext context) override
-//   {
-//     context.getParams().getComponent().cStr();
+struct TestData
+{
+  std::string component;
+  std::string state;
+  ComponentClientReturnType status;
+};
   
-//     return kj::READY_NOW;
-//   }
-
-//   ::kj::Promise<void>
-//   getComponentState(GetComponentStateContext context) override
-//   {
-//     m_data.component = context.getParams().getComponent().cStr();
+class TestServer
+{
+public:
+    explicit TestServer(TestData& data)
+        : m_sharedResource(data)
+    {
+        LOG << "Server created...";
+    }
     
-//     context.getResults().setState(m_data.state);
-//     context.getResults().setResult(ComponentClientReturnType::kSuccess);
+    void start(std::string);
+    void stop();
+    ComponentClientReturnType stateUpdateHandler(common::ReceivedMessage&);
+    ComponentClientReturnType getComponentState(std::string, ComponentClientReturnType);
+    void confirmComponentState();
+    void checkIfAnyEventsAvailable(std::string, int);
 
-//     return kj::READY_NOW;
-//   }
+private:
+    TestData& m_sharedResource;
+    std::unique_ptr<base_server::Server> server;
+    std::unique_ptr<base_server::ConnectionFactory> connection =
+            std::make_unique<base_server::ConnectionFactory>(
+                    std::make_unique<base_client::ProxyClientFactory>());
+};
 
-//   ::kj::Promise<void>
-//   confirmComponentState(ConfirmComponentStateContext context) override
-//   {
-//       m_data.component = context.getParams().getComponent().cStr();
-//       m_data.state = context.getParams().getState().cStr();
-//       m_data.status = context.getParams().getStatus();
+void TestServer::start(std::string path)
+{
+  server = std::make_unique<base_server::Server>
+            (path,
+             std::make_unique<socket_handler::ServerSocket>(),
+             std::make_unique<base_server::ConnectionFactory>(
+                    std::make_unique<base_client::ProxyClientFactory>()));
 
-//     return kj::READY_NOW;
-//   }
+  server->start();
+}
 
-// private:
-//   TestData& m_data;
-//   static const uint32_t m_defaultDelay;
-// };
+void TestServer::stop()
+{
+    server->stop();
+}
 
-// class ComponentClientTest
-// : public ::testing::Test
-// {
-//   protected:
-//   virtual ~ComponentClientTest() noexcept(true) {}
+ComponentClientReturnType TestServer::stateUpdateHandler(common::ReceivedMessage& message)
+{
+    bool promiseSet{false};
+    
+    while (message.data.empty())
+    {
+        server->getQueueElement(message);
+    }
 
-//   void SetUp() override
-//   {
-//     unlink(EM_SOCKET_NAME.c_str());
-//   }
+    google::protobuf::Any any;
+    any.ParseFromString(message.data);
 
-//   void TearDown() override
-//   {
-// 		unlink(EM_SOCKET_NAME.c_str());
-//   }
+    if (any.Is<StateManagement::RegisterComponent>())
+    {
+        StateManagement::RegisterComponent context;
+        any.UnpackTo(&context);
+       
+        m_sharedResource.component = context.component();
+
+        context = {};
+    }
+
+    ExecutionManagement::resultRegisterComponent regResult;
+    regResult.set_result(ComponentClientReturnType::kSuccess);
+
+    server->send(regResult, message.fd);
+
+    ExecutionManagement::setComponentState com;
+    com.set_state("kOn");
+
+    server->send(com, message.fd);
+}
+
+ComponentClientReturnType TestServer::getComponentState(std::string state, ComponentClientReturnType result)
+{
+    common::ReceivedMessage message;
+    
+    while (message.data.empty())
+    {
+        server->getQueueElement(message);
+    }
+
+    google::protobuf::Any any;
+    any.ParseFromString(message.data);
+      
+    if (any.Is<StateManagement::GetComponentState>())
+    {
+        StateManagement::GetComponentState context;
+        any.UnpackTo(&context);
+       
+        m_sharedResource.component = context.component();
+       
+        context = {};
+    }
+
+    ExecutionManagement::resultGetComponentState context;
+    context.set_state(state);
+    context.set_result(result);
+
+    server->send(context, message.fd);
+}
+
+void TestServer::confirmComponentState()
+{
+    common::ReceivedMessage message;
+    
+    while (message.data.empty())
+    {
+        server->getQueueElement(message);
+    }
+
+    google::protobuf::Any any;
+    any.ParseFromString(message.data);
+
+    if (any.Is<StateManagement::ConfirmComponentState>())
+    {
+        StateManagement::ConfirmComponentState context;
+        any.UnpackTo(&context);
+       
+        m_sharedResource.component = context.component();
+        m_sharedResource.state = context.state();
+        m_sharedResource.status = context.status();
+       
+        context = {};
+    }
+}
+
+void TestServer::checkIfAnyEventsAvailable(std::string state, int fd)
+{
+    ExecutionManagement::setComponentState context;
+    context.set_state(state);
+
+    server->send(context, fd);
+}
+
+class ComponentClientTest : public Test 
+{
+protected:
+    ~ComponentClientTest() noexcept(true) override {}
+
+    ComponentClientTest() {}
+
+    void SetUp() override
+    {
+        ::unlink(EM_SOCKET_NAME.c_str());
+    }
+
+    void TearDown() override
+    {
+        ::unlink(EM_SOCKET_NAME.c_str());
+    }
+
+    void expectCheckIfAnyEventsAvailable();
+    ComponentClientReturnType expectSetStateUpdateHandler();
+
+    const uint32_t defaultTimeout{666};
+
+    TestData testData;
+    const std::string socketName{EM_SOCKET_NAME};
+
+    std::unique_ptr<ClientMock> clientMock = std::make_unique<ClientMock>();
+    ClientMock *clientMockPtr = clientMock.get();
+
+    std::unique_ptr<Client> client = std::make_unique<Client>(EM_SOCKET_NAME, std::make_unique<socket_handler::ClientSocket>());
+
+    TestServer testServer{testData};
+
+    component_client::StateUpdateMode mode = component_client::StateUpdateMode::kPoll;
+    component_client::StateUpdateMode eventMode = component_client::StateUpdateMode::kEvent;
+    std::string componentName = "TestName";
+    std::string eventComponentName = "ComponentWithEventMode";
+
+    ComponentClientForWrapper cc {componentName, mode};
+    ComponentClientForWrapper ccEventMode {eventComponentName, eventMode};
+};
 
 
-//   const uint32_t defaultTimeout{666};
+ComponentClientReturnType ComponentClientTest::expectSetStateUpdateHandler()
+{
+  std::function<void(std::string const&)> f = [](std::string const& res){};
 
-//   TestData testData;
-//   component_client::StateUpdateMode mode = component_client::StateUpdateMode::kPoll;
-//   component_client::StateUpdateMode eventMode = component_client::StateUpdateMode::kEvent;
-//   std::string componentName = "TestName";
-//   std::string eventComponentName = "ComponentWithEventMode";
-//   ExecutionManagementTestServer emServer {testData};
-  
-//   const std::string socketName{IPC_PROTOCOL + EM_SOCKET_NAME};
-//   capnp::EzRpcServer server{kj::heap<ExecutionManagementTestServer>(testData), socketName}; 
+  return ccEventMode.setStateUpdateHandler(f);
+}
 
-//   ComponentClient cc {componentName, mode};
-//   ComponentClient ccEventMode {eventComponentName, eventMode};
-// };
+void ComponentClientTest::expectCheckIfAnyEventsAvailable()
+{
+  ccEventMode.checkIfAnyEventsAvailable();
+}
 
-// void ComponentClientTest::expectSetStateUpdateHandler()
-// {
-//   std::function<void(std::string const&)> f;
-//   const auto result = ccEventMode.SetStateUpdateHandler(f);
-//   EXPECT_EQ(result, ComponentClientReturnType::kSuccess);
-// }
+TEST_F(ComponentClientTest, ShouldSucceedToSetStateUpdateHandlerUsingClientMock)
+{
+    {
+        EXPECT_CALL(*clientMockPtr, connect()).WillOnce(Return());
+        EXPECT_CALL(*clientMockPtr, sendMessage(_));
+        EXPECT_CALL(*clientMockPtr, receive(_)).WillOnce(Return(8));
+    }
+    ccEventMode.setClient(std::move(clientMock));
 
-// void ComponentClientTest::expectCheckIfAnyEventsAvailable()
-// {
-//   ccEventMode.checkIfAnyEventsAvailable();
-// }
+    expectSetStateUpdateHandler();
+}
 
-// TEST_F(ComponentClientTest, ShouldSucceedToSetStateUpdateHandler)
-// {
-//   expectSetStateUpdateHandler();
-// }
+TEST_F(ComponentClientTest, ShouldSucceedToSetStateUpdateHandler)
+{
+    common::ReceivedMessage message;
 
-// TEST_F(ComponentClientTest, ShouldEnterCheckIfAnyEventsAvailable)
-// {
-//   expectSetStateUpdateHandler();
-//   expectCheckIfAnyEventsAvailable();
-// }
+    testServer.start(socketName);
 
-// TEST_F(ComponentClientTest, ShouldSucceedToGetComponentClientState)
-// {
-//   testData.state = "TestComponentState";
-//   std::string state;
-  
-// 	const auto result = cc.GetComponentState(state);
+    auto tread = std::thread( [&] () {
+        
+        ccEventMode.setClient(std::move(client));
+        auto result = expectSetStateUpdateHandler();
 
-//   EXPECT_EQ(result, ComponentClientReturnType::kSuccess);
-//   EXPECT_EQ(testData.state, state);
-// }
+        EXPECT_EQ(result, ComponentClientReturnType::kSuccess);
+    });
 
-// TEST_F(ComponentClientTest, ShouldSucceedToConfirmComponentState)
-// {
-//   std::string state = "TestComponentState";
-//   ComponentClientReturnType status = ComponentClientReturnType::kSuccess;
+    testServer.stateUpdateHandler(message);
 
-//   cc.ConfirmComponentState(state, status);
+    EXPECT_EQ(testData.component, eventComponentName);
 
-//   EXPECT_EQ(testData.component, componentName);
-//   EXPECT_EQ(testData.state, state);
-//   EXPECT_EQ(testData.status, status);
-// }
+    tread.join();
+    testServer.stop();
+}
 
-// TEST_F(ComponentClientTest, ShouldSuccessfullyConfirmComponentStateWithInvalidStatus)
-// {
-//   std::string state = "TestComponentState";
-//   ComponentClientReturnType status = ComponentClientReturnType::kInvalid;
+TEST_F(ComponentClientTest, ShouldEnterCheckIfAnyEventsAvailable)
+{
+    testData.state = "TestComponentState";
+    common::ReceivedMessage message;
 
-//   cc.ConfirmComponentState(state, status);
+    testServer.start(socketName);
 
-//   EXPECT_EQ(testData.component, componentName);
-//   EXPECT_EQ(testData.state, state);
-//   EXPECT_EQ(testData.status, status);
-// }
+    auto tread = std::thread( [&] () {
+
+        ccEventMode.setClient(std::move(client));
+
+        auto result = expectSetStateUpdateHandler();
+        expectCheckIfAnyEventsAvailable();
+
+        EXPECT_EQ(result, ComponentClientReturnType::kSuccess);
+    });
+
+    testServer.stateUpdateHandler(message);
+    testServer.checkIfAnyEventsAvailable(testData.state, message.fd);
+
+    tread.join();
+    testServer.stop();
+}
+
+TEST_F(ComponentClientTest, ShouldSucceedToGetComponentClientState)
+{
+    std::string setState = "TestComponentState";
+    std::string state;
+
+    testServer.start(socketName);
+
+    auto tread = std::thread( [&] () {
+        
+        ccEventMode.setClient(std::move(client));
+        const auto result = ccEventMode.GetComponentState(state);
+
+        EXPECT_EQ(result, ComponentClientReturnType::kSuccess);
+        EXPECT_EQ(setState, state);
+    });
+
+    testServer.getComponentState(setState, ComponentClientReturnType::kSuccess);
+
+    tread.join();
+    testServer.stop();
+}
+
+TEST_F(ComponentClientTest, ShouldSucceedToConfirmComponentState)
+{
+    std::string state = "TestComponentState";
+    ComponentClientReturnType status = ComponentClientReturnType::kSuccess;
+
+    testServer.start(socketName);
+
+    auto tread = std::thread( [&] () {
+        cc.setClient(std::move(client));
+        cc.ConfirmComponentState(state, status);
+    });
+
+    testServer.confirmComponentState();
+
+    EXPECT_EQ(testData.component, componentName);
+    EXPECT_EQ(testData.state, state);
+    EXPECT_EQ(testData.status, status);
+
+    tread.join();
+    testServer.stop();
+}

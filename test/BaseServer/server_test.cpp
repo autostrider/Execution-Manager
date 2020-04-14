@@ -48,7 +48,6 @@ void ServerTest::expectCreateServer()
 void ServerTest::expectCloseServerSocket()
 {
     EXPECT_CALL(*socket, shutdown(serverfd)).WillOnce(Return(0));
-    EXPECT_CALL(*socket, close(serverfd)).WillOnce(Return(0));
 }
 
 void ServerTest::expectCreatingAcceptedConnection()
@@ -97,6 +96,7 @@ TEST_F(ServerTest, ShouldSuccessfulyCreateConnectionAndAcceptedClient)
         expectCreateServer();
         expectCreatingAcceptedConnection();
         expectReadData("message", 7);
+        EXPECT_CALL(*connectionPtr, getFd()).WillRepeatedly(Return(0));
         expectCloseServerSocket();
     }
     
@@ -116,6 +116,7 @@ TEST_F(ServerTest, ShouldSuccessfulyReceiveData)
         expectCreateServer();
         expectCreatingAcceptedConnection();
         expectReadData("message", 7);
+        EXPECT_CALL(*connectionPtr, getFd()).WillRepeatedly(Return(0));
         expectCloseServerSocket();
     }
     
@@ -134,25 +135,29 @@ TEST_F(ServerTest, ShouldSuccessfulyReceiveDataNull)
     {
         expectCreateServer();
         expectCreatingAcceptedConnection();
-        expectReadData("", 0);
+        expectReadData("", 0);     
         expectCloseServerSocket();
     }
     
     std::unique_ptr<Server> server =
         std::make_unique<Server>(socketPath, std::move(socket), std::move(connFactory));
     
+    std::vector<std::shared_ptr<IConnection>> activeCon {connection};
+    auto it = activeCon.begin();
+    
     server->start();
-    server->readFromSocket(connection);
+    server->readFromSocket(it);
     server->stop();
 }
 
 TEST_F(ServerTest, ShouldSuccessfulyGetQueueElement)
 {
-    std::string str = "hi";
+    ReceivedMessage message;
+    message.data = "hi";
     {
         expectCreateServer();
         expectCreatingAcceptedConnection();
-        expectReadData(str, 2);
+        expectReadData(message.data, 2);
         expectCloseServerSocket();
     }
     
@@ -161,8 +166,8 @@ TEST_F(ServerTest, ShouldSuccessfulyGetQueueElement)
 
     server->start();
 
-    ASSERT_FALSE(server->getQueueElement(str));
-    EXPECT_NE(str, "");
+    ASSERT_FALSE(server->getQueueElement(message));
+    EXPECT_EQ(message.data, "hi");
 
     server->stop();
 }

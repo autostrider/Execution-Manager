@@ -8,6 +8,11 @@ ComponentClientWrapper::ComponentClientWrapper(const std::string& component,
   : m_client{component, updateMode}
 {}
 
+void ComponentClientWrapper::setClient(std::unique_ptr<IClient> client)
+{
+  m_client.setClient(std::move(client));
+}
+
 ComponentClientReturnType ComponentClientWrapper::GetComponentState(ComponentState& state) noexcept
 {
   return m_client.GetComponentState(state);
@@ -19,9 +24,14 @@ void ComponentClientWrapper::ConfirmComponentState(ComponentState state,
   m_client.ConfirmComponentState(state, status);
 }
 
-ComponentState ComponentClientWrapper::setStateUpdateHandler() noexcept
+ComponentClientReturnType ComponentClientWrapper::setStateUpdateHandler(std::function<void(ComponentState const&)> f) noexcept
 {
-    return m_client.setStateUpdateHandler();
+    return m_client.setStateUpdateHandler(f);
+}
+
+void ComponentClientWrapper::checkIfAnyEventsAvailable()
+{
+  m_client.checkIfAnyEventsAvailable();
 }
 
 } // namespace component_client

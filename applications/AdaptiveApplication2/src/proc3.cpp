@@ -1,21 +1,16 @@
-#include "adaptive_app.hpp"
-// #include <state.hpp>
-// #include <constants.hpp>
+#include <adaptive_app.hpp>
+#include <i_application_state_client_wrapper.hpp>
+#include <i_component_client_wrapper.hpp>
 #include <logger.hpp>
-// #include <mean_calculator.hpp>
-// #include <i_application_state_client_wrapper.hpp>
-// #include <i_component_client_wrapper.hpp>
-// #include <component_server.hpp>
-// #include <connection_factory.hpp>
-// #include <proxy_client_factory.hpp>
-// #include <server_socket.hpp>
+#include <mean_calculator.hpp>
+#include <state.hpp>
 
 #include <csignal>
 #include <thread>
 
 static void signalHandler(int signo);
-// using ApplicationState = application_state::ApplicationStateClient::ApplicationState;
-// using namespace base_client;
+using ApplicationState = application_state::ApplicationStateClient::ApplicationState;
+using namespace base_client;
 
 static std::atomic<bool> isTerminated{false};
 
@@ -26,26 +21,25 @@ int main()
         LOG << "[proc3] Error while registering signal.";
     }
 
-    // const std::string componentName{"AdaptiveApplication2_proc3"};
-    // auto updateMode = component_client::StateUpdateMode::kPoll;
+    const std::string componentName{"AdaptiveApplication2_proc3"};
+    auto updateMode = component_client::StateUpdateMode::kPoll;
 
-    // AdaptiveApp app3(std::make_unique<StateFactory>(),
-    //                  std::make_unique<application_state::ApplicationStateClientWrapper>(),
-    //                  std::make_unique<component_client::ComponentClientWrapper>(componentName,
-    //                                                                             updateMode),
-    //                  nullptr,
-    //                  std::make_unique<api::MeanCalculator>());
+    AdaptiveApp app3(std::make_unique<StateFactory>(),
+                     std::make_unique<application_state::ApplicationStateClientWrapper>(),
+                     std::make_unique<component_client::ComponentClientWrapper>(componentName,
+                                                                                updateMode),
+                     std::make_unique<api::MeanCalculator>());
 
-    // app3.init();
-    // app3.run();
+    app3.init();
+    app3.run();
 
-    // while (false == isTerminated)
-    // {
-    //     app3.performAction();
-    //     std::this_thread::sleep_for(FIVE_SECONDS);
-    // }
+    while (false == isTerminated)
+    {
+        app3.performAction();
+        std::this_thread::sleep_for(FIVE_SECONDS);
+    }
 
-    // app3.terminate();
+    app3.terminate();
     return 0;
 }
 

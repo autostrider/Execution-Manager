@@ -43,7 +43,7 @@ public:
     ComponentClientReturnType stateUpdateHandler(common::ReceivedMessage&);
     ComponentClientReturnType getComponentState(std::string, ComponentClientReturnType);
     void confirmComponentState();
-    void checkIfAnyEventsAvailable(std::string, int);
+    void checkEvents(std::string, int);
 
 private:
     TestData& m_sharedResource;
@@ -156,7 +156,7 @@ void TestServer::confirmComponentState()
     }
 }
 
-void TestServer::checkIfAnyEventsAvailable(std::string state, int fd)
+void TestServer::checkEvents(std::string state, int fd)
 {
     ExecutionManagement::setComponentState context;
     context.set_state(state);
@@ -270,7 +270,7 @@ TEST_F(ComponentClientTest, ShouldEnterCheckIfAnyEventsAvailable)
     });
 
     testServer.stateUpdateHandler(message);
-    testServer.checkIfAnyEventsAvailable(testData.state, message.fd);
+    testServer.checkEvents(testData.state, message.fd);
 
     tread.join();
     testServer.stop();

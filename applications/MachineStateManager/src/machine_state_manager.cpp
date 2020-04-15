@@ -30,7 +30,7 @@ MachineStateManager::MachineStateManager(
         std::unique_ptr<application_state::IApplicationStateClientWrapper> appStateClient,
         std::unique_ptr<machine_state_client::IMachineStateClientWrapper> machineClient,
         std::unique_ptr<api::IManifestReader> manifestReader,
-        std::unique_ptr<base_client::Client> client,
+        std::unique_ptr<api::IClient> client,
         std::unique_ptr<per::KeyValueStorageBase> persistentStorage) :
         m_machineStateClient(std::move(machineClient)),
         m_factory{std::move(factory)},
@@ -88,9 +88,6 @@ StateError MachineStateManager::setMachineState(const std::string& state)
 
 StateError MachineStateManager::registerMsm(const std::string& applicationName)
 {
-  auto c = std::make_unique<base_client::Client>(MSM_STATES_SERVER,
-                                                 std::make_unique<socket_handler::ClientSocket>());
-  m_machineStateClient->setClient(std::move(c));
   return m_machineStateClient->Register(applicationName.c_str(), DEFAULT_RESPONSE_TIMEOUT);
 }
 
@@ -145,10 +142,8 @@ std::string MachineStateManager::recvState()
       {
         MachineStateManagement::nextState context;
         recvData.UnpackTo(&context);
-        data = context.state();
-        context = {};
 
-        return data;
+        return context.state();
       }
 
       recvData = {};

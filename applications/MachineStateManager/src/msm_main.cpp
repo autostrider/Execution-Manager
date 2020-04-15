@@ -34,9 +34,17 @@ int main(int argc, char **argv)
     }
     std::this_thread::sleep_for(FIVE_SECONDS);
 
+    auto asc = std::make_unique<application_state::ApplicationStateClientWrapper>();
+    asc->setClient(std::make_unique<base_client::Client>(EM_SOCKET_NAME,
+                                                         std::make_unique<socket_handler::ClientSocket>()));
+
+    auto msc = std::make_unique<machine_state_client::MachineStateClientWrapper>(MSM_SOCKET_NAME);
+    msc->setClient(std::make_unique<base_client::Client>(EM_SOCKET_NAME,
+                                                         std::make_unique<socket_handler::ClientSocket>()));
+
     MSM::MachineStateManager msm(std::make_unique<MSM::MsmStateFactory>(),
-                                 std::make_unique<application_state::ApplicationStateClientWrapper>(),
-                                 std::make_unique<machine_state_client::MachineStateClientWrapper>(MSM_SOCKET_NAME),
+                                 std::move(asc),
+                                 std::move(msc),
                                  std::make_unique<common::ManifestReader>(),
                                  std::make_unique<base_client::Client>(MSM_STATES_SERVER,
                                                                        std::make_unique<socket_handler::ClientSocket>()),

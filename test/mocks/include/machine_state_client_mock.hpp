@@ -7,16 +7,15 @@
 
 namespace machine_state_client
 {
-using StateError = MachineStateClient::StateError;
 
 class MachineStateClientMock : public IMachineStateClientWrapper
 {
 public:
     MachineStateClientMock() = default;
-    MOCK_METHOD2(Register, StateError(std::string appName, std::uint32_t timeout));
-    MOCK_METHOD2(GetMachineState, StateError(std::uint32_t timeout, std::string& state));
-    MOCK_METHOD2(SetMachineState, StateError(std::string state, std::uint32_t timeout));
-    MOCK_METHOD1(waitForConfirm, StateError(std::uint32_t timeout));
+    MOCK_METHOD(StateError, Register, (std::string appName, std::uint32_t timeout), (override));
+    MOCK_METHOD(StateError, GetMachineState, (std::string& state, uint32_t timeout), (override));
+    MOCK_METHOD(StateError, SetMachineState, (std::string state, std::uint32_t timeout), (override));
+    MOCK_METHOD(void, setClient, (std::unique_ptr<IClient> client), (override));
 };
 
 } // namespace machine_state_client

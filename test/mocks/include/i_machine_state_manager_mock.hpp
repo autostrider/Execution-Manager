@@ -7,19 +7,15 @@
 
 namespace MSM
 {
-
-using StateError = machine_state_client::StateError;
-
 class IMachineStateManagerMock : public MachineStateManager
 {
 public:
-    IMachineStateManagerMock(
-            std::unique_ptr<api::IStateFactory> factory,
-            std::unique_ptr<application_state::IApplicationStateClientWrapper> appClient,
-            std::unique_ptr<machine_state_client::IMachineStateClientWrapper> machineClient,
-            std::unique_ptr<api::IManifestReader> manifestReader,
-            std::unique_ptr<base_client::Client> client,
-            std::unique_ptr<per::KeyValueStorageBase> persistentStorage);
+    IMachineStateManagerMock(std::unique_ptr<api::IStateFactory> factory,
+                             std::unique_ptr<application_state::IApplicationStateClientWrapper> appStateClient,
+                             std::unique_ptr<machine_state_client::IMachineStateClientWrapper> machineClient,
+                             std::unique_ptr<api::IManifestReader> manifestReader,
+                             std::unique_ptr<api::IClient> cilent,
+                             std::unique_ptr<per::KeyValueStorageBase> persistentStorage);
 
     MOCK_METHOD(void, init, ());
     MOCK_METHOD(void, run, ());

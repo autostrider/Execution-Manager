@@ -14,12 +14,8 @@ add_library(common
 
 target_link_libraries(common
     PUBLIC
-      api::application_state_client
-      api::machine_state_client
-      api::component_client
-      per::per_memory
       nlohmann_json::nlohmann_json
-      gmock
+      gen::application_state_management
 )
 
 # Specify include directory
@@ -30,3 +26,7 @@ target_include_directories(common
       ${MSM_INCLUDE}
       ${EM_INCLUDE}
 )
+
+target_compile_options(common PRIVATE -Werror -Wall -fdiagnostics-color=always -fPIC)
+target_compile_features(common PRIVATE cxx_std_14)
+

@@ -8,11 +8,15 @@ list(REMOVE_ITEM EM_SRC ${CMAKE_CURRENT_SOURCE_DIR}/../applications/ExecutionMan
 file(GLOB_RECURSE MSM_SRC ${CMAKE_CURRENT_SOURCE_DIR}/../applications/MachineStateManager/src/*.cpp)
 list(REMOVE_ITEM MSM_SRC ${CMAKE_CURRENT_SOURCE_DIR}/../applications/MachineStateManager/src/msm_main.cpp)
 
-add_subdirectory(AdaptiveApplication)
-add_subdirectory(ApplicationStateClient)
-add_subdirectory(Common)
-add_subdirectory(ComponentClient)
-add_subdirectory(ExecutionManager)
-add_subdirectory(MachineStateClient)
-add_subdirectory(MachineStateManager)
-add_subdirectory(mocks)
+file(GLOB_RECURSE MOCKS_SRCS ${CMAKE_CURRENT_SOURCE_DIR}/mocks/src/*.cpp)
+
+set(MOCKS_INCLUDE ${CMAKE_CURRENT_SOURCE_DIR}/mocks/include)
+
+# add_subdirectory(AdaptiveApplication)
+# add_subdirectory(ApplicationStateClient)
+# add_subdirectory(Common)
+# add_subdirectory(ComponentClient)
+# add_subdirectory(ExecutionManager)
+# add_subdirectory(MachineStateClient)
+# add_subdirectory(MachineStateManager)
+# add_subdirectory(mocks)

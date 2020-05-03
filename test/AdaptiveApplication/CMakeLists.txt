@@ -7,12 +7,13 @@ file(GLOB_RECURSE SRCS *.cpp)
 
 add_executable(${TEST_NAME}_test ${SRCS} ${AA1_SRC})
 
-target_include_directories(${TEST_NAME}_test PRIVATE ${AA1_INCLUDE})
+target_include_directories(${TEST_NAME}_test PRIVATE ${AA1_INCLUDE} ${MOCKS_INCLUDE})
 target_link_libraries(${TEST_NAME}_test
   gtest
   gtest_main
   gmock
   api::application_state_client
+  api::component_client
 )
 
 target_compile_definitions(${TEST_NAME}_test PUBLIC -DUNIT_TEST)

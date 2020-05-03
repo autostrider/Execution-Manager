@@ -6,7 +6,7 @@ file(GLOB_RECURSE CC_SRC src/*.cpp)
 
 # Create major target
 add_library(component_client
-  STATIC
+  SHARED
     ${CC_SRC}
 )
 # Lib target alias
@@ -26,3 +26,6 @@ target_include_directories(component_client
       $<BUILD_INTERFACE:${CMAKE_CURRENT_SOURCE_DIR}/include>
       $<INSTALL_INTERFACE:${CMAKE_CURRENT_SOURCE_DIR}/include>
 )
+
+target_compile_options(component_client PRIVATE -Werror -Wall -fdiagnostics-color=always -fPIC)
+target_compile_features(component_client PRIVATE cxx_std_14)

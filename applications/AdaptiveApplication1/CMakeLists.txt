@@ -9,7 +9,6 @@ target_link_libraries(proc1
   PRIVATE
     api::application_state_client
     api::component_client
-    common
 )
 
 target_include_directories(proc1

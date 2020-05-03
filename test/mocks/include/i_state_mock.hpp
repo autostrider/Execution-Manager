@@ -11,9 +11,9 @@ namespace api
 class StateMock : public IState
 {
 public:
-    MOCK_METHOD0(enter, void());
-    MOCK_CONST_METHOD0(leave, void();
-    MOCK_METHOD0(performAction, void());
+    MOCK_METHOD(void, enter,         (), (override));
+    MOCK_METHOD(void, leave,         (), (const, override));
+    MOCK_METHOD(void, performAction, (), (override));
 };
 
 } // namespace api

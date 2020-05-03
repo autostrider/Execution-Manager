@@ -10,7 +10,7 @@ capnp_generate_cpp(asGenSources asGenHeaders
 )
 
 # Create major target
-add_library(application_state_management STATIC
+add_library(application_state_management SHARED
    ${asGenSources}
    ${asGenHeaders}
 )
@@ -39,7 +39,7 @@ capnp_generate_cpp(msGenSources msGenHeaders
 )
 
 # Create major target
-add_library(machine_state_management STATIC
+add_library(machine_state_management SHARED
    ${msGenSources}
    ${msGenHeaders}
 )
@@ -68,7 +68,7 @@ capnp_generate_cpp(cmGenSources cmGenHeaders
 )
 
 # Create major target
-add_library(component_state_management STATIC
+add_library(component_state_management SHARED
    ${cmGenSources}
    ${cmGenHeaders}
 )
@@ -97,7 +97,7 @@ capnp_generate_cpp(emGenSources emGenHeaders
 )
 
 # Create major target
-add_library(execution_management STATIC
+add_library(execution_management SHARED
    ${emGenSources}
    ${emGenHeaders}
 )

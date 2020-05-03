@@ -1,6 +1,7 @@
 cmake_minimum_required(VERSION 3.9)
 
 set(BUILD_TESTING OFF)
+set(BUILD_SHARED_LIBS ON)
 set(CMAKE_RUNTIME_OUTPUT_DIRECTORY ${CMAKE_BINARY_DIR}/bin)
 set(MSM_INCLUDE ${CMAKE_CURRENT_SOURCE_DIR}/applications/MachineStateManager/include)
 set(EM_INCLUDE ${CMAKE_CURRENT_SOURCE_DIR}/applications/ExecutionManager/include)

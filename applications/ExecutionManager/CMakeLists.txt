@@ -10,11 +10,8 @@ add_executable(em src/em_main.cpp ${EM_SRC})
 
 target_link_libraries(em
     PUBLIC
-    nlohmann_json::nlohmann_json
       gen::execution_management
       api::application_state_client
-      CapnProto::capnp-rpc
-      common
 )
 
 target_include_directories(em
@@ -24,3 +21,18 @@ target_include_directories(em
 
 target_compile_options(em PRIVATE -Werror -Wall -fdiagnostics-color=always)
 target_compile_features(em PRIVATE cxx_std_14)
+
+add_library(em_lib SHARED ${EM_SRC})
+target_link_libraries(em_lib
+    PUBLIC
+      gen::execution_management
+      api::application_state_client
+)
+target_include_directories(em_lib
+    PUBLIC
+      $<BUILD_INTERFACE:${CMAKE_CURRENT_SOURCE_DIR}/include>
+      $<INSTALL_INTERFACE:${CMAKE_CURRENT_SOURCE_DIR}/include>
+)
+
+target_compile_options(em_lib PRIVATE -Werror -Wall -fdiagnostics-color=always -fPIC)
+target_compile_features(em_lib PRIVATE cxx_std_14)
